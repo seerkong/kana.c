@@ -1,0 +1,6 @@
+build/
+ide/
+.vscode/
+vendor/
+.xmake/
+thoughts.txt

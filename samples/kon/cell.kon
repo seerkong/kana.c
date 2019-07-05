@@ -1,0 +1,8 @@
+<kon
+ (:a 1 :b "zxc")
+ [@x @y]
+ {
+   {!define x -50}
+   {writeln % x}
+ }
+>
