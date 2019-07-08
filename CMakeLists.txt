@@ -278,6 +278,61 @@ target_sources(playreader PRIVATE
 )
 
 # target
+add_executable(eval_file "")
+set_target_properties(eval_file PROPERTIES OUTPUT_NAME "eval_file")
+set_target_properties(eval_file PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
+add_dependencies(eval_file kon)
+target_include_directories(eval_file PRIVATE
+    /usr/include
+    /usr/local/include
+)
+target_compile_definitions(eval_file PRIVATE
+    DEBUG
+    __tb_prefix__="eval_file"
+)
+set_property(TARGET eval_file PROPERTY C_STANDARD 99)
+if(MSVC)
+    target_compile_options(eval_file PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
+endif()
+set_property(TARGET eval_file PROPERTY CXX_STANDARD 14)
+target_compile_options(eval_file PRIVATE
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
+    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
+)
+if(MSVC)
+    target_compile_options(eval_file PRIVATE $<$<CONFIG:Debug>:-Od>)
+else()
+    target_compile_options(eval_file PRIVATE -O0)
+endif()
+target_link_libraries(eval_file PRIVATE
+    tbox
+    pthread
+    kon
+)
+target_link_directories(eval_file PRIVATE
+    /usr/local/lib
+    /usr/lib
+)
+target_link_options(eval_file PRIVATE
+    -L/usr/local/lib
+    -lpthread
+)
+target_sources(eval_file PRIVATE
+    src/playground/eval_file.c
+)
+
+# target
 add_library(kon STATIC "")
 set_target_properties(kon PROPERTIES OUTPUT_NAME "kon")
 set_target_properties(kon PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
@@ -330,13 +385,14 @@ target_link_directories(kon PRIVATE
 target_link_options(kon PRIVATE
 )
 target_sources(kon PRIVATE
-    src/kon/kson/node.c
     src/kon/kson/writer.c
-    src/kon/kson/state_stack.c
-    src/kon/kson/tokenizer.c
-    src/kon/kson/reader.c
     src/kon/kon.c
     src/kon/kson/value_builder.c
+    src/kon/kson/reader.c
+    src/kon/kson/node.c
     src/kon/utils/number_utils.c
+    src/kon/kson/state_stack.c
+    src/kon/interpreter/cps_interpreter.c
+    src/kon/kson/tokenizer.c
 )
 

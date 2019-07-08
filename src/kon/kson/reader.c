@@ -1,9 +1,6 @@
 #include "reader.h"
 #include <tbox/tbox.h>
 
-
-#define TB_VECTOR_GROW_SIZE (256)
-
 void ExitTopBuilder(KonReader* reader);
 void AddValueToTopBuilder(KonReader* reader, Kon* value);
 

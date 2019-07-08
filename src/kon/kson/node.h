@@ -29,6 +29,7 @@ typedef int kon_int32_t;
 
 
 
+#define TB_VECTOR_GROW_SIZE (256)
 
 
 ////
@@ -119,6 +120,9 @@ typedef enum {
     KON_EXPAND,
     KON_UNQUOTE,
     KON_ENV,
+    // KON_CONTINUATION,
+    // KON_TRAMPOLINE,
+    KON_PROCEDURE,
     KON_CPOINTER,
     KON_EXCEPTION
 } KonType;
@@ -213,9 +217,51 @@ typedef struct _Unquote {
 
 typedef struct {
     Kon* Parent;
-    Kon* Lambda;
+    // pair list. pair car key, pair cdr value
     Kon* Bindings;
 } KonEnv;
+
+
+typedef enum {
+    KON_PRIMARY_FUNC,
+    KON_PRIMARY_OBJ_METHOD,
+    // don't capture upper code env vars.
+    // make by !func
+    KON_COMPOSITE_FUNC,
+    // capture upper code env vars.
+    // make by !lambda
+    KON_COMPOSITE_LAMBDA,
+    // vars lookup in eval env.
+    // make by !fragment
+    KON_COMPOSITE_FRAGMENT,
+    KON_COMPOSITE_OBJ_METHOD,
+} KonProcedureType;
+
+typedef struct {
+    KonProcedureType Type;
+    union {
+        Kon* (*PrimaryFunc)(Kon* env, Kon* argList);
+        Kon* (*PrimaryObjMethod)(void* self, Kon* env, Kon* argList);
+        
+        struct {
+            tb_string_t Name;
+            Kon* argList;
+            Kon* body;
+        } Function;
+
+        struct {
+            tb_string_t Name;
+            Kon* argList;
+            Kon* body;
+        } Lambda;
+
+        struct {
+            tb_string_t Name;
+            Kon* argList;
+            Kon* body;
+        } Fragment;
+    };
+} KonProcedure;
 
 struct KonStruct {
     KonType Tag;
@@ -250,6 +296,11 @@ struct KonStruct {
 
         KonEnv Env;
 
+        // KonContinuation Continuation;
+
+        // KonTrampoline Trampoline;
+
+        KonProcedure Procedure;
     } Value;
 };
 
@@ -299,15 +350,18 @@ struct KonStruct {
 #define kon_is_unquote(x)    (kon_check_tag(x, KON_UNQUOTE))
 
 
+#define kon_is_env(x)        (kon_check_tag(x, KON_ENV))
+#define kon_is_continuation(x)        (kon_check_tag(x, KON_CONTINUATION))
+#define kon_is_trampoline(x)        (kon_check_tag(x, KON_TRAMPOLINE))
 #define kon_is_cpointer(x)   (kon_check_tag(x, KON_CPOINTER))
 #define kon_is_exception(x)  (kon_check_tag(x, KON_EXCEPTION))
-#define kon_is_env(x)        (kon_check_tag(x, KON_ENV))
+
 
 // predicates end
 ////
 
 ////
-// constructors start
+// data structure util start
 
 #define KON_NEG_ONE kon_make_fixnum(-1)
 #define KON_ZERO    kon_make_fixnum(0)
@@ -354,8 +408,12 @@ struct KonStruct {
 
 #define kon_list1(kstate,a)        kon_cons((kstate), (a), KON_NIL)
 
+// #define kon_cont_type(x)         (kon_field(x, Continuation, KON_CONTINUATION, Type))
+// #define kon_cont_value(x, type_value)         (kon_field(x, Continuation, KON_CONTINUATION, Type).type_value)
+// #define kon_trampo_type(x)         (kon_field(x, Trampoline, KON_TRAMPOLINE, Type))
+// #define kon_trampo_value(x, type_value)         (kon_field(x, Trampoline, KON_TRAMPOLINE, Type).type_value)
 
-// constructors end
+// data structure util end
 ////
 
 #define kon_alloc(kstate, size) kon_malloc(size)
@@ -396,6 +454,7 @@ KON_API Kon* KON_List2(Kon* kstate, Kon* a, Kon* b);
 KON_API Kon* KON_List3(Kon* kstate, Kon* a, Kon* b, Kon* c);
 KON_API bool KON_IsList(Kon* source);
 Kon* KON_ListStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
+Kon* Kon_ListRevert(Kon* kstate, Kon* source);
 
 // table
 Kon* KON_TableStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);

@@ -537,6 +537,22 @@ Kon* KON_ListStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* 
     return result;
 }
 
+Kon* Kon_ListRevert(Kon* kstate, Kon* source)
+{
+    Kon* result = KON_NIL;
+    if (source != KON_NIL && kon_is_pair(source)) {
+        Kon* iter = source;
+        do {
+            Kon* item = kon_car(iter);
+            
+            result = kon_cons(kstate, item, result);
+            
+            iter = kon_cdr(iter);
+        } while (iter != KON_NIL);
+    }
+    return result;
+}
+
 Kon* KON_Cons(Kon* kstate, Kon* self, kon_int_t n, Kon* head, Kon* tail)
 {
   Kon* pair = kon_alloc_type(kstate, Pair, KON_PAIR);

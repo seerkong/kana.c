@@ -15,7 +15,7 @@ target("kon")
     add_includedirs("..", {public = true})
 
     -- add the header files for installing
-    add_headerfiles("../(kon/**.h)|**/impl/**.h")
+    add_headerfiles("./*.h")
 
     -- add options
 
@@ -25,5 +25,6 @@ target("kon")
     -- add the common source files
     add_files("*.c")
     add_files("utils/**.c")  
-    add_files("kson/**.c")  
+    add_files("kson/**.c")
+    add_files("interpreter/**.c")  
 
