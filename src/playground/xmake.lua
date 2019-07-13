@@ -82,7 +82,7 @@ target("playwriter")
     add_files("kson/writer.c")
 
 
-  target("eval_file")
+target("eval_file")
     -- add the dependent target
     -- add_deps("tbox")
     add_deps("kon")

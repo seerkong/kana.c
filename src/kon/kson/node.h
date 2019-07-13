@@ -73,12 +73,12 @@ typedef int kon_int32_t;
 #define KON_MAKE_IMMEDIATE(n)  ((Kon*) ((n<<KON_EXTENDED_BITS) \
                                           + KON_EXTENDED_TAG))
 
-#define KON_FALSE  KON_MAKE_IMMEDIATE(0) /* 14 0x0e */
+#define KON_UKN  KON_MAKE_IMMEDIATE(0) /* 14 0x0e unknown, undefined */
 #define KON_TRUE   KON_MAKE_IMMEDIATE(1) /* 30 0x1e */
-#define KON_NULL   KON_MAKE_IMMEDIATE(2) /* 46 0x2e, container placeholder */
-#define KON_EOF    KON_MAKE_IMMEDIATE(3) /* 62 0x3e */
-#define KON_NIL   KON_MAKE_IMMEDIATE(4) /*  0x43e empyt list */
-#define KON_UKN  KON_MAKE_IMMEDIATE(5) /* unknown, undefined */
+#define KON_FALSE  KON_MAKE_IMMEDIATE(2) /* 46 0x2e */
+#define KON_NULL   KON_MAKE_IMMEDIATE(3) /* 62 0x3e, container placeholder */
+#define KON_NIL   KON_MAKE_IMMEDIATE(4) /* 1086 0x43e list end, tree end */
+#define KON_EOF    KON_MAKE_IMMEDIATE(5) /* 1342 0x53e */
 
 #define kon_align(n, bits) (((n)+(1<<(bits))-1)&(((kon_uint_t)-1)-((1<<(bits))-1)))
 
@@ -217,14 +217,13 @@ typedef struct _Unquote {
 
 typedef struct {
     Kon* Parent;
-    // pair list. pair car key, pair cdr value
-    Kon* Bindings;
+    tb_hash_map_ref_t Bindings;
 } KonEnv;
 
-
 typedef enum {
-    KON_PRIMARY_FUNC,
-    KON_PRIMARY_OBJ_METHOD,
+    // KON_PRIMARY_FUNC,   // high order native func
+    KON_NATIVE_FUNC,
+    KON_NATIVE_OBJ_METHOD,
     // don't capture upper code env vars.
     // make by !func
     KON_COMPOSITE_FUNC,
@@ -237,12 +236,16 @@ typedef enum {
     KON_COMPOSITE_OBJ_METHOD,
 } KonProcedureType;
 
+typedef Kon* (*KonNativeFuncRef)(Kon* kstate, Kon* argList);
+typedef Kon* (*KonNativeObjMethodRef)(Kon* kstate, void* objRef, Kon* argList);
+
 typedef struct {
     KonProcedureType Type;
     union {
-        Kon* (*PrimaryFunc)(Kon* env, Kon* argList);
-        Kon* (*PrimaryObjMethod)(void* self, Kon* env, Kon* argList);
-        
+        KonNativeFuncRef NativeFuncRef;
+
+        KonNativeObjMethodRef NativeObjMethod;
+
         struct {
             tb_string_t Name;
             Kon* argList;
@@ -265,7 +268,7 @@ typedef struct {
 
 struct KonStruct {
     KonType Tag;
-    char Markedp;
+    char IsMarked;
     union {
         // basic types
         double Flonum;
@@ -446,6 +449,7 @@ KON_API Kon* KON_VectorStringify(Kon* kstate, Kon* source, bool newLine, int dep
 
 // symbol
 KON_API Kon* KON_SymbolStringify(Kon* kstate, Kon* source);
+KON_API const char* KON_SymbolToCstr(Kon* sym);
 
 // list
 KON_API Kon* KON_MakeList(Kon* kstate, ...);
@@ -472,6 +476,9 @@ Kon* KON_QuasiquoteStringify(Kon* kstate, Kon* source, bool newLine, int depth, 
 Kon* KON_ExpandStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
 // eg $[]e.
 Kon* KON_UnquoteStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
+
+
+Kon* MakeNativeProcedure(Kon* kstate, KonProcedureType type, KonNativeFuncRef funcRef);
 
 // data structure apis end
 

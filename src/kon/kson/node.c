@@ -269,6 +269,12 @@ Kon* KON_SymbolStringify(Kon* kstate, Kon* source)
     return result;
 }
 
+const char* KON_SymbolToCstr(Kon* sym)
+{
+    // TODO assert
+    return tb_string_cstr(&sym->Value.Symbol.Data);
+}
+
 Kon* KON_SyntaxMarkerStringify(Kon* kstate, Kon* source)
 {
     KonSyntaxMarkerType type = source->Value.SyntaxMarker.Type;
@@ -735,5 +741,13 @@ Kon* KON_CellStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* 
         tb_string_cstrcat(&(result->Value.String), ">");
     }
 
+    return result;
+}
+
+Kon* MakeNativeProcedure(Kon* kstate, KonProcedureType type, KonNativeFuncRef funcRef)
+{
+    Kon* result = KON_AllocTagged(kstate, sizeof(KonProcedure), KON_PROCEDURE);
+    result->Value.Procedure.Type = type;
+    result->Value.Procedure.NativeFuncRef = funcRef;
     return result;
 }

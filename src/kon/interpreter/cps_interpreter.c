@@ -6,14 +6,28 @@
 #include <tbox/tbox.h>
 #include "cps_interpreter.h"
 
+
 KonTrampoline* ApplySubjVerbAndObjects(Kon* kstate, Kon* subj, Kon* argList, Kon* env, KonContinuation* cont)
 {
     Kon* subjFmtStr = KON_ToFormatString(kstate, subj, false, 0, " ");
     Kon* objectsFmtStr = KON_ToFormatString(kstate, argList, false, 0, " ");
 
     kon_debug("subj: %s, objects: %s", KON_StringToCstr(subjFmtStr), KON_StringToCstr(objectsFmtStr));
+    Kon* firstObj = kon_car(argList);
+    // KON_MakeString(kstate, "ihojh");
+    Kon* applyResult = KON_NULL;
+    if (kon_is_syntax_marker(firstObj)) {
+        if (firstObj->Value.SyntaxMarker.Type == KON_SYNTAX_MARKER_APPLY) {
+            // TODO assert subj is a procedure
+            if (subj->Value.Procedure.Type == KON_NATIVE_FUNC) {
+                KonNativeFuncRef funcRef = subj->Value.Procedure.NativeFuncRef;
+                applyResult = (*funcRef)(kstate, kon_cdr(argList));
+            }
+        }
+    }
+    
     KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-    bounce->Run.Value = KON_MakeString(kstate, "ihojh");
+    bounce->Run.Value = applyResult;
     bounce->Run.Cont = cont;
     return bounce;
 }
@@ -340,8 +354,9 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences)
     Kon* formated = KON_ToFormatString(&kstate, sentences, true, 0, "  ");
     //  Kon* formated = KON_ToFormatString(&kstate, root, false, 0, " ");
     printf("%s\n", KON_StringToCstr(formated));
-    Kon* env = KON_NULL;
+    Kon* env = KON_MakeRootEnv(kstate);
     KonContinuation* firstCont = AllocContinuationWithType(KON_CONT_RETURN);
+    firstCont->Env = env;
     KonTrampoline* bounce = KON_EvalSentences(kstate, sentences, env, firstCont);
 
     while (kon_bounce_type(bounce) != KON_TRAMPOLINE_LAND) {
@@ -376,7 +391,8 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences)
                 // a code block like { {!local a 4} a}
                 // TODO asert should be a SYM_IDENTIFIER
                 // env lookup this val
-                Kon* val = KON_NULL;
+                Kon* val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(sentence));
+                assert(val != KON_NULL);
                 bounce = KON_RunContinuation(kstate, cont, val);
             }
             else if (IsSelfEvaluated(sentence)) {
@@ -405,7 +421,9 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences)
             }
             else if (kon_is_symbol(subj)) {
                 // TODO env lookup this val
-                Kon* val = KON_MakeString(kstate, "writeln");
+                // Kon* val = KON_MakeString(kstate, "writeln");
+                Kon* val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(subj));
+                assert(val != KON_NULL);
                 bounce = KON_RunContinuation(kstate, cont, val);
             }
             // TODO quasiquote unquote, etc.
@@ -472,7 +490,8 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences)
             }
             else if (kon_is_symbol(arg)) {
                 // env lookup this val
-                Kon* val = KON_NULL;
+                Kon* val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(arg));;
+                assert(val != KON_NULL);
                 bounce = KON_RunContinuation(kstate, cont, val);
             }
             else if (IsSelfEvaluated(arg)) {

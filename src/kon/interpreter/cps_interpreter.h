@@ -7,6 +7,7 @@ extern "C"{
 
 #include "../prefix.h"
 #include "types.h"
+#include "env.h"
 
 Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences);
 
