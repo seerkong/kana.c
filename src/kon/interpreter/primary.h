@@ -13,11 +13,24 @@ extern "C"{
 #include "types.h"
 
 bool KON_IsPrimaryFunc(Kon* kstate, tb_string_ref_t funcName);
+
+Kon* KON_PrimaryPlus(Kon* kstate, Kon* args);
+Kon* KON_PrimaryMinus(Kon* kstate, Kon* args);
+Kon* KON_PrimaryMultiply(Kon* kstate, Kon* args);
+Kon* KON_PrimaryDivide(Kon* kstate, Kon* args);
+Kon* KON_PrimaryMod(Kon* kstate, Kon* args);
+Kon* KON_PrimaryLowerThan(Kon* kstate, Kon* args);
+Kon* KON_PrimaryLowerOrEqual(Kon* kstate, Kon* args);
+Kon* KON_PrimaryGreaterThan(Kon* kstate, Kon* args);
+Kon* KON_PrimaryGreaterOrEqual(Kon* kstate, Kon* args);
+
+
 Kon* KON_PrimaryNewline(Kon* kstate, Kon* args);
+Kon* KON_PrimaryDisplay(Kon* kstate, Kon* args);
+Kon* KON_PrimaryDisplayln(Kon* kstate, Kon* args);
 Kon* KON_PrimaryWrite(Kon* kstate, Kon* args);
 Kon* KON_PrimaryWriteln(Kon* kstate, Kon* args);
-
-Kon* KON_ApplyPrimaryFunc(Kon* kstate, tb_string_ref_t funcName, Kon* args);
+Kon* KON_PrimaryStringify(Kon* kstate, Kon* args);
 
 #ifdef __cplusplus
 }

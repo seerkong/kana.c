@@ -816,8 +816,19 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 break;
             }
             else {
-                // TODO divide identifier
+                // divide identifier
+                UpdateTokenContent(tokenizer, "/");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
+                break;
             }
+        }
+        else if (pc[0] == '*') {
+            // multiply identifier
+            UpdateTokenContent(tokenizer, "*");
+            ForwardToken(tokenizer, 1);
+            tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
+            break;
         }
         else {
             printf("neet non space char %d\n", pc[0]);

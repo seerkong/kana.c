@@ -113,61 +113,6 @@ target_sources(koni PRIVATE
 )
 
 # target
-add_executable(env "")
-set_target_properties(env PROPERTIES OUTPUT_NAME "env")
-set_target_properties(env PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
-add_dependencies(env kon)
-target_include_directories(env PRIVATE
-    /usr/include
-    /usr/local/include
-)
-target_compile_definitions(env PRIVATE
-    DEBUG
-    __tb_prefix__="env"
-)
-set_property(TARGET env PROPERTY C_STANDARD 99)
-if(MSVC)
-    target_compile_options(env PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
-endif()
-set_property(TARGET env PROPERTY CXX_STANDARD 14)
-target_compile_options(env PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
-)
-if(MSVC)
-    target_compile_options(env PRIVATE $<$<CONFIG:Debug>:-Od>)
-else()
-    target_compile_options(env PRIVATE -O0)
-endif()
-target_link_libraries(env PRIVATE
-    tbox
-    pthread
-    kon
-)
-target_link_directories(env PRIVATE
-    /usr/local/lib
-    /usr/lib
-)
-target_link_options(env PRIVATE
-    -L/usr/local/lib
-    -lpthread
-)
-target_sources(env PRIVATE
-    src/playground/env.c
-)
-
-# target
 add_executable(playdatatypes "")
 set_target_properties(playdatatypes PROPERTIES OUTPUT_NAME "playdatatypes")
 set_target_properties(playdatatypes PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
@@ -278,61 +223,6 @@ target_sources(playtokenizer PRIVATE
 )
 
 # target
-add_executable(eval_file "")
-set_target_properties(eval_file PROPERTIES OUTPUT_NAME "eval_file")
-set_target_properties(eval_file PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
-add_dependencies(eval_file kon)
-target_include_directories(eval_file PRIVATE
-    /usr/include
-    /usr/local/include
-)
-target_compile_definitions(eval_file PRIVATE
-    DEBUG
-    __tb_prefix__="eval_file"
-)
-set_property(TARGET eval_file PROPERTY C_STANDARD 99)
-if(MSVC)
-    target_compile_options(eval_file PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
-endif()
-set_property(TARGET eval_file PROPERTY CXX_STANDARD 14)
-target_compile_options(eval_file PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
-)
-if(MSVC)
-    target_compile_options(eval_file PRIVATE $<$<CONFIG:Debug>:-Od>)
-else()
-    target_compile_options(eval_file PRIVATE -O0)
-endif()
-target_link_libraries(eval_file PRIVATE
-    tbox
-    pthread
-    kon
-)
-target_link_directories(eval_file PRIVATE
-    /usr/local/lib
-    /usr/lib
-)
-target_link_options(eval_file PRIVATE
-    -L/usr/local/lib
-    -lpthread
-)
-target_sources(eval_file PRIVATE
-    src/playground/eval_file.c
-)
-
-# target
 add_executable(playreader "")
 set_target_properties(playreader PROPERTIES OUTPUT_NAME "playreader")
 set_target_properties(playreader PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
@@ -385,6 +275,61 @@ target_link_options(playreader PRIVATE
 )
 target_sources(playreader PRIVATE
     src/playground/kson/reader.c
+)
+
+# target
+add_executable(eval_file "")
+set_target_properties(eval_file PROPERTIES OUTPUT_NAME "eval_file")
+set_target_properties(eval_file PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
+add_dependencies(eval_file kon)
+target_include_directories(eval_file PRIVATE
+    /usr/include
+    /usr/local/include
+)
+target_compile_definitions(eval_file PRIVATE
+    DEBUG
+    __tb_prefix__="eval_file"
+)
+set_property(TARGET eval_file PROPERTY C_STANDARD 99)
+if(MSVC)
+    target_compile_options(eval_file PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
+endif()
+set_property(TARGET eval_file PROPERTY CXX_STANDARD 14)
+target_compile_options(eval_file PRIVATE
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
+    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
+)
+if(MSVC)
+    target_compile_options(eval_file PRIVATE $<$<CONFIG:Debug>:-Od>)
+else()
+    target_compile_options(eval_file PRIVATE -O0)
+endif()
+target_link_libraries(eval_file PRIVATE
+    tbox
+    pthread
+    kon
+)
+target_link_directories(eval_file PRIVATE
+    /usr/local/lib
+    /usr/lib
+)
+target_link_options(eval_file PRIVATE
+    -L/usr/local/lib
+    -lpthread
+)
+target_sources(eval_file PRIVATE
+    src/playground/eval_file.c
 )
 
 # target

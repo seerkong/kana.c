@@ -120,6 +120,12 @@ Kon* KON_ToFormatString(Kon* kstate, Kon* source, bool newLine, int depth, char*
     else if (kon_is_cell(source)) {
         return KON_CellStringify(kstate, source, newLine, depth, padding);
     }
+    else if (source == KON_TRUE) {
+        return KON_MakeString(kstate, "#t;");
+    }
+    else if (source == KON_FALSE) {
+        return KON_MakeString(kstate, "#f;");
+    }
     // TODO other data types
     else {
         return KON_MakeEmptyString(kstate);

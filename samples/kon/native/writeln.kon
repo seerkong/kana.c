@@ -1,3 +1,4 @@
 {
   {writeln % "Hello World!"}
+  {displayln % "Hello World!"}
 }
