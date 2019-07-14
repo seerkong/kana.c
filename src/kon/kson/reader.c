@@ -365,7 +365,7 @@ void AddValueToTopBuilder(KonReader* reader, Kon* value)
             assert(kon_is_symbol(value));
             KonSymbolType symbolType = kon_field(value, Symbol, KON_SYMBOL, Type);
             assert(symbolType != KON_SYM_FORM_WORD);
-            CellBuilderSetSubj(topBuilder, value);
+            CellBuilderSetName(topBuilder, value);
         }
     }
     // when in wrapper builders, should exit this builder

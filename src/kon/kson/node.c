@@ -472,7 +472,7 @@ bool KON_IsList(Kon* source)
         if (iter == KON_NIL) {
             break;
         }
-        if (!kon_is_pair(iter)) {
+        if (!kon_is_list_node(iter)) {
             isList = false;
             break;
         }
@@ -491,7 +491,7 @@ Kon* KON_ListStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* 
     if (newLine) {
         tb_string_cstrcat(&(result->Value.String), "{");
         tb_string_cstrcat(&(result->Value.String), "\n");
-        if (source != KON_NIL && kon_is_pair(source)) {
+        if (source != KON_NIL && kon_is_list_node(source)) {
             Kon* iter = kon_cdr(source);
             Kon* item = kon_car(source);
             
@@ -523,7 +523,7 @@ Kon* KON_ListStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* 
     else {
         tb_string_cstrcat(&(result->Value.String), "{");
         
-        if (source != KON_NIL && kon_is_pair(source)) {
+        if (source != KON_NIL && kon_is_list_node(source)) {
             Kon* iter = kon_cdr(source);
             Kon* item = kon_car(source);
             
@@ -552,7 +552,7 @@ Kon* KON_ListStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* 
 Kon* Kon_ListRevert(Kon* kstate, Kon* source)
 {
     Kon* result = KON_NIL;
-    if (source != KON_NIL && kon_is_pair(source)) {
+    if (source != KON_NIL && kon_is_list_node(source)) {
         Kon* iter = source;
         do {
             Kon* item = kon_car(iter);
@@ -567,18 +567,22 @@ Kon* Kon_ListRevert(Kon* kstate, Kon* source)
 
 Kon* KON_Cons(Kon* kstate, Kon* self, kon_int_t n, Kon* head, Kon* tail)
 {
-  Kon* pair = kon_alloc_type(kstate, Pair, KON_PAIR);
-  if (kon_is_exception(pair)) {
-      return pair;
+  Kon* node = kon_alloc_type(kstate, ListNode, KON_LIST_NODE);
+  if (kon_is_exception(node)) {
+      return node;
   }
-  kon_car(pair) = head;
-  kon_cdr(pair) = tail;
-  return pair;
+  node->Value.ListNode.Prev = KON_NIL;
+  if (kon_is_list_node(tail)) {
+      tail->Value.ListNode.Prev = node;
+  }
+  kon_car(node) = head;
+  kon_cdr(node) = tail;
+  return node;
 }
 
 Kon* KON_List2(Kon* kstate, Kon* a, Kon* b)
 {
-  Kon* res = kon_cons(kstate, b, KON_NULL);
+  Kon* res = kon_cons(kstate, b, KON_NIL);
   res = kon_cons(kstate, a, res);
   return res;
 }
@@ -668,7 +672,7 @@ Kon* KON_CellStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* 
     Kon* result = KON_AllocTagged(kstate, sizeof(tb_string_t), KON_STRING);
     tb_string_init(&(result->Value.String));
 
-    Kon* subj = source->Value.Cell.Subj;
+    Kon* name = source->Value.Cell.Name;
     Kon* innerVector = source->Value.Cell.Vector;
     Kon* innerTable = source->Value.Cell.Table;
     Kon* innerList = source->Value.Cell.List;
@@ -676,9 +680,9 @@ Kon* KON_CellStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* 
     if (newLine) {
         tb_string_cstrcat(&(result->Value.String), "<");
         
-        if (subj != KON_NULL) {
-            Kon* subjToKonStr = KON_ToFormatString(kstate, subj, true, depth, padding);
-            tb_string_strcat(&(result->Value.String), &subjToKonStr->Value.String);
+        if (name != KON_NULL) {
+            Kon* nameToKonStr = KON_ToFormatString(kstate, name, true, depth, padding);
+            tb_string_strcat(&(result->Value.String), &nameToKonStr->Value.String);
         }
         tb_string_cstrcat(&(result->Value.String), "\n");
 
@@ -716,9 +720,9 @@ Kon* KON_CellStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* 
     else {
         tb_string_cstrcat(&(result->Value.String), "<");
 
-        if (subj != KON_NULL) {
-            Kon* subjToKonStr = KON_ToFormatString(kstate, subj, true, depth, padding);
-            tb_string_strcat(&(result->Value.String), &subjToKonStr->Value.String);
+        if (name != KON_NULL) {
+            Kon* nameToKonStr = KON_ToFormatString(kstate, name, true, depth, padding);
+            tb_string_strcat(&(result->Value.String), &nameToKonStr->Value.String);
             
         }
 

@@ -73,10 +73,10 @@ typedef int kon_int32_t;
 #define KON_MAKE_IMMEDIATE(n)  ((Kon*) ((n<<KON_EXTENDED_BITS) \
                                           + KON_EXTENDED_TAG))
 
-#define KON_UKN  KON_MAKE_IMMEDIATE(0) /* 14 0x0e unknown, undefined */
-#define KON_TRUE   KON_MAKE_IMMEDIATE(1) /* 30 0x1e */
-#define KON_FALSE  KON_MAKE_IMMEDIATE(2) /* 46 0x2e */
-#define KON_NULL   KON_MAKE_IMMEDIATE(3) /* 62 0x3e, container placeholder */
+#define KON_UKN  KON_MAKE_IMMEDIATE(0) /* 62 0x3e unknown, undefined */
+#define KON_TRUE   KON_MAKE_IMMEDIATE(1) /* 318 0x13e */
+#define KON_FALSE  KON_MAKE_IMMEDIATE(2) /* 574 0x23e */
+#define KON_NULL   KON_MAKE_IMMEDIATE(3) /* 830 0x33e, container placeholder */
 #define KON_NIL   KON_MAKE_IMMEDIATE(4) /* 1086 0x43e list end, tree end */
 #define KON_EOF    KON_MAKE_IMMEDIATE(5) /* 1342 0x53e */
 
@@ -107,7 +107,7 @@ typedef enum {
     KON_BIGNUM,
     KON_CHAR,
     KON_BOOLEAN,
-    KON_PAIR,
+    KON_LIST_NODE,
     KON_SYMBOL,
     KON_SYNTAX_MARKER,
     KON_BYTES,
@@ -159,14 +159,14 @@ typedef enum {
 
 typedef enum {
     KON_UNQUOTE_REPLACE,          // $e.abc
-    KON_UNQUOTE_VECTOR,        // $[]e.[1 2 3]
-    KON_UNQUOTE_LIST,         // ${}e.{1 2 3}
-    KON_UNQUOTE_TABLE        // $()e.(:a 1 :b 2)
+    KON_UNQUOTE_VECTOR,        // $[]e.{[1 2 3]}
+    KON_UNQUOTE_LIST,         // ${}e.{@{1 2 3}}
+    KON_UNQUOTE_TABLE        // $()e.{$(:a $var :b 2)}
 } KonUnquoteType;
 
 typedef struct KonStruct Kon;
 
-typedef struct _KonSymbol {
+typedef struct KonSymbol {
     tb_string_t Data;
     KonSymbolType Type;
 } KonSymbol;
@@ -179,38 +179,40 @@ typedef enum {
 } KonSyntaxMarkerType;
 
 // eg: % | ;
-typedef struct _KonSyntaxMarker {
+typedef struct KonSyntaxMarker {
     KonSyntaxMarkerType Type;
 } KonSyntaxMarker;
 
-typedef struct _KonPair {
-    Kon* Car;
-    Kon* Cdr;
-} KonPair;
+typedef struct KonListNode {
+    Kon* Prev;
+    Kon* Body;
+    Kon* Next;
+} KonListNode;
 
-typedef struct _KonCell {
-    Kon* Subj;
+typedef struct KonCell {
+    Kon* Name;
     Kon* Vector;
     Kon* Table;
     Kon* List;
+    Kon* Next;
 } KonCell;
 
-typedef struct _KonQuote {
+typedef struct KonQuote {
     Kon* Inner;
     KonQuoteType Type;
 } KonQuote;
 
-typedef struct _KonQuasiquote {
+typedef struct KonQuasiquote {
     Kon* Inner;
     KonQuasiquoteType Type;
 } KonQuasiquote;
 
-typedef struct _KonExpand {
+typedef struct KonExpand {
     Kon* Inner;
     KonExpandType Type;
 } KonExpand;
 
-typedef struct _Unquote {
+typedef struct Unquote {
     Kon* Inner;
     KonUnquoteType Type;
 } KonUnquote;
@@ -277,7 +279,7 @@ struct KonStruct {
         KonSyntaxMarker SyntaxMarker;
 
         // list node
-        KonPair Pair;
+        KonListNode ListNode;
 
         tb_vector_ref_t Vector;
 
@@ -340,9 +342,10 @@ struct KonStruct {
 #define kon_is_bytes(x)      (kon_check_tag(x, KON_BYTES))
 #define kon_is_string(x)     (kon_check_tag(x, KON_STRING))
 #define kon_is_symbol(x)    (kon_check_tag(x, KON_SYMBOL))
+#define kon_is_variable(x)    (kon_check_tag(x, KON_SYMBOL) && x->Value.Symbol.Type.KON_SYM_VAR)
 #define kon_is_syntax_marker(x)    (kon_check_tag(x, KON_SYNTAX_MARKER))
 
-#define kon_is_pair(x)       (kon_check_tag(x, KON_PAIR))
+#define kon_is_list_node(x)       (kon_check_tag(x, KON_LIST_NODE))
 #define kon_is_vector(x)     (kon_check_tag(x, KON_VECTOR))
 #define kon_is_table(x)     (kon_check_tag(x, KON_TABLE))
 #define kon_is_cell(x)     (kon_check_tag(x, KON_CELL))
@@ -391,8 +394,8 @@ struct KonStruct {
 
 // list
 #define kon_cons(kstate, a, b) KON_Cons(kstate, NULL, 2, a, b)
-#define kon_car(x)         (kon_field(x, Pair, KON_PAIR, Car))
-#define kon_cdr(x)         (kon_field(x, Pair, KON_PAIR, Cdr))
+#define kon_car(x)         (kon_field(x, ListNode, KON_LIST_NODE, Body))
+#define kon_cdr(x)         (kon_field(x, ListNode, KON_LIST_NODE, Next))
 
 #define kon_caar(x)      (kon_car(kon_car(x)))
 #define kon_cadr(x)      (kon_car(kon_cdr(x)))

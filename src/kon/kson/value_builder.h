@@ -32,7 +32,7 @@ typedef struct {
         } TablePair;
 
         struct {
-            Kon* Subj;
+            Kon* Name;
             Kon* Vector; // vector of Kon*
             Kon* Table;  // vector of TablePair*
             Kon* List; // vector of Kon*
@@ -77,7 +77,7 @@ void TablePairSetValue(KonBuilder* builder, Kon* value);
 void TablePairDestroy(KonBuilder* builder);
 
 KonBuilder* CreateCellBuilder();
-void CellBuilderSetSubj(KonBuilder* builder, Kon* subj);
+void CellBuilderSetName(KonBuilder* builder, Kon* name);
 void CellBuilderSetVector(KonBuilder* builder, Kon* vector);
 void CellBuilderSetList(KonBuilder* builder, Kon* list);
 void CellBuilderSetTable(KonBuilder* builder, Kon* table);

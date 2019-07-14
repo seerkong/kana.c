@@ -488,6 +488,33 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences)
                 bounce->Bounce.Cont = k;
                 bounce->Bounce.Env = cont->Env;
             }
+            else if (kon_is_vector(arg)) {
+                // TODO !!! verify cell inner content
+                // whether have Quasiquote, Expand, Unquote, KON_SYM_VAR node
+                bounce = KON_RunContinuation(kstate, cont, arg);
+            }
+            else if (kon_is_table(arg)) {
+                // TODO !!! verify cell inner content key, value
+                // whether have Quasiquote, Expand, Unquote, KON_SYM_VAR node
+                bounce = KON_RunContinuation(kstate, cont, arg);
+            }
+            else if (kon_is_cell(arg)) {
+                // TODO !!! verify cell inner content(tag, list, vector, table )
+                // whether have Quasiquote, Expand, Unquote, KON_SYM_VAR node
+                bounce = KON_RunContinuation(kstate, cont, arg);
+            }
+            else if (kon_is_quote(arg)) {
+                // TODO
+            }
+            else if (kon_is_quasiquote(arg)) {
+                // TODO
+            }
+            else if (kon_is_expand(arg)) {
+                // TODO
+            }
+            else if (kon_is_unquote(arg)) {
+                // TODO
+            }
             else if (kon_is_symbol(arg)) {
                 // env lookup this val
                 Kon* val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(arg));;

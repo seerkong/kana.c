@@ -149,17 +149,17 @@ KonBuilder* CreateCellBuilder()
         return NULL;
     }
     builder->Type = KON_BUILDER_CELL;
-    builder->Cell.Subj = KON_NULL;
+    builder->Cell.Name = KON_NULL;
     builder->Cell.Vector = KON_NULL;
     builder->Cell.Table = KON_NULL;
     builder->Cell.List = KON_NULL;
     return builder;
 }
 
-void CellBuilderSetSubj(KonBuilder* builder, Kon* subj)
+void CellBuilderSetName(KonBuilder* builder, Kon* name)
 {
-    printf("CellBuilderSetSubj\n");
-    builder->Cell.Subj = subj;
+    printf("CellBuilderSetName\n");
+    builder->Cell.Name = name;
 }
 
 void CellBuilderSetVector(KonBuilder* builder, Kon* vector)
@@ -180,7 +180,7 @@ void CellBuilderSetTable(KonBuilder* builder, Kon* table)
 Kon* MakeCellByBuilder(Kon* kstate, KonBuilder* builder)
 {
     Kon* value = kon_alloc_type(kstate, Cell, KON_CELL);
-    value->Value.Cell.Subj = builder->Cell.Subj;
+    value->Value.Cell.Name = builder->Cell.Name;
     value->Value.Cell.Vector = builder->Cell.Vector;
     value->Value.Cell.Table = builder->Cell.Table;
     value->Value.Cell.List = builder->Cell.List;
