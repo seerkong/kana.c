@@ -601,20 +601,19 @@ Kon* KON_TableStringify(Kon* kstate, Kon* source, bool newLine, int depth, char*
     Kon* result = KON_AllocTagged(kstate, sizeof(tb_string_t), KON_STRING);
     tb_string_init(&(result->Value.String));
 
-    tb_hash_map_ref_t hashmap = source->Value.Table;
-    tb_size_t itor = tb_iterator_head(hashmap);
-    
+    KonHashMap* hashMap = source->Value.Table;
+    KonHashMapIter* iter = KON_HashMapIterHead(hashMap);
+
     if (newLine) {
         tb_string_cstrcat(&(result->Value.String), "(");
         tb_string_cstrcat(&(result->Value.String), "\n");
 
 
-        while (itor != tb_iterator_tail(hashmap)) {
-            tb_hash_map_item_ref_t hashItem = (tb_hash_map_item_ref_t)tb_iterator_item(hashmap, itor);
-            
-            tb_size_t next = tb_iterator_next(hashmap, itor);
-            char* itemKey = (char*)hashItem->name;
-            Kon* itemValue = (Kon*)hashItem->data;
+        while (iter) {
+            KonHashMapIter* next = KON_HashMapIterNext(hashMap, iter);
+            char* itemKey = KON_HashMapIterItemKey(hashMap, iter);
+            Kon* itemValue = (Kon*)KON_HashMapIterItemValue(hashMap, iter);
+
             Kon* itemToKonStr = KON_ToFormatString(kstate, itemValue, true, depth + 1, padding);
 
             AddLeftPadding(&(result->Value.String), depth, padding);
@@ -629,7 +628,7 @@ Kon* KON_TableStringify(Kon* kstate, Kon* source, bool newLine, int depth, char*
             tb_string_cstrcat(&(result->Value.String), KON_StringToCstr(itemToKonStr));
             tb_string_cstrcat(&(result->Value.String), "\n");
 
-            itor = next;
+            iter = next;
         }
 
         AddLeftPadding(&(result->Value.String), depth, padding);
@@ -638,12 +637,11 @@ Kon* KON_TableStringify(Kon* kstate, Kon* source, bool newLine, int depth, char*
     else {
         tb_string_cstrcat(&(result->Value.String), "(");
 
-        while (itor != tb_iterator_tail(hashmap)) {
-            tb_hash_map_item_ref_t hashItem = (tb_hash_map_item_ref_t)tb_iterator_item(hashmap, itor);
-            
-            tb_size_t next = tb_iterator_next(hashmap, itor);
-            char* itemKey = (char*)hashItem->name;
-            Kon* itemValue = (Kon*)hashItem->data;
+        while (iter) {
+            KonHashMapIter* next = KON_HashMapIterNext(hashMap, iter);
+            char* itemKey = KON_HashMapIterItemKey(hashMap, iter);
+            Kon* itemValue = (Kon*)KON_HashMapIterItemValue(hashMap, iter);
+
             Kon* itemToKonStr = KON_ToFormatString(kstate, itemValue, false, depth + 1, padding);
 
             tb_string_cstrcat(&(result->Value.String), ":'");
@@ -653,11 +651,11 @@ Kon* KON_TableStringify(Kon* kstate, Kon* source, bool newLine, int depth, char*
 
             tb_string_cstrcat(&(result->Value.String), KON_StringToCstr(itemToKonStr));
             
-            if (next != tb_iterator_tail(hashmap)) {
+            if (next != NULL) {
                 tb_string_cstrcat(&(result->Value.String), " ");
             }
 
-            itor = next;
+            iter = next;
         }
         tb_string_cstrcat(&(result->Value.String), ")");
     }

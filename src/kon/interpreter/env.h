@@ -9,12 +9,6 @@ extern "C"{
 #include "types.h"
 #include "primary.h"
 
-// typedef struct {
-//     Kon* Parent;
-//     // pair list. pair car key, pair cdr value
-//     Kon* Bindings;
-// } KonEnv;
-
 Kon* KON_MakeRootEnv(Kon* kstate);
 Kon* KON_MakeChildEnv(Kon* kstate, Kon* parentEnv);
 Kon* KON_EnvDefine(Kon* kstate, Kon* env, char* key, Kon* value);

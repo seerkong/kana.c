@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <tbox/tbox.h>
 #include "../prefix/config.h"
-
+#include "hashmap.h"
 
 ////
 // type alias start
@@ -220,7 +220,7 @@ typedef struct Unquote {
 
 typedef struct {
     Kon* Parent;
-    tb_hash_map_ref_t Bindings;
+    KonHashMap* Bindings;
 } KonEnv;
 
 typedef enum {
@@ -290,7 +290,7 @@ struct KonStruct {
 
         tb_vector_ref_t Vector;
 
-        tb_hash_map_ref_t Table;
+        KonHashMap* Table;
 
         KonCell Cell;
 

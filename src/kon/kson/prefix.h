@@ -3,7 +3,7 @@
 
 #include "../prefix.h"
 
-#include "prefix.h"
+#include "hashmap.h"
 #include "node.h"
 // #include "reader.h"
 

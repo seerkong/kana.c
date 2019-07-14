@@ -1,5 +1,6 @@
 #include "value_builder.h"
 #include <tbox/tbox.h>
+#include "hashmap.h"
 
 #define BUILDER_VECTOR_GROW_SIZE 20
 // TODO
@@ -83,7 +84,7 @@ KonBuilder* CreateTableBuilder()
         return NULL;
     }
     builder->Type = KON_BUILDER_TABLE;
-    builder->Table = tb_hash_map_init(8, tb_element_str(tb_true), tb_element_ptr(kon_hash_item_ptr_free, "ValueBuilderType"));
+    builder->Table = KON_HashMapInit(10);
     return builder;
 }
 
@@ -92,10 +93,9 @@ void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
     // char* key = pair->TablePair.Key;
     char* key = tb_string_cstr(&(pair->TablePair.Key));
     
-    tb_hash_map_insert(builder->Table, key, (tb_pointer_t)pair->TablePair.Value);
+    KON_HashMapPut(builder->Table, key, pair->TablePair.Value);
     printf("TableBuilderAddPair before free pair builder key %s\n", key);
     free(pair);
-    // tb_hash_map_dump(builder->Table);
 }
 
 Kon* MakeTableByBuilder(Kon* kstate, KonBuilder* builder)
