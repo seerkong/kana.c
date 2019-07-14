@@ -100,7 +100,7 @@ typedef struct
 
 } KonTokenizer;
 
-KonTokenizer* KSON_TokenizerInit(Kon* kstate);
+KonTokenizer* KSON_TokenizerInit(KonState* kstate);
 
 bool KSON_TokenizerOpenStream(KonTokenizer* reader, tb_stream_ref_t stream);
 

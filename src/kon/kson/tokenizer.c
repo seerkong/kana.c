@@ -160,7 +160,7 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
     printf("<%s (:row %ld, :col %ld, :row-end %ld, :col-end %ld) [%s]>\n", tb_string_cstr(&tokenKind), tokenizer->RowStart, tokenizer->ColStart, tokenizer->RowEnd, tokenizer->ColEnd, tb_string_cstr(&tokenizer->Content));
 }
 
-KonTokenizer* KSON_TokenizerInit(Kon* kstate)
+KonTokenizer* KSON_TokenizerInit(KonState* kstate)
 {
     // init
     KonTokenizer* tokenizer = (KonTokenizer*)malloc(sizeof(KonTokenizer));

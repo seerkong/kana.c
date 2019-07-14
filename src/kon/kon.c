@@ -12,13 +12,12 @@
 
 
 
-int KON_Init(Kon* kstate)
+int KON_Init(KonState* kstate)
 {
-    kon_debug("offsetof(struct KonStruct, value) %lu", offsetof(struct KonStruct, Value));
-    kstate->Tag = KON_CONTEXT;
+    kstate->Base.Tag = KON_T_STATE;
 
     // init root env
-    // Kon* env = KON_MakeRootEnv(kstate);
+    // KN env = KON_MakeRootEnv(kstate);
     // kon_debug("root env addr %x", env);     
     // kstate->Value.Context.RootEnv = env;
     // if (!tb_init(tb_null, tb_null)) {
@@ -28,14 +27,14 @@ int KON_Init(Kon* kstate)
 }
 
 
-int KON_Finish(Kon* kstate)
+int KON_Finish(KonState* kstate)
 {
     // exit tbox
     // tb_exit();
     return 0;
 }
 
-Kon* KON_EvalFile(Kon* kstate, char* filePath)
+KN KON_EvalFile(KonState* kstate, char* filePath)
 {
     printf("KON_EvalFile enter");
     
@@ -52,18 +51,18 @@ Kon* KON_EvalFile(Kon* kstate, char* filePath)
     if (istream) {
         bool openRes = KSON_ReaderOpenStream(reader, istream, false);
         if (openRes) {
-            Kon* root = KSON_Parse(reader);
+            KN root = KSON_Parse(reader);
             if (KON_IsList(root)) {
 
-                Kon* env = KON_MakeRootEnv(kstate);
+                KN env = KON_MakeRootEnv(kstate);
 
-                // Kon* result = KON_ProcessSentences(kstate, root, kstate->Value.Context.RootEnv);
-                Kon* result = KON_ProcessSentences(kstate, root, env);
+                // KN result = KON_ProcessSentences(kstate, root, kstate->Value.Context.RootEnv);
+                KN result = KON_ProcessSentences(kstate, root, env);
                 
                 
                 printf("eval sentences success\n");
-                Kon* formated = KON_ToFormatString(kstate, result, true, 0, "  ");
-                //  Kon* formated = KON_ToFormatString(&kstate, root, false, 0, " ");
+                KN formated = KON_ToFormatString(kstate, result, true, 0, "  ");
+                //  KN formated = KON_ToFormatString(&kstate, root, false, 0, " ");
                 printf("%s\n", KON_StringToCstr(formated));
             }
             

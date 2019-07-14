@@ -13,10 +13,10 @@ extern "C"{
 
 // script lifetime start
 
-KON_API int KON_Init(Kon* kstate);
-KON_API int KON_Finish(Kon* kstate);
+KON_API int KON_Init(KonState* kstate);
+KON_API int KON_Finish(KonState* kstate);
 
-KON_API Kon* KON_EvalFile(Kon* kstate, char* filePath);
+KON_API KN KON_EvalFile(KonState* kstate, char* filePath);
 
 // script lifetime end
 

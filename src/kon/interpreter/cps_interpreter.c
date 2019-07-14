@@ -7,20 +7,21 @@
 #include "cps_interpreter.h"
 
 
-KonTrampoline* ApplySubjVerbAndObjects(Kon* kstate, Kon* subj, Kon* argList, Kon* env, KonContinuation* cont)
+KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, KN env, KonContinuation* cont)
 {
-    Kon* subjFmtStr = KON_ToFormatString(kstate, subj, false, 0, " ");
-    Kon* objectsFmtStr = KON_ToFormatString(kstate, argList, false, 0, " ");
+    KN subjFmtStr = KON_ToFormatString(kstate, subj, false, 0, " ");
+    KN objectsFmtStr = KON_ToFormatString(kstate, argList, false, 0, " ");
 
     kon_debug("subj: %s, objects: %s", KON_StringToCstr(subjFmtStr), KON_StringToCstr(objectsFmtStr));
-    Kon* firstObj = kon_car(argList);
+    KN firstObj = kon_car(argList);
     // KON_MakeString(kstate, "ihojh");
-    Kon* applyResult = KON_NULL;
+    KN applyResult = KON_NULL;
     if (kon_is_syntax_marker(firstObj)) {
-        if (firstObj->Value.SyntaxMarker.Type == KON_SYNTAX_MARKER_APPLY) {
+        KonProcedure* subjProc = (KonProcedure*)subj;
+        if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_APPLY) {
             // TODO assert subj is a procedure
-            if (subj->Value.Procedure.Type == KON_NATIVE_FUNC) {
-                KonNativeFuncRef funcRef = subj->Value.Procedure.NativeFuncRef;
+            if (subjProc->Type == KON_NATIVE_FUNC) {
+                KonNativeFuncRef funcRef = subjProc->NativeFuncRef;
                 applyResult = (*funcRef)(kstate, kon_cdr(argList));
             }
         }
@@ -33,9 +34,9 @@ KonTrampoline* ApplySubjVerbAndObjects(Kon* kstate, Kon* subj, Kon* argList, Kon
 }
 
 
-Kon* TbVectorToKonList(Kon* kstate, tb_vector_ref_t clauseWords)
+KN TbVectorToKonList(KonState* kstate, tb_vector_ref_t clauseWords)
 {
-    Kon* clause = KON_NIL;
+    KN clause = KON_NIL;
     
     tb_size_t clauseHead = tb_iterator_head(clauseWords);
     tb_size_t clauseItor = tb_iterator_tail(clauseWords);
@@ -43,7 +44,7 @@ Kon* TbVectorToKonList(Kon* kstate, tb_vector_ref_t clauseWords)
         // the previous item
         clauseItor = tb_iterator_prev(clauseWords, clauseItor);
         
-        Kon* item = (Kon*)tb_iterator_item(clauseWords, clauseItor);
+        KN item = (KN)tb_iterator_item(clauseWords, clauseItor);
         if (item == NULL) {
             break;
         }
@@ -57,24 +58,24 @@ Kon* TbVectorToKonList(Kon* kstate, tb_vector_ref_t clauseWords)
 // @param sentenceRestWords sentence words except subject,
 //        if a sentence is {"zhangsan " name | upcase}, then this
 //        param should be {name | upcase}
-Kon* SplitClauses(Kon* kstate, Kon* sentenceRestWords)
+KN SplitClauses(KonState* kstate, KN sentenceRestWords)
 {
     // TODO parse symbol type verb
     
     
-    tb_vector_ref_t clauseListVec = tb_vector_init(TB_VECTOR_GROW_SIZE, tb_element_ptr(kon_vector_item_ptr_free, "ClauseVec"));
+    tb_vector_ref_t clauseListVec = tb_vector_init(TB_VECTOR_GROW_SIZE, tb_element_long());
     
-    tb_vector_ref_t clauseVec = tb_vector_init(TB_VECTOR_GROW_SIZE, tb_element_ptr(kon_vector_item_ptr_free, "ClauseVec"));
+    tb_vector_ref_t clauseVec = tb_vector_init(TB_VECTOR_GROW_SIZE, tb_element_long());
 
-    Kon* iter = sentenceRestWords;
+    KonListNode* iter = sentenceRestWords;
     
     int state = 1; // 1 need verb, 2 need objects
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
         
         if (state == 1) {
             if (kon_is_syntax_marker(item)
-                && item->Value.SyntaxMarker.Type != KON_SYNTAX_MARKER_CLAUSE_END
+                && CAST_Kon(SyntaxMarker, item)->Type != KON_SYNTAX_MARKER_CLAUSE_END
             ) {
                 tb_vector_insert_tail(clauseVec, item);
                 state = 2;
@@ -96,7 +97,7 @@ Kon* SplitClauses(Kon* kstate, Kon* sentenceRestWords)
         else {
             // meet ;
             if (kon_is_syntax_marker(item)
-                && item->Value.SyntaxMarker.Type == KON_SYNTAX_MARKER_CLAUSE_END
+                && CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_CLAUSE_END
             ) {
                 tb_vector_insert_tail(clauseListVec, clauseVec);
                 // reset state
@@ -117,7 +118,7 @@ Kon* SplitClauses(Kon* kstate, Kon* sentenceRestWords)
     tb_size_t clauseListHead = tb_iterator_head(clauseListVec);
     tb_size_t clauseListItor = tb_iterator_tail(clauseListVec);
     
-    Kon* result = KON_NIL;
+    KN result = KON_NIL;
     do {
         // the previous item
         clauseListItor = tb_iterator_prev(clauseListVec, clauseListItor);
@@ -126,7 +127,7 @@ Kon* SplitClauses(Kon* kstate, Kon* sentenceRestWords)
         if (clauseWords == NULL) {
             break;
         }
-        Kon* clause = TbVectorToKonList(kstate, clauseWords);
+        KN clause = TbVectorToKonList(kstate, clauseWords);
         result = kon_cons(kstate, clause, result);
         
     } while (clauseListItor != clauseListHead);
@@ -151,7 +152,7 @@ KonTrampoline* AllocBounceWithType(KonBounceType type)
 
 // pop the top continuation
 // the bounce continuation should be cont->Cont
-KonTrampoline* KON_RunContinuation(Kon* kstate, KonContinuation* cont, Kon* val)
+KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* cont, KN val)
 {
     // all sentences finished, return last value
     if (kon_continuation_type(cont) == KON_CONT_RETURN) {
@@ -160,9 +161,9 @@ KonTrampoline* KON_RunContinuation(Kon* kstate, KonContinuation* cont, Kon* val)
         return bounce;
     }
     else if (kon_continuation_type(cont) == KON_CONT_EVAL_SENTENCE_LIST) {
-        Kon* lastSentenceVal = val;
-        Kon* env = cont->Env;
-        Kon* restSentences = cont->EvalSentenceList.RestSentenceList;
+        KN lastSentenceVal = val;
+        KN env = cont->Env;
+        KN restSentences = cont->EvalSentenceList.RestSentenceList;
         if (restSentences == KON_NIL) {
             // block sentences all finished
             KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
@@ -187,7 +188,7 @@ KonTrampoline* KON_RunContinuation(Kon* kstate, KonContinuation* cont, Kon* val)
     }
     // else if (kon_continuation_type(cont) == KON_CONT_EVAL_SENTENCE) {
     //     // eval subj first if have a sentence
-    //     Kon* words = val;
+    //     KN words = val;
     //     KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_SUBJ);
             
     //     KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
@@ -202,8 +203,8 @@ KonTrampoline* KON_RunContinuation(Kon* kstate, KonContinuation* cont, Kon* val)
     // }
     else if (kon_continuation_type(cont) == KON_CONT_EVAL_SUBJ) {
         // subj evaled, now should eval clauses
-        Kon* subj = val;
-        Kon* restWords = cont->EvalSubj.RestWordList;
+        KN subj = val;
+        KN restWords = cont->EvalSubj.RestWordList;
 
         if (restWords == KON_NIL) {
             // no other words besids subj, is a sentence like {"abc"}
@@ -217,7 +218,7 @@ KonTrampoline* KON_RunContinuation(Kon* kstate, KonContinuation* cont, Kon* val)
             // split sub clauses
             // TODO split % xxx; .xxx a a ; | xx aaa; sss
             // as {{% xxx} {. xxx a a} {| xx aaa} {sss}}
-            Kon* clauses = SplitClauses(kstate, restWords);
+            KN clauses = SplitClauses(kstate, restWords);
             
             if (clauses == KON_NIL) {
                 // no clauses like {{a}}
@@ -245,8 +246,8 @@ KonTrampoline* KON_RunContinuation(Kon* kstate, KonContinuation* cont, Kon* val)
     else if (kon_continuation_type(cont) == KON_CONT_EVAL_CLAUSE_LIST) {
         // last clause eval finshed, eval next clause
         // last clause eval result is the subj of the next clause
-        Kon* subj = val;
-        Kon* restClauseList = cont->EvalClauseList.RestClauseList;
+        KN subj = val;
+        KN restClauseList = cont->EvalClauseList.RestClauseList;
         if (restClauseList == KON_NIL) {
             // no other clauses, is a sentence like {writeln % "abc"}
             // finish this sentence. use last clause eval result as return val
@@ -274,17 +275,17 @@ KonTrampoline* KON_RunContinuation(Kon* kstate, KonContinuation* cont, Kon* val)
 
 
     else if (kon_continuation_type(cont) == KON_CONT_EVAL_CLAUSE_ARGS) {
-        Kon* lastArgEvaled = val;
-        Kon* subj = cont->EvalClauseArgs.Subj;
-        Kon* restArgList = cont->EvalClauseArgs.RestArgList;
-        Kon* evaledArgList = cont->EvalClauseArgs.EvaledArgList;
+        KN lastArgEvaled = val;
+        KN subj = cont->EvalClauseArgs.Subj;
+        KN restArgList = cont->EvalClauseArgs.RestArgList;
+        KN evaledArgList = cont->EvalClauseArgs.EvaledArgList;
         // NOTE! the evaluated arg list here is reverted saved
         // should reverted back when apply the arguments
         evaledArgList = kon_cons(kstate, lastArgEvaled, evaledArgList);
 
         if (restArgList == KON_NIL) {
             // this clause args all eval finished
-            Kon* argList = Kon_ListRevert(kstate, evaledArgList);
+            KN argList = Kon_ListRevert(kstate, evaledArgList);
             return ApplySubjVerbAndObjects(kstate, subj, argList, cont->Env, cont->Cont);
         }
         else {
@@ -310,7 +311,7 @@ KonTrampoline* KON_RunContinuation(Kon* kstate, KonContinuation* cont, Kon* val)
     }
 }
 
-KonTrampoline* KON_EvalSentences(Kon* kstate, Kon* sentences, Kon* env, KonContinuation* cont)
+KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonContinuation* cont)
 {
     if (sentences == KON_NIL) {
         // TODO throw error
@@ -332,13 +333,13 @@ KonTrampoline* KON_EvalSentences(Kon* kstate, Kon* sentences, Kon* env, KonConti
     }
 }
 
-bool IsSelfEvaluated(Kon* source)
+bool IsSelfEvaluated(KN source)
 {
-    if (kon_is_fixnum(source)
-        || kon_is_flonum(source)
+    if (KON_IS_FIXNUM(source)
+        || KON_IS_FLONUM(source)
         || kon_is_string(source)
         || kon_is_syntax_marker(source)
-        || (kon_is_symbol(source) && source->Value.Symbol.Type == KON_SYM_STRING)
+        || (kon_is_symbol(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_STRING)
         || kon_is_quote(source)
     ) {
         return true;
@@ -348,11 +349,11 @@ bool IsSelfEvaluated(Kon* source)
     }
 }
 
-Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env)
+KN KON_ProcessSentences(KonState* kstate, KN sentences, KN env)
 {
     // TODO add step count when debug
-    Kon* formated = KON_ToFormatString(&kstate, sentences, true, 0, "  ");
-    //  Kon* formated = KON_ToFormatString(&kstate, root, false, 0, " ");
+    KN formated = KON_ToFormatString(&kstate, sentences, true, 0, "  ");
+    //  KN formated = KON_ToFormatString(&kstate, root, false, 0, " ");
     printf("%s\n", KON_StringToCstr(formated));
     
     KonContinuation* firstCont = AllocContinuationWithType(KON_CONT_RETURN);
@@ -362,7 +363,7 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env)
     while (kon_bounce_type(bounce) != KON_TRAMPOLINE_LAND) {
         if (kon_bounce_type(bounce) == KON_TRAMPOLINE_RUN) {
             KonTrampoline* oldBounce = bounce;
-            Kon* value = bounce->Run.Value;
+            KN value = bounce->Run.Value;
             KonContinuation* cont = bounce->Run.Cont;
             free(oldBounce);
             bounce = KON_RunContinuation(kstate, cont, value);
@@ -370,12 +371,12 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env)
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_BLOCK) {
             KonTrampoline* oldBounce = bounce;
             KonContinuation* cont = bounce->Bounce.Cont;
-            Kon* env = bounce->Bounce.Env;
-            Kon* sentence = bounce->Bounce.Value;
+            KN env = bounce->Bounce.Env;
+            KN sentence = bounce->Bounce.Value;
 
             if (KON_IsList(sentence)) {
                 // passed a sentence like {writeln % "abc" "efg"}
-                Kon* words = sentence;
+                KN words = sentence;
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_SUBJ);
                     
                 KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
@@ -391,7 +392,7 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env)
                 // a code block like { {!local a 4} a}
                 // TODO asert should be a SYM_IDENTIFIER
                 // env lookup this val
-                Kon* val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(sentence));
+                KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(sentence));
                 assert(val != KON_NULL);
                 bounce = KON_RunContinuation(kstate, cont, val);
             }
@@ -402,12 +403,12 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env)
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_SUBJ) {
             KonTrampoline* oldBounce = bounce;
             KonContinuation* cont = bounce->Bounce.Cont;
-            Kon* env = bounce->Bounce.Env;
-            Kon* subj = bounce->Bounce.Value;
+            KN env = bounce->Bounce.Env;
+            KN subj = bounce->Bounce.Value;
             if (KON_IsList(subj)) {
                 // the subj position is a list, should be evaluated
                 // like the first sentence in this eg block {{ {zhangsan name} |upcase }}
-                Kon* words = subj;
+                KN words = subj;
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_SUBJ);
                     
                 KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
@@ -421,8 +422,8 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env)
             }
             else if (kon_is_symbol(subj)) {
                 // TODO env lookup this val
-                // Kon* val = KON_MakeString(kstate, "writeln");
-                Kon* val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(subj));
+                // KN val = KON_MakeString(kstate, "writeln");
+                KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(subj));
                 assert(val != KON_NULL);
                 bounce = KON_RunContinuation(kstate, cont, val);
             }
@@ -436,10 +437,10 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env)
             
             KonTrampoline* oldBounce = bounce;
             KonContinuation* cont = bounce->SubjBounce.Cont;
-            Kon* env = bounce->SubjBounce.Env;
-            Kon* clauseArgList = bounce->SubjBounce.Value;
-            Kon* subj = bounce->SubjBounce.Subj;
-            Kon* firstArg = kon_car(clauseArgList);
+            KN env = bounce->SubjBounce.Env;
+            KN clauseArgList = bounce->SubjBounce.Value;
+            KN subj = bounce->SubjBounce.Subj;
+            KN firstArg = kon_car(clauseArgList);
 
             if (kon_is_syntax_marker(firstArg)) {
                 // % . |
@@ -471,12 +472,12 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env)
             // eval each argment
             KonTrampoline* oldBounce = bounce;
             KonContinuation* cont = bounce->Bounce.Cont;
-            Kon* env = bounce->Bounce.Env;
-            Kon* arg = bounce->Bounce.Value;
+            KN env = bounce->Bounce.Env;
+            KN arg = bounce->Bounce.Value;
             if (KON_IsList(arg)) {
                 // the subj position is a list, should be evaluated
                 // like the first sentence in this eg block {{ {zhangsan name} |upcase }}
-                Kon* words = arg;
+                KN words = arg;
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_SUBJ);
                     
                 KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
@@ -517,7 +518,7 @@ Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env)
             }
             else if (kon_is_symbol(arg)) {
                 // env lookup this val
-                Kon* val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(arg));;
+                KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(arg));;
                 assert(val != KON_NULL);
                 bounce = KON_RunContinuation(kstate, cont, val);
             }

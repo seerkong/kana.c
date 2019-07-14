@@ -1,11 +1,11 @@
 #include "env.h"
 #include "../kson/hashmap.h"
 
-Kon* KON_MakeRootEnv(Kon* kstate)
+KN KON_MakeRootEnv(KonState* kstate)
 {
-    Kon* env = KON_AllocTagged(kstate, sizeof(KonEnv), KON_ENV);
-    env->Value.Env.Parent = KON_NULL;
-    env->Value.Env.Bindings = KON_HashMapInit(20);
+    KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
+    env->Parent = KON_NULL;
+    env->Bindings = KON_HashMapInit(20);
 
     // math
     KON_EnvDefine(kstate, env, "+",
@@ -61,30 +61,30 @@ Kon* KON_MakeRootEnv(Kon* kstate)
     return env;
 }
 
-Kon* KON_MakeChildEnv(Kon* kstate, Kon* parentEnv)
+KN KON_MakeChildEnv(KonState* kstate, KN parentEnv)
 {
-    Kon* env = KON_AllocTagged(kstate, sizeof(KonEnv), KON_ENV);
-    env->Value.Env.Parent = parentEnv;
-    env->Value.Env.Bindings =  KON_HashMapInit(20);
+    KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
+    env->Parent = parentEnv;
+    env->Bindings =  KON_HashMapInit(20);
     return env;
 }
 
-Kon* KON_EnvDefine(Kon* kstate, Kon* env, char* key, Kon* value)
+KN KON_EnvDefine(KonState* kstate, KN env, char* key, KN value)
 {
-    KON_HashMapPut(env->Value.Env.Bindings, key, value);
+    KON_HashMapPut(CAST_Kon(Env, env)->Bindings, key, value);
     return KON_TRUE;
 }
 
-Kon* KON_EnvLookup(Kon* kstate, Kon* env, char* key)
+KN KON_EnvLookup(KonState* kstate, KN env, char* key)
 {
-    Kon* value = (Kon*)KON_HashMapGet(env->Value.Env.Bindings, key);
+    KN value = (KN)KON_HashMapGet(CAST_Kon(Env, env)->Bindings, key);
     if (value) {
         return value;
     }
-    else if (env->Value.Env.Parent == KON_NULL) {
+    else if (CAST_Kon(Env, env)->Parent == KON_NULL) {
         return KON_NULL;
     }
     else {
-        return KON_EnvLookup(kstate, env->Value.Env.Parent, key);
+        return KON_EnvLookup(kstate, CAST_Kon(Env, env)->Parent, key);
     }
 }

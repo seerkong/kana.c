@@ -9,12 +9,12 @@ extern "C"{
 #include "types.h"
 #include "env.h"
 
-Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env);
+KN KON_ProcessSentences(KonState* kstate, KN sentences, KN env);
 
 KonContinuation* AllocContinuationWithType(KonContinuationType type);
 KonTrampoline* AllocBounceWithType(KonBounceType type);
-KonTrampoline* KON_EvalSentences(Kon* kstate, Kon* sentences, Kon* env, KonContinuation* cont);
-KonTrampoline* ApplySubjVerbAndObjects(Kon* kstate, Kon* subj, Kon* argList, Kon* env, KonContinuation* cont);
+KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonContinuation* cont);
+KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, KN env, KonContinuation* cont);
 
 #ifdef __cplusplus
 }

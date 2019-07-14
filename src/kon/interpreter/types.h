@@ -26,29 +26,29 @@ typedef enum {
 
 struct _KonContinuation {
     KonContinuationType Type;
-    Kon* Env;
+    KN Env;
     KonContinuation* Cont;
     union {
         struct {
-            Kon* RestSentenceList;
+            KN RestSentenceList;
         } EvalSentenceList;
 
         struct {
-            Kon* WordList;
+            KN WordList;
         } EvalSentence;
 
         struct {
-            Kon* RestWordList;
+            KN RestWordList;
         } EvalSubj;
 
         struct {
-            Kon* RestClauseList;
+            KN RestClauseList;
         } EvalClauseList;
 
         struct {
-            Kon* Subj;
-            Kon* RestArgList;
-            Kon* EvaledArgList;
+            KN Subj;
+            KN RestArgList;
+            KN EvaledArgList;
         } EvalClauseArgs;
     };
 };
@@ -76,25 +76,25 @@ struct _KonTrampoline {
     KonBounceType Type;
     union {
         struct {
-            Kon* Value;
+            KN Value;
         } Land;
 
         struct {
-            Kon* Value;
+            KN Value;
             KonContinuation* Cont;
         } Run;
 
         struct {
-            Kon* Value;
+            KN Value;
             KonContinuation* Cont;
-            Kon* Env;
+            KN Env;
         } Bounce;
 
         struct {
-            Kon* Subj;
-            Kon* Value;
+            KN Subj;
+            KN Value;
             KonContinuation* Cont;
-            Kon* Env;
+            KN Env;
         } SubjBounce;
     };
 };

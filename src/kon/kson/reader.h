@@ -12,7 +12,7 @@
 
 typedef struct
 {
-    Kon* Kstate;
+    KonState* Kstate;
     // the reader stream
     tb_stream_ref_t ReadStream;
     bool IsOwnedStream;
@@ -21,7 +21,7 @@ typedef struct
 
     KonTokenizer* Tokenizer;
 
-    Kon* Root;
+    KN Root;
 } KonReader;
 
 typedef struct
@@ -75,11 +75,11 @@ typedef enum
     KON_READER_PARSE_QUOTE,
 } KonReaderState;
 
-KonReader* KSON_ReaderInit(Kon* kstate);
+KonReader* KSON_ReaderInit(KonState* kstate);
 
 bool KSON_ReaderOpenStream(KonReader* reader, tb_stream_ref_t stream, bool isOwnedStream);
 
-Kon* KSON_Parse(KonReader* reader);
+KN KSON_Parse(KonReader* reader);
 
 void KSON_ReaderCloseStream(KonReader* reader);
 

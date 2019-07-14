@@ -2,10 +2,10 @@
 #include <tbox/tbox.h>
 
 void ExitTopBuilder(KonReader* reader);
-void AddValueToTopBuilder(KonReader* reader, Kon* value);
+void AddValueToTopBuilder(KonReader* reader, KN value);
 
 
-KonReader* KSON_ReaderInit(Kon* kstate)
+KonReader* KSON_ReaderInit(KonState* kstate)
 {
     // init reader
     KonReader* reader = (KonReader*)malloc(sizeof(KonReader));
@@ -154,28 +154,24 @@ bool IsSyntaxToken(tb_size_t event)
 
 
 
-Kon* MakeSyntaxMarker(Kon* kstate, KonTokenKind tokenKind)
+KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
 {
-    Kon* value = KON_NULL;
+    KonSyntaxMarker* value = KON_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KON_T_SYNTAX_MARKER);
     switch (tokenKind) {
         case KON_TOKEN_APPLY: {
-            value = kon_alloc_type(kstate, SyntaxMarker, KON_SYNTAX_MARKER);
-            value->Value.SyntaxMarker.Type = KON_SYNTAX_MARKER_APPLY;
+            value->Type = KON_SYNTAX_MARKER_APPLY;
             break;
         }
         case KON_TOKEN_EXEC_MSG: {
-            value = kon_alloc_type(kstate, SyntaxMarker, KON_SYNTAX_MARKER);
-            value->Value.SyntaxMarker.Type = KON_SYNTAX_MARKER_EXEC_MSG;
+            value->Type = KON_SYNTAX_MARKER_EXEC_MSG;
             break;
         }
         case KON_TOKEN_PIPE: {
-            value = kon_alloc_type(kstate, SyntaxMarker, KON_SYNTAX_MARKER);
-            value->Value.SyntaxMarker.Type = KON_SYNTAX_MARKER_PIPE;
+            value->Type = KON_SYNTAX_MARKER_PIPE;
             break;
         }
         case KON_TOKEN_CLAUSE_END: {
-            value = kon_alloc_type(kstate, SyntaxMarker, KON_SYNTAX_MARKER);
-            value->Value.SyntaxMarker.Type = KON_SYNTAX_MARKER_CLAUSE_END;
+            value->Type = KON_SYNTAX_MARKER_CLAUSE_END;
             break;
         }
         default: {
@@ -185,47 +181,47 @@ Kon* MakeSyntaxMarker(Kon* kstate, KonTokenKind tokenKind)
     return value;
 }
 
-Kon* MakeSymbol(KonReader* reader, KonTokenKind event)
+KN MakeSymbol(KonReader* reader, KonTokenKind event)
 {
-    Kon* value = kon_alloc_type(reader->Kstate, Symbol, KON_SYMBOL);
+    KonSymbol* value = KON_ALLOC_TYPE_TAG(reader->Kstate, KonSymbol, KON_T_SYMBOL);
     if (event == KON_TOKEN_SYM_FORM_WORD) {
-        value->Value.Symbol.Type = KON_SYM_FORM_WORD;
+        value->Type = KON_SYM_FORM_WORD;
     }
     else if (event == KON_TOKEN_SYM_VARIABLE) {
-        value->Value.Symbol.Type = KON_SYM_VAR;
+        value->Type = KON_SYM_VAR;
     }
     else if (event == KON_TOKEN_SYM_IDENTIFIER) {
-        value->Value.Symbol.Type = KON_SYM_IDENTIFER;
+        value->Type = KON_SYM_IDENTIFER;
     }
     else if (event == KON_TOKEN_SYM_STRING) {
-        value->Value.Symbol.Type = KON_SYM_STRING;
+        value->Type = KON_SYM_STRING;
     }
     
-    tb_string_init(&(value->Value.Symbol.Data));
-    tb_string_strcat(&value->Value.Symbol.Data, &reader->Tokenizer->Content);
+    tb_string_init(&(value->Data));
+    tb_string_strcat(&value->Data, &reader->Tokenizer->Content);
 
     return value;
 }
 
-Kon* MakeSymFormWord(KonReader* reader, KonTokenKind event)
+KN MakeSymFormWord(KonReader* reader, KonTokenKind event)
 {
-    Kon* value = kon_alloc_type(reader->Kstate, Symbol, KON_SYMBOL);
-    value->Value.Symbol.Type = KON_SYM_IDENTIFER;
-    tb_string_init(&(value->Value.Symbol.Data));
-    tb_string_strcat(&value->Value.Symbol.Data, &reader->Tokenizer->Content);
+    KonSymbol* value = KON_ALLOC_TYPE_TAG(reader->Kstate, KonSymbol, KON_T_SYMBOL);
+    value->Type = KON_SYM_IDENTIFER;
+    tb_string_init(&(value->Data));
+    tb_string_strcat(&value->Data, &reader->Tokenizer->Content);
     return value;
 }
 
 
 // num token to kon number
-Kon* MakeNumber(KonReader* reader)
+KN MakeNumber(KonReader* reader)
 {
     bool isPositive = reader->Tokenizer->NumIsPositive;
     char* numStrBeforeDot = tb_string_cstr(&reader->Tokenizer->NumBeforeDot);
     char* numStrAfterDot = tb_string_cstr(&reader->Tokenizer->NumAfterDot);
     char* numStrAfterPower = tb_string_cstr(&reader->Tokenizer->NumAfterPower);
     
-    Kon* value = KON_ZERO;
+    KN value = KON_ZERO;
     
     if (isPositive
         && numStrAfterDot == NULL
@@ -259,15 +255,15 @@ Kon* MakeNumber(KonReader* reader)
     return value;
 }
 
-Kon* MakeString(KonReader* reader)
+KN MakeString(KonReader* reader)
 {
-    Kon* value = KON_MakeString(reader->Kstate, tb_string_cstr(&reader->Tokenizer->Content));
+    KN value = KON_MakeString(reader->Kstate, tb_string_cstr(&reader->Tokenizer->Content));
     return value;
 }
 
-Kon* MakeLiteral(KonReader* reader, KonTokenKind event)
+KN MakeLiteral(KonReader* reader, KonTokenKind event)
 {
-    Kon* value = KON_UKN;
+    KN value = KON_UKN;
 
     if (event == KON_TOKEN_KEYWORD_NIL) {
         value = KON_NIL;
@@ -301,7 +297,7 @@ Kon* MakeLiteral(KonReader* reader, KonTokenKind event)
     return value;
 }
 
-void AddValueToTopBuilder(KonReader* reader, Kon* value)
+void AddValueToTopBuilder(KonReader* reader, KN value)
 {
     KonReaderState currentState = StateStackTop(reader->StateStack);
     KonReaderState newState = currentState;
@@ -325,10 +321,10 @@ void AddValueToTopBuilder(KonReader* reader, Kon* value)
     else if (builderType == KON_BUILDER_TABLE_PAIR) {
         if (currentState == KON_READER_PARSE_TABLE_KEY) {
             assert(kon_is_symbol(value));
-            KonSymbolType symbolType = kon_field(value, Symbol, KON_SYMBOL, Type);
+            KonSymbolType symbolType = KON_FIELD(value, KonSymbol, Type);
             assert(symbolType != KON_SYM_VAR && symbolType != KON_SYM_FORM_WORD);
             // table tag key should not be NULL
-            char* tableKey = tb_string_cstr(&value->Value.Symbol.Data);
+            char* tableKey = tb_string_cstr(&KON_UNBOX_SYMBOL(value));
             assert(tableKey);
             TablePairSetKey(topBuilder, tableKey);
 
@@ -363,7 +359,7 @@ void AddValueToTopBuilder(KonReader* reader, Kon* value)
         }
         else {
             assert(kon_is_symbol(value));
-            KonSymbolType symbolType = kon_field(value, Symbol, KON_SYMBOL, Type);
+            KonSymbolType symbolType = KON_FIELD(value, KonSymbol, Type);
             assert(symbolType != KON_SYM_FORM_WORD);
             CellBuilderSetName(topBuilder, value);
         }
@@ -391,7 +387,7 @@ void ExitTopBuilder(KonReader* reader)
 
     printf("ExitTopBuilder builder type %d\n", builderType);
 
-    Kon* value;
+    KN value;
     if (builderType == KON_BUILDER_VECTOR) {
         value = MakeVectorByBuilder(reader->Kstate, topBuilder);
     }
@@ -435,7 +431,7 @@ void ExitAllStackBuilders()
     // KonBuilder* newTopBuilder = BuilderStackTop(reader->BuilderStack);
 }
 
-Kon* KSON_Parse(KonReader* reader)
+KN KSON_Parse(KonReader* reader)
 {
     tb_size_t initState = KON_READER_ROOT;
     StateStackPush(reader->StateStack, initState);
@@ -581,7 +577,7 @@ Kon* KSON_Parse(KonReader* reader)
             // top builder should be a list
             // don't need update state
             assert(topBuilder && topBuilder->Type == KON_BUILDER_LIST);
-            Kon* marker = MakeSyntaxMarker(reader->Kstate, event);
+            KN marker = MakeSyntaxMarker(reader->Kstate, event);
             AddValueToTopBuilder(reader, marker);
         }
         else if (event == KON_TOKEN_SYM_FORM_WORD) {
@@ -589,7 +585,7 @@ Kon* KSON_Parse(KonReader* reader)
             // top builder should be a list
             // don't need update state
             assert(topBuilder && topBuilder->Type == KON_BUILDER_LIST);
-            Kon* symbol = MakeSymbol(reader, event);
+            KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);
         }
         else if (IsContainerEndToken(event)) {
@@ -600,15 +596,15 @@ Kon* KSON_Parse(KonReader* reader)
         else if (event == KON_TOKEN_SYM_STRING
             || event == KON_TOKEN_SYM_IDENTIFIER
         ) {
-            Kon* symbol = MakeSymbol(reader, event);
+            KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);
         }
         else if (event == KON_TOKEN_SYM_VARIABLE) {
-            Kon* value = MakeSymbol(reader, event);
+            KN value = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, value);
         }
         else if (IsLiteralToken(event)) {
-            Kon* value = MakeLiteral(reader, event);
+            KN value = MakeLiteral(reader, event);
             AddValueToTopBuilder(reader, value);
         }
     }

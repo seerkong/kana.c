@@ -6,7 +6,7 @@
 
 int main(int argc, char const* argv[])
 {
-    Kon kstate;
+    KonState kstate;
     KON_Init(&kstate);
     // if (!KON_Init(&kstate)) {
     //     fprintf(stderr, "Could not initialize!\n");

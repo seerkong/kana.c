@@ -12,25 +12,25 @@ extern "C"{
 #include "../prefix.h"
 #include "types.h"
 
-bool KON_IsPrimaryFunc(Kon* kstate, tb_string_ref_t funcName);
+bool KON_IsPrimaryFunc(KonState* kstate, tb_string_ref_t funcName);
 
-Kon* KON_PrimaryPlus(Kon* kstate, Kon* args);
-Kon* KON_PrimaryMinus(Kon* kstate, Kon* args);
-Kon* KON_PrimaryMultiply(Kon* kstate, Kon* args);
-Kon* KON_PrimaryDivide(Kon* kstate, Kon* args);
-Kon* KON_PrimaryMod(Kon* kstate, Kon* args);
-Kon* KON_PrimaryLowerThan(Kon* kstate, Kon* args);
-Kon* KON_PrimaryLowerOrEqual(Kon* kstate, Kon* args);
-Kon* KON_PrimaryGreaterThan(Kon* kstate, Kon* args);
-Kon* KON_PrimaryGreaterOrEqual(Kon* kstate, Kon* args);
+KN KON_PrimaryPlus(KonState* kstate, KN args);
+KN KON_PrimaryMinus(KonState* kstate, KN args);
+KN KON_PrimaryMultiply(KonState* kstate, KN args);
+KN KON_PrimaryDivide(KonState* kstate, KN args);
+KN KON_PrimaryMod(KonState* kstate, KN args);
+KN KON_PrimaryLowerThan(KonState* kstate, KN args);
+KN KON_PrimaryLowerOrEqual(KonState* kstate, KN args);
+KN KON_PrimaryGreaterThan(KonState* kstate, KN args);
+KN KON_PrimaryGreaterOrEqual(KonState* kstate, KN args);
 
 
-Kon* KON_PrimaryNewline(Kon* kstate, Kon* args);
-Kon* KON_PrimaryDisplay(Kon* kstate, Kon* args);
-Kon* KON_PrimaryDisplayln(Kon* kstate, Kon* args);
-Kon* KON_PrimaryWrite(Kon* kstate, Kon* args);
-Kon* KON_PrimaryWriteln(Kon* kstate, Kon* args);
-Kon* KON_PrimaryStringify(Kon* kstate, Kon* args);
+KN KON_PrimaryNewline(KonState* kstate, KN args);
+KN KON_PrimaryDisplay(KonState* kstate, KN args);
+KN KON_PrimaryDisplayln(KonState* kstate, KN args);
+KN KON_PrimaryWrite(KonState* kstate, KN args);
+KN KON_PrimaryWriteln(KonState* kstate, KN args);
+KN KON_PrimaryStringify(KonState* kstate, KN args);
 
 #ifdef __cplusplus
 }

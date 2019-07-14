@@ -19,17 +19,15 @@ KonBuilder* CreateVectorBuilder()
     return builder;
 }
 
-void VectorBuilderAddItem(KonBuilder* builder, Kon* item)
+void VectorBuilderAddItem(KonBuilder* builder, KN item)
 {
     tb_vector_insert_tail(builder->Vector, (tb_cpointer_t)item);
 }
 
-Kon* MakeVectorByBuilder(Kon* kstate, KonBuilder* builder)
+KN MakeVectorByBuilder(KonState* kstate, KonBuilder* builder)
 {
-//    Kon* value = kon_alloc_type(kstate, Vector, KON_VECTOR);
-    Kon* value = KON_AllocTagged(kstate, sizeof(tb_vector_ref_t), KON_VECTOR);
-    printf("MakeVectorByBuilder value->Value.Vector %x\n", value->Value.Vector);
-    value->Value.Vector = builder->Vector;
+    KonVector* value = KON_ALLOC_TYPE_TAG(kstate, KonVector, KON_T_VECTOR);
+    value->Vector = builder->Vector;
     free(builder);
     return value;
 }
@@ -45,14 +43,14 @@ KonBuilder* CreateListBuilder()
     return builder;
 }
 
-void ListBuilderAddItem(KonBuilder* builder, Kon* item)
+void ListBuilderAddItem(KonBuilder* builder, KN item)
 {
     tb_vector_insert_tail(builder->List, (tb_cpointer_t)item);
 }
 
-Kon* MakeListByBuilder(Kon* kstate, KonBuilder* builder)
+KN MakeListByBuilder(KonState* kstate, KonBuilder* builder)
 {
-    Kon* pair = KON_NIL;
+    KN pair = KON_NIL;
     
     tb_vector_ref_t list = builder->List;
 
@@ -65,7 +63,7 @@ Kon* MakeListByBuilder(Kon* kstate, KonBuilder* builder)
         // the previous item
         itor = tb_iterator_prev(list, itor);
         
-        Kon* item = (Kon*)tb_iterator_item(list, itor);
+        KN item = (KN)tb_iterator_item(list, itor);
         if (item == NULL) {
             break;
         }
@@ -98,10 +96,10 @@ void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
     free(pair);
 }
 
-Kon* MakeTableByBuilder(Kon* kstate, KonBuilder* builder)
+KN MakeTableByBuilder(KonState* kstate, KonBuilder* builder)
 {
-    Kon* value = kon_alloc_type(kstate, Table, KON_TABLE);
-    value->Value.Table = builder->Table;
+    KonTable* value = KON_ALLOC_TYPE_TAG(kstate, KonTable, KON_T_TABLE);
+    value->Table = builder->Table;
     free(builder);
     return value;
 }
@@ -125,7 +123,7 @@ void TablePairSetKey(KonBuilder* builder, char* key)
     tb_string_cstrcat(&(builder->TablePair.Key), key);
 }
 
-void TablePairSetValue(KonBuilder* builder, Kon* value)
+void TablePairSetValue(KonBuilder* builder, KN value)
 {
     assert(value);
     builder->TablePair.Value = value;
@@ -136,7 +134,7 @@ void TablePairDestroy(KonBuilder* builder)
     free(builder);
 }
 
-KonBuilder* MakeTablePairBuilder(KonBuilder* builder, Kon* value)
+KonBuilder* MakeTablePairBuilder(KonBuilder* builder, KN value)
 {
     builder->TablePair.Value = value;
     return builder;
@@ -156,36 +154,36 @@ KonBuilder* CreateCellBuilder()
     return builder;
 }
 
-void CellBuilderSetName(KonBuilder* builder, Kon* name)
+void CellBuilderSetName(KonBuilder* builder, KN name)
 {
     printf("CellBuilderSetName\n");
     builder->Cell.Name = name;
 }
 
-void CellBuilderSetVector(KonBuilder* builder, Kon* vector)
+void CellBuilderSetVector(KonBuilder* builder, KN vector)
 {
     builder->Cell.Vector = vector;
 }
 
-void CellBuilderSetList(KonBuilder* builder, Kon* list)
+void CellBuilderSetList(KonBuilder* builder, KN list)
 {
     builder->Cell.List = list;
 }
 
-void CellBuilderSetTable(KonBuilder* builder, Kon* table)
+void CellBuilderSetTable(KonBuilder* builder, KN table)
 {
     builder->Cell.Table = table;
 }
 
-Kon* MakeCellByBuilder(Kon* kstate, KonBuilder* builder)
+KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder)
 {
-    Kon* value = kon_alloc_type(kstate, Cell, KON_CELL);
-    value->Value.Cell.Name = builder->Cell.Name;
-    value->Value.Cell.Vector = builder->Cell.Vector;
-    value->Value.Cell.Table = builder->Cell.Table;
-    value->Value.Cell.List = builder->Cell.List;
+    KonCell* value = KON_ALLOC_TYPE_TAG(kstate, KonCell, KON_T_CELL);
+    value->Name = builder->Cell.Name;
+    value->Vector = builder->Cell.Vector;
+    value->Table = builder->Cell.Table;
+    value->List = builder->Cell.List;
     free(builder);
-    return value;
+    return (KN)value;
 }
 
 KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind)
@@ -200,112 +198,116 @@ KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind)
     return builder;
 }
 
-void WrapperSetInner(Kon* kstate, KonBuilder* builder, Kon* inner)
+void WrapperSetInner(KonState* kstate, KonBuilder* builder, KN inner)
 {
     builder->Wrapper.Inner = inner;
 }
 
-Kon* MakeWrapperByBuilder(Kon* kstate, KonBuilder* builder)
+KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
 {
-    Kon* inner = builder->Wrapper.Inner;
+    KN inner = builder->Wrapper.Inner;
     KonBuilderType type = builder->Type;
     KonTokenKind tokenKind = builder->Wrapper.TokenKind;
-    Kon* result = KON_NULL;
+    KN result = KON_NULL;
     if (type == KON_BUILDER_QUOTE) {
-        result = KON_AllocTagged(kstate, sizeof(KonQuote), KON_QUOTE);
-        result->Value.Quote.Inner = inner;
+        KonQuote* tmp = KON_ALLOC_TYPE_TAG(kstate, KonQuote, KON_T_QUOTE);
+        tmp->Inner = inner;
         switch (tokenKind) {
             case KON_TOKEN_QUOTE_IDENTIFER: {
-                result->Value.Quote.Type = KON_QUOTE_IDENTIFER;
+                tmp->Type = KON_QUOTE_IDENTIFER;
                 break;
             }
             case KON_TOKEN_QUOTE_SYMBOL: {
-                result->Value.Quote.Type = KON_QUOTE_SYMBOL;
+                tmp->Type = KON_QUOTE_SYMBOL;
                 break;
             }
             case KON_TOKEN_QUOTE_VECTOR: {
-                result->Value.Quote.Type = KON_QUOTE_VECTOR;
+                tmp->Type = KON_QUOTE_VECTOR;
                 break;
             }
             case KON_TOKEN_QUOTE_LIST: {
-                result->Value.Quote.Type = KON_QUOTE_LIST;
+                tmp->Type = KON_QUOTE_LIST;
                 break;
             }
             case KON_TOKEN_QUOTE_TABLE: {
-                result->Value.Quote.Type = KON_QUOTE_TABLE;
+                tmp->Type = KON_QUOTE_TABLE;
                 break;
             }
             case KON_TOKEN_QUOTE_CELL: {
-                result->Value.Quote.Type = KON_QUOTE_CELL;
+                tmp->Type = KON_QUOTE_CELL;
                 break;
             }
         }
+        result = tmp;
     }
     else if (type == KON_BUILDER_QUASIQUOTE) {
-        result = KON_AllocTagged(kstate, sizeof(KonQuasiquote), KON_QUASIQUOTE);
-        result->Value.Quasiquote.Inner = inner;
+        KonQuasiquote* tmp = KON_ALLOC_TYPE_TAG(kstate, KonQuasiquote, KON_T_QUASIQUOTE);
+        tmp->Inner = inner;
         switch (tokenKind) {
             case KON_TOKEN_QUASI_VECTOR: {
-                result->Value.Quasiquote.Type = KON_QUASI_VECTOR;
+                tmp->Type = KON_QUASI_VECTOR;
                 break;
             }
             case KON_TOKEN_QUASI_LIST: {
-                result->Value.Quasiquote.Type = KON_QUASI_LIST;
+                tmp->Type = KON_QUASI_LIST;
                 break;
             }
             case KON_TOKEN_QUASI_TABLE: {
-                result->Value.Quasiquote.Type = KON_QUASI_TABLE;
+                tmp->Type = KON_QUASI_TABLE;
                 break;
             }
             case KON_TOKEN_QUASI_CELL: {
-                result->Value.Quasiquote.Type = KON_QUASI_CELL;
+                tmp->Type = KON_QUASI_CELL;
                 break;
             }
         }
+        result = tmp;
     }
     else if (type == KON_BUILDER_EXPAND) {
-        result = KON_AllocTagged(kstate, sizeof(KonExpand), KON_EXPAND);
-        result->Value.Expand.Inner = inner;
+        KonExpand* tmp = KON_ALLOC_TYPE_TAG(kstate, KonExpand, KON_T_EXPAND);
+        tmp->Inner = inner;
         switch (tokenKind) {
             case KON_TOKEN_EXPAND_REPLACE: {
-                result->Value.Expand.Type = KON_EXPAND_REPLACE;
+                tmp->Type = KON_EXPAND_REPLACE;
                 break;
             }
             case KON_TOKEN_EXPAND_VECTOR: {
-                result->Value.Expand.Type = KON_EXPAND_VECTOR;
+                tmp->Type = KON_EXPAND_VECTOR;
                 break;
             }
             case KON_TOKEN_EXPAND_TABLE: {
-                result->Value.Expand.Type = KON_EXPAND_LIST;
+                tmp->Type = KON_EXPAND_LIST;
                 break;
             }
             case KON_TOKEN_EXPAND_LIST: {
-                result->Value.Expand.Type = KON_EXPAND_TABLE;
+                tmp->Type = KON_EXPAND_TABLE;
                 break;
             }
         }
+        result = tmp;
     }
     else if (type == KON_BUILDER_UNQUOTE) {
-        result = KON_AllocTagged(kstate, sizeof(KonUnquote), KON_UNQUOTE);
-        result->Value.Unquote.Inner = inner;
+        KonUnquote* tmp = KON_ALLOC_TYPE_TAG(kstate, KonUnquote, KON_T_UNQUOTE);
+        tmp->Inner = inner;
         switch (tokenKind) {
             case KON_TOKEN_UNQUOTE_REPLACE: {
-                result->Value.Unquote.Type = KON_UNQUOTE_REPLACE;
+                tmp->Type = KON_UNQUOTE_REPLACE;
                 break;
             }
             case KON_TOKEN_UNQUOTE_VECTOR: {
-                result->Value.Unquote.Type = KON_UNQUOTE_VECTOR;
+                tmp->Type = KON_UNQUOTE_VECTOR;
                 break;
             }
             case KON_TOKEN_UNQUOTE_TABLE: {
-                result->Value.Unquote.Type = KON_UNQUOTE_LIST;
+                tmp->Type = KON_UNQUOTE_LIST;
                 break;
             }
             case KON_TOKEN_UNQUOTE_LIST: {
-                result->Value.Unquote.Type = KON_UNQUOTE_TABLE;
+                tmp->Type = KON_UNQUOTE_TABLE;
                 break;
             }
         }
+        result = tmp;
     }
     free(builder);
     return result;

@@ -6,7 +6,7 @@
 
 int main(int argc, char const* argv[])
 {
-    Kon kstate;
+    KonState kstate;
     KON_Init(&kstate);
     // if (!KON_Init(&kstate)) {
     //     fprintf(stderr, "Could not initialize!\n");
@@ -31,11 +31,11 @@ int main(int argc, char const* argv[])
         bool openRes = KSON_ReaderOpenStream(reader, istream, false);
         if (openRes) {
             printf("open stream success\n");
-            Kon* root = KSON_Parse(reader);
+            KN root = KSON_Parse(reader);
             // TODO 打印为字符串
             printf("parse success\n");
-            Kon* formated = KON_ToFormatString(&kstate, root, true, 0, "  ");
-            //  Kon* formated = KON_ToFormatString(&kstate, root, false, 0, " ");
+            KN formated = KON_ToFormatString(&kstate, root, true, 0, "  ");
+            //  KN formated = KON_ToFormatString(&kstate, root, false, 0, " ");
             printf("%s\n", KON_StringToCstr(formated));
         }
         else {

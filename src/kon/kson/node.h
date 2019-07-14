@@ -28,8 +28,10 @@ typedef int kon_int32_t;
 ////
 
 
-
 #define TB_VECTOR_GROW_SIZE (256)
+
+
+
 
 
 ////
@@ -44,6 +46,7 @@ typedef int kon_int32_t;
 //            00011110:  char
 //            00101110:  reader label (optional)
 //            00111110:  unique immediate (NULL, TRUE, FALSE)
+
 
 #define KON_FIXNUM_BITS 1
 #define KON_POINTER_BITS 2
@@ -70,7 +73,7 @@ typedef int kon_int32_t;
 // 2: 1000111110
 // 比如3： 1100111110
 // 8: 100000111110
-#define KON_MAKE_IMMEDIATE(n)  ((Kon*) ((n<<KON_EXTENDED_BITS) \
+#define KON_MAKE_IMMEDIATE(n)  ((KN) ((n<<KON_EXTENDED_BITS) \
                                           + KON_EXTENDED_TAG))
 
 #define KON_UKN  KON_MAKE_IMMEDIATE(0) /* 62 0x3e unknown, undefined */
@@ -80,53 +83,78 @@ typedef int kon_int32_t;
 #define KON_NIL   KON_MAKE_IMMEDIATE(4) /* 1086 0x43e list end, tree end */
 #define KON_EOF    KON_MAKE_IMMEDIATE(5) /* 1342 0x53e */
 
-#define kon_align(n, bits) (((n)+(1<<(bits))-1)&(((kon_uint_t)-1)-((1<<(bits))-1)))
-
-#if KON_64_BIT
-#define kon_word_align(n) kon_align((n), 3)
-#else
-#define kon_word_align(n) kon_align((n), 2)
-#endif
-
-#define kon_sizeof(x) (offsetof(struct KonStruct, Value) + sizeof(((Kon*)0)->Value.x))
-#define kon_offsetof(type, f) (offsetof(struct KonStruct, value.type.f))
-
-#define kon_alloc_type(kstate, type, tag) KON_AllocTagged(kstate, kon_sizeof(type), tag)
-#define kon_alloc_bytecode(kstate, i) KON_AllocTagged(kstate, kon_sizeof(bytecode) + i, KON_BYTECODE)
-
-
 // tagging system end
 ////
 
 ////
 // types start
 typedef enum {
-    KON_CONTEXT,
-    KON_NUMBER,
-    KON_FIXNUM,
-    KON_FLONUM,
-    KON_BIGNUM,
-    KON_CHAR,
-    KON_BOOLEAN,
-    KON_LIST_NODE,
-    KON_SYMBOL,
-    KON_SYNTAX_MARKER,
-    KON_BYTES,
-    KON_STRING,
-    KON_VECTOR,
-    KON_TABLE,
-    KON_CELL,
-    KON_QUOTE,
-    KON_QUASIQUOTE,
-    KON_EXPAND,
-    KON_UNQUOTE,
-    KON_ENV,
-    // KON_CONTINUATION,
-    // KON_TRAMPOLINE,
-    KON_PROCEDURE,
-    KON_CPOINTER,
-    KON_EXCEPTION
+    // determined by tagging system
+    KON_T_FIXNUM = 1,     //   1
+    KON_T_POINTER,        // 000
+    KON_T_IMMDT_SYMBOL,   // 0110
+    KON_T_CHAR,               // 00011110
+    KON_T_UNIQUE_IMMDT,   // 00111110
+    KON_T_BOOLEAN,    // a sub type of unique immediate
+    KON_T_UKN,
+    KON_T_NULL,
+    KON_T_NIL,
+
+    // determined by tagging system and ((KonBase*)x)->Tag
+    KON_T_NUMBER,
+
+    // determined by ((KonBase*)x)->Tag
+    KON_T_STATE,
+    KON_T_FLONUM,
+    KON_T_BIGNUM,
+    KON_T_LIST_NODE,
+    KON_T_SYMBOL,
+    KON_T_SYNTAX_MARKER,
+    KON_T_BYTES,
+    KON_T_STRING,
+    KON_T_VECTOR,
+    KON_T_TABLE,
+    KON_T_CELL,
+    KON_T_QUOTE,
+    KON_T_QUASIQUOTE,
+    KON_T_EXPAND,
+    KON_T_UNQUOTE,
+    KON_T_ENV,
+    // KON_T_CONTINUATION,
+    // KON_T_TRAMPOLINE,
+    KON_T_PROCEDURE,
+    KON_T_CPOINTER,
+    KON_T_EXCEPTION
 } KonType;
+
+
+
+
+
+typedef unsigned long _Kon;
+typedef volatile _Kon KN;
+typedef struct KonState KonState;
+typedef struct KonSymbol KonSymbol;
+typedef struct KonSyntaxMarker KonSyntaxMarker;
+typedef struct KonString KonString;
+typedef struct KonTable KonTable;
+typedef struct KonVector KonVector;
+typedef struct KonListNode KonListNode;
+typedef struct KonCell KonCell;
+typedef struct KonQuote KonQuote;
+typedef struct KonQuasiquote KonQuasiquote;
+typedef struct KonExpand KonExpand;
+typedef struct KonUnquote KonUnquote;
+typedef struct KonEnv KonEnv;
+typedef struct KonProcedure KonProcedure;
+
+
+
+typedef struct KonBase {
+    KonType Tag;
+    char IsMarked;
+} KonBase;
+
 
 typedef enum {
     KON_SYM_IDENTIFER,  // abc
@@ -134,6 +162,13 @@ typedef enum {
     KON_SYM_VAR,    // $abc
     KON_SYM_FORM_WORD // !ass
 } KonSymbolType;
+
+struct KonSymbol {
+    KonBase Base;
+    tb_string_t Data;
+    KonSymbolType Type;
+};
+
 
 typedef enum {
     KON_QUOTE_IDENTIFER,    // @abc
@@ -144,12 +179,28 @@ typedef enum {
     KON_QUOTE_CELL          // @<ojb (:a 1 :b 2)>
 } KonQuoteType;
 
+struct KonQuote {
+    KonBase Base;
+    KN Inner;
+    KonQuoteType Type;
+};
+
+
 typedef enum {
     KON_QUASI_VECTOR,        // $[1 2 3]
     KON_QUASI_LIST,         // ${1 2 3}
     KON_QUASI_TABLE,        // $(:a 1 :b 2)
     KON_QUASI_CELL          // $<ojb (:a 1 :b 2)>
 } KonQuasiquoteType;
+
+struct KonQuasiquote {
+    KonBase Base;
+    KN Inner;
+    KonQuasiquoteType Type;
+};
+
+
+
 
 typedef enum {
     KON_EXPAND_REPLACE,          // $.abc
@@ -158,6 +209,12 @@ typedef enum {
     KON_EXPAND_TABLE        // $().(:a 1 :b 2)
 } KonExpandType;
 
+struct KonExpand {
+    KonBase Base;
+    KN Inner;
+    KonExpandType Type;
+};
+
 typedef enum {
     KON_UNQUOTE_REPLACE,          // $e.abc
     KON_UNQUOTE_VECTOR,        // $[]e.{[1 2 3]}
@@ -165,12 +222,12 @@ typedef enum {
     KON_UNQUOTE_TABLE        // $()e.{$(:a $var :b 2)}
 } KonUnquoteType;
 
-typedef struct KonStruct Kon;
+struct KonUnquote {
+    KonBase Base;
+    KN Inner;
+    KonUnquoteType Type;
+};
 
-typedef struct KonSymbol {
-    tb_string_t Data;
-    KonSymbolType Type;
-} KonSymbol;
 
 typedef enum {
     KON_SYNTAX_MARKER_APPLY,        // %
@@ -180,48 +237,32 @@ typedef enum {
 } KonSyntaxMarkerType;
 
 // eg: % | ;
-typedef struct KonSyntaxMarker {
+struct KonSyntaxMarker {
+    KonBase Base;
     KonSyntaxMarkerType Type;
-} KonSyntaxMarker;
+};
 
-typedef struct KonListNode {
-    Kon* Prev;
-    Kon* Body;
-    Kon* Next;
-} KonListNode;
+struct KonListNode {
+    KonBase Base;
+    KonListNode* Prev;
+    KN Body;
+    KonListNode* Next;
+};
 
-typedef struct KonCell {
-    Kon* Name;
-    Kon* Vector;
-    Kon* Table;
-    Kon* List;
-    Kon* Next;
-} KonCell;
+struct KonCell {
+    KonBase Base;
+    KN Name;
+    KonVector* Vector;
+    KonTable* Table;
+    KonListNode* List;
+    KonCell* Next;
+};
 
-typedef struct KonQuote {
-    Kon* Inner;
-    KonQuoteType Type;
-} KonQuote;
-
-typedef struct KonQuasiquote {
-    Kon* Inner;
-    KonQuasiquoteType Type;
-} KonQuasiquote;
-
-typedef struct KonExpand {
-    Kon* Inner;
-    KonExpandType Type;
-} KonExpand;
-
-typedef struct Unquote {
-    Kon* Inner;
-    KonUnquoteType Type;
-} KonUnquote;
-
-typedef struct {
-    Kon* Parent;
+struct KonEnv {
+    KonBase Base;
+    KN Parent;
     KonHashMap* Bindings;
-} KonEnv;
+};
 
 typedef enum {
     // KON_PRIMARY_FUNC,   // high order native func
@@ -239,10 +280,11 @@ typedef enum {
     KON_COMPOSITE_OBJ_METHOD,
 } KonProcedureType;
 
-typedef Kon* (*KonNativeFuncRef)(Kon* kstate, Kon* argList);
-typedef Kon* (*KonNativeObjMethodRef)(Kon* kstate, void* objRef, Kon* argList);
+typedef KN (*KonNativeFuncRef)(KonState* kstate, KonListNode* argList);
+typedef KN (*KonNativeObjMethodRef)(KonState* kstate, void* objRef, KonListNode* argList);
 
-typedef struct {
+struct KonProcedure {
+    KonBase Base;
     KonProcedureType Type;
     union {
         KonNativeFuncRef NativeFuncRef;
@@ -251,33 +293,57 @@ typedef struct {
 
         struct {
             tb_string_t Name;
-            Kon* argList;
-            Kon* body;
+            KonListNode* ArgList;
+            KonListNode* Body;
         } Function;
 
         struct {
             tb_string_t Name;
-            Kon* argList;
-            Kon* body;
+            KonListNode* ArgList;
+            KonListNode* Body;
         } Lambda;
 
         struct {
             tb_string_t Name;
-            Kon* argList;
-            Kon* body;
+            KonListNode* ArgList;
+            KonListNode* Body;
         } Fragment;
     };
-} KonProcedure;
+};
 
-typedef struct {
-    Kon* RootEnv;
-} KonContext;
+struct KonState {
+    KonBase Base;
+    KN RootEnv;
+};
 
+typedef struct KonFlonum {
+    KonBase Base;
+    double Flonum;
+} KonFlonum;
+
+// TODO replace to kon string impl
+struct KonString {
+    KonBase Base;
+    tb_string_t String;
+};
+
+// TODO replace to kon vector impl
+struct KonVector {
+    KonBase Base;
+    tb_vector_ref_t Vector;
+};
+
+struct KonTable {
+    KonBase Base;
+    KonHashMap* Table;
+};
+
+/*
 struct KonStruct {
     KonType Tag;
     char IsMarked;
     union {
-        // KonContext Context;
+        // KonState Context;
 
         // basic types
         double Flonum;
@@ -317,12 +383,42 @@ struct KonStruct {
         
     } Value;
 };
+*/
 
 // types end
 ////
 
+KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
+#define KON_ALLOC_TYPE_TAG(kstate,t,tag)  ((t *)KON_AllocTagged(kstate, sizeof(t), tag))
+#define KON_FREE(kstate, ptr) KON_GC_FREE(ptr)
+
+
+// inline KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
+// {
+//   KN res = (KN) KON_GC_MALLOC(size);
+//   if (res && ! kon_is_exception(res)) {
+//     ((KonBase*)res)->Tag = tag;
+//   }
+//   return res;
+// }
+
+
+// TODO change to self managed gc,malloc,free
+#define KON_GC_MALLOC malloc
+#define KON_GC_FREE free
+
 ////
 // predicates
+
+
+
+
+#define KonDef(t)          struct Kon##t *
+#define CAST_Kon(t, v)          ((struct Kon##t *)v)
+#define KON_TYPE(x)      kon_type((KN)(x))
+#define KON_PTR_TYPE(x)     (((KonBase*)(x))->Tag)
+
+
 
 #define kon_is_true(x)    ((x) != KON_FALSE)
 #define kon_is_not(x)      ((x) == KON_FALSE)
@@ -330,47 +426,57 @@ struct KonStruct {
 #define kon_is_null(x)    ((x) == KON_NULL)
 #define kon_is_nil(x)    ((x) == KON_NIL)
 #define kon_is_pointer(x) (((kon_uint_t)(size_t)(x) & KON_POINTER_MASK) == KON_POINTER_TAG)
-#define kon_is_fixnum(x)  (((kon_uint_t)(x) & KON_FIXNUM_MASK) == KON_FIXNUM_TAG)
+#define KON_IS_FIXNUM(x)  (((kon_uint_t)(x) & KON_FIXNUM_MASK) == KON_FIXNUM_TAG)
 
 #define kon_is_immediate_symbol(x) (((kon_uint_t)(x) & KON_IMMEDIATE_MASK) == KON_ISYMBOL_TAG)
 #define kon_is_char(x)    (((kon_uint_t)(x) & KON_EXTENDED_MASK) == KON_CHAR_TAG)
 #define kon_is_reader_label(x) (((kon_uint_t)(x) & KON_EXTENDED_MASK) == KON_READER_LABEL_TAG)
 #define kon_is_boolean(x) (((x) == KON_TRUE) || ((x) == KON_FALSE))
 
-#define kon_pointer_tag(x)      ((x)->Tag)
+#define KON_GET_PTR_TAG(x)      (((KonBase*)x)->Tag)
 
-#define kon_check_tag(x,t)  (kon_is_pointer(x) && (kon_pointer_tag(x) == (t)))
+#define kon_check_tag(x,t)  (kon_is_pointer(x) && (KON_PTR_TYPE(x) == (t)))
 
-#define kon_slot_ref(x,i)   (((Kon*)&((x)->Value))[i])
-#define kon_slot_set(x,i,v) (((Kon*)&((x)->Value))[i] = (v))
+// #define kon_slot_ref(x,i)   (((KN)&((x)->Value))[i])
+// #define kon_slot_set(x,i,v) (((KN)&((x)->Value))[i] = (v))
 
-#define kon_is_flonum(x)      (kon_check_tag(x, KON_FLONUM))
-#define kon_flonum_value(f) ((f)->Value.Flonum)
-#define kon_flonum_value_set(f, x) ((f)->Value.Flonum = x)
+#define KON_IS_FLONUM(x)      (kon_check_tag(x, KON_T_FLONUM))
+#define kon_flonum_value(f) (((KonFlonum*)f)->Flonum)
+#define kon_flonum_value_set(f, x) (((KonFlonum*)f)->Flonum = x)
 
-#define kon_is_bytes(x)      (kon_check_tag(x, KON_BYTES))
-#define kon_is_string(x)     (kon_check_tag(x, KON_STRING))
-#define kon_is_symbol(x)    (kon_check_tag(x, KON_SYMBOL))
-#define kon_is_variable(x)    (kon_check_tag(x, KON_SYMBOL) && x->Value.Symbol.Type.KON_SYM_VAR)
-#define kon_is_syntax_marker(x)    (kon_check_tag(x, KON_SYNTAX_MARKER))
+#define kon_is_bytes(x)      (kon_check_tag(x, KON_T_BYTES))
+#define kon_is_string(x)     (kon_check_tag(x, KON_T_STRING))
+#define kon_is_symbol(x)    (kon_check_tag(x, KON_T_SYMBOL))
+#define kon_is_variable(x)    (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_VAR)
+#define kon_is_syntax_marker(x)    (kon_check_tag(x, KON_T_SYNTAX_MARKER))
 
-#define kon_is_list_node(x)       (kon_check_tag(x, KON_LIST_NODE))
-#define kon_is_vector(x)     (kon_check_tag(x, KON_VECTOR))
-#define kon_is_table(x)     (kon_check_tag(x, KON_TABLE))
-#define kon_is_cell(x)     (kon_check_tag(x, KON_CELL))
+#define kon_is_list_node(x)       (kon_check_tag(x, KON_T_LIST_NODE))
+#define kon_is_vector(x)     (kon_check_tag(x, KON_T_VECTOR))
+#define kon_is_table(x)     (kon_check_tag(x, KON_T_TABLE))
+#define kon_is_cell(x)     (kon_check_tag(x, KON_T_CELL))
 
-#define kon_is_quote(x)    (kon_check_tag(x, KON_QUOTE))
-#define kon_is_quasiquote(x)    (kon_check_tag(x, KON_QUASIQUOTE))
-#define kon_is_expand(x)    (kon_check_tag(x, KON_EXPAND))
-#define kon_is_unquote(x)    (kon_check_tag(x, KON_UNQUOTE))
+#define kon_is_quote(x)    (kon_check_tag(x, KON_T_QUOTE))
+#define kon_is_quasiquote(x)    (kon_check_tag(x, KON_T_QUASIQUOTE))
+#define kon_is_expand(x)    (kon_check_tag(x, KON_T_EXPAND))
+#define kon_is_unquote(x)    (kon_check_tag(x, KON_T_UNQUOTE))
 
 
-#define kon_is_env(x)        (kon_check_tag(x, KON_ENV))
-#define kon_is_continuation(x)        (kon_check_tag(x, KON_CONTINUATION))
-#define kon_is_trampoline(x)        (kon_check_tag(x, KON_TRAMPOLINE))
-#define kon_is_cpointer(x)   (kon_check_tag(x, KON_CPOINTER))
-#define kon_is_exception(x)  (kon_check_tag(x, KON_EXCEPTION))
+#define kon_is_env(x)        (kon_check_tag(x, KON_T_ENV))
+#define kon_is_continuation(x)        (kon_check_tag(x, KON_T_CONTINUATION))
+#define kon_is_trampoline(x)        (kon_check_tag(x, KON_T_TRAMPOLINE))
+#define kon_is_cpointer(x)   (kon_check_tag(x, KON_T_CPOINTER))
+#define kon_is_exception(x)  (kon_check_tag(x, KON_T_EXCEPTION))
 
+
+/// either immediate (NUM,BOOL,NIL) or a fwd
+static inline KonType kon_type(KN obj) {
+  if (KON_IS_FIXNUM(obj) || KON_IS_FLONUM(obj))  return KON_T_NUMBER;
+  if (obj == KON_TRUE || obj == KON_FALSE) return KON_T_BOOLEAN;
+  if (obj == KON_UKN)  return KON_T_UKN;
+  if (obj == KON_NULL)  return KON_T_NULL;
+  if (obj == KON_NIL)  return KON_T_NIL;
+  return (((KonBase*)(obj))->Tag);
+}
 
 // predicates end
 ////
@@ -392,19 +498,29 @@ struct KonStruct {
 #define KON_TEN     kon_make_fixnum(10)
 
 
-#define kon_make_fixnum(n)    ((Kon*) ((((kon_int_t)(n))*(kon_int_t)((kon_int_t)1<<KON_FIXNUM_BITS)) | KON_FIXNUM_TAG))
+#define kon_make_fixnum(n)    ((KN) ((((kon_int_t)(n))*(kon_int_t)((kon_int_t)1<<KON_FIXNUM_BITS)) | KON_FIXNUM_TAG))
 #define kon_unbox_fixnum(n)   (((kon_int_t)((kon_uint_t)(n) & ~KON_FIXNUM_TAG))/(kon_int_t)((kon_int_t)1<<KON_FIXNUM_BITS))
 
+static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
+  KonFlonum* result = (KonFlonum*)KON_AllocTagged(kstate, sizeof(KonFlonum), KON_T_FLONUM);
+  result->Flonum = num;
+  return (KN)(result);
+}
+#define KON_UNBOX_FLONUM(n) ((KonFlonum*)n)->Flonum
 
-#define kon_field(x, type, id, field) ((x)->Value.type.field)
+#define KON_FIELD(x, type, field) (((type *)x)->field)
 
-#define kon_make_character(n)  ((Kon*) ((((kon_int_t)(n))<<KON_EXTENDED_BITS) + KON_CHAR_TAG))
+#define kon_make_character(n)  ((KN) ((((kon_int_t)(n))<<KON_EXTENDED_BITS) + KON_CHAR_TAG))
 #define kon_unbox_character(n) ((int) (((kon_int_t)(n))>>KON_EXTENDED_BITS))
+
+#define KON_UNBOX_STRING(str) (((KonString*)str)->String)
+
+#define KON_UNBOX_SYMBOL(s) (((KonSymbol*)s)->Data)
 
 // list
 #define kon_cons(kstate, a, b) KON_Cons(kstate, NULL, 2, a, b)
-#define kon_car(x)         (kon_field(x, ListNode, KON_LIST_NODE, Body))
-#define kon_cdr(x)         (kon_field(x, ListNode, KON_LIST_NODE, Next))
+#define kon_car(x)         (KON_FIELD(x, KonListNode, Body))
+#define kon_cdr(x)         (KON_FIELD(x, KonListNode, Next))
 
 #define kon_caar(x)      (kon_car(kon_car(x)))
 #define kon_cadr(x)      (kon_car(kon_cdr(x)))
@@ -423,74 +539,66 @@ struct KonStruct {
 
 #define kon_list1(kstate,a)        kon_cons((kstate), (a), KON_NIL)
 
-// #define kon_cont_type(x)         (kon_field(x, Continuation, KON_CONTINUATION, Type))
-// #define kon_cont_value(x, type_value)         (kon_field(x, Continuation, KON_CONTINUATION, Type).type_value)
-// #define kon_trampo_type(x)         (kon_field(x, Trampoline, KON_TRAMPOLINE, Type))
-// #define kon_trampo_value(x, type_value)         (kon_field(x, Trampoline, KON_TRAMPOLINE, Type).type_value)
 
 // data structure util end
 ////
 
-#define kon_alloc(kstate, size) kon_malloc(size)
-// TODO change to self managed gc,malloc,free
-#define kon_malloc malloc
-#define kon_free free
 
 
 // data structure apis start
 
-KON_API Kon* KON_Stringify(Kon* kstate, Kon* source);
-Kon* KON_ToFormatString(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
+KON_API KN KON_Stringify(KonState* kstate, KN source);
+KN KON_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
 // number
-KON_API Kon* KON_FixnumStringify(Kon* kstate, Kon* source);
+KON_API KN KON_FixnumStringify(KonState* kstate, KN source);
 
-KON_API Kon* KON_MakeFlonum(Kon* kstate, double f);
-KON_API Kon* KON_FlonumStringify(Kon* kstate, Kon* source);
+KON_API KN KON_MakeFlonum(KonState* kstate, double f);
+KON_API KN KON_FlonumStringify(KonState* kstate, KN source);
 
 // char
-KON_API Kon* KON_CharStringify(Kon* kstate, Kon* source);
+KON_API KN KON_CharStringify(KonState* kstate, KN source);
 
 // string
-KON_API Kon* KON_MakeString(Kon* kstate, const char* str);
-KON_API Kon* KON_MakeEmptyString(Kon* kstate);
-KON_API const char* KON_StringToCstr(Kon* str);
-KON_API Kon* KON_StringStringify(Kon* kstate, Kon* source);
+KON_API KN KON_MakeString(KonState* kstate, const char* str);
+KON_API KN KON_MakeEmptyString(KonState* kstate);
+KON_API const char* KON_StringToCstr(KN str);
+KON_API KN KON_StringStringify(KonState* kstate, KN source);
 
-KON_API Kon* KON_VectorStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
+KON_API KN KON_VectorStringify(KonState* kstate, KonVector* source, bool newLine, int depth, char* padding);
 
 // symbol
-KON_API Kon* KON_SymbolStringify(Kon* kstate, Kon* source);
-KON_API const char* KON_SymbolToCstr(Kon* sym);
+KON_API KN KON_SymbolStringify(KonState* kstate, KN source);
+KON_API const char* KON_SymbolToCstr(KN sym);
 
 // list
-KON_API Kon* KON_MakeList(Kon* kstate, ...);
-KON_API Kon* KON_Cons(Kon* kstate, Kon* self, kon_int_t n, Kon* head, Kon* tail);
-KON_API Kon* KON_List2(Kon* kstate, Kon* a, Kon* b);
-KON_API Kon* KON_List3(Kon* kstate, Kon* a, Kon* b, Kon* c);
-KON_API bool KON_IsList(Kon* source);
-Kon* KON_ListStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
-Kon* Kon_ListRevert(Kon* kstate, Kon* source);
+KON_API KonListNode* KON_MakeList(KonState* kstate, ...);
+KON_API KonListNode* KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KonListNode* tail);
+KON_API KonListNode* KON_List2(KonState* kstate, KN a, KN b);
+KON_API KonListNode* KON_List3(KonState* kstate, KN a, KN b, KN c);
+KON_API bool KON_IsList(KN source);
+KN KON_ListStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KonListNode* Kon_ListRevert(KonState* kstate, KonListNode* source);
 
 // table
-Kon* KON_TableStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
+KN KON_TableStringify(KonState* kstate, KonTable* source, bool newLine, int depth, char* padding);
 
 // cell
-Kon* KON_CellStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
+KN KON_CellStringify(KonState* kstate, KonCell* source, bool newLine, int depth, char* padding);
 
-Kon* KON_SyntaxMarkerStringify(Kon* kstate, Kon* source);
+KN KON_SyntaxMarkerStringify(KonState* kstate, KonSyntaxMarker* source);
 
 // @
-Kon* KON_QuoteStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
+KN KON_QuoteStringify(KonState* kstate, KonQuote* source, bool newLine, int depth, char* padding);
 // $
-Kon* KON_QuasiquoteStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
+KN KON_QuasiquoteStringify(KonState* kstate, KonQuasiquote* source, bool newLine, int depth, char* padding);
 // eg $[].
-Kon* KON_ExpandStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
+KN KON_ExpandStringify(KonState* kstate, KonExpand* source, bool newLine, int depth, char* padding);
 // eg $[]e.
-Kon* KON_UnquoteStringify(Kon* kstate, Kon* source, bool newLine, int depth, char* padding);
+KN KON_UnquoteStringify(KonState* kstate, KonUnquote* source, bool newLine, int depth, char* padding);
 
 
-Kon* MakeNativeProcedure(Kon* kstate, KonProcedureType type, KonNativeFuncRef funcRef);
+KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef);
 
 // data structure apis end
 
@@ -499,7 +607,6 @@ KON_API tb_void_t kon_vector_item_ptr_free(tb_element_ref_t element, tb_pointer_
 
 // common utils start
 KON_API const char* KON_HumanFormatTime();
-KON_API Kon* KON_AllocTagged(Kon* kstate, size_t size, kon_uint_t tag);
 
 
 // common utils end

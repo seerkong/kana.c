@@ -22,24 +22,24 @@ typedef enum {
 typedef struct {
     KonBuilderType Type;
     union {
-        tb_vector_ref_t Vector; // vector of Kon*
-        tb_vector_ref_t List; // vector of Kon*
+        tb_vector_ref_t Vector; // vector of KN
+        tb_vector_ref_t List; // vector of KN
 
         KonHashMap* Table;
         struct {
             tb_string_t Key;
-            Kon* Value;
+            KN Value;
         } TablePair;
 
         struct {
-            Kon* Name;
-            Kon* Vector; // vector of Kon*
-            Kon* Table;  // vector of TablePair*
-            Kon* List; // vector of Kon*
+            KN Name;
+            KN Vector; // vector of KN
+            KN Table;  // vector of TablePair*
+            KN List; // vector of KN
         } Cell;
 
         struct {
-            Kon* Inner;
+            KN Inner;
             KonTokenKind TokenKind;
         } Wrapper;
     };
@@ -59,33 +59,33 @@ typedef struct _BuilderStack {
 // make xxx by builder
 
 KonBuilder* CreateVectorBuilder();
-void VectorBuilderAddItem(KonBuilder* builder, Kon* item);
-Kon* MakeVectorByBuilder(Kon* kstate, KonBuilder* builder);
+void VectorBuilderAddItem(KonBuilder* builder, KN item);
+KN MakeVectorByBuilder(KonState* kstate, KonBuilder* builder);
 
 KonBuilder* CreateListBuilder();
-void ListBuilderAddItem(KonBuilder* builder, Kon* item);
-Kon* MakeListByBuilder(Kon* kstate, KonBuilder* builder);
+void ListBuilderAddItem(KonBuilder* builder, KN item);
+KN MakeListByBuilder(KonState* kstate, KonBuilder* builder);
 
 KonBuilder* CreateTableBuilder();
 // add pair and destroy pair
 void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair);
-Kon* MakeTableByBuilder(Kon* kstate, KonBuilder* builder);
+KN MakeTableByBuilder(KonState* kstate, KonBuilder* builder);
 
 KonBuilder* CreateTablePairBuilder();
 void TablePairSetKey(KonBuilder* builder, char* key);
-void TablePairSetValue(KonBuilder* builder, Kon* value);
+void TablePairSetValue(KonBuilder* builder, KN value);
 void TablePairDestroy(KonBuilder* builder);
 
 KonBuilder* CreateCellBuilder();
-void CellBuilderSetName(KonBuilder* builder, Kon* name);
-void CellBuilderSetVector(KonBuilder* builder, Kon* vector);
-void CellBuilderSetList(KonBuilder* builder, Kon* list);
-void CellBuilderSetTable(KonBuilder* builder, Kon* table);
-Kon* MakeCellByBuilder(Kon* kstate, KonBuilder* builder);
+void CellBuilderSetName(KonBuilder* builder, KN name);
+void CellBuilderSetVector(KonBuilder* builder, KN vector);
+void CellBuilderSetList(KonBuilder* builder, KN list);
+void CellBuilderSetTable(KonBuilder* builder, KN table);
+KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder);
 
 KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind);
-void WrapperSetInner(Kon* kstate, KonBuilder* builder, Kon* inner);
-Kon* MakeWrapperByBuilder(Kon* kstate, KonBuilder* builder);
+void WrapperSetInner(KonState* kstate, KonBuilder* builder, KN inner);
+KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder);
 
 BuilderStack* BuilderStackInit();
 void BuilderStackDestroy(BuilderStack* stack);

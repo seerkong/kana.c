@@ -1,6 +1,6 @@
 #include "primary.h"
 
-bool KON_IsPrimaryFunc(Kon* kstate, tb_string_ref_t funcName)
+bool KON_IsPrimaryFunc(KonState* kstate, tb_string_ref_t funcName)
 {
     if (
         // math
@@ -96,10 +96,10 @@ bool KON_IsPrimaryFunc(Kon* kstate, tb_string_ref_t funcName)
     }
 }
 
-Kon* KON_PrimaryPlus(Kon* kstate, Kon* args)
+KN KON_PrimaryPlus(KonState* kstate, KN args)
 {
-    Kon* iter = args;
-    Kon* first = kon_car(iter);
+    KN iter = args;
+    KN first = kon_car(iter);
     if (first == KON_NIL) {
         return kon_make_fixnum(0);
     }
@@ -108,14 +108,14 @@ Kon* KON_PrimaryPlus(Kon* kstate, Kon* args)
     double resFlonum = 0.0;
     bool isFixNum = false;
     // the result type is determined by the first arg
-    if (kon_is_fixnum(first)) {
+    if (KON_IS_FIXNUM(first)) {
         isFixNum = true;
     }
     // Unbox
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
 
-        if (kon_is_fixnum(item)) {
+        if (KON_IS_FIXNUM(item)) {
             int num = kon_unbox_fixnum(item);
             if (isFixNum) {
                 resFixnum += num;
@@ -124,8 +124,8 @@ Kon* KON_PrimaryPlus(Kon* kstate, Kon* args)
                 resFlonum += num;
             }
         }
-        else if (kon_is_flonum(item)) {
-            double num = item->Value.Flonum;
+        else if (KON_IS_FLONUM(item)) {
+            double num = KON_UNBOX_FLONUM(item);
             if (isFixNum) {
                 resFixnum += num;
             }
@@ -143,16 +143,16 @@ Kon* KON_PrimaryPlus(Kon* kstate, Kon* args)
         return kon_make_fixnum(resFixnum);
     }
     else {
-        Kon* result = KON_AllocTagged(kstate, sizeof(double), KON_FLONUM);
+        KN result = KON_MAKE_FLONUM(kstate, resFlonum);
         return result;
     }
 }
 
 
-Kon* KON_PrimaryMinus(Kon* kstate, Kon* args)
+KN KON_PrimaryMinus(KonState* kstate, KN args)
 {
-    Kon* iter = args;
-    Kon* first = kon_car(iter);
+    KN iter = args;
+    KN first = kon_car(iter);
     iter = kon_cdr(iter);
     if (first == KON_NIL) {
         return kon_make_fixnum(0);
@@ -166,18 +166,18 @@ Kon* KON_PrimaryMinus(Kon* kstate, Kon* args)
     double resFlonum = 0.0;
     bool isFixNum = false;
     // the result type is determined by the first arg
-    if (kon_is_fixnum(first)) {
+    if (KON_IS_FIXNUM(first)) {
         isFixNum = true;
         resFixnum = kon_unbox_fixnum(first);
     }
     else {
-        resFlonum = first->Value.Flonum;
+        resFlonum =  KON_UNBOX_FLONUM(first);
     }
     // Unbox
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
 
-        if (kon_is_fixnum(item)) {
+        if (KON_IS_FIXNUM(item)) {
             int num = kon_unbox_fixnum(item);
             if (isFixNum) {
                 resFixnum -= num;
@@ -186,8 +186,8 @@ Kon* KON_PrimaryMinus(Kon* kstate, Kon* args)
                 resFlonum -= num;
             }
         }
-        else if (kon_is_flonum(item)) {
-            double num = item->Value.Flonum;
+        else if (KON_IS_FLONUM(item)) {
+            double num = KON_UNBOX_FLONUM(item);
             if (isFixNum) {
                 resFixnum -= num;
             }
@@ -205,16 +205,16 @@ Kon* KON_PrimaryMinus(Kon* kstate, Kon* args)
         return kon_make_fixnum(resFixnum);
     }
     else {
-        Kon* result = KON_AllocTagged(kstate, sizeof(double), KON_FLONUM);
+        KN result = KON_MAKE_FLONUM(kstate, resFlonum);
         return result;
     }
 }
 
 
-Kon* KON_PrimaryMultiply(Kon* kstate, Kon* args)
+KN KON_PrimaryMultiply(KonState* kstate, KN args)
 {
-    Kon* iter = args;
-    Kon* first = kon_car(iter);
+    KN iter = args;
+    KN first = kon_car(iter);
     if (first == KON_NIL) {
         return kon_make_fixnum(0);
     }
@@ -223,14 +223,14 @@ Kon* KON_PrimaryMultiply(Kon* kstate, Kon* args)
     double resFlonum = 1.0;
     bool isFixNum = false;
     // the result type is determined by the first arg
-    if (kon_is_fixnum(first)) {
+    if (KON_IS_FIXNUM(first)) {
         isFixNum = true;
     }
     // Unbox
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
 
-        if (kon_is_fixnum(item)) {
+        if (KON_IS_FIXNUM(item)) {
             int num = kon_unbox_fixnum(item);
             if (isFixNum) {
                 resFixnum *= num;
@@ -239,8 +239,8 @@ Kon* KON_PrimaryMultiply(Kon* kstate, Kon* args)
                 resFlonum *= num;
             }
         }
-        else if (kon_is_flonum(item)) {
-            double num = item->Value.Flonum;
+        else if (KON_IS_FLONUM(item)) {
+            double num = KON_UNBOX_FLONUM(item);
             if (isFixNum) {
                 resFixnum *= num;
             }
@@ -258,15 +258,15 @@ Kon* KON_PrimaryMultiply(Kon* kstate, Kon* args)
         return kon_make_fixnum(resFixnum);
     }
     else {
-        Kon* result = KON_AllocTagged(kstate, sizeof(double), KON_FLONUM);
+        KN result = KON_MAKE_FLONUM(kstate, resFlonum);
         return result;
     }
 }
 
-Kon* KON_PrimaryDivide(Kon* kstate, Kon* args)
+KN KON_PrimaryDivide(KonState* kstate, KN args)
 {
-    Kon* iter = args;
-    Kon* first = kon_car(iter);
+    KN iter = args;
+    KN first = kon_car(iter);
     iter = kon_cdr(iter);
     if (first == KON_NIL) {
         return kon_make_fixnum(0);
@@ -280,18 +280,18 @@ Kon* KON_PrimaryDivide(Kon* kstate, Kon* args)
     double resFlonum = 0.0;
     bool isFixNum = false;
     // the result type is determined by the first arg
-    if (kon_is_fixnum(first)) {
+    if (KON_IS_FIXNUM(first)) {
         isFixNum = true;
         resFixnum = kon_unbox_fixnum(first);
     }
     else {
-        resFlonum = first->Value.Flonum;
+        resFlonum = KON_UNBOX_FLONUM(first);
     }
     // Unbox
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
 
-        if (kon_is_fixnum(item)) {
+        if (KON_IS_FIXNUM(item)) {
             int num = kon_unbox_fixnum(item);
             if (isFixNum) {
                 resFixnum /= num;
@@ -300,8 +300,8 @@ Kon* KON_PrimaryDivide(Kon* kstate, Kon* args)
                 resFlonum /= num;
             }
         }
-        else if (kon_is_flonum(item)) {
-            double num = item->Value.Flonum;
+        else if (KON_IS_FLONUM(item)) {
+            double num = KON_UNBOX_FLONUM(item);
             if (isFixNum) {
                 resFixnum /= num;
             }
@@ -319,16 +319,16 @@ Kon* KON_PrimaryDivide(Kon* kstate, Kon* args)
         return kon_make_fixnum(resFixnum);
     }
     else {
-        Kon* result = KON_AllocTagged(kstate, sizeof(double), KON_FLONUM);
+        KN result = KON_MAKE_FLONUM(kstate, resFlonum);
         return result;
     }
 }
 
 
-Kon* KON_PrimaryMod(Kon* kstate, Kon* args)
+KN KON_PrimaryMod(KonState* kstate, KN args)
 {
-    Kon* iter = args;
-    Kon* first = kon_car(iter);
+    KN iter = args;
+    KN first = kon_car(iter);
     iter = kon_cdr(iter);
     if (first == KON_NIL) {
         return kon_make_fixnum(0);
@@ -337,32 +337,32 @@ Kon* KON_PrimaryMod(Kon* kstate, Kon* args)
         return first;
     }
 
-    Kon* second = kon_car(iter);
+    KN second = kon_car(iter);
 
 
     int resFixnum = 0;
-    if (kon_is_fixnum(first)) {
+    if (KON_IS_FIXNUM(first)) {
         resFixnum = kon_unbox_fixnum(first);
     }
     else {
-        resFixnum = (int)(first->Value.Flonum);
+        resFixnum = (int)(KON_UNBOX_FLONUM(first));
     }
 
     int mod = 1;
-    if (kon_is_fixnum(first)) {
+    if (KON_IS_FIXNUM(first)) {
         mod = kon_unbox_fixnum(second);
     }
     else {
-        mod = (int)(second->Value.Flonum);
+        mod = (int)(KON_UNBOX_FLONUM(second));
     }
  
     return kon_make_fixnum(resFixnum % mod);
 }
 
-Kon* KON_PrimaryLowerThan(Kon* kstate, Kon* args)
+KN KON_PrimaryLowerThan(KonState* kstate, KN args)
 {
-    Kon* iter = args;
-    Kon* first = kon_car(iter);
+    KN iter = args;
+    KN first = kon_car(iter);
     if (first == KON_NIL) {
         return KON_TRUE;
     }
@@ -370,22 +370,22 @@ Kon* KON_PrimaryLowerThan(Kon* kstate, Kon* args)
 
     double lastNum = 0.0;
 
-    if (kon_is_fixnum(first)) {
+    if (KON_IS_FIXNUM(first)) {
         lastNum = 1.0 * kon_unbox_fixnum(first);
     }
     else {
-        lastNum = first->Value.Flonum;
+        lastNum = KON_UNBOX_FLONUM(first);
     }
 
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
 
         double cmpNum = 0.0;
-        if (kon_is_fixnum(item)) {
+        if (KON_IS_FIXNUM(item)) {
             cmpNum = kon_unbox_fixnum(item);
         }
-        else if (kon_is_flonum(item)) {
-            cmpNum = item->Value.Flonum;
+        else if (KON_IS_FLONUM(item)) {
+            cmpNum = KON_UNBOX_FLONUM(item);
         }
 
         if (lastNum >= cmpNum) {
@@ -402,10 +402,10 @@ Kon* KON_PrimaryLowerThan(Kon* kstate, Kon* args)
     return KON_TRUE;
 }
 
-Kon* KON_PrimaryLowerOrEqual(Kon* kstate, Kon* args)
+KN KON_PrimaryLowerOrEqual(KonState* kstate, KN args)
 {
-    Kon* iter = args;
-    Kon* first = kon_car(iter);
+    KN iter = args;
+    KN first = kon_car(iter);
     if (first == KON_NIL) {
         return KON_TRUE;
     }
@@ -413,22 +413,22 @@ Kon* KON_PrimaryLowerOrEqual(Kon* kstate, Kon* args)
 
     double lastNum = 0.0;
 
-    if (kon_is_fixnum(first)) {
+    if (KON_IS_FIXNUM(first)) {
         lastNum = 1.0 * kon_unbox_fixnum(first);
     }
     else {
-        lastNum = first->Value.Flonum;
+        lastNum = KON_UNBOX_FLONUM(first);
     }
 
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
 
         double cmpNum = 0.0;
-        if (kon_is_fixnum(item)) {
+        if (KON_IS_FIXNUM(item)) {
             cmpNum = kon_unbox_fixnum(item);
         }
-        else if (kon_is_flonum(item)) {
-            cmpNum = item->Value.Flonum;
+        else if (KON_IS_FLONUM(item)) {
+            cmpNum = KON_UNBOX_FLONUM(item);
         }
 
         if (lastNum > cmpNum) {
@@ -445,10 +445,10 @@ Kon* KON_PrimaryLowerOrEqual(Kon* kstate, Kon* args)
     return KON_TRUE;
 }
 
-Kon* KON_PrimaryGreaterThan(Kon* kstate, Kon* args)
+KN KON_PrimaryGreaterThan(KonState* kstate, KN args)
 {
-    Kon* iter = args;
-    Kon* first = kon_car(iter);
+    KN iter = args;
+    KN first = kon_car(iter);
     if (first == KON_NIL) {
         return KON_TRUE;
     }
@@ -456,22 +456,22 @@ Kon* KON_PrimaryGreaterThan(Kon* kstate, Kon* args)
 
     double lastNum = 0.0;
 
-    if (kon_is_fixnum(first)) {
+    if (KON_IS_FIXNUM(first)) {
         lastNum = 1.0 * kon_unbox_fixnum(first);
     }
     else {
-        lastNum = first->Value.Flonum;
+        lastNum = KON_UNBOX_FLONUM(first);
     }
 
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
 
         double cmpNum = 0.0;
-        if (kon_is_fixnum(item)) {
+        if (KON_IS_FIXNUM(item)) {
             cmpNum = kon_unbox_fixnum(item);
         }
-        else if (kon_is_flonum(item)) {
-            cmpNum = item->Value.Flonum;
+        else if (KON_IS_FLONUM(item)) {
+            cmpNum = KON_UNBOX_FLONUM(item);
         }
 
         if (lastNum <= cmpNum) {
@@ -488,10 +488,10 @@ Kon* KON_PrimaryGreaterThan(Kon* kstate, Kon* args)
     return KON_TRUE;
 }
 
-Kon* KON_PrimaryGreaterOrEqual(Kon* kstate, Kon* args)
+KN KON_PrimaryGreaterOrEqual(KonState* kstate, KN args)
 {
-    Kon* iter = args;
-    Kon* first = kon_car(iter);
+    KN iter = args;
+    KN first = kon_car(iter);
     if (first == KON_NIL) {
         return KON_TRUE;
     }
@@ -499,22 +499,22 @@ Kon* KON_PrimaryGreaterOrEqual(Kon* kstate, Kon* args)
 
     double lastNum = 0.0;
 
-    if (kon_is_fixnum(first)) {
+    if (KON_IS_FIXNUM(first)) {
         lastNum = 1.0 * kon_unbox_fixnum(first);
     }
     else {
-        lastNum = first->Value.Flonum;
+        lastNum = KON_UNBOX_FLONUM(first);
     }
 
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
 
         double cmpNum = 0.0;
-        if (kon_is_fixnum(item)) {
+        if (KON_IS_FIXNUM(item)) {
             cmpNum = kon_unbox_fixnum(item);
         }
-        else if (kon_is_flonum(item)) {
-            cmpNum = item->Value.Flonum;
+        else if (KON_IS_FLONUM(item)) {
+            cmpNum = KON_UNBOX_FLONUM(item);
         }
 
         if (lastNum < cmpNum) {
@@ -531,24 +531,24 @@ Kon* KON_PrimaryGreaterOrEqual(Kon* kstate, Kon* args)
     return KON_TRUE;
 }
 
-Kon* KON_PrimaryNewline(Kon* kstate, Kon* args)
+KN KON_PrimaryNewline(KonState* kstate, KN args)
 {
     printf("\n");
     return kon_make_fixnum(1);
 }
 
-Kon* KON_PrimaryDisplay(Kon* kstate, Kon* args)
+KN KON_PrimaryDisplay(KonState* kstate, KN args)
 {
-    Kon* iter = args;
+    KN iter = args;
     tb_string_t merged;
     tb_string_init(&merged);
 
     int state = 1; // 1 need verb, 2 need objects
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
 
-        Kon* formated = KON_ToFormatString(&kstate, item, false, 0, "  ");
-        tb_string_strcat(&merged, &formated->Value.String);
+        KN formated = KON_ToFormatString(kstate, item, false, 0, "  ");
+        tb_string_strcat(&merged, &KON_UNBOX_STRING(formated));
         
         iter = kon_cdr(iter);
     } while (iter != KON_NIL);
@@ -557,30 +557,30 @@ Kon* KON_PrimaryDisplay(Kon* kstate, Kon* args)
     return kon_make_fixnum(size);
 }
 
-Kon* KON_PrimaryDisplayln(Kon* kstate, Kon* args)
+KN KON_PrimaryDisplayln(KonState* kstate, KN args)
 {
-    Kon* size = KON_PrimaryDisplay(kstate, args);
+    KN size = KON_PrimaryDisplay(kstate, args);
     KON_PrimaryNewline(kstate, args);
     return kon_make_fixnum(kon_unbox_fixnum(size) + 1);
 }
 
 // TODO select output
-Kon* KON_PrimaryWrite(Kon* kstate, Kon* args)
+KN KON_PrimaryWrite(KonState* kstate, KN args)
 {
-    Kon* iter = args;
+    KN iter = args;
     tb_string_t merged;
     tb_string_init(&merged);
 
     int state = 1; // 1 need verb, 2 need objects
     do {
-        Kon* item = kon_car(iter);
+        KN item = kon_car(iter);
 
         if (kon_is_string(item)) {
-            tb_string_strcat(&merged, &item->Value.String);
+            tb_string_strcat(&merged, &KON_UNBOX_STRING(item));
         }
         else {
-            Kon* formated = KON_ToFormatString(&kstate, item, false, 0, "  ");
-            tb_string_strcat(&merged, &formated->Value.String);
+            KN formated = KON_ToFormatString(kstate, item, false, 0, "  ");
+            tb_string_strcat(&merged, &KON_UNBOX_STRING(formated));
         }
         iter = kon_cdr(iter);
     } while (iter != KON_NIL);
@@ -590,17 +590,17 @@ Kon* KON_PrimaryWrite(Kon* kstate, Kon* args)
 }
 
 // TODO select output
-Kon* KON_PrimaryWriteln(Kon* kstate, Kon* args)
+KN KON_PrimaryWriteln(KonState* kstate, KN args)
 {
-    Kon* size = KON_PrimaryWrite(kstate, args);
+    KN size = KON_PrimaryWrite(kstate, args);
     KON_PrimaryNewline(kstate, args);
     return kon_make_fixnum(kon_unbox_fixnum(size) + 1);
 }
 
-Kon* KON_PrimaryStringify(Kon* kstate, Kon* args)
+KN KON_PrimaryStringify(KonState* kstate, KN args)
 {
-    Kon* item = kon_car(args);
-    Kon* formated = KON_ToFormatString(&kstate, item, false, 0, "  ");
+    KN item = kon_car(args);
+    KN formated = KON_ToFormatString(&kstate, item, false, 0, "  ");
 
     return formated;
 }
