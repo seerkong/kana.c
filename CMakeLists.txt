@@ -386,15 +386,17 @@ target_link_options(kon PRIVATE
 )
 target_sources(kon PRIVATE
     src/kon/kson/writer.c
-    src/kon/kon.c
     src/kon/kson/reader.c
+    src/kon/kon.c
     src/kon/interpreter/primary.c
-    src/kon/kson/value_builder.c
     src/kon/interpreter/env.c
     src/kon/kson/node.c
+    src/kon/kson/value_builder.c
+    src/kon/kson/hashmap.c
+    src/kon/kson/tokenizer.c
     src/kon/utils/number_utils.c
     src/kon/kson/state_stack.c
     src/kon/interpreter/cps_interpreter.c
-    src/kon/kson/tokenizer.c
+    src/kon/kson/murmurhash.c
 )
 
