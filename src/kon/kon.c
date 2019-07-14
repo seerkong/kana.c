@@ -15,6 +15,12 @@
 int KON_Init(Kon* kstate)
 {
     kon_debug("offsetof(struct KonStruct, value) %lu", offsetof(struct KonStruct, Value));
+    kstate->Tag = KON_CONTEXT;
+
+    // init root env
+    // Kon* env = KON_MakeRootEnv(kstate);
+    // kon_debug("root env addr %x", env);     
+    // kstate->Value.Context.RootEnv = env;
     // if (!tb_init(tb_null, tb_null)) {
     //     return 1;
     // }
@@ -48,7 +54,13 @@ Kon* KON_EvalFile(Kon* kstate, char* filePath)
         if (openRes) {
             Kon* root = KSON_Parse(reader);
             if (KON_IsList(root)) {
-                Kon* result = KON_ProcessSentences(kstate, root);
+
+                Kon* env = KON_MakeRootEnv(kstate);
+
+                // Kon* result = KON_ProcessSentences(kstate, root, kstate->Value.Context.RootEnv);
+                Kon* result = KON_ProcessSentences(kstate, root, env);
+                
+                
                 printf("eval sentences success\n");
                 Kon* formated = KON_ToFormatString(kstate, result, true, 0, "  ");
                 //  Kon* formated = KON_ToFormatString(&kstate, root, false, 0, " ");

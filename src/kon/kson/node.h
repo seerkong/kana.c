@@ -101,6 +101,7 @@ typedef int kon_int32_t;
 ////
 // types start
 typedef enum {
+    KON_CONTEXT,
     KON_NUMBER,
     KON_FIXNUM,
     KON_FLONUM,
@@ -268,10 +269,16 @@ typedef struct {
     };
 } KonProcedure;
 
+typedef struct {
+    Kon* RootEnv;
+} KonContext;
+
 struct KonStruct {
     KonType Tag;
     char IsMarked;
     union {
+        // KonContext Context;
+
         // basic types
         double Flonum;
         tb_string_t String;
@@ -306,6 +313,8 @@ struct KonStruct {
         // KonTrampoline Trampoline;
 
         KonProcedure Procedure;
+
+        
     } Value;
 };
 

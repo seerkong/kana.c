@@ -348,13 +348,13 @@ bool IsSelfEvaluated(Kon* source)
     }
 }
 
-Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences)
+Kon* KON_ProcessSentences(Kon* kstate, Kon* sentences, Kon* env)
 {
     // TODO add step count when debug
     Kon* formated = KON_ToFormatString(&kstate, sentences, true, 0, "  ");
     //  Kon* formated = KON_ToFormatString(&kstate, root, false, 0, " ");
     printf("%s\n", KON_StringToCstr(formated));
-    Kon* env = KON_MakeRootEnv(kstate);
+    
     KonContinuation* firstCont = AllocContinuationWithType(KON_CONT_RETURN);
     firstCont->Env = env;
     KonTrampoline* bounce = KON_EvalSentences(kstate, sentences, env, firstCont);
