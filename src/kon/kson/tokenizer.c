@@ -91,8 +91,11 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_SYM_VARIABLE:
             tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_VARIABLE");
             break;
-        case KON_TOKEN_SYM_FORM_WORD:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_FORM_WORD");
+        case KON_TOKEN_SYM_PREFIX_MARCRO:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_PREFIX_MARCRO");
+            break;
+        case KON_TOKEN_SYM_SUFFIX_MARCRO:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_SUFFIX_MARCRO");
             break;
         case KON_TOKEN_QUOTE_IDENTIFER:
             tb_string_cstrcpy(&tokenKind, "KON_TOKEN_QUOTE_IDENTIFER");
@@ -798,7 +801,12 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
         else if (pc[0] == '!') {
             ForwardToken(tokenizer, 1);
             ParseIdentifier(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_SYM_FORM_WORD;
+            tokenizer->TokenKind = KON_TOKEN_SYM_PREFIX_MARCRO;
+        }
+        else if (pc[0] == '^') {
+            ForwardToken(tokenizer, 1);
+            ParseIdentifier(tokenizer);
+            tokenizer->TokenKind = KON_TOKEN_SYM_SUFFIX_MARCRO;
         }
         else if (IsIdentiferPrefixChar(pc[0])) {
             ParseIdentifier(tokenizer);

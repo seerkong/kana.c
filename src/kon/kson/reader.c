@@ -184,8 +184,11 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
 KN MakeSymbol(KonReader* reader, KonTokenKind event)
 {
     KonSymbol* value = KON_ALLOC_TYPE_TAG(reader->Kstate, KonSymbol, KON_T_SYMBOL);
-    if (event == KON_TOKEN_SYM_FORM_WORD) {
-        value->Type = KON_SYM_FORM_WORD;
+    if (event == KON_TOKEN_SYM_PREFIX_MARCRO) {
+        value->Type = KON_SYM_PREFIX_MARCRO;
+    }
+    else if (event == KON_TOKEN_SYM_SUFFIX_MARCRO) {
+        value->Type = KON_SYM_SUFFIX_MARCRO;
     }
     else if (event == KON_TOKEN_SYM_VARIABLE) {
         value->Type = KON_SYM_VAR;
@@ -322,7 +325,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         if (currentState == KON_READER_PARSE_TABLE_KEY) {
             assert(kon_is_symbol(value));
             KonSymbolType symbolType = KON_FIELD(value, KonSymbol, Type);
-            assert(symbolType != KON_SYM_VAR && symbolType != KON_SYM_FORM_WORD);
+            assert(symbolType != KON_SYM_VAR && symbolType != KON_SYM_PREFIX_MARCRO);
             // table tag key should not be NULL
             char* tableKey = tb_string_cstr(&KON_UNBOX_SYMBOL(value));
             assert(tableKey);
@@ -360,7 +363,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         else {
             assert(kon_is_symbol(value));
             KonSymbolType symbolType = KON_FIELD(value, KonSymbol, Type);
-            assert(symbolType != KON_SYM_FORM_WORD);
+            assert(symbolType != KON_SYM_PREFIX_MARCRO);
             CellBuilderSetName(topBuilder, value);
         }
     }
@@ -580,13 +583,17 @@ KN KSON_Parse(KonReader* reader)
             KN marker = MakeSyntaxMarker(reader->Kstate, event);
             AddValueToTopBuilder(reader, marker);
         }
-        else if (event == KON_TOKEN_SYM_FORM_WORD) {
+        else if (event == KON_TOKEN_SYM_PREFIX_MARCRO) {
             // prefix marcro eg !abc
             // top builder should be a list
             // don't need update state
             assert(topBuilder && topBuilder->Type == KON_BUILDER_LIST);
             KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);
+        }
+        else if (event == KON_TOKEN_SYM_SUFFIX_MARCRO) {
+            // suffix marcro eg ^abc
+            // TODO
         }
         else if (IsContainerEndToken(event)) {
             ExitTopBuilder(reader);

@@ -35,7 +35,8 @@ typedef enum
 
     KON_TOKEN_SYM_STRING,       // 'abc'
     KON_TOKEN_SYM_IDENTIFIER,   // abC
-    KON_TOKEN_SYM_FORM_WORD, // !cond !define
+    KON_TOKEN_SYM_PREFIX_MARCRO, // !cond !define
+    KON_TOKEN_SYM_SUFFIX_MARCRO, // ^await
     KON_TOKEN_SYM_VARIABLE, // $abc
 
     // @abc @'' @[] @() @<> @{}

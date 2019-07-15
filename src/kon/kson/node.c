@@ -261,7 +261,7 @@ KN KON_SymbolStringify(KonState* kstate, KN source)
             tb_string_strcat(&(result->String), data);
             break;
         }
-        case KON_SYM_FORM_WORD: {
+        case KON_SYM_PREFIX_MARCRO: {
             tb_string_cstrcat(&(result->String), "!");
             tb_string_strcat(&(result->String), data);
             break;

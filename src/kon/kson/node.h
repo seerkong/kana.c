@@ -154,7 +154,8 @@ typedef enum {
     KON_SYM_IDENTIFER,  // abc
     KON_SYM_STRING, // ''
     KON_SYM_VAR,    // $abc
-    KON_SYM_FORM_WORD // !ass
+    KON_SYM_PREFIX_MARCRO, // !ass
+    KON_SYM_SUFFIX_MARCRO // ^ass
 } KonSymbolType;
 
 struct KonSymbol {
