@@ -77,7 +77,7 @@ KN KON_EnvDefine(KonState* kstate, KN env, char* key, KN value)
 
 KN KON_EnvLookup(KonState* kstate, KN env, char* key)
 {
-    KN value = (KN)KON_HashMapGet(CAST_Kon(Env, env)->Bindings, key);
+    KN value = KON_HashMapGet(CAST_Kon(Env, env)->Bindings, key);
     if (value) {
         return value;
     }

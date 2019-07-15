@@ -127,12 +127,6 @@ typedef enum {
     KON_T_EXCEPTION
 } KonType;
 
-
-
-
-
-typedef unsigned long _Kon;
-typedef volatile _Kon KN;
 typedef struct KonState KonState;
 typedef struct KonSymbol KonSymbol;
 typedef struct KonSyntaxMarker KonSyntaxMarker;
@@ -149,12 +143,12 @@ typedef struct KonEnv KonEnv;
 typedef struct KonProcedure KonProcedure;
 
 
-
 typedef struct KonBase {
     KonType Tag;
     char IsMarked;
 } KonBase;
 
+typedef volatile union _Kon* KN;
 
 typedef enum {
     KON_SYM_IDENTIFER,  // abc
@@ -168,7 +162,6 @@ struct KonSymbol {
     tb_string_t Data;
     KonSymbolType Type;
 };
-
 
 typedef enum {
     KON_QUOTE_IDENTIFER,    // @abc
@@ -260,7 +253,7 @@ struct KonCell {
 
 struct KonEnv {
     KonBase Base;
-    KN Parent;
+    KonEnv* Parent;
     KonHashMap* Bindings;
 };
 
@@ -280,8 +273,8 @@ typedef enum {
     KON_COMPOSITE_OBJ_METHOD,
 } KonProcedureType;
 
-typedef KN (*KonNativeFuncRef)(KonState* kstate, KonListNode* argList);
-typedef KN (*KonNativeObjMethodRef)(KonState* kstate, void* objRef, KonListNode* argList);
+typedef KN (*KonNativeFuncRef)(KonState* kstate, KN argList);
+typedef KN (*KonNativeObjMethodRef)(KonState* kstate, void* objRef, KN argList);
 
 struct KonProcedure {
     KonBase Base;
@@ -313,7 +306,7 @@ struct KonProcedure {
 
 struct KonState {
     KonBase Base;
-    KN RootEnv;
+    KonEnv* RootEnv;
 };
 
 typedef struct KonFlonum {
@@ -338,52 +331,23 @@ struct KonTable {
     KonHashMap* Table;
 };
 
-/*
-struct KonStruct {
-    KonType Tag;
-    char IsMarked;
-    union {
-        // KonState Context;
-
-        // basic types
-        double Flonum;
-        tb_string_t String;
-        KonSymbol Symbol;
-        KonSyntaxMarker SyntaxMarker;
-
-        // list node
-        KonListNode ListNode;
-
-        tb_vector_ref_t Vector;
-
-        KonHashMap* Table;
-
-        KonCell Cell;
-
-        // quote
-        KonQuote Quote;
-
-        // quasiquote
-        KonQuasiquote Quasiquote;
-
-        // expand
-        KonExpand Expand;
-        
-        // unquote
-        KonUnquote Unquote;
-
-        KonEnv Env;
-
-        // KonContinuation Continuation;
-
-        // KonTrampoline Trampoline;
-
-        KonProcedure Procedure;
-
-        
-    } Value;
+union _Kon {
+    KonBase KonBase;
+    KonState KonState;
+    KonSymbol KonSymbol;
+    KonSyntaxMarker KonSyntaxMarker;
+    KonString KonString;
+    KonTable KonTable;
+    KonVector KonVector;
+    KonListNode KonListNode;
+    KonCell KonCell;
+    KonQuote KonQuote;
+    KonQuasiquote KonQuasiquote;
+    KonExpand KonExpand;
+    KonUnquote KonUnquote;
+    KonEnv KonEnv;
+    KonProcedure KonProcedure;
 };
-*/
 
 // types end
 ////
@@ -413,7 +377,7 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 
 
 
-#define KonDef(t)          struct Kon##t *
+// #define KonDef(t)          struct Kon##t *
 #define CAST_Kon(t, v)          ((struct Kon##t *)v)
 #define KON_TYPE(x)      kon_type((KN)(x))
 #define KON_PTR_TYPE(x)     (((KonBase*)(x))->Tag)
@@ -504,7 +468,7 @@ static inline KonType kon_type(KN obj) {
 static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
   KonFlonum* result = (KonFlonum*)KON_AllocTagged(kstate, sizeof(KonFlonum), KON_T_FLONUM);
   result->Flonum = num;
-  return (KN)(result);
+  return (result);
 }
 #define KON_UNBOX_FLONUM(n) ((KonFlonum*)n)->Flonum
 
@@ -565,37 +529,37 @@ KON_API KN KON_MakeEmptyString(KonState* kstate);
 KON_API const char* KON_StringToCstr(KN str);
 KON_API KN KON_StringStringify(KonState* kstate, KN source);
 
-KON_API KN KON_VectorStringify(KonState* kstate, KonVector* source, bool newLine, int depth, char* padding);
+KON_API KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
 // symbol
 KON_API KN KON_SymbolStringify(KonState* kstate, KN source);
 KON_API const char* KON_SymbolToCstr(KN sym);
 
 // list
-KON_API KonListNode* KON_MakeList(KonState* kstate, ...);
-KON_API KonListNode* KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KonListNode* tail);
-KON_API KonListNode* KON_List2(KonState* kstate, KN a, KN b);
-KON_API KonListNode* KON_List3(KonState* kstate, KN a, KN b, KN c);
+KON_API KN KON_MakeList(KonState* kstate, ...);
+KON_API KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail);
+KON_API KN KON_List2(KonState* kstate, KN a, KN b);
+KON_API KN KON_List3(KonState* kstate, KN a, KN b, KN c);
 KON_API bool KON_IsList(KN source);
 KN KON_ListStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
-KonListNode* Kon_ListRevert(KonState* kstate, KonListNode* source);
+KN Kon_ListRevert(KonState* kstate, KN source);
 
 // table
-KN KON_TableStringify(KonState* kstate, KonTable* source, bool newLine, int depth, char* padding);
+KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
 // cell
-KN KON_CellStringify(KonState* kstate, KonCell* source, bool newLine, int depth, char* padding);
+KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
-KN KON_SyntaxMarkerStringify(KonState* kstate, KonSyntaxMarker* source);
+KN KON_SyntaxMarkerStringify(KonState* kstate, KN source);
 
 // @
-KN KON_QuoteStringify(KonState* kstate, KonQuote* source, bool newLine, int depth, char* padding);
+KN KON_QuoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 // $
-KN KON_QuasiquoteStringify(KonState* kstate, KonQuasiquote* source, bool newLine, int depth, char* padding);
+KN KON_QuasiquoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 // eg $[].
-KN KON_ExpandStringify(KonState* kstate, KonExpand* source, bool newLine, int depth, char* padding);
+KN KON_ExpandStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 // eg $[]e.
-KN KON_UnquoteStringify(KonState* kstate, KonUnquote* source, bool newLine, int depth, char* padding);
+KN KON_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
 
 KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef);

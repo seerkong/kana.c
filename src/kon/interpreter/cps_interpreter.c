@@ -7,7 +7,7 @@
 #include "cps_interpreter.h"
 
 
-KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, KN env, KonContinuation* cont)
+KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, KonEnv* env, KonContinuation* cont)
 {
     KN subjFmtStr = KON_ToFormatString(kstate, subj, false, 0, " ");
     KN objectsFmtStr = KON_ToFormatString(kstate, argList, false, 0, " ");
@@ -44,7 +44,7 @@ KN TbVectorToKonList(KonState* kstate, tb_vector_ref_t clauseWords)
         // the previous item
         clauseItor = tb_iterator_prev(clauseWords, clauseItor);
         
-        KN item = (KN)tb_iterator_item(clauseWords, clauseItor);
+        KN item = tb_iterator_item(clauseWords, clauseItor);
         if (item == NULL) {
             break;
         }

@@ -63,7 +63,7 @@ KN MakeListByBuilder(KonState* kstate, KonBuilder* builder)
         // the previous item
         itor = tb_iterator_prev(list, itor);
         
-        KN item = (KN)tb_iterator_item(list, itor);
+        KN item = tb_iterator_item(list, itor);
         if (item == NULL) {
             break;
         }
@@ -183,7 +183,7 @@ KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder)
     value->Table = builder->Cell.Table;
     value->List = builder->Cell.List;
     free(builder);
-    return (KN)value;
+    return value;
 }
 
 KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind)

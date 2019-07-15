@@ -204,7 +204,7 @@ KN KON_StringStringify(KonState* kstate, KN source)
     tb_string_cstrcat(&(value->String), "\"");
     tb_string_strcat(&(value->String), &(CAST_Kon(String, source)->String));
     tb_string_cstrcat(&(value->String), "\"");
-    return (KN)value;
+    return value;
 }
 
 KN KON_MakeString(KonState* kstate, const char* str)
@@ -212,14 +212,14 @@ KN KON_MakeString(KonState* kstate, const char* str)
     KonString* value = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(value->String));
     tb_string_cstrcat(&(value->String), str);
-    return (KN)value;
+    return value;
 }
 
 KN KON_MakeEmptyString(KonState* kstate)
 {
     KonString* value = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(value->String));
-    return (KN)value;
+    return value;
 }
 
 const char* KON_StringToCstr(KN str)
@@ -276,7 +276,7 @@ const char* KON_SymbolToCstr(KN sym)
     return tb_string_cstr(&KON_UNBOX_SYMBOL(sym));
 }
 
-KN KON_SyntaxMarkerStringify(KonState* kstate, KonSyntaxMarker* source)
+KN KON_SyntaxMarkerStringify(KonState* kstate, KN source)
 {
     KonSyntaxMarkerType type = CAST_Kon(SyntaxMarker, source)->Type;
 
@@ -301,10 +301,10 @@ KN KON_SyntaxMarkerStringify(KonState* kstate, KonSyntaxMarker* source)
             break;
         }
     }
-    return (KN)result;
+    return result;
 }
 
-KN KON_QuoteStringify(KonState* kstate, KonQuote* source, bool newLine, int depth, char* padding)
+KN KON_QuoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonQuoteType type = CAST_Kon(Quote, source)->Type;
     KN inner = CAST_Kon(Quote, source)->Inner;
@@ -320,10 +320,10 @@ KN KON_QuoteStringify(KonState* kstate, KonQuote* source, bool newLine, int dept
     return result;
 }
 
-KN KON_QuasiquoteStringify(KonState* kstate, KonQuasiquote* source, bool newLine, int depth, char* padding)
+KN KON_QuasiquoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonQuasiquoteType type = source->Type;
-    KN inner = source->Inner;
+    KonQuasiquoteType type = CAST_Kon(Quasiquote, source)->Type;
+    KN inner = CAST_Kon(Quasiquote, source)->Inner;
 
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(result->String));
@@ -336,10 +336,10 @@ KN KON_QuasiquoteStringify(KonState* kstate, KonQuasiquote* source, bool newLine
     return (KN)result;
 }
 
-KN KON_ExpandStringify(KonState* kstate, KonExpand* source, bool newLine, int depth, char* padding)
+KN KON_ExpandStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonExpandType type = source->Type;
-    KN inner = source->Inner;
+    KonExpandType type = CAST_Kon(Expand, source)->Type;
+    KN inner = CAST_Kon(Expand, source)->Inner;
 
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(result->String));
@@ -347,6 +347,9 @@ KN KON_ExpandStringify(KonState* kstate, KonExpand* source, bool newLine, int de
     tb_string_cstrcat(&(result->String), "$");
 
     switch (type) {
+        case KON_EXPAND_REPLACE: {
+            break;
+        }
         case KON_EXPAND_VECTOR: {
             tb_string_cstrcat(&(result->String), "[]");
             break;
@@ -369,10 +372,10 @@ KN KON_ExpandStringify(KonState* kstate, KonExpand* source, bool newLine, int de
     return result;
 }
 
-KN KON_UnquoteStringify(KonState* kstate, KonUnquote* source, bool newLine, int depth, char* padding)
+KN KON_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonUnquoteType type = source->Type;
-    KN inner = source->Inner;
+    KonUnquoteType type = CAST_Kon(Unquote, source)->Type;
+    KN inner = CAST_Kon(Unquote, source)->Inner;
 
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(result->String));
@@ -408,12 +411,12 @@ KN KON_UnquoteStringify(KonState* kstate, KonUnquote* source, bool newLine, int 
 // add newline in parent node
 
 
-KN KON_VectorStringify(KonState* kstate, KonVector* source, bool newLine, int depth, char* padding)
+KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(result->String));
 
-    tb_vector_ref_t items = source->Vector;
+    tb_vector_ref_t items = CAST_Kon(Vector, source)->Vector;
     tb_size_t itor = tb_iterator_head(items);
     tb_size_t tail = tb_iterator_tail(items);
     
@@ -456,7 +459,7 @@ KN KON_VectorStringify(KonState* kstate, KonVector* source, bool newLine, int de
         tb_string_cstrcat(&(result->String), "]");
     }
 
-    return (KN)result;
+    return result;
 }
 
 bool KON_IsList(KN source)
@@ -544,7 +547,7 @@ KN KON_ListStringify(KonState* kstate, KN source, bool newLine, int depth, char*
     return result;
 }
 
-KonListNode* Kon_ListRevert(KonState* kstate, KonListNode* source)
+KN Kon_ListRevert(KonState* kstate, KN source)
 {
     KN result = KON_NIL;
     if (source != KON_NIL && kon_is_list_node(source)) {
@@ -560,7 +563,7 @@ KonListNode* Kon_ListRevert(KonState* kstate, KonListNode* source)
     return result;
 }
 
-KonListNode* KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KonListNode* tail)
+KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail)
 {
   KonListNode* node = KON_ALLOC_TYPE_TAG(kstate, KonListNode, KON_T_LIST_NODE);
   if (kon_is_exception(node)) {
@@ -568,21 +571,21 @@ KonListNode* KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KonListNo
   }
   node->Prev = KON_NIL;
   if (kon_is_list_node(tail)) {
-      tail->Prev = node;
+      CAST_Kon(ListNode, tail)->Prev = node;
   }
   kon_car(node) = head;
   kon_cdr(node) = tail;
   return node;
 }
 
-KonListNode* KON_List2(KonState* kstate, KN a, KN b)
+KN KON_List2(KonState* kstate, KN a, KN b)
 {
   KN res = kon_cons(kstate, b, KON_NIL);
   res = kon_cons(kstate, a, res);
   return res;
 }
 
-KonListNode* KON_List3(KonState* kstate, KN a, KN b, KN c)
+KN KON_List3(KonState* kstate, KN a, KN b, KN c)
 {
   KN res = KON_List2(kstate, b, c);
   res = kon_cons(kstate, a, res);
@@ -591,12 +594,12 @@ KonListNode* KON_List3(KonState* kstate, KN a, KN b, KN c)
 
 
 
-KN KON_TableStringify(KonState* kstate, KonTable* source, bool newLine, int depth, char* padding)
+KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(result->String));
 
-    KonHashMap* hashMap = source->Table;
+    KonHashMap* hashMap = CAST_Kon(Table, source)->Table;
     KonHashMapIter* iter = KON_HashMapIterHead(hashMap);
 
     if (newLine) {
@@ -660,15 +663,15 @@ KN KON_TableStringify(KonState* kstate, KonTable* source, bool newLine, int dept
 
 
 
-KN KON_CellStringify(KonState* kstate, KonCell* source, bool newLine, int depth, char* padding)
+KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(result->String));
 
-    KN name = source->Name;
-    KonVector* innerVector = source->Vector;
-    KonTable* innerTable = source->Table;
-    KonListNode* innerList = source->List;
+    KN name = CAST_Kon(Cell, source)->Name;
+    KonVector* innerVector = CAST_Kon(Cell, source)->Vector;
+    KonTable* innerTable = CAST_Kon(Cell, source)->Table;
+    KonListNode* innerList = CAST_Kon(Cell, source)->List;
     
     if (newLine) {
         tb_string_cstrcat(&(result->String), "<");
