@@ -757,3 +757,24 @@ KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef
     result->NativeFuncRef = funcRef;
     return result;
 }
+
+
+KN TbVectorToKonList(KonState* kstate, tb_vector_ref_t clauseWords)
+{
+    KN clause = KON_NIL;
+    
+    tb_size_t clauseHead = tb_iterator_head(clauseWords);
+    tb_size_t clauseItor = tb_iterator_tail(clauseWords);
+    do {
+        // the previous item
+        clauseItor = tb_iterator_prev(clauseWords, clauseItor);
+        
+        KN item = tb_iterator_item(clauseWords, clauseItor);
+        if (item == NULL) {
+            break;
+        }
+        clause = kon_cons(kstate, item, clause);
+        
+    } while (clauseItor != clauseHead);
+    return clause;
+}

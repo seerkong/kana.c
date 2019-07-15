@@ -17,8 +17,19 @@ int main(int argc, char const* argv[])
     if (!tb_init(tb_null, tb_null)) {
         return 1;
     }
+
+    char* path;// = "~/lang/konscript/kon-c/samples/kon/native/writeln.kon";
+
     
-    char* path = "~/lang/konscript/kon-c/samples/kon/native/writeln.kon";
+    if (argc > 1) {
+        path = argv[1];
+    }
+    else {
+        printf("need file path\n");
+//        exit(1);
+        path = "~/lang/konscript/kon-c/samples/kon/native/if.kon";
+    }
+    
     KON_EvalFile(&kstate, path);
 
     tb_exit();

@@ -281,7 +281,7 @@ KN MakeLiteral(KonReader* reader, KonTokenKind event)
         value = KON_TRUE;
     }
     else if (event == KON_TOKEN_KEYWORD_FALSE) {
-        value = KON_TRUE;
+        value = KON_FALSE;
     }
     else if (event == KON_TOKEN_KEYWORD_EITHER) {
         // TODO

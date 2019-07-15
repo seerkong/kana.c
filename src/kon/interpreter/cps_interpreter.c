@@ -5,7 +5,25 @@
 #include <assert.h>
 #include <tbox/tbox.h>
 #include "cps_interpreter.h"
+#include "keyword/prefix.h"
 
+bool IsSelfEvaluated(KN source)
+{
+    if (KON_IS_FIXNUM(source)
+        || KON_IS_FLONUM(source)
+        || kon_is_string(source)
+        || kon_is_syntax_marker(source)
+        || (kon_is_symbol(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_STRING)
+        || kon_is_quote(source)
+        || source == KON_TRUE
+        || source == KON_FALSE
+    ) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
 
 KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, KonEnv* env, KonContinuation* cont)
 {
@@ -34,25 +52,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
 }
 
 
-KN TbVectorToKonList(KonState* kstate, tb_vector_ref_t clauseWords)
-{
-    KN clause = KON_NIL;
-    
-    tb_size_t clauseHead = tb_iterator_head(clauseWords);
-    tb_size_t clauseItor = tb_iterator_tail(clauseWords);
-    do {
-        // the previous item
-        clauseItor = tb_iterator_prev(clauseWords, clauseItor);
-        
-        KN item = tb_iterator_item(clauseWords, clauseItor);
-        if (item == NULL) {
-            break;
-        }
-        clause = kon_cons(kstate, item, clause);
-        
-    } while (clauseItor != clauseHead);
-    return clause;
-}
+
 
 ////
 // @param sentenceRestWords sentence words except subject,
@@ -160,6 +160,11 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* cont, KN v
         bounce->Land.Value = val;
         return bounce;
     }
+    else if (kon_continuation_type(cont) == KON_CONT_NATIVE_CALLBACK) {
+        KonContFuncRef callbackFunc = cont->NativeCallback;
+        KonTrampoline* bounce = callbackFunc(kstate, val, cont);
+        return bounce;
+    }
     else if (kon_continuation_type(cont) == KON_CONT_EVAL_SENTENCE_LIST) {
         KN lastSentenceVal = val;
         KN env = cont->Env;
@@ -173,34 +178,8 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* cont, KN v
         }
         else {
             return KON_EvalSentences(kstate, restSentences, env, cont->Cont);
-//            KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_BLOCK);
-//
-//            KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SENTENCE_LIST);
-//            k->Cont = cont->Cont;
-//            k->Env = cont->Env;
-//            k->EvalSentenceList.RestSentenceList = kon_cdr(restSentences);
-//
-//            bounce->Bounce.Value = kon_car(restSentences);
-//            bounce->Bounce.Cont = k;
-//            bounce->Bounce.Env = cont->Env;
-//            return bounce;
         }
     }
-    // else if (kon_continuation_type(cont) == KON_CONT_EVAL_SENTENCE) {
-    //     // eval subj first if have a sentence
-    //     KN words = val;
-    //     KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_SUBJ);
-            
-    //     KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
-    //     k->Cont = cont;
-    //     k->Env = cont->Env;
-    //     k->EvalSubj.RestWordList = kon_cdr(words);
-        
-    //     bounce->Bounce.Value = kon_car(words);
-    //     bounce->Bounce.Cont = k;
-    //     bounce->Bounce.Env = cont->Env;
-    //     return bounce;
-    // }
     else if (kon_continuation_type(cont) == KON_CONT_EVAL_SUBJ) {
         // subj evaled, now should eval clauses
         KN subj = val;
@@ -271,9 +250,6 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* cont, KN v
             return bounce;
         }
     }
-    
-
-
     else if (kon_continuation_type(cont) == KON_CONT_EVAL_CLAUSE_ARGS) {
         KN lastArgEvaled = val;
         KN subj = cont->EvalClauseArgs.Subj;
@@ -311,6 +287,58 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* cont, KN v
     }
 }
 
+KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+{
+    KonTrampoline* bounce;
+    if (KON_IsList(expression)) {
+        // passed a sentence like {writeln % "abc" "efg"}
+        KN words = expression;
+        KN first = kon_car(words);
+        if (KON_IS_PREFIX_MARCRO(first)) {
+            const char* prefix = tb_string_cstr(&KON_UNBOX_SYMBOL(first));
+
+            if (strcmp(prefix, "if") == 0) {
+                bounce = KON_EvalPrefixIf(kstate, kon_cdr(words), env, cont);
+            }
+            else {
+                kon_debug("error! unhandled prefix marcro %s", prefix);
+                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce->Run.Value = KON_NULL;
+                bounce->Run.Cont = cont;
+            }
+        }
+        // TODO quasiquote unquote, etc.
+        else {
+            bounce = AllocBounceWithType(KON_TRAMPOLINE_SUBJ);
+            
+            KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
+            k->Cont = cont;
+            k->Env = cont->Env;
+            k->EvalSubj.RestWordList = kon_cdr(words);
+            
+            bounce->Bounce.Value = first;  // get subj word
+            bounce->Bounce.Cont = k;
+            bounce->Bounce.Env = cont->Env;
+        }
+    }
+    else if (kon_is_symbol(expression)) {
+        // a code block like { a }
+        // TODO asert should be a SYM_IDENTIFIER
+        // env lookup this val
+        KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(expression));
+        assert(val != KON_NULL);
+        bounce = KON_RunContinuation(kstate, cont, val);
+    }
+    else if (IsSelfEvaluated(expression)) {
+        bounce = KON_RunContinuation(kstate, cont, expression);
+    }
+    else {
+        printf("unhandled expression type\n");
+        exit(1);
+    }
+    return bounce;
+}
+
 KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonContinuation* cont)
 {
     if (sentences == KON_NIL) {
@@ -333,21 +361,7 @@ KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonCont
     }
 }
 
-bool IsSelfEvaluated(KN source)
-{
-    if (KON_IS_FIXNUM(source)
-        || KON_IS_FLONUM(source)
-        || kon_is_string(source)
-        || kon_is_syntax_marker(source)
-        || (kon_is_symbol(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_STRING)
-        || kon_is_quote(source)
-    ) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
+
 
 KN KON_ProcessSentences(KonState* kstate, KN sentences, KN env)
 {
@@ -374,31 +388,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN env)
             KN env = bounce->Bounce.Env;
             KN sentence = bounce->Bounce.Value;
 
-            if (KON_IsList(sentence)) {
-                // passed a sentence like {writeln % "abc" "efg"}
-                KN words = sentence;
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_SUBJ);
-                    
-                KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
-                k->Cont = cont;
-                k->Env = cont->Env;
-                k->EvalSubj.RestWordList = kon_cdr(words);
-                
-                bounce->Bounce.Value = kon_car(words);  // get subj word
-                bounce->Bounce.Cont = k;
-                bounce->Bounce.Env = cont->Env;
-            }
-            else if (kon_is_symbol(sentence)) {
-                // a code block like { {!local a 4} a}
-                // TODO asert should be a SYM_IDENTIFIER
-                // env lookup this val
-                KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(sentence));
-                assert(val != KON_NULL);
-                bounce = KON_RunContinuation(kstate, cont, val);
-            }
-            else if (IsSelfEvaluated(sentence)) {
-                bounce = KON_RunContinuation(kstate, cont, sentence);
-            }
+            bounce = KON_EvalExpression(kstate, sentence, env, cont);
         }
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_SUBJ) {
             KonTrampoline* oldBounce = bounce;
@@ -420,7 +410,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN env)
                 bounce->Bounce.Cont = k;
                 bounce->Bounce.Env = cont->Env;
             }
-            else if (kon_is_symbol(subj)) {
+            else if (kon_is_variable(subj) || KON_IS_IDENTIFER(subj)) {
                 // TODO env lookup this val
                 // KN val = KON_MakeString(kstate, "writeln");
                 KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(subj));

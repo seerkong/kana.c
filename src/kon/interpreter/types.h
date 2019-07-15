@@ -21,14 +21,24 @@ typedef enum {
     KON_CONT_EVAL_SUBJ,
     KON_CONT_EVAL_CLAUSE_LIST,
     KON_CONT_EVAL_CLAUSE,
-    KON_CONT_EVAL_CLAUSE_ARGS
+    KON_CONT_EVAL_CLAUSE_ARGS,
+
+    // native callback, use a MemoTable to store info
+    KON_CONT_NATIVE_CALLBACK
+
 } KonContinuationType;
+
+typedef KN (*KonContFuncRef)(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
 
 struct _KonContinuation {
     KonContinuationType Type;
     KN Env;
     KonContinuation* Cont;
+    KonHashMap* MemoTable;
+
     union {
+        KonContFuncRef NativeCallback;
+
         struct {
             KN RestSentenceList;
         } EvalSentenceList;

@@ -14,6 +14,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN env);
 KonContinuation* AllocContinuationWithType(KonContinuationType type);
 KonTrampoline* AllocBounceWithType(KonBounceType type);
 KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonContinuation* cont);
+KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonContinuation* cont);
 KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, KonEnv* env, KonContinuation* cont);
 
 #ifdef __cplusplus

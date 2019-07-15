@@ -386,7 +386,7 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 
 
 #define kon_is_true(x)    ((x) != KON_FALSE)
-#define kon_is_not(x)      ((x) == KON_FALSE)
+#define kon_is_false(x)      ((x) == KON_FALSE)
 
 #define kon_is_null(x)    ((x) == KON_NULL)
 #define kon_is_nil(x)    ((x) == KON_NIL)
@@ -409,11 +409,13 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 #define kon_flonum_value(f) (((KonFlonum*)f)->Flonum)
 #define kon_flonum_value_set(f, x) (((KonFlonum*)f)->Flonum = x)
 
-#define kon_is_bytes(x)      (kon_check_tag(x, KON_T_BYTES))
-#define kon_is_string(x)     (kon_check_tag(x, KON_T_STRING))
-#define kon_is_symbol(x)    (kon_check_tag(x, KON_T_SYMBOL))
-#define kon_is_variable(x)    (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_VAR)
-#define kon_is_syntax_marker(x)    (kon_check_tag(x, KON_T_SYNTAX_MARKER))
+#define kon_is_bytes(x)         (kon_check_tag(x, KON_T_BYTES))
+#define kon_is_string(x)        (kon_check_tag(x, KON_T_STRING))
+#define kon_is_symbol(x)        (kon_check_tag(x, KON_T_SYMBOL))
+#define kon_is_variable(x)      (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_VAR)
+#define KON_IS_IDENTIFER(x)      (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_IDENTIFER)
+#define KON_IS_PREFIX_MARCRO(x) (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_PREFIX_MARCRO)
+#define kon_is_syntax_marker(x) (kon_check_tag(x, KON_T_SYNTAX_MARKER))
 
 #define kon_is_list_node(x)       (kon_check_tag(x, KON_T_LIST_NODE))
 #define kon_is_vector(x)     (kon_check_tag(x, KON_T_VECTOR))
@@ -573,6 +575,7 @@ KON_API tb_void_t kon_vector_item_ptr_free(tb_element_ref_t element, tb_pointer_
 // common utils start
 KON_API const char* KON_HumanFormatTime();
 
+KN TbVectorToKonList(KonState* kstate, tb_vector_ref_t clauseWords);
 
 // common utils end
 
