@@ -385,12 +385,14 @@ target_link_directories(kon PRIVATE
 target_link_options(kon PRIVATE
 )
 target_sources(kon PRIVATE
+    src/kon/interpreter/keyword/prefix_set.c
     src/kon/kson/writer.c
     src/kon/interpreter/primary.c
+    src/kon/interpreter/env.c
     src/kon/kson/reader.c
     src/kon/kon.c
     src/kon/interpreter/keyword/prefix_if.c
-    src/kon/interpreter/env.c
+    src/kon/interpreter/keyword/prefix_let.c
     src/kon/kson/node.c
     src/kon/kson/value_builder.c
     src/kon/kson/hashmap.c

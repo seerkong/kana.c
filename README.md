@@ -7,6 +7,10 @@ Kon is a simple programming language, aiming for embedding into other host langu
 
 xmake project -k cmakelists
 
-mkdir -p ide/xcode
-cd ide/xcode
-cmake ../.. -G "Xcode"
+mkdir -p xcode
+cd xcode
+cmake .. -G "Xcode"
+
+xmake run eval_file ~/lang/konscript/kon-c/samples/kon/native/if.kon
+
+xmake run eval_file ~/lang/konscript/kon-c/samples/kon/native/writeln.kon

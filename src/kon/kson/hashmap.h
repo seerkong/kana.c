@@ -52,6 +52,9 @@ bool KON_HashMapIterHasNext(KonHashMap* hashmap, KonHashMapIter* iter);
 bool KON_HashMapIterEqual(KonHashMapIter* left, KonHashMapIter* right);
 void KON_HashMapIterDestroy(KonHashMapIter* iter);
 
+// for debug
+void KON_HashMapDumpKeys(KonHashMap* hashMap);
+
 #ifdef __cplusplus
 }
 #endif

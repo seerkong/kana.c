@@ -4,7 +4,7 @@
 KN KON_MakeRootEnv(KonState* kstate)
 {
     KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
-    env->Parent = KON_NULL;
+    env->Parent = KON_NIL;
     env->Bindings = KON_HashMapInit(20);
 
     // math
@@ -81,10 +81,25 @@ KN KON_EnvLookup(KonState* kstate, KN env, char* key)
     if (value) {
         return value;
     }
-    else if (CAST_Kon(Env, env)->Parent == KON_NULL) {
-        return KON_NULL;
+    else if (CAST_Kon(Env, env)->Parent == KON_NIL) {
+        return KON_UKN;
     }
     else {
         return KON_EnvLookup(kstate, CAST_Kon(Env, env)->Parent, key);
+    }
+}
+
+KN KON_EnvLookupSet(KonState* kstate, KN env, char* key, KN value)
+{
+    KN slot = KON_HashMapGet(CAST_Kon(Env, env)->Bindings, key);
+    if (slot) {
+        KON_HashMapPut(CAST_Kon(Env, env)->Bindings, key, value);
+        return KON_TRUE;
+    }
+    else if (CAST_Kon(Env, env)->Parent == KON_NIL) {
+        return KON_FALSE;
+    }
+    else {
+        return KON_EnvLookupSet(kstate, CAST_Kon(Env, env)->Parent, key, value);
     }
 }

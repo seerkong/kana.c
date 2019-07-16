@@ -300,6 +300,12 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             if (strcmp(prefix, "if") == 0) {
                 bounce = KON_EvalPrefixIf(kstate, kon_cdr(words), env, cont);
             }
+            else if (strcmp(prefix, "let") == 0) {
+                bounce = KON_EvalPrefixLet(kstate, kon_cdr(words), env, cont);
+            }
+            else if (strcmp(prefix, "set") == 0) {
+                bounce = KON_EvalPrefixSet(kstate, kon_cdr(words), env, cont);
+            }
             else {
                 kon_debug("error! unhandled prefix marcro %s", prefix);
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
@@ -509,7 +515,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN env)
             else if (kon_is_symbol(arg)) {
                 // env lookup this val
                 KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(arg));;
-                assert(val != KON_NULL);
+                assert(val != NULL);
                 bounce = KON_RunContinuation(kstate, cont, val);
             }
             else if (IsSelfEvaluated(arg)) {

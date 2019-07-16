@@ -27,7 +27,7 @@ int main(int argc, char const* argv[])
     else {
         printf("need file path\n");
 //        exit(1);
-        path = "~/lang/konscript/kon-c/samples/kon/native/if.kon";
+        path = "~/lang/konscript/kon-c/samples/kon/native/letset.kon";
     }
     
     KON_EvalFile(&kstate, path);

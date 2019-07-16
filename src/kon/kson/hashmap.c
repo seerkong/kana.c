@@ -416,3 +416,17 @@ void KON_HashMapIterDestroy(KonHashMapIter* iter)
 {
     free(iter);
 }
+
+void KON_HashMapDumpKeys(KonHashMap* hashMap)
+{
+    KonHashMapIter* iter = KON_HashMapIterHead(hashMap);
+    printf("HashMapKeys: ");
+    while (iter) {
+        char* key = KON_HashMapIterItemKey(hashMap, iter);
+        printf("%s ", key);
+
+        iter = KON_HashMapIterNext(hashMap, iter);
+    }
+    printf("\n");
+    KON_HashMapIterDestroy(iter);
+}

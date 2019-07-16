@@ -120,11 +120,17 @@ KN KON_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char
     else if (kon_is_cell(source)) {
         return KON_CellStringify(kstate, source, newLine, depth, padding);
     }
+    else if (source == KON_UKN) {
+        return KON_MakeString(kstate, "#ukn;");
+    }
     else if (source == KON_TRUE) {
         return KON_MakeString(kstate, "#t;");
     }
     else if (source == KON_FALSE) {
         return KON_MakeString(kstate, "#f;");
+    }
+    else if (source == KON_NULL) {
+        return KON_MakeString(kstate, "#null;");
     }
     // TODO other data types
     else {
