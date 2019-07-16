@@ -262,13 +262,13 @@ typedef enum {
     // KON_PRIMARY_FUNC,   // high order native func
     KON_NATIVE_FUNC,
     KON_NATIVE_OBJ_METHOD,
-    // don't capture upper code env vars.
+    // dynamic scope.
     // make by !func
     KON_COMPOSITE_FUNC,
-    // capture upper code env vars.
+    // lexial(static) scope
     // make by !lambda
     KON_COMPOSITE_LAMBDA,
-    // vars lookup in eval env.
+    // vars lookup in eval env. no need params
     // make by !fragment
     KON_COMPOSITE_FRAGMENT,
     KON_COMPOSITE_OBJ_METHOD,
@@ -286,22 +286,10 @@ struct KonProcedure {
         KonNativeObjMethodRef NativeObjMethod;
 
         struct {
-            tb_string_t Name;
             KonListNode* ArgList;
             KonListNode* Body;
-        } Function;
-
-        struct {
-            tb_string_t Name;
-            KonListNode* ArgList;
-            KonListNode* Body;
-        } Lambda;
-
-        struct {
-            tb_string_t Name;
-            KonListNode* ArgList;
-            KonListNode* Body;
-        } Fragment;
+            KonEnv* LexicalEnv;
+        } Composite;
     };
 };
 
@@ -483,6 +471,8 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 #define KON_UNBOX_STRING(str) (((KonString*)str)->String)
 
 #define KON_UNBOX_SYMBOL(s) (((KonSymbol*)s)->Data)
+
+#define KON_UNBOX_QUOTE(s) (((KonQuote*)s)->Inner)
 
 // list
 #define kon_cons(kstate, a, b) KON_Cons(kstate, NULL, 2, a, b)

@@ -1,0 +1,27 @@
+{
+  {!let m
+    {!lambda {@x @y}
+      {displayln % "before add x y"}
+      {+ % x y}
+    }
+  }
+  {m % 1 3}
+
+  {!lambda n {@x @y}
+    {* % x y}
+  }
+  {n % 2 3}
+
+  {!let a 2}
+  {!lambda foo {}
+    {writeln % "current env a value: " a}
+  }
+
+  {!lambda bar {}
+    {!let a 3}
+    {writeln % a}
+    {foo %}
+  }
+
+  {bar %}
+}

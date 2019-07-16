@@ -5,5 +5,7 @@
 #include "prefix_if.h"
 #include "prefix_let.h"
 #include "prefix_set.h"
+#include "prefix_func.h"
+#include "prefix_lambda.h"
 
 #endif

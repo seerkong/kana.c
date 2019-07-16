@@ -50,7 +50,7 @@ KonTrampoline* KON_EvalPrefixSet(KonState* kstate, KN expression, KN env, KonCon
 
         KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
         k->Cont = cont;
-        k->Env = cont->Env;
+        k->Env = env;
 
         KonHashMap* memo = KON_HashMapInit(10);
         
