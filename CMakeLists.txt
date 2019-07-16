@@ -391,16 +391,18 @@ target_sources(kon PRIVATE
     src/kon/interpreter/primary.c
     src/kon/kson/state_stack.c
     src/kon/interpreter/keyword/prefix_func.c
+    src/kon/interpreter/keyword/prefix_blk.c
     src/kon/kson/writer.c
     src/kon/interpreter/keyword/prefix_set.c
+    src/kon/interpreter/keyword/prefix_do.c
     src/kon/interpreter/keyword/prefix_if.c
     src/kon/interpreter/keyword/prefix_lambda.c
-    src/kon/kson/murmurhash.c
-    src/kon/kson/value_builder.c
-    src/kon/kson/hashmap.c
     src/kon/kson/node.c
+    src/kon/kson/value_builder.c
+    src/kon/kson/murmurhash.c
     src/kon/utils/number_utils.c
     src/kon/kson/tokenizer.c
+    src/kon/kson/hashmap.c
     src/kon/interpreter/cps_interpreter.c
     src/kon/kson/reader.c
 )

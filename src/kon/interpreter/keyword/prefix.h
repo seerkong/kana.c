@@ -7,5 +7,7 @@
 #include "prefix_set.h"
 #include "prefix_func.h"
 #include "prefix_lambda.h"
+#include "prefix_blk.h"
+#include "prefix_do.h"
 
 #endif

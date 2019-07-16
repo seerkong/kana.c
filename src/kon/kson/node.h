@@ -268,9 +268,10 @@ typedef enum {
     // lexial(static) scope
     // make by !lambda
     KON_COMPOSITE_LAMBDA,
-    // vars lookup in eval env. no need params
-    // make by !fragment
-    KON_COMPOSITE_FRAGMENT,
+    // a block of code, can be assigned to a var, and call
+    // vars lookup in eval env. like a func without params
+    // make by !blk
+    KON_COMPOSITE_BLK,
     KON_COMPOSITE_OBJ_METHOD,
 } KonProcedureType;
 

@@ -53,8 +53,8 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             else if (subjProc->Type == KON_COMPOSITE_FUNC) {
                 bounce = KON_ApplyCompositeFunc(kstate, subjProc, argList, env, cont);
             }
-            else if (subjProc->Type == KON_COMPOSITE_FRAGMENT) {
-
+            else if (subjProc->Type == KON_COMPOSITE_BLK) {
+                bounce = KON_ApplyCompositeBlk(kstate, subjProc, KON_NIL, env, cont);
             }
         }
     }
@@ -322,6 +322,12 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             }
             else if (strcmp(prefix, "func") == 0) {
                 bounce = KON_EvalPrefixFunc(kstate, kon_cdr(words), env, cont);
+            }
+            else if (strcmp(prefix, "blk") == 0) {
+                bounce = KON_EvalPrefixBlk(kstate, kon_cdr(words), env, cont);
+            }
+            else if (strcmp(prefix, "do") == 0) {
+                bounce = KON_EvalPrefixDo(kstate, kon_cdr(words), env, cont);
             }
             else {
                 kon_debug("error! unhandled prefix marcro %s", prefix);
