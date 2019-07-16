@@ -1,0 +1,27 @@
+{
+  {!lambda a {}
+    {writeln % "condition a"}
+    5
+  }
+
+  {!lambda b {}
+    {writeln % "condition b"}
+    6
+  }
+
+  {!lambda c {}
+    {writeln % "condition c"}
+    5
+  }
+
+  {!lambda d {}
+    {writeln % "condition d"}
+    8
+  }
+  {!and
+    {gt % {a %} 4}
+    {gt % {b %} 5}
+    {gt % {c %} 6}
+    {gt % {d %} 7}
+  }
+}

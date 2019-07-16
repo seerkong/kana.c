@@ -9,5 +9,7 @@
 #include "prefix_lambda.h"
 #include "prefix_blk.h"
 #include "prefix_do.h"
+#include "prefix_and.h"
+#include "prefix_or.h"
 
 #endif

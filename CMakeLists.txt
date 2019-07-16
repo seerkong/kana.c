@@ -385,6 +385,7 @@ target_link_directories(kon PRIVATE
 target_link_options(kon PRIVATE
 )
 target_sources(kon PRIVATE
+    src/kon/interpreter/keyword/prefix_or.c
     src/kon/kon.c
     src/kon/interpreter/keyword/prefix_let.c
     src/kon/interpreter/env.c
@@ -395,14 +396,15 @@ target_sources(kon PRIVATE
     src/kon/kson/writer.c
     src/kon/interpreter/keyword/prefix_set.c
     src/kon/interpreter/keyword/prefix_do.c
-    src/kon/interpreter/keyword/prefix_if.c
     src/kon/interpreter/keyword/prefix_lambda.c
-    src/kon/kson/node.c
-    src/kon/kson/value_builder.c
+    src/kon/interpreter/keyword/prefix_if.c
     src/kon/kson/murmurhash.c
+    src/kon/kson/node.c
     src/kon/utils/number_utils.c
-    src/kon/kson/tokenizer.c
     src/kon/kson/hashmap.c
+    src/kon/kson/tokenizer.c
+    src/kon/interpreter/keyword/prefix_and.c
+    src/kon/kson/value_builder.c
     src/kon/interpreter/cps_interpreter.c
     src/kon/kson/reader.c
 )
