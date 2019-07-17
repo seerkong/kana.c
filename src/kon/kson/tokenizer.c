@@ -160,7 +160,7 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
             break;
     }
     // format
-    printf("<%s (:row %ld, :col %ld, :row-end %ld, :col-end %ld) [%s]>\n", tb_string_cstr(&tokenKind), tokenizer->RowStart, tokenizer->ColStart, tokenizer->RowEnd, tokenizer->ColEnd, tb_string_cstr(&tokenizer->Content));
+    KON_DEBUG("<%s (:row %ld, :col %ld, :row-end %ld, :col-end %ld) [%s]>", tb_string_cstr(&tokenKind), tokenizer->RowStart, tokenizer->ColStart, tokenizer->RowEnd, tokenizer->ColEnd, tb_string_cstr(&tokenizer->Content));
 }
 
 KonTokenizer* KSON_TokenizerInit(KonState* kstate)
@@ -267,10 +267,8 @@ tb_char_t ForwardChar(KonTokenizer* tokenizer)
     tb_char_t ch = '\0';
     if (tb_stream_bread_s8(tokenizer->ReadStream, (tb_sint8_t*)&ch)) {
         if (ch == '\n') {
-            
             tokenizer->CurrRow = tokenizer->CurrRow + 1;
             tokenizer->CurrCol = 1;
-            // printf("meet newline CurrRow %d\n", tokenizer->CurrRow);
         }
         else {
             tokenizer->CurrCol = tokenizer->CurrCol + 1;
@@ -454,7 +452,6 @@ void ParseSingleLineComment(KonTokenizer* tokenizer)
 
 void ParseNumber(KonTokenizer* tokenizer)
 {
-    // printf("ParseNumber\n");
     tokenizer->RowStart = tokenizer->CurrRow;
     tokenizer->ColStart = tokenizer->CurrCol;
     // initialize
@@ -527,9 +524,8 @@ void UpdateTokenContent(KonTokenizer* tokenizer, char* newContent)
 
 KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
 {
-    // printf("KSON_TokenizerNext before assert tokenizer %ld, tokenizer->ReadStream %ld\n", tokenizer, tokenizer->ReadStream);
     tb_assert_and_check_return_val(tokenizer && tokenizer->ReadStream, KON_TOKEN_EOF);
-    // printf("KSON_TokenizerNext current offset %d\n", tb_stream_offset(tokenizer->ReadStream));
+
     // reset
     tokenizer->TokenKind = KON_TOKEN_EOF;
     while (tokenizer->TokenKind == KON_TOKEN_EOF) {
@@ -839,7 +835,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             break;
         }
         else {
-            printf("neet non space char %d\n", pc[0]);
+            KON_DEBUG("neet non space char %d", pc[0]);
             break;
         }
     }

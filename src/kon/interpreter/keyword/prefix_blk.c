@@ -6,7 +6,7 @@
 KonTrampoline* KON_ApplyCompositeBlk(KonState* kstate, KonProcedure* proc, KN argList, KN env, KonContinuation* cont)
 {
     KN body = proc->Composite.Body;
-    kon_debug("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
+    KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 
     // KonEnv* procBindEnv = KON_MakeChildEnv(kstate, dynamicEnv);
     KonEnv* procBindEnv = env;
@@ -16,10 +16,10 @@ KonTrampoline* KON_ApplyCompositeBlk(KonState* kstate, KonProcedure* proc, KN ar
 
 KonTrampoline* KON_EvalPrefixBlk(KonState* kstate, KN expression, KN env, KonContinuation* cont)
 {
-    kon_debug("meet prefix marcro blk");
+    KON_DEBUG("meet prefix marcro blk");
     KN body = expression;
 
-    kon_debug("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
+    KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 
     KonProcedure* proc = KON_ALLOC_TYPE_TAG(kstate, KonProcedure, KON_T_PROCEDURE);
     proc->Type = KON_COMPOSITE_BLK;

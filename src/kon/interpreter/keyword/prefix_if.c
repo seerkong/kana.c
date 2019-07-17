@@ -62,16 +62,16 @@ KN AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* con
 
 KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KN env, KonContinuation* cont)
 {
-    kon_debug("meet prefix marcro if");
-    kon_debug("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
+    KON_DEBUG("meet prefix marcro if");
+    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     KN condition = kon_car(expression);
     KN parsed = SplitIfClauses(kstate, kon_cdr(expression));
     KN trueClause = kon_car(parsed);
     KN falseClause = kon_cadr(parsed);
 
-    kon_debug("condition %s", KON_StringToCstr(KON_ToFormatString(kstate, condition, true, 0, "  ")));
-    kon_debug("trueClause %s", KON_StringToCstr(KON_ToFormatString(kstate, trueClause, true, 0, "  ")));
-    kon_debug("falseClause %s", KON_StringToCstr(KON_ToFormatString(kstate, falseClause, true, 0, "  ")));
+    KON_DEBUG("condition %s", KON_StringToCstr(KON_ToFormatString(kstate, condition, true, 0, "  ")));
+    KON_DEBUG("trueClause %s", KON_StringToCstr(KON_ToFormatString(kstate, trueClause, true, 0, "  ")));
+    KON_DEBUG("falseClause %s", KON_StringToCstr(KON_ToFormatString(kstate, falseClause, true, 0, "  ")));
 
     KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;

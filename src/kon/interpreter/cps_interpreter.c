@@ -30,7 +30,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
     KN subjFmtStr = KON_ToFormatString(kstate, subj, false, 0, " ");
     KN objectsFmtStr = KON_ToFormatString(kstate, argList, false, 0, " ");
 
-    kon_debug("subj: %s, objects: %s", KON_StringToCstr(subjFmtStr), KON_StringToCstr(objectsFmtStr));
+    KON_DEBUG("subj: %s, objects: %s", KON_StringToCstr(subjFmtStr), KON_StringToCstr(objectsFmtStr));
     KN firstObj = kon_car(argList);
 
     KonTrampoline* bounce;
@@ -340,7 +340,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
                 bounce = KON_EvalPrefixCond(kstate, kon_cdr(words), env, cont);
             }
             else {
-                kon_debug("error! unhandled prefix marcro %s", prefix);
+                KON_DEBUG("error! unhandled prefix marcro %s", prefix);
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = KON_NULL;
                 bounce->Run.Cont = cont;
@@ -372,7 +372,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
         bounce = KON_RunContinuation(kstate, cont, expression);
     }
     else {
-        printf("unhandled expression type\n");
+        KON_DEBUG("unhandled expression type");
         exit(1);
     }
     return bounce;
@@ -407,7 +407,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
     // TODO add step count when debug
     KN formated = KON_ToFormatString(&kstate, sentences, true, 0, "  ");
     //  KN formated = KON_ToFormatString(&kstate, root, false, 0, " ");
-    printf("%s\n", KON_StringToCstr(formated));
+    KON_DEBUG("%s", KON_StringToCstr(formated));
     
     KonContinuation* firstCont = AllocContinuationWithType(KON_CONT_RETURN);
     firstCont->Env = rootEnv;

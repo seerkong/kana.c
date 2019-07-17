@@ -18,7 +18,7 @@ int KON_Init(KonState* kstate)
 
     // init root env
     // KN env = KON_MakeRootEnv(kstate);
-    // kon_debug("root env addr %x", env);     
+    // KON_DEBUG("root env addr %x", env);     
     // kstate->Value.Context.RootEnv = env;
     // if (!tb_init(tb_null, tb_null)) {
     //     return 1;
@@ -36,7 +36,7 @@ int KON_Finish(KonState* kstate)
 
 KN KON_EvalFile(KonState* kstate, char* filePath)
 {
-    printf("KON_EvalFile enter");
+    KON_DEBUG("KON_EvalFile enter");
     
     // 初始化流
     tb_stream_ref_t istream = tb_stream_init_from_url(filePath);
@@ -44,7 +44,7 @@ KN KON_EvalFile(KonState* kstate, char* filePath)
 
     KonReader* reader = KSON_ReaderInit(&kstate);
     if (!reader) {
-        printf("KON_EvalFile init failed\n");
+        KON_DEBUG("KON_EvalFile init failed");
         exit(1);
     }
 
@@ -60,15 +60,15 @@ KN KON_EvalFile(KonState* kstate, char* filePath)
                 KN result = KON_ProcessSentences(kstate, root, env);
                 
                 
-                printf("eval sentences success\n");
+                KON_DEBUG("eval sentences success");
                 KN formated = KON_ToFormatString(kstate, result, true, 0, "  ");
                 //  KN formated = KON_ToFormatString(&kstate, root, false, 0, " ");
-                printf("%s\n", KON_StringToCstr(formated));
+                KON_DEBUG("%s", KON_StringToCstr(formated));
             }
             
         }
         else {
-            printf("open stream failed\n");
+            KON_DEBUG("open stream failed");
         }
         KSON_ReaderCloseStream(reader);
         // 释放读取器 

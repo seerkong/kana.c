@@ -67,7 +67,6 @@ KN MakeListByBuilder(KonState* kstate, KonBuilder* builder)
         if (item == NULL) {
             break;
         }
-        printf("list builder item %d\n", (int)item);
         pair = kon_cons(kstate, item, pair);
         
     } while (itor != head);
@@ -92,7 +91,7 @@ void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
     char* key = tb_string_cstr(&(pair->TablePair.Key));
     
     KON_HashMapPut(builder->Table, key, pair->TablePair.Value);
-    printf("TableBuilderAddPair before free pair builder key %s\n", key);
+    KON_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
     free(pair);
 }
 
@@ -156,7 +155,7 @@ KonBuilder* CreateCellBuilder()
 
 void CellBuilderSetName(KonBuilder* builder, KN name)
 {
-    printf("CellBuilderSetName\n");
+    KON_DEBUG("CellBuilderSetName");
     builder->Cell.Name = name;
 }
 

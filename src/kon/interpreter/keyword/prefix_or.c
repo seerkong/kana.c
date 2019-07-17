@@ -11,14 +11,14 @@ KN AfterOrConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* con
 
     KonTrampoline* bounce;
     if (kon_is_true(evaledValue)) {
-        kon_debug("break or");
+        KON_DEBUG("break or");
         bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
         bounce->Run.Cont = contBeingInvoked->Cont;
         bounce->Run.Value = KON_TRUE;
     }
     else if (restConditon == KON_NIL) {
         // all conditions passed, return true
-        kon_debug("all or condition return true");
+        KON_DEBUG("all or condition return true");
         bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
         bounce->Run.Cont = contBeingInvoked->Cont;
         bounce->Run.Value = KON_FALSE;
@@ -44,8 +44,8 @@ KN AfterOrConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* con
 
 KonTrampoline* KON_EvalPrefixOr(KonState* kstate, KN expression, KN env, KonContinuation* cont)
 {
-    kon_debug("meet prefix marcro or");
-    kon_debug("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
+    KON_DEBUG("meet prefix marcro or");
+    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     
     KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;

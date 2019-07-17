@@ -9,9 +9,9 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
     KN param = proc->Composite.ArgList;
     KN body = proc->Composite.Body;
 
-    kon_debug("param def %s", KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")));
-    kon_debug("argList %s", KON_StringToCstr(KON_ToFormatString(kstate, argList, true, 0, "  ")));
-    kon_debug("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
+    KON_DEBUG("param def %s", KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")));
+    KON_DEBUG("argList %s", KON_StringToCstr(KON_ToFormatString(kstate, argList, true, 0, "  ")));
+    KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 
     KonEnv* procBindEnv = KON_MakeChildEnv(kstate, parentEnv);
 
@@ -27,7 +27,7 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
             arg = iterArg;
         }
         char* varName = tb_string_cstr(&KON_UNBOX_SYMBOL(KON_UNBOX_QUOTE(param)));
-        kon_debug("arg %s cstr %s, bind value %s",
+        KON_DEBUG("arg %s cstr %s, bind value %s",
             KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")),
             varName,
             KON_StringToCstr(KON_ToFormatString(kstate, arg, true, 0, "  "))
@@ -44,8 +44,8 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
 
 KonTrampoline* KON_EvalPrefixLambda(KonState* kstate, KN expression, KN env, KonContinuation* cont)
 {
-    kon_debug("meet prefix marcro lambda");
-    kon_debug("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
+    KON_DEBUG("meet prefix marcro lambda");
+    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     KN first = kon_car(expression);
     KN param = KON_NIL;
     KN funcName = KON_NULL;
@@ -60,9 +60,9 @@ KonTrampoline* KON_EvalPrefixLambda(KonState* kstate, KN expression, KN env, Kon
         body = kon_cdr(expression);
     }
 
-    kon_debug("funcName %s", KON_StringToCstr(KON_ToFormatString(kstate, funcName, true, 0, "  ")));
-    kon_debug("param %s", KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")));
-    kon_debug("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
+    KON_DEBUG("funcName %s", KON_StringToCstr(KON_ToFormatString(kstate, funcName, true, 0, "  ")));
+    KON_DEBUG("param %s", KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")));
+    KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 
     KonProcedure* proc = KON_ALLOC_TYPE_TAG(kstate, KonProcedure, KON_T_PROCEDURE);
     proc->Type = KON_COMPOSITE_LAMBDA;

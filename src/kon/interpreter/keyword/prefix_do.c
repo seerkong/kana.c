@@ -5,7 +5,7 @@
 
 KonTrampoline* KON_EvalPrefixDo(KonState* kstate, KN expression, KN env, KonContinuation* cont)
 {
-    kon_debug("meet prefix marcro do");
+    KON_DEBUG("meet prefix marcro do");
     KonEnv* procBindEnv = KON_MakeChildEnv(kstate, env);
     KonTrampoline* bounce = KON_EvalSentences(kstate, expression, procBindEnv, cont);
 

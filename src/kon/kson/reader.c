@@ -9,15 +9,15 @@ KonReader* KSON_ReaderInit(KonState* kstate)
 {
     // init reader
     KonReader* reader = (KonReader*)malloc(sizeof(KonReader));
-    printf("[KSON_ReaderInit] malloc reader %x\n", reader);
-    printf("before tb_assert_and_check_return_val\n");
+    KON_DEBUG("malloc reader %x", reader);
+    KON_DEBUG("before tb_assert_and_check_return_val");
     tb_assert_and_check_return_val(reader, tb_null);
     
     reader->Kstate = kstate;
     
     
     reader->Tokenizer = KSON_TokenizerInit(kstate);
-    printf("after KSON_TokenizerInit\n");
+    KON_DEBUG("after KSON_TokenizerInit");
     
     reader->BuilderStack = BuilderStackInit();
     reader->StateStack = StateStackInit();
@@ -29,7 +29,7 @@ KonReader* KSON_ReaderInit(KonState* kstate)
 
 bool KSON_ReaderOpenStream(KonReader* reader, tb_stream_ref_t stream, bool isOwnedStream)
 {
-    printf("IsOwnedStream %d reader %x\n", isOwnedStream, reader);
+    KON_DEBUG("IsOwnedStream %d reader %x", isOwnedStream, reader);
     reader->IsOwnedStream = isOwnedStream;
     if (stream) {
         bool openRes = KSON_TokenizerOpenStream(reader->Tokenizer, stream);
@@ -314,7 +314,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
     
     
     KonBuilderType builderType = topBuilder->Type;
-//    kon_debug("AddValueToTopBuilder builder type %d", (int)builderType);
+//    KON_DEBUG("AddValueToTopBuilder builder type %d", (int)builderType);
     if (builderType == KON_BUILDER_VECTOR) {
         VectorBuilderAddItem(topBuilder, value);
     }
@@ -388,7 +388,7 @@ void ExitTopBuilder(KonReader* reader)
     KonBuilder* topBuilder = BuilderStackTop(reader->BuilderStack);
     KonBuilderType builderType = topBuilder->Type;
 
-    printf("ExitTopBuilder builder type %d\n", builderType);
+    KON_DEBUG("ExitTopBuilder builder type %d", builderType);
 
     KN value;
     if (builderType == KON_BUILDER_VECTOR) {
@@ -430,7 +430,7 @@ void ExitTopBuilder(KonReader* reader)
 
 void ExitAllStackBuilders()
 {
-    kon_debug("ExitAllStackBuilders");
+    KON_DEBUG("ExitAllStackBuilders");
     // KonBuilder* newTopBuilder = BuilderStackTop(reader->BuilderStack);
 }
 
@@ -438,7 +438,7 @@ KN KSON_Parse(KonReader* reader)
 {
     tb_size_t initState = KON_READER_ROOT;
     StateStackPush(reader->StateStack, initState);
-    printf("[KSON_Parse]start\n");
+    KON_DEBUG("start");
 
     tb_size_t event = KON_TOKEN_NONE;
     while ((event = KSON_TokenizerNext(reader->Tokenizer)) && event != KON_TOKEN_EOF) {
@@ -470,10 +470,8 @@ KN KSON_Parse(KonReader* reader)
                 builder = CreateListBuilder();
             }
             else if (event == KON_TOKEN_VECTOR_START) {
-                printf("event is KON_TOKEN_VECTOR_START\n");
                 StateStackSetTopValue(reader->StateStack, KON_READER_PARSE_VECTOR);
                 KonBuilder* builder2 = CreateVectorBuilder();
-                printf("builder type %d\n", builder2->Type);
                 BuilderStackPush(reader->BuilderStack, builder2);
                 continue;
             }

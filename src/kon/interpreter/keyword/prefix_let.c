@@ -23,14 +23,14 @@ KN AfterLetValExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
 
 KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KN env, KonContinuation* cont)
 {
-    kon_debug("meet prefix marcro let");
-    kon_debug("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
+    KON_DEBUG("meet prefix marcro let");
+    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     KN varName = kon_car(expression);
     
 
     char* varNameCstr = tb_string_cstr(&KON_UNBOX_SYMBOL(varName));
 
-    kon_debug("varName %s", varNameCstr);
+    KON_DEBUG("varName %s", varNameCstr);
     
     KonTrampoline* bounce;
     if ((KN)kon_cdr(expression) == KON_NIL) {
@@ -41,7 +41,7 @@ KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KN env, KonCon
     }
     else {
         KN initVal = kon_cadr(expression);
-        kon_debug("initVal %s", KON_StringToCstr(KON_ToFormatString(kstate, initVal, true, 0, "  ")));
+        KON_DEBUG("initVal %s", KON_StringToCstr(KON_ToFormatString(kstate, initVal, true, 0, "  ")));
 
         KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
         k->Cont = cont;
