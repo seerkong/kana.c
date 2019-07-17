@@ -5,7 +5,7 @@
 
 KonTrampoline* KON_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN argList, KN env, KonContinuation* cont)
 {
-    KonEnv* dynamicEnv = env;
+    KonEnv* parentEnv = env;
     KN param = proc->Composite.ArgList;
     KN body = proc->Composite.Body;
 
@@ -13,7 +13,7 @@ KonTrampoline* KON_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN a
     kon_debug("argList %s", KON_StringToCstr(KON_ToFormatString(kstate, argList, true, 0, "  ")));
     kon_debug("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 
-    KonEnv* procBindEnv = KON_MakeChildEnv(kstate, dynamicEnv);
+    KonEnv* procBindEnv = KON_MakeChildEnv(kstate, parentEnv);
 
     KonListNode* iterParam = param;
     KonListNode* iterArg = kon_cdr(argList);

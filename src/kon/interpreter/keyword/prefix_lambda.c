@@ -5,7 +5,7 @@
 
 KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN argList, KN env, KonContinuation* cont)
 {
-    KonEnv* lexicalEnv = proc->Composite.LexicalEnv;
+    KonEnv* parentEnv = proc->Composite.LexicalEnv;
     KN param = proc->Composite.ArgList;
     KN body = proc->Composite.Body;
 
@@ -13,7 +13,7 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
     kon_debug("argList %s", KON_StringToCstr(KON_ToFormatString(kstate, argList, true, 0, "  ")));
     kon_debug("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 
-    KonEnv* procBindEnv = KON_MakeChildEnv(kstate, lexicalEnv);
+    KonEnv* procBindEnv = KON_MakeChildEnv(kstate, parentEnv);
 
     KonListNode* iterParam = param;
     KonListNode* iterArg = kon_cdr(argList);

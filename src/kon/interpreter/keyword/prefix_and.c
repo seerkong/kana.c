@@ -5,30 +5,29 @@
 
 KN AfterAndConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KonContinuation* cont = contBeingInvoked;//CAST_Kon(Continuation, contBeingInvoked);
-    KN env = cont->Env;
-    KonHashMap* memo = cont->MemoTable;
+    KN env = contBeingInvoked->Env;
+    KonHashMap* memo = contBeingInvoked->MemoTable;
     KN restConditon = KON_HashMapGet(memo, "RestCondition");
 
     KonTrampoline* bounce;
     if (kon_is_false(evaledValue) || evaledValue == KON_NIL) {
         kon_debug("break and");
         bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-        bounce->Run.Cont = cont->Cont;
+        bounce->Run.Cont = contBeingInvoked->Cont;
         bounce->Run.Value = KON_FALSE;
     }
     else if (restConditon == KON_NIL) {
         // all conditions passed, return true
         kon_debug("all and condition return true");
         bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-        bounce->Run.Cont = cont->Cont;
+        bounce->Run.Cont = contBeingInvoked->Cont;
         bounce->Run.Value = KON_TRUE;
     }
     else {
         // next condition
         KN nextExpr = kon_car(restConditon);
         KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
-        k->Cont = cont->Cont;
+        k->Cont = contBeingInvoked->Cont;
         k->Env = env;
 
         KonHashMap* memo = KON_HashMapInit(10);
@@ -50,7 +49,7 @@ KonTrampoline* KON_EvalPrefixAnd(KonState* kstate, KN expression, KN env, KonCon
     
     KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
-    k->Env = cont->Env;
+    k->Env = env;
 
     KonHashMap* memo = KON_HashMapInit(10);
     KON_HashMapPut(memo, "RestCondition", kon_cdr(expression));

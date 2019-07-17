@@ -39,22 +39,21 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
 
 KN AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KonContinuation* cont = contBeingInvoked;//CAST_Kon(Continuation, contBeingInvoked);
-    KN env = cont->Env;
-    KonHashMap* memo = cont->MemoTable;
+    KN env = contBeingInvoked->Env;
+    KonHashMap* memo = contBeingInvoked->MemoTable;
     KN trueClause = KON_HashMapGet(memo, "TrueClause");
     KN falseClause = KON_HashMapGet(memo, "FalseClause");
 
     KonTrampoline* bounce;
     if (kon_is_true(evaledValue)) {
-        bounce = KON_EvalSentences(kstate, trueClause, env, cont->Cont);
+        bounce = KON_EvalSentences(kstate, trueClause, env, contBeingInvoked->Cont);
     }
     else if (kon_is_false(evaledValue) && falseClause != KON_NIL) {
-        bounce = KON_EvalSentences(kstate, falseClause, env, cont->Cont);
+        bounce = KON_EvalSentences(kstate, falseClause, env, contBeingInvoked->Cont);
     }
     else {
         bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-        bounce->Run.Cont = cont->Cont;
+        bounce->Run.Cont = contBeingInvoked->Cont;
         bounce->Run.Value = KON_FALSE;
     }
 

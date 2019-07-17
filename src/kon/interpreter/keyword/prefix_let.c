@@ -6,9 +6,8 @@
 
 KN AfterLetValExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KonContinuation* cont = contBeingInvoked;//CAST_Kon(Continuation, contBeingInvoked);
-    KN env = cont->Env;
-    KonHashMap* memo = cont->MemoTable;
+    KN env = contBeingInvoked->Env;
+    KonHashMap* memo = contBeingInvoked->MemoTable;
     char* varName = KON_HashMapGet(memo, "VarName");
 
     KON_EnvDefine(kstate, env, varName, evaledValue);
@@ -16,7 +15,7 @@ KN AfterLetValExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
     KonTrampoline* bounce;
 
     bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-    bounce->Run.Cont = cont->Cont;
+    bounce->Run.Cont = contBeingInvoked->Cont;
     bounce->Run.Value = KON_TWO;
 
     return bounce;

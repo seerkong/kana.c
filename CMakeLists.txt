@@ -390,6 +390,7 @@ target_sources(kon PRIVATE
     src/kon/interpreter/keyword/prefix_let.c
     src/kon/interpreter/env.c
     src/kon/interpreter/primary.c
+    src/kon/interpreter/keyword/prefix_cond.c
     src/kon/kson/state_stack.c
     src/kon/interpreter/keyword/prefix_func.c
     src/kon/interpreter/keyword/prefix_blk.c
