@@ -11,5 +11,6 @@
 #include "prefix_do.h"
 #include "prefix_and.h"
 #include "prefix_or.h"
+#include "prefix_cond.h"
 
 #endif

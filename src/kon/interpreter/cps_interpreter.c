@@ -163,44 +163,44 @@ KonTrampoline* AllocBounceWithType(KonBounceType type)
 
 // pop the top continuation
 // the bounce continuation should be cont->Cont
-KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* cont, KN val)
+KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingInvoked, KN val)
 {
     // all sentences finished, return last value
-    if (kon_continuation_type(cont) == KON_CONT_RETURN) {
+    if (kon_continuation_type(contBeingInvoked) == KON_CONT_RETURN) {
         KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_LAND);
         bounce->Land.Value = val;
         return bounce;
     }
-    else if (kon_continuation_type(cont) == KON_CONT_NATIVE_CALLBACK) {
-        KonContFuncRef callbackFunc = cont->NativeCallback;
-        KonTrampoline* bounce = callbackFunc(kstate, val, cont);
+    else if (kon_continuation_type(contBeingInvoked) == KON_CONT_NATIVE_CALLBACK) {
+        KonContFuncRef callbackFunc = contBeingInvoked->NativeCallback;
+        KonTrampoline* bounce = callbackFunc(kstate, val, contBeingInvoked);
         return bounce;
     }
-    else if (kon_continuation_type(cont) == KON_CONT_EVAL_SENTENCE_LIST) {
+    else if (kon_continuation_type(contBeingInvoked) == KON_CONT_EVAL_SENTENCE_LIST) {
         KN lastSentenceVal = val;
-        KN env = cont->Env;
-        KN restSentences = cont->EvalSentenceList.RestSentenceList;
+        KN env = contBeingInvoked->Env;
+        KN restSentences = contBeingInvoked->EvalSentenceList.RestSentenceList;
         if (restSentences == KON_NIL) {
             // block sentences all finished
             KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-            bounce->Run.Cont = cont->Cont;
+            bounce->Run.Cont = contBeingInvoked->Cont;
             bounce->Run.Value = lastSentenceVal;
             return bounce;
         }
         else {
-            return KON_EvalSentences(kstate, restSentences, env, cont->Cont);
+            return KON_EvalSentences(kstate, restSentences, env, contBeingInvoked->Cont);
         }
     }
-    else if (kon_continuation_type(cont) == KON_CONT_EVAL_SUBJ) {
+    else if (kon_continuation_type(contBeingInvoked) == KON_CONT_EVAL_SUBJ) {
         // subj evaled, now should eval clauses
         KN subj = val;
-        KN restWords = cont->EvalSubj.RestWordList;
+        KN restWords = contBeingInvoked->EvalSubj.RestWordList;
 
         if (restWords == KON_NIL) {
             // no other words besids subj, is a sentence like {"abc"}
             // finish this sentence. use subj as return val
             KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-            bounce->Run.Cont = cont->Cont;
+            bounce->Run.Cont = contBeingInvoked->Cont;
             bounce->Run.Value = subj;
             return bounce;
         }
@@ -213,59 +213,59 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* cont, KN v
             if (clauses == KON_NIL) {
                 // no clauses like {{a}}
                 KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-                bounce->Run.Cont = cont->Cont;
+                bounce->Run.Cont = contBeingInvoked->Cont;
                 bounce->Run.Value = subj;
                 return bounce;
             }
 
             // eval the first clause
             KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_LIST);
-            k->Cont = cont->Cont;
-            k->Env = cont->Env;
+            k->Cont = contBeingInvoked->Cont;
+            k->Env = contBeingInvoked->Env;
             k->EvalClauseList.RestClauseList = kon_cdr(clauses);
             
             KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_CLAUSE_LIST);
             bounce->SubjBounce.Subj = subj;
             bounce->SubjBounce.Cont = k;
-            bounce->SubjBounce.Env = cont->Env;
+            bounce->SubjBounce.Env = contBeingInvoked->Env;
             bounce->SubjBounce.Value = kon_car(clauses);
             return bounce;
         }
         
     }
-    else if (kon_continuation_type(cont) == KON_CONT_EVAL_CLAUSE_LIST) {
+    else if (kon_continuation_type(contBeingInvoked) == KON_CONT_EVAL_CLAUSE_LIST) {
         // last clause eval finshed, eval next clause
         // last clause eval result is the subj of the next clause
         KN subj = val;
-        KN restClauseList = cont->EvalClauseList.RestClauseList;
+        KN restClauseList = contBeingInvoked->EvalClauseList.RestClauseList;
         if (restClauseList == KON_NIL) {
             // no other clauses, is a sentence like {writeln % "abc"}
             // finish this sentence. use last clause eval result as return val
             KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-            bounce->Run.Cont = cont->Cont;
+            bounce->Run.Cont = contBeingInvoked->Cont;
             bounce->Run.Value = subj;
             return bounce;
         }
         else {
             // eval the next clause
             KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_LIST);
-            k->Cont = cont->Cont;
-            k->Env = cont->Env;
+            k->Cont = contBeingInvoked->Cont;
+            k->Env = contBeingInvoked->Env;
             k->EvalClauseList.RestClauseList = kon_cdr(restClauseList);
             
             KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_CLAUSE_LIST);
             bounce->SubjBounce.Subj = subj;
             bounce->SubjBounce.Cont = k;
-            bounce->SubjBounce.Env = cont->Env;
+            bounce->SubjBounce.Env = contBeingInvoked->Env;
             bounce->SubjBounce.Value = kon_car(restClauseList);
             return bounce;
         }
     }
-    else if (kon_continuation_type(cont) == KON_CONT_EVAL_CLAUSE_ARGS) {
+    else if (kon_continuation_type(contBeingInvoked) == KON_CONT_EVAL_CLAUSE_ARGS) {
         KN lastArgEvaled = val;
-        KN subj = cont->EvalClauseArgs.Subj;
-        KN restArgList = cont->EvalClauseArgs.RestArgList;
-        KN evaledArgList = cont->EvalClauseArgs.EvaledArgList;
+        KN subj = contBeingInvoked->EvalClauseArgs.Subj;
+        KN restArgList = contBeingInvoked->EvalClauseArgs.RestArgList;
+        KN evaledArgList = contBeingInvoked->EvalClauseArgs.EvaledArgList;
         // NOTE! the evaluated arg list here is reverted saved
         // should reverted back when apply the arguments
         evaledArgList = kon_cons(kstate, lastArgEvaled, evaledArgList);
@@ -273,13 +273,14 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* cont, KN v
         if (restArgList == KON_NIL) {
             // this clause args all eval finished
             KN argList = Kon_ListRevert(kstate, evaledArgList);
-            return ApplySubjVerbAndObjects(kstate, subj, argList, cont->Env, cont->Cont);
+            // next continuation should be KON_CONT_EVAL_CLAUSE_LIST
+            return ApplySubjVerbAndObjects(kstate, subj, argList, contBeingInvoked->Env, contBeingInvoked->Cont);
         }
         else {
             // eval the next clause
             KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_ARGS);
-            k->Cont = cont->Cont;
-            k->Env = cont->Env;
+            k->Cont = contBeingInvoked->Cont;
+            k->Env = contBeingInvoked->Env;
             k->EvalClauseArgs.Subj = subj;
             k->EvalClauseArgs.RestArgList = kon_cdr(restArgList);
             k->EvalClauseArgs.EvaledArgList = evaledArgList;
@@ -287,7 +288,7 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* cont, KN v
             KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_ARG_LIST);
 //            bounce->SubjBounce.Subj = subj;
             bounce->Bounce.Cont = k;
-            bounce->Bounce.Env = cont->Env;
+            bounce->Bounce.Env = contBeingInvoked->Env;
             bounce->Bounce.Value = kon_car(restArgList);
             return bounce;
         }
@@ -334,6 +335,9 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             }
             else if (strcmp(prefix, "or") == 0) {
                 bounce = KON_EvalPrefixOr(kstate, kon_cdr(words), env, cont);
+            }
+            else if (strcmp(prefix, "cond") == 0) {
+                bounce = KON_EvalPrefixCond(kstate, kon_cdr(words), env, cont);
             }
             else {
                 kon_debug("error! unhandled prefix marcro %s", prefix);
