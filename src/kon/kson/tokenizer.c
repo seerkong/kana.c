@@ -422,7 +422,7 @@ void ParseRawString(KonTokenizer* tokenizer)
     tokenizer->ColEnd = tokenizer->CurrCol;
 }
 
-// single line comment like // xxx
+// single line comment like // xxx or ` xxx
 void ParseSingleLineComment(KonTokenizer* tokenizer)
 {
     tokenizer->RowStart = tokenizer->CurrRow;
@@ -696,8 +696,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (nextChars == tb_null) {
                 break;
             }
-            
-            if (nextChars[1] == '.') {
+            else if (nextChars[1] == '.') {
                 UpdateTokenContent(tokenizer, "$.");
                 ForwardToken(tokenizer, 2);
                 tokenizer->TokenKind = KON_TOKEN_EXPAND_REPLACE;
@@ -803,6 +802,11 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
         else if (IsIdentiferPrefixChar(pc[0])) {
             ParseIdentifier(tokenizer);
             tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
+            break;
+        }
+        else if (pc[0] == '`') {
+            ParseSingleLineComment(tokenizer);
+            tokenizer->TokenKind = KON_TOKEN_COMMENT_SINGLE_LINE;
             break;
         }
         else if (pc[0] == '/') {
