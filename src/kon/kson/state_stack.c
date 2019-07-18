@@ -23,7 +23,7 @@ void StateStackDestroy(StateStack* stack)
     free(stack);
 }
 
-void StateStackPush(StateStack* stack, long item)
+void StateStackPush(StateStack* stack, KonReaderState item)
 {
     assert(stack);
     StateStackNode* oldTop = stack->Top;
@@ -35,7 +35,7 @@ void StateStackPush(StateStack* stack, long item)
     stack->Length = stack->Length + 1;
 }
 
-long StateStackPop(StateStack* stack)
+KonReaderState StateStackPop(StateStack* stack)
 {
     assert(stack);
     StateStackNode* top = stack->Top;
@@ -50,13 +50,13 @@ long StateStackPop(StateStack* stack)
     return data;
 }
 
-long StateStackLength(StateStack* stack)
+KonReaderState StateStackLength(StateStack* stack)
 {
     assert(stack);
     return stack->Length;
 }
 
-long StateStackTop(StateStack* stack)
+KonReaderState StateStackTop(StateStack* stack)
 {
     assert(stack);
     StateStackNode* top = stack->Top;
@@ -64,7 +64,7 @@ long StateStackTop(StateStack* stack)
     return top->Data;
 }
 
-void StateStackSetTopValue(StateStack* stack, long newData)
+void StateStackSetTopValue(StateStack* stack, KonReaderState newData)
 {
     assert(stack);
     StateStackNode* top = stack->Top;

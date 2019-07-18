@@ -103,13 +103,11 @@ bool IsWrapperToken(tb_size_t event)
         || event == KON_TOKEN_QUASI_TABLE
         || event == KON_TOKEN_QUASI_CELL
         || event == KON_TOKEN_EXPAND_REPLACE
-        || event == KON_TOKEN_EXPAND_VECTOR
-        || event == KON_TOKEN_EXPAND_TABLE
-        || event == KON_TOKEN_EXPAND_LIST
+        || event == KON_TOKEN_EXPAND_KV
+        || event == KON_TOKEN_EXPAND_SEQ
         || event == KON_TOKEN_UNQUOTE_REPLACE
-        || event == KON_TOKEN_UNQUOTE_VECTOR
-        || event == KON_TOKEN_UNQUOTE_TABLE
-        || event == KON_TOKEN_UNQUOTE_LIST
+        || event == KON_TOKEN_UNQUOTE_KV
+        || event == KON_TOKEN_UNQUOTE_SEQ
     ) {
         return true;
     }
@@ -388,7 +386,7 @@ void ExitTopBuilder(KonReader* reader)
     KonBuilder* topBuilder = BuilderStackTop(reader->BuilderStack);
     KonBuilderType builderType = topBuilder->Type;
 
-    KON_DEBUG("ExitTopBuilder builder type %d", builderType);
+    KON_DEBUG("ExitTopBuilder builder type %s", BuilderTypeToCStr(builderType));
 
     KN value;
     if (builderType == KON_BUILDER_VECTOR) {
@@ -462,28 +460,30 @@ KN KSON_Parse(KonReader* reader)
                 StateStackSetTopValue(reader->StateStack, KON_READER_PARSE_CELL_INNER_CONTAINER);
             }
 
-            StateStackPush(reader->StateStack, currentState);
-
             KonBuilder* builder;
             if (event == KON_TOKEN_LIST_START) {
-                StateStackSetTopValue(reader->StateStack, KON_READER_PARSE_LIST);
+//                StateStackSetTopValue(reader->StateStack, KON_READER_PARSE_LIST);
+                StateStackPush(reader->StateStack, KON_READER_PARSE_LIST);
                 builder = CreateListBuilder();
             }
             else if (event == KON_TOKEN_VECTOR_START) {
-                StateStackSetTopValue(reader->StateStack, KON_READER_PARSE_VECTOR);
+//                StateStackSetTopValue(reader->StateStack, KON_READER_PARSE_VECTOR);
+                StateStackPush(reader->StateStack, KON_READER_PARSE_VECTOR);
                 KonBuilder* builder2 = CreateVectorBuilder();
                 BuilderStackPush(reader->BuilderStack, builder2);
                 continue;
             }
             else if (event == KON_TOKEN_TABLE_START) {
-                StateStackSetTopValue(reader->StateStack, KON_READER_PARSE_TABLE);
+//                StateStackSetTopValue(reader->StateStack, KON_READER_PARSE_TABLE);
+                StateStackPush(reader->StateStack, KON_READER_PARSE_TABLE);
                 builder = CreateTableBuilder();
             }
             else if (event == KON_TOKEN_CELL_START) {
-                StateStackSetTopValue(
-                    reader->StateStack,
-                    KON_READER_PARSE_CELL_TAG
-                );
+//                StateStackSetTopValue(
+//                    reader->StateStack,
+//                    KON_READER_PARSE_CELL_TAG
+//                );
+                StateStackPush(reader->StateStack, KON_READER_PARSE_CELL_TAG);
                 builder = CreateCellBuilder();
             }
             else {
@@ -495,10 +495,11 @@ KN KSON_Parse(KonReader* reader)
                     || event == KON_TOKEN_QUOTE_TABLE
                     || event == KON_TOKEN_QUOTE_CELL
                 ) {
-                    StateStackSetTopValue(
-                        reader->StateStack,
-                        KON_READER_PARSE_QUOTE
-                    );
+//                    StateStackSetTopValue(
+//                        reader->StateStack,
+//                        KON_READER_PARSE_QUOTE
+//                    );
+                    StateStackPush(reader->StateStack, KON_READER_PARSE_QUOTE);
                     builder = CreateWrapperBuilder(KON_BUILDER_QUOTE, event);
                 }
                 else if (event == KON_TOKEN_QUASI_VECTOR
@@ -506,49 +507,46 @@ KN KSON_Parse(KonReader* reader)
                     || event == KON_TOKEN_QUASI_TABLE
                     || event == KON_TOKEN_QUASI_CELL
                 ) {
-                    StateStackSetTopValue(
-                        reader->StateStack,
-                        KON_READER_PARSE_QUASIQUOTE
-                    );
+//                    StateStackSetTopValue(
+//                        reader->StateStack,
+//                        KON_READER_PARSE_QUASIQUOTE
+//                    );
+                    StateStackPush(reader->StateStack, KON_READER_PARSE_QUASIQUOTE);
                     builder = CreateWrapperBuilder(KON_BUILDER_QUASIQUOTE, event);
                 }
                 else if (event == KON_TOKEN_UNQUOTE_REPLACE
-                    || event == KON_TOKEN_UNQUOTE_VECTOR
-                    || event == KON_TOKEN_UNQUOTE_TABLE
-                    || event == KON_TOKEN_UNQUOTE_LIST
+                    || event == KON_TOKEN_UNQUOTE_KV
+                    || event == KON_TOKEN_UNQUOTE_SEQ
                 ) {
-                    StateStackSetTopValue(
-                        reader->StateStack,
-                        KON_READER_PARSE_UNQUOTE
-                    );
+//                    StateStackSetTopValue(
+//                        reader->StateStack,
+//                        KON_READER_PARSE_UNQUOTE
+//                    );
+                    StateStackPush(reader->StateStack, KON_READER_PARSE_UNQUOTE);
                     builder = CreateWrapperBuilder(KON_BUILDER_UNQUOTE, event);
                 }
                 else if (event == KON_TOKEN_EXPAND_REPLACE) {
-                    StateStackSetTopValue(
-                        reader->StateStack,
-                        KON_READER_PARSE_EXPAND_REPLACE
-                    );
+//                    StateStackSetTopValue(
+//                        reader->StateStack,
+//                        KON_READER_PARSE_EXPAND_REPLACE
+//                    );
+                    StateStackPush(reader->StateStack, KON_READER_PARSE_EXPAND_REPLACE);
                     builder = CreateWrapperBuilder(KON_BUILDER_EXPAND, event);
                 }
-                else if (event == KON_TOKEN_EXPAND_VECTOR) {
-                    StateStackSetTopValue(
-                        reader->StateStack,
-                        KON_READER_PARSE_EXPAND_VECTOR
-                    );
+                else if (event == KON_TOKEN_EXPAND_KV) {
+//                    StateStackSetTopValue(
+//                        reader->StateStack,
+//                        KON_READER_PARSE_EXPAND_KV
+//                    );
+                    StateStackPush(reader->StateStack, KON_READER_PARSE_EXPAND_KV);
                     builder = CreateWrapperBuilder(KON_BUILDER_EXPAND, event);
                 }
-                else if (event == KON_TOKEN_EXPAND_TABLE) {
-                    StateStackSetTopValue(
-                        reader->StateStack,
-                        KON_READER_PARSE_EXPAND_TABLE
-                    );
-                    builder = CreateWrapperBuilder(KON_BUILDER_EXPAND, event);
-                }
-                else if (event == KON_TOKEN_EXPAND_LIST) {
-                    StateStackSetTopValue(
-                        reader->StateStack,
-                        KON_READER_PARSE_EXPAND_LIST
-                    );
+                else if (event == KON_TOKEN_EXPAND_SEQ) {
+//                    StateStackSetTopValue(
+//                        reader->StateStack,
+//                        KON_READER_PARSE_EXPAND_SEQ
+//                    );
+                    StateStackPush(reader->StateStack, KON_READER_PARSE_EXPAND_SEQ);
                     builder = CreateWrapperBuilder(KON_BUILDER_EXPAND, event);
                 }
             }

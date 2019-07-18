@@ -7,7 +7,7 @@
 #include "tokenizer.h"
 
 typedef enum {
-    KON_BUILDER_VECTOR,
+    KON_BUILDER_VECTOR = 1,
     KON_BUILDER_LIST,
     KON_BUILDER_TABLE,
     KON_BUILDER_TABLE_PAIR,
@@ -57,6 +57,8 @@ typedef struct _BuilderStack {
 
 // create xxx builder
 // make xxx by builder
+
+const char* BuilderTypeToCStr(KonBuilderType type);
 
 KonBuilder* CreateVectorBuilder();
 void VectorBuilderAddItem(KonBuilder* builder, KN item);

@@ -37,31 +37,27 @@ typedef enum
     KON_TOKEN_SYM_IDENTIFIER,   // abC
     KON_TOKEN_SYM_PREFIX_MARCRO, // !cond !define
     KON_TOKEN_SYM_SUFFIX_MARCRO, // ^await
-    KON_TOKEN_SYM_VARIABLE, // $abc
+    KON_TOKEN_SYM_VARIABLE, // @abc
 
-    // @abc @'' @[] @() @<> @{}
-    KON_TOKEN_QUOTE_IDENTIFER,
-    KON_TOKEN_QUOTE_SYMBOL,
-    KON_TOKEN_QUOTE_VECTOR,
-    KON_TOKEN_QUOTE_LIST,
-    KON_TOKEN_QUOTE_TABLE,
-    KON_TOKEN_QUOTE_CELL,
+    KON_TOKEN_QUOTE_IDENTIFER,  // $abc
+    KON_TOKEN_QUOTE_SYMBOL, // $''
+    KON_TOKEN_QUOTE_VECTOR, // $[]
+    KON_TOKEN_QUOTE_LIST,   // ${}
+    KON_TOKEN_QUOTE_TABLE,  // $()
+    KON_TOKEN_QUOTE_CELL,   // $<>
 
-    // $[] $() $<> ${}
-    KON_TOKEN_QUASI_VECTOR,
-    KON_TOKEN_QUASI_LIST,
-    KON_TOKEN_QUASI_TABLE,
-    KON_TOKEN_QUASI_CELL,
+    KON_TOKEN_QUASI_VECTOR, // @[]
+    KON_TOKEN_QUASI_LIST,   // @{}
+    KON_TOKEN_QUASI_TABLE,  // @()
+    KON_TOKEN_QUASI_CELL,   // @<>
 
     KON_TOKEN_EXPAND_REPLACE,   // $.abc
-    KON_TOKEN_EXPAND_VECTOR,     // $[].
-    KON_TOKEN_EXPAND_TABLE,     // $().
-    KON_TOKEN_EXPAND_LIST,      // ${}.
+    KON_TOKEN_EXPAND_KV,        // $%.abc
+    KON_TOKEN_EXPAND_SEQ,        // $~.abc
 
-    KON_TOKEN_UNQUOTE_REPLACE,  // $e.abc $e.{5 .+ $.a}
-    KON_TOKEN_UNQUOTE_VECTOR,    // $[]e.{[1 2 3]}
-    KON_TOKEN_UNQUOTE_TABLE,    // $()e.{(:a 1 :b 2)}
-    KON_TOKEN_UNQUOTE_LIST,     // ${}e.{@{1 2 3}}
+    KON_TOKEN_UNQUOTE_REPLACE,  // @.abc @.{5 .+ $.a}
+    KON_TOKEN_UNQUOTE_KV,        // @%.abc
+    KON_TOKEN_UNQUOTE_SEQ,        // @~.abc
 
     KON_TOKEN_TABLE_TAG,    // :
     

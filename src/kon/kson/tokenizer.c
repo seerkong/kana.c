@@ -131,26 +131,20 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_EXPAND_REPLACE:
             tb_string_cstrcpy(&tokenKind, "KON_TOKEN_EXPAND_REPLACE");
             break;
-        case KON_TOKEN_EXPAND_VECTOR:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_EXPAND_VECTOR");
+        case KON_TOKEN_EXPAND_KV:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_EXPAND_KV");
             break;
-        case KON_TOKEN_EXPAND_TABLE:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_EXPAND_TABLE");
-            break;
-        case KON_TOKEN_EXPAND_LIST:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_EXPAND_LIST");
+        case KON_TOKEN_EXPAND_SEQ:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_EXPAND_SEQ");
             break;
         case KON_TOKEN_UNQUOTE_REPLACE:
             tb_string_cstrcpy(&tokenKind, "KON_TOKEN_UNQUOTE_REPLACE");
             break;
-        case KON_TOKEN_UNQUOTE_VECTOR:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_UNQUOTE_VECTOR");
+        case KON_TOKEN_UNQUOTE_KV:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_UNQUOTE_KV");
             break;
-        case KON_TOKEN_UNQUOTE_TABLE:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_UNQUOTE_TABLE");
-            break;
-        case KON_TOKEN_UNQUOTE_LIST:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_UNQUOTE_LIST");
+        case KON_TOKEN_UNQUOTE_SEQ:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_UNQUOTE_SEQ");
             break;
 
         case KON_TOKEN_COMMENT_SINGLE_LINE:
@@ -160,7 +154,8 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
             break;
     }
     // format
-    KON_DEBUG("<%s (:row %ld, :col %ld, :row-end %ld, :col-end %ld) [%s]>", tb_string_cstr(&tokenKind), tokenizer->RowStart, tokenizer->ColStart, tokenizer->RowEnd, tokenizer->ColEnd, tb_string_cstr(&tokenizer->Content));
+//    KON_DEBUG("<%s (:row %ld, :col %ld, :row-end %ld, :col-end %ld) [%s]>", tb_string_cstr(&tokenKind), tokenizer->RowStart, tokenizer->ColStart, tokenizer->RowEnd, tokenizer->ColEnd, tb_string_cstr(&tokenizer->Content));
+    KON_DEBUG("<%s (:row %d, :col %d) [%s]>", tb_string_cstr(&tokenKind), tokenizer->RowStart, tokenizer->ColStart, tb_string_cstr(&tokenizer->Content));
 }
 
 KonTokenizer* KSON_TokenizerInit(KonState* kstate)
@@ -696,99 +691,100 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             ParseRawString(tokenizer);
             tokenizer->TokenKind = KON_TOKEN_SYM_STRING;
         }
-        else if (pc[0] == '@') {
-            tb_char_t* nextChars = PeekChars(tokenizer, 2);
-            if (nextChars == tb_null) {
-                break;
-            }
-            if (nextChars[1] == '[') {
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_VECTOR;
-            }
-            else if (nextChars[1] == '(') {
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_TABLE;
-            }
-            else if (nextChars[1] == '<') {
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_CELL;
-            }
-            else if (nextChars[1] == '{') {
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_LIST;
-            }
-            else if (nextChars[1] == '\'') {
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_SYMBOL;
-            }
-            else {
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_IDENTIFER;
-            }
-            UpdateTokenContent(tokenizer, "@");
-            ForwardToken(tokenizer, 1);
-        }
         else if (pc[0] == '$') {
-            tb_char_t* nextChars = PeekChars(tokenizer, 4);
+            tb_char_t* nextChars = PeekChars(tokenizer, 3);
             if (nextChars == tb_null) {
                 break;
             }
+            
             if (nextChars[1] == '.') {
                 UpdateTokenContent(tokenizer, "$.");
                 ForwardToken(tokenizer, 2);
                 tokenizer->TokenKind = KON_TOKEN_EXPAND_REPLACE;
             }
-            else if (nextChars[1] == 'e') {
-                UpdateTokenContent(tokenizer, "$e.");
+            else if (nextChars[1] == '%' && nextChars[2] == '.') {
+                UpdateTokenContent(tokenizer, "$%.");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KON_TOKEN_UNQUOTE_REPLACE;
+                tokenizer->TokenKind = KON_TOKEN_EXPAND_KV;
             }
-            else if (nextChars[1] == '[' && nextChars[2] == ']' && nextChars[3] == '.') {
-                UpdateTokenContent(tokenizer, "$[].");
-                ForwardToken(tokenizer, 4);
-                tokenizer->TokenKind = KON_TOKEN_EXPAND_VECTOR;
-            }
-            else if (nextChars[1] == '[' && nextChars[2] == ']' && nextChars[3] == 'e') {
-                UpdateTokenContent(tokenizer, "$[]e.");
-                ForwardToken(tokenizer, 5);
-                tokenizer->TokenKind = KON_TOKEN_UNQUOTE_VECTOR;
-            }
-            else if (nextChars[1] == '(' && nextChars[2] == ')' && nextChars[3] == '.') {
-                UpdateTokenContent(tokenizer, "$().");
-                ForwardToken(tokenizer, 4);
-                tokenizer->TokenKind = KON_TOKEN_EXPAND_TABLE;
-            }
-            else if (nextChars[1] == '(' && nextChars[2] == ')' && nextChars[3] == 'e') {
-                UpdateTokenContent(tokenizer, "$()e.");
-                ForwardToken(tokenizer, 5);
-                tokenizer->TokenKind = KON_TOKEN_UNQUOTE_TABLE;
-            }
-            else if (nextChars[1] == '{' && nextChars[2] == '}' && nextChars[3] == '.') {
-                UpdateTokenContent(tokenizer, "${}.");
-                ForwardToken(tokenizer, 4);
-                tokenizer->TokenKind = KON_TOKEN_EXPAND_LIST;
-            }
-            else if (nextChars[1] == '{' && nextChars[2] == '}' && nextChars[3] == 'e') {
-                UpdateTokenContent(tokenizer, "${}e.");
-                ForwardToken(tokenizer, 5);
-                tokenizer->TokenKind = KON_TOKEN_UNQUOTE_LIST;
+            else if (nextChars[1] == '~' && nextChars[2] == '.') {
+                UpdateTokenContent(tokenizer, "$~.");
+                ForwardToken(tokenizer, 3);
+                tokenizer->TokenKind = KON_TOKEN_EXPAND_SEQ;
             }
             else if (nextChars[1] == '[') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUASI_VECTOR;
+                tokenizer->TokenKind = KON_TOKEN_QUOTE_VECTOR;
             }
             else if (nextChars[1] == '(') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUASI_TABLE;
+                tokenizer->TokenKind = KON_TOKEN_QUOTE_TABLE;
             }
             else if (nextChars[1] == '<') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUASI_CELL;
+                tokenizer->TokenKind = KON_TOKEN_QUOTE_CELL;
             }
             else if (nextChars[1] == '{') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUASI_LIST;
+                tokenizer->TokenKind = KON_TOKEN_QUOTE_LIST;
+            }
+            else if (nextChars[1] == '\'') {
+                UpdateTokenContent(tokenizer, "$");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_QUOTE_SYMBOL;
             }
             else {
                 UpdateTokenContent(tokenizer, "$");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_QUOTE_IDENTIFER;
+            }
+        }
+        else if (pc[0] == '@') {
+            tb_char_t* nextChars = PeekChars(tokenizer, 3);
+            if (nextChars == tb_null) {
+                break;
+            }
+            else if (nextChars[1] == '.') {
+                UpdateTokenContent(tokenizer, "@.");
+                ForwardToken(tokenizer, 2);
+                tokenizer->TokenKind = KON_TOKEN_UNQUOTE_REPLACE;
+            }
+            else if (nextChars[1] == '%' && nextChars[2] == '.') {
+                UpdateTokenContent(tokenizer, "@%.");
+                ForwardToken(tokenizer, 3);
+                tokenizer->TokenKind = KON_TOKEN_UNQUOTE_KV;
+            }
+            else if (nextChars[1] == '~' && nextChars[2] == '.') {
+                UpdateTokenContent(tokenizer, "@~.");
+                ForwardToken(tokenizer, 3);
+                tokenizer->TokenKind = KON_TOKEN_UNQUOTE_SEQ;
+            }
+            else if (nextChars[1] == '[') {
+                UpdateTokenContent(tokenizer, "@");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_QUASI_VECTOR;
+            }
+            else if (nextChars[1] == '(') {
+                UpdateTokenContent(tokenizer, "@");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_QUASI_TABLE;
+            }
+            else if (nextChars[1] == '<') {
+                UpdateTokenContent(tokenizer, "@");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_QUASI_CELL;
+            }
+            else if (nextChars[1] == '{') {
+                UpdateTokenContent(tokenizer, "@");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_QUASI_LIST;
+            }
+            else {
+                UpdateTokenContent(tokenizer, "@");
                 ForwardToken(tokenizer, 1);
                 ParseIdentifier(tokenizer);
                 tokenizer->TokenKind = KON_TOKEN_SYM_VARIABLE;

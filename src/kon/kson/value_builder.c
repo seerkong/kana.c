@@ -8,6 +8,42 @@ static tb_void_t builder_vector_item_ptr_free(tb_element_ref_t element, tb_point
 {
 }
 
+const char* BuilderTypeToCStr(KonBuilderType type)
+{
+    switch (type) {
+        case KON_BUILDER_VECTOR: {
+            return "KON_BUILDER_VECTOR";
+        }
+        case KON_BUILDER_LIST: {
+            return "KON_BUILDER_LIST";
+        }
+        case KON_BUILDER_TABLE: {
+            return "KON_BUILDER_TABLE";
+        }
+        case KON_BUILDER_TABLE_PAIR: {
+            return "KON_BUILDER_TABLE_PAIR";
+        }
+        case KON_BUILDER_CELL: {
+            return "KON_BUILDER_CELL";
+        }
+        case KON_BUILDER_QUOTE: {
+            return "KON_BUILDER_QUOTE";
+        }
+        case KON_BUILDER_QUASIQUOTE: {
+            return "KON_BUILDER_QUASIQUOTE";
+        }
+        case KON_BUILDER_EXPAND: {
+            return "KON_BUILDER_EXPAND";
+        }
+        case KON_BUILDER_UNQUOTE: {
+            return "KON_BUILDER_UNQUOTE";
+        }
+        default: {
+            return "";
+        }
+    }
+}
+
 KonBuilder* CreateVectorBuilder()
 {
     KonBuilder* builder = (KonBuilder*)malloc(sizeof(KonBuilder));
@@ -270,16 +306,12 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
                 tmp->Type = KON_EXPAND_REPLACE;
                 break;
             }
-            case KON_TOKEN_EXPAND_VECTOR: {
-                tmp->Type = KON_EXPAND_VECTOR;
+            case KON_TOKEN_EXPAND_KV: {
+                tmp->Type = KON_EXPAND_KV;
                 break;
             }
-            case KON_TOKEN_EXPAND_TABLE: {
-                tmp->Type = KON_EXPAND_LIST;
-                break;
-            }
-            case KON_TOKEN_EXPAND_LIST: {
-                tmp->Type = KON_EXPAND_TABLE;
+            case KON_TOKEN_EXPAND_SEQ: {
+                tmp->Type = KON_EXPAND_SEQ;
                 break;
             }
         }
@@ -293,16 +325,12 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
                 tmp->Type = KON_UNQUOTE_REPLACE;
                 break;
             }
-            case KON_TOKEN_UNQUOTE_VECTOR: {
-                tmp->Type = KON_UNQUOTE_VECTOR;
+            case KON_TOKEN_UNQUOTE_KV: {
+                tmp->Type = KON_UNQUOTE_KV;
                 break;
             }
-            case KON_TOKEN_UNQUOTE_TABLE: {
-                tmp->Type = KON_UNQUOTE_LIST;
-                break;
-            }
-            case KON_TOKEN_UNQUOTE_LIST: {
-                tmp->Type = KON_UNQUOTE_TABLE;
+            case KON_TOKEN_UNQUOTE_SEQ: {
+                tmp->Type = KON_UNQUOTE_SEQ;
                 break;
             }
         }

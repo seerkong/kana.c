@@ -318,7 +318,7 @@ KN KON_QuoteStringify(KonState* kstate, KN source, bool newLine, int depth, char
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(result->String));
 
-    tb_string_cstrcat(&(result->String), "@");
+    tb_string_cstrcat(&(result->String), "$");
 
     KN innerToKonStr = KON_ToFormatString(kstate, inner, newLine, depth, padding);
     tb_string_strcat(&(result->String), &(KON_UNBOX_STRING(innerToKonStr)));
@@ -334,7 +334,7 @@ KN KON_QuasiquoteStringify(KonState* kstate, KN source, bool newLine, int depth,
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(result->String));
 
-    tb_string_cstrcat(&(result->String), "$");
+    tb_string_cstrcat(&(result->String), "@");
 
     KN innerToKonStr = KON_ToFormatString(kstate, inner, newLine, depth, padding);
     tb_string_strcat(&(result->String), &(KON_UNBOX_STRING(innerToKonStr)));
@@ -356,16 +356,12 @@ KN KON_ExpandStringify(KonState* kstate, KN source, bool newLine, int depth, cha
         case KON_EXPAND_REPLACE: {
             break;
         }
-        case KON_EXPAND_VECTOR: {
-            tb_string_cstrcat(&(result->String), "[]");
+        case KON_EXPAND_KV: {
+            tb_string_cstrcat(&(result->String), "%");
             break;
         }
-        case KON_EXPAND_LIST: {
-            tb_string_cstrcat(&(result->String), "{}");
-            break;
-        }
-        case KON_EXPAND_TABLE: {
-            tb_string_cstrcat(&(result->String), "()");
+        case KON_EXPAND_SEQ: {
+            tb_string_cstrcat(&(result->String), "~");
             break;
         }
     }
@@ -386,24 +382,20 @@ KN KON_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, ch
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     tb_string_init(&(result->String));
 
-    tb_string_cstrcat(&(result->String), "$");
+    tb_string_cstrcat(&(result->String), "@");
 
     switch (type) {
-        case KON_UNQUOTE_VECTOR: {
-            tb_string_cstrcat(&(result->String), "[]");
+        case KON_UNQUOTE_SEQ: {
+            tb_string_cstrcat(&(result->String), "~");
             break;
         }
-        case KON_UNQUOTE_LIST: {
-            tb_string_cstrcat(&(result->String), "{}");
-            break;
-        }
-        case KON_UNQUOTE_TABLE: {
-            tb_string_cstrcat(&(result->String), "()");
+        case KON_UNQUOTE_KV: {
+            tb_string_cstrcat(&(result->String), "%");
             break;
         }
     }
 
-    tb_string_cstrcat(&(result->String), "e.");
+    tb_string_cstrcat(&(result->String), ".");
 
     KN innerToKonStr = KON_ToFormatString(kstate, inner, newLine, depth, padding);
     tb_string_strcat(&(result->String), &(KON_UNBOX_STRING(innerToKonStr)));
@@ -688,28 +680,28 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
         }
         tb_string_cstrcat(&(result->String), "\n");
 
-        AddLeftPadding(&(result->String), depth, padding);
-        tb_string_cstrcat(&(result->String), padding);
         if (innerTable != KON_NULL) {
+            AddLeftPadding(&(result->String), depth, padding);
+            tb_string_cstrcat(&(result->String), padding);
+
             KN innerTableToKonStr = KON_ToFormatString(kstate, innerTable, true, depth + 1, padding);
             tb_string_cstrcat(&(result->String), KON_StringToCstr(innerTableToKonStr));
             tb_string_cstrcat(&(result->String), "\n");
         }
         
-
-        AddLeftPadding(&(result->String), depth, padding);
-        tb_string_cstrcat(&(result->String), padding);
         if (innerVector != KON_NULL) {
+            AddLeftPadding(&(result->String), depth, padding);
+            tb_string_cstrcat(&(result->String), padding);
+
             KN innerVectorToKonStr = KON_ToFormatString(kstate, innerVector, true, depth + 1, padding);
             tb_string_cstrcat(&(result->String), KON_StringToCstr(innerVectorToKonStr));
             tb_string_cstrcat(&(result->String), "\n");
         }
         
-
-
-        AddLeftPadding(&(result->String), depth, padding);
-        tb_string_cstrcat(&(result->String), padding);
         if (innerList != KON_NULL) {
+            AddLeftPadding(&(result->String), depth, padding);
+            tb_string_cstrcat(&(result->String), padding);
+
             KN innerListToKonStr = KON_ToFormatString(kstate, innerList, true, depth + 1, padding);
             tb_string_cstrcat(&(result->String), KON_StringToCstr(innerListToKonStr));
             tb_string_cstrcat(&(result->String), "\n");

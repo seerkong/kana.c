@@ -198,9 +198,8 @@ struct KonQuasiquote {
 
 typedef enum {
     KON_EXPAND_REPLACE,          // $.abc
-    KON_EXPAND_VECTOR,        // $[].[1 2 3]
-    KON_EXPAND_LIST,         // ${}.{1 2 3}
-    KON_EXPAND_TABLE        // $().(:a 1 :b 2)
+    KON_EXPAND_SEQ,        // $~.[1 2 3]
+    KON_EXPAND_KV        // $%.(:a 1 :b 2)
 } KonExpandType;
 
 struct KonExpand {
@@ -210,10 +209,9 @@ struct KonExpand {
 };
 
 typedef enum {
-    KON_UNQUOTE_REPLACE,          // $e.abc
-    KON_UNQUOTE_VECTOR,        // $[]e.{[1 2 3]}
-    KON_UNQUOTE_LIST,         // ${}e.{@{1 2 3}}
-    KON_UNQUOTE_TABLE        // $()e.{$(:a $var :b 2)}
+    KON_UNQUOTE_REPLACE,          // @.abc
+    KON_UNQUOTE_SEQ,        // @~.{[1 2 3]}
+    KON_UNQUOTE_KV        // @%.{$(:a $var :b 2)}
 } KonUnquoteType;
 
 struct KonUnquote {
