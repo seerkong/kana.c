@@ -82,26 +82,26 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_LITERAL_STRING:
             tb_string_cstrcpy(&tokenKind, "KON_TOKEN_LITERAL_STRING");
             break;
+        case KON_TOKEN_SYM_WORD:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_WORD");
+            break;
+        case KON_TOKEN_LITERAL_RAW_STRING:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_LITERAL_RAW_STRING");
+            break;
+        case KON_TOKEN_SYM_VARIABLE:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_VARIABLE");
+            break;
+        case KON_TOKEN_SYM_PREFIX_WORD:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_PREFIX_WORD");
+            break;
+        case KON_TOKEN_SYM_SUFFIX_WORD:
+            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_SUFFIX_WORD");
+            break;
         case KON_TOKEN_SYM_IDENTIFIER:
             tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_IDENTIFIER");
             break;
         case KON_TOKEN_SYM_STRING:
             tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_STRING");
-            break;
-        case KON_TOKEN_SYM_VARIABLE:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_VARIABLE");
-            break;
-        case KON_TOKEN_SYM_PREFIX_MARCRO:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_PREFIX_MARCRO");
-            break;
-        case KON_TOKEN_SYM_SUFFIX_MARCRO:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_SYM_SUFFIX_MARCRO");
-            break;
-        case KON_TOKEN_QUOTE_IDENTIFER:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_QUOTE_IDENTIFER");
-            break;
-        case KON_TOKEN_QUOTE_SYMBOL:
-            tb_string_cstrcpy(&tokenKind, "KON_TOKEN_QUOTE_SYMBOL");
             break;
         case KON_TOKEN_QUOTE_VECTOR:
             tb_string_cstrcpy(&tokenKind, "KON_TOKEN_QUOTE_VECTOR");
@@ -590,7 +590,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (IsSpace(nextChars[1])) {
                 UpdateTokenContent(tokenizer, "-");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
+                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
                 break;
             }
             else if (IsDigit(nextChars[1])) {
@@ -607,7 +607,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (IsSpace(nextChars[1])) {
                 UpdateTokenContent(tokenizer, "+");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
+                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
                 break;
             }
             else if (IsDigit(nextChars[1])) {
@@ -689,7 +689,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
         }
         else if (pc[0] == '\'') {
             ParseRawString(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_SYM_STRING;
+            tokenizer->TokenKind = KON_TOKEN_LITERAL_RAW_STRING;
         }
         else if (pc[0] == '$') {
             tb_char_t* nextChars = PeekChars(tokenizer, 3);
@@ -734,12 +734,12 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             else if (nextChars[1] == '\'') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_SYMBOL;
+                tokenizer->TokenKind = KON_TOKEN_SYM_STRING;
             }
             else {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_IDENTIFER;
+                tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
             }
         }
         else if (pc[0] == '@') {
@@ -792,16 +792,16 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
         else if (pc[0] == '!') {
             ForwardToken(tokenizer, 1);
             ParseIdentifier(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_SYM_PREFIX_MARCRO;
+            tokenizer->TokenKind = KON_TOKEN_SYM_PREFIX_WORD;
         }
         else if (pc[0] == '^') {
             ForwardToken(tokenizer, 1);
             ParseIdentifier(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_SYM_SUFFIX_MARCRO;
+            tokenizer->TokenKind = KON_TOKEN_SYM_SUFFIX_WORD;
         }
         else if (IsIdentiferPrefixChar(pc[0])) {
             ParseIdentifier(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
+            tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
             break;
         }
         else if (pc[0] == '`') {
@@ -823,7 +823,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 // divide identifier
                 UpdateTokenContent(tokenizer, "/");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
+                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
                 break;
             }
         }
@@ -831,7 +831,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             // multiply identifier
             UpdateTokenContent(tokenizer, "*");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
+            tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
             break;
         }
         else {

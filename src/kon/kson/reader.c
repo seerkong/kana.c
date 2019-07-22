@@ -92,8 +92,8 @@ bool IsContainerEndToken(tb_size_t event)
 // $e. $[]e. $()e. ${}e.
 bool IsWrapperToken(tb_size_t event)
 {
-    if (event == KON_TOKEN_QUOTE_IDENTIFER
-        || event == KON_TOKEN_QUOTE_SYMBOL
+    if (event == KON_TOKEN_SYM_IDENTIFIER
+        || event == KON_TOKEN_SYM_STRING
         || event == KON_TOKEN_QUOTE_VECTOR
         || event == KON_TOKEN_QUOTE_LIST
         || event == KON_TOKEN_QUOTE_TABLE
@@ -182,19 +182,19 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
 KN MakeSymbol(KonReader* reader, KonTokenKind event)
 {
     KonSymbol* value = KON_ALLOC_TYPE_TAG(reader->Kstate, KonSymbol, KON_T_SYMBOL);
-    if (event == KON_TOKEN_SYM_PREFIX_MARCRO) {
+    if (event == KON_TOKEN_SYM_PREFIX_WORD) {
         value->Type = KON_SYM_PREFIX_MARCRO;
     }
-    else if (event == KON_TOKEN_SYM_SUFFIX_MARCRO) {
+    else if (event == KON_TOKEN_SYM_SUFFIX_WORD) {
         value->Type = KON_SYM_SUFFIX_MARCRO;
     }
     else if (event == KON_TOKEN_SYM_VARIABLE) {
         value->Type = KON_SYM_VAR;
     }
-    else if (event == KON_TOKEN_SYM_IDENTIFIER) {
+    else if (event == KON_TOKEN_SYM_WORD) {
         value->Type = KON_SYM_IDENTIFER;
     }
-    else if (event == KON_TOKEN_SYM_STRING) {
+    else if (event == KON_TOKEN_LITERAL_RAW_STRING) {
         value->Type = KON_SYM_STRING;
     }
     
@@ -488,8 +488,8 @@ KN KSON_Parse(KonReader* reader)
             }
             else {
                 // wrapper types
-                if (event == KON_TOKEN_QUOTE_IDENTIFER
-                    || event == KON_TOKEN_QUOTE_SYMBOL
+                if (event == KON_TOKEN_SYM_IDENTIFIER
+                    || event == KON_TOKEN_SYM_STRING
                     || event == KON_TOKEN_QUOTE_VECTOR
                     || event == KON_TOKEN_QUOTE_LIST
                     || event == KON_TOKEN_QUOTE_TABLE
@@ -579,7 +579,7 @@ KN KSON_Parse(KonReader* reader)
             KN marker = MakeSyntaxMarker(reader->Kstate, event);
             AddValueToTopBuilder(reader, marker);
         }
-        else if (event == KON_TOKEN_SYM_PREFIX_MARCRO) {
+        else if (event == KON_TOKEN_SYM_PREFIX_WORD) {
             // prefix marcro eg !abc
             // top builder should be a list
             // don't need update state
@@ -587,7 +587,7 @@ KN KSON_Parse(KonReader* reader)
             KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);
         }
-        else if (event == KON_TOKEN_SYM_SUFFIX_MARCRO) {
+        else if (event == KON_TOKEN_SYM_SUFFIX_WORD) {
             // suffix marcro eg ^abc
             // TODO
         }
@@ -596,8 +596,8 @@ KN KSON_Parse(KonReader* reader)
             continue;
         }
         
-        else if (event == KON_TOKEN_SYM_STRING
-            || event == KON_TOKEN_SYM_IDENTIFIER
+        else if (event == KON_TOKEN_LITERAL_RAW_STRING
+            || event == KON_TOKEN_SYM_WORD
         ) {
             KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);

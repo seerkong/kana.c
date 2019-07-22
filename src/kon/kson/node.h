@@ -76,11 +76,20 @@ typedef int kon_int32_t;
 #define KON_MAKE_IMMEDIATE(n)  ((KN) ((n<<KON_EXTENDED_BITS) \
                                           + KON_EXTENDED_TAG))
 
-#define KON_UKN  KON_MAKE_IMMEDIATE(0) /* 62 0x3e unknown, undefined */
-#define KON_TRUE   KON_MAKE_IMMEDIATE(1) /* 318 0x13e */
-#define KON_FALSE  KON_MAKE_IMMEDIATE(2) /* 574 0x23e */
-#define KON_NULL   KON_MAKE_IMMEDIATE(3) /* 830 0x33e, container placeholder */
-#define KON_NIL   KON_MAKE_IMMEDIATE(4) /* 1086 0x43e list end, tree end */
+// 62 0x3e unknown, container empty placeholder
+// like objective c [NSNull null]
+#define KON_UKN  KON_MAKE_IMMEDIATE(0)
+// 318 0x13e
+#define KON_TRUE   KON_MAKE_IMMEDIATE(1)
+// 574 0x23e
+#define KON_FALSE  KON_MAKE_IMMEDIATE(2)
+// 830 0x33e, undefined, no value here a kind of exception
+// like javascript undefined
+#define KON_NULL   KON_MAKE_IMMEDIATE(3)
+// 1086 0x43e ref end of a data structure like list, tree, graph ...
+// representes a no value struct/class instance pointer
+// KON_IS_LIST(KON_NIL) == KON_TRUE
+#define KON_NIL   KON_MAKE_IMMEDIATE(4)
 #define KON_EOF    KON_MAKE_IMMEDIATE(5) /* 1342 0x53e */
 
 // tagging system end
@@ -248,6 +257,7 @@ struct KonCell {
     KonTable* Table;
     KonListNode* List;
     KonCell* Next;
+    KonCell* Prev;
 };
 
 struct KonEnv {
@@ -279,6 +289,8 @@ typedef KN (*KonNativeObjMethodRef)(KonState* kstate, void* objRef, KN argList);
 struct KonProcedure {
     KonBase Base;
     KonProcedureType Type;
+    int ParamNum;   // exclude ... arg
+    bool HasVariableParam;   // if have ... in arg list
     union {
         KonNativeFuncRef NativeFuncRef;
 

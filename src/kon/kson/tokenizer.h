@@ -32,15 +32,16 @@ typedef enum
 
     KON_TOKEN_LITERAL_NUMBER,
     KON_TOKEN_LITERAL_STRING,   // "abc"
+    KON_TOKEN_LITERAL_RAW_STRING,       // 'abc'
 
-    KON_TOKEN_SYM_STRING,       // 'abc'
-    KON_TOKEN_SYM_IDENTIFIER,   // abC
-    KON_TOKEN_SYM_PREFIX_MARCRO, // !cond !define
-    KON_TOKEN_SYM_SUFFIX_MARCRO, // ^await
+    KON_TOKEN_SYM_PREFIX_WORD, // !cond !define
+    KON_TOKEN_SYM_SUFFIX_WORD, // ^await
+    KON_TOKEN_SYM_WORD,   // abC
     KON_TOKEN_SYM_VARIABLE, // @abc
+    KON_TOKEN_SYM_IDENTIFIER,  // $abc
+    KON_TOKEN_SYM_STRING, // $''
+    KON_TOKEN_SYM_SLOT, // /tag /. /.. /~
 
-    KON_TOKEN_QUOTE_IDENTIFER,  // $abc
-    KON_TOKEN_QUOTE_SYMBOL, // $''
     KON_TOKEN_QUOTE_VECTOR, // $[]
     KON_TOKEN_QUOTE_LIST,   // ${}
     KON_TOKEN_QUOTE_TABLE,  // $()
@@ -63,6 +64,7 @@ typedef enum
     
     KON_TOKEN_APPLY,        // %
     KON_TOKEN_EXEC_MSG,     // .
+    KON_TOKEN_EXEC_MSG,     // ... like scheme . eg {!func {a ... b}}
     KON_TOKEN_PIPE,         // |
     KON_TOKEN_CLAUSE_END,   // ;
 

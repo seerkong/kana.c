@@ -248,11 +248,11 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
         KonQuote* tmp = KON_ALLOC_TYPE_TAG(kstate, KonQuote, KON_T_QUOTE);
         tmp->Inner = inner;
         switch (tokenKind) {
-            case KON_TOKEN_QUOTE_IDENTIFER: {
+            case KON_TOKEN_SYM_IDENTIFIER: {
                 tmp->Type = KON_QUOTE_IDENTIFER;
                 break;
             }
-            case KON_TOKEN_QUOTE_SYMBOL: {
+            case KON_TOKEN_SYM_STRING: {
                 tmp->Type = KON_QUOTE_SYMBOL;
                 break;
             }
