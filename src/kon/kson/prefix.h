@@ -4,6 +4,8 @@
 #include "../prefix.h"
 
 #include "hashmap.h"
+#include "../string/utf8.h"
+#include "../string/kon_stringbuffer.h"
 #include "node.h"
 // #include "reader.h"
 

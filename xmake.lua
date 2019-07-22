@@ -23,4 +23,5 @@ add_mxflags("-Wno-error=deprecated-declarations", "-fno-strict-aliasing", "-Wno-
 
 
 -- include project sources
-includes("src") 
+includes("src")
+includes("test")

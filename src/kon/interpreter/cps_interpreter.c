@@ -307,7 +307,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
         KN words = expression;
         KN first = kon_car(words);
         if (KON_IS_PREFIX_MARCRO(first)) {
-            const char* prefix = tb_string_cstr(&KON_UNBOX_SYMBOL(first));
+            const char* prefix = KON_UNBOX_SYMBOL(first);
 
             if (strcmp(prefix, "if") == 0) {
                 bounce = KON_EvalPrefixIf(kstate, kon_cdr(words), env, cont);

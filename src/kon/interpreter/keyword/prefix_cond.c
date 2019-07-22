@@ -6,7 +6,7 @@
 bool IsElseTag(KN predicate)
 {
     if (KON_IS_IDENTIFER(predicate)
-        && strcmp(tb_string_cstr(&KON_UNBOX_SYMBOL(predicate)), "else") == 0
+        && strcmp(KON_UNBOX_SYMBOL(predicate), "else") == 0
     ) {
         return true;
     }

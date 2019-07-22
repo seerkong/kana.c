@@ -12,7 +12,6 @@ extern "C"{
 #include "../prefix.h"
 #include "types.h"
 
-bool KON_IsPrimaryFunc(KonState* kstate, tb_string_ref_t funcName);
 
 KN KON_PrimaryPlus(KonState* kstate, KN args);
 KN KON_PrimaryMinus(KonState* kstate, KN args);

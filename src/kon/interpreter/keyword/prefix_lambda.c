@@ -26,7 +26,7 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
         ) {
             arg = iterArg;
         }
-        char* varName = tb_string_cstr(&KON_UNBOX_SYMBOL(KON_UNBOX_QUOTE(param)));
+        const char* varName = KON_UNBOX_SYMBOL(KON_UNBOX_QUOTE(param));
         KON_DEBUG("arg %s cstr %s, bind value %s",
             KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")),
             varName,
@@ -71,7 +71,7 @@ KonTrampoline* KON_EvalPrefixLambda(KonState* kstate, KN expression, KN env, Kon
     proc->Composite.Body = body;
 
     if (KON_IS_IDENTIFER(funcName)) {
-        char* varNameCstr = tb_string_cstr(&KON_UNBOX_SYMBOL(funcName));
+        const char* varNameCstr = KON_UNBOX_SYMBOL(funcName);
         KON_EnvDefine(kstate, env, varNameCstr, proc);
     }
 

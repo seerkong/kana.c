@@ -64,7 +64,7 @@ typedef enum
     
     KON_TOKEN_APPLY,        // %
     KON_TOKEN_EXEC_MSG,     // .
-    KON_TOKEN_EXEC_MSG,     // ... like scheme . eg {!func {a ... b}}
+    KON_TOKEN_REST,     // ... like scheme . eg {!func {a ... b}}
     KON_TOKEN_PIPE,         // |
     KON_TOKEN_CLAUSE_END,   // ;
 
@@ -88,14 +88,14 @@ typedef struct
     tb_stream_ref_t ReadStream;
 
     // the element
-    tb_string_t Content;
+    KonStringBuffer* Content;
 
     // 解析number用的
     bool NumIsPositive;
-    tb_string_t NumBeforeDot;   // 234.
-    tb_string_t NumAfterDot;    // .12
+    KonStringBuffer* NumBeforeDot;   // 234.
+    KonStringBuffer* NumAfterDot;    // .12
     bool NumIsPowerPositive;    // e-2
-    tb_string_t NumAfterPower;  // e5
+    KonStringBuffer* NumAfterPower;  // e5
 
 } KonTokenizer;
 

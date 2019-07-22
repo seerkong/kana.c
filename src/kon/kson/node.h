@@ -5,6 +5,7 @@
 #include <tbox/tbox.h>
 #include "../prefix/config.h"
 #include "hashmap.h"
+#include "../string/kon_stringbuffer.h"
 
 ////
 // type alias start
@@ -169,7 +170,7 @@ typedef enum {
 
 struct KonSymbol {
     KonBase Base;
-    tb_string_t Data;
+    const char* Data;
     KonSymbolType Type;
 };
 
@@ -317,7 +318,7 @@ typedef struct KonFlonum {
 // TODO replace to kon string impl
 struct KonString {
     KonBase Base;
-    tb_string_t String;
+    KonStringBuffer* String;
 };
 
 // TODO replace to kon vector impl

@@ -123,8 +123,7 @@ KonBuilder* CreateTableBuilder()
 
 void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
 {
-    // char* key = pair->TablePair.Key;
-    char* key = tb_string_cstr(&(pair->TablePair.Key));
+    char* key = KonStringBuffer_Cstr(pair->TablePair.Key);
     
     KON_HashMapPut(builder->Table, key, pair->TablePair.Value);
     KON_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
@@ -146,7 +145,7 @@ KonBuilder* CreateTablePairBuilder()
         return NULL;
     }
     builder->Type = KON_BUILDER_TABLE_PAIR;
-    tb_string_init(&(builder->TablePair.Key));
+    builder->TablePair.Key = KonStringBuffer_New();
     builder->TablePair.Value = KON_NULL;
     return builder;
 }
@@ -154,8 +153,7 @@ KonBuilder* CreateTablePairBuilder()
 void TablePairSetKey(KonBuilder* builder, char* key)
 {
     assert(key);
-    // builder->TablePair.Key = key;
-    tb_string_cstrcat(&(builder->TablePair.Key), key);
+    KonStringBuffer_AppendCstr(builder->TablePair.Key, key);
 }
 
 void TablePairSetValue(KonBuilder* builder, KN value)

@@ -28,7 +28,7 @@ KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KN env, KonCon
     KN varName = kon_car(expression);
     
 
-    char* varNameCstr = tb_string_cstr(&KON_UNBOX_SYMBOL(varName));
+    const char* varNameCstr = KON_UNBOX_SYMBOL(varName);
 
     KON_DEBUG("varName %s", varNameCstr);
     

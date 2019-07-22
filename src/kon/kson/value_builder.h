@@ -27,7 +27,7 @@ typedef struct {
 
         KonHashMap* Table;
         struct {
-            tb_string_t Key;
+            KonStringBuffer* Key;
             KN Value;
         } TablePair;
 

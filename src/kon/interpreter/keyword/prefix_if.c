@@ -16,7 +16,7 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
         KN item = kon_car(iter);
         
         if (state == 1) {
-            if (KON_IS_IDENTIFER(item) && strcmp(tb_string_cstr(&KON_UNBOX_SYMBOL(item)), "else") == 0) {
+            if (KON_IS_IDENTIFER(item) && strcmp(KON_UNBOX_SYMBOL(item), "else") == 0) {
                 state = 2;
             }
             else {

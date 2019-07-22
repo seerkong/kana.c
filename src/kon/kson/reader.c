@@ -198,8 +198,7 @@ KN MakeSymbol(KonReader* reader, KonTokenKind event)
         value->Type = KON_SYM_STRING;
     }
     
-    tb_string_init(&(value->Data));
-    tb_string_strcat(&value->Data, &reader->Tokenizer->Content);
+    value->Data = utf8dup(KonStringBuffer_Cstr(reader->Tokenizer->Content));
 
     return value;
 }
@@ -208,8 +207,7 @@ KN MakeSymFormWord(KonReader* reader, KonTokenKind event)
 {
     KonSymbol* value = KON_ALLOC_TYPE_TAG(reader->Kstate, KonSymbol, KON_T_SYMBOL);
     value->Type = KON_SYM_IDENTIFER;
-    tb_string_init(&(value->Data));
-    tb_string_strcat(&value->Data, &reader->Tokenizer->Content);
+    value->Data = utf8dup(KonStringBuffer_Cstr(reader->Tokenizer->Content));
     return value;
 }
 
@@ -218,9 +216,9 @@ KN MakeSymFormWord(KonReader* reader, KonTokenKind event)
 KN MakeNumber(KonReader* reader)
 {
     bool isPositive = reader->Tokenizer->NumIsPositive;
-    char* numStrBeforeDot = tb_string_cstr(&reader->Tokenizer->NumBeforeDot);
-    char* numStrAfterDot = tb_string_cstr(&reader->Tokenizer->NumAfterDot);
-    char* numStrAfterPower = tb_string_cstr(&reader->Tokenizer->NumAfterPower);
+    char* numStrBeforeDot = KonStringBuffer_Cstr(reader->Tokenizer->NumBeforeDot);
+    char* numStrAfterDot = KonStringBuffer_Cstr(reader->Tokenizer->NumAfterDot);
+    char* numStrAfterPower = KonStringBuffer_Cstr(reader->Tokenizer->NumAfterPower);
     
     KN value = KON_ZERO;
     
@@ -258,7 +256,7 @@ KN MakeNumber(KonReader* reader)
 
 KN MakeString(KonReader* reader)
 {
-    KN value = KON_MakeString(reader->Kstate, tb_string_cstr(&reader->Tokenizer->Content));
+    KN value = KON_MakeString(reader->Kstate, KonStringBuffer_Cstr(reader->Tokenizer->Content));
     return value;
 }
 
@@ -325,7 +323,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
             KonSymbolType symbolType = KON_FIELD(value, KonSymbol, Type);
             assert(symbolType != KON_SYM_VAR && symbolType != KON_SYM_PREFIX_MARCRO);
             // table tag key should not be NULL
-            char* tableKey = tb_string_cstr(&KON_UNBOX_SYMBOL(value));
+            char* tableKey = KON_UNBOX_SYMBOL(value);
             assert(tableKey);
             TablePairSetKey(topBuilder, tableKey);
 

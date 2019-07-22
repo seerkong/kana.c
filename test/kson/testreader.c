@@ -1,25 +1,23 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include "../../kon/kon.h"
-// #include "./log.h"
+#include <stdio.h>
+#include <stddef.h>
+#include <string.h>
+#include <stdint.h>
+#include <assert.h>
+#include "../greatest.h"
+#include "../../src/kon/kon.h"
 #include <tbox/tbox.h>
+SUITE(suite);
 
-int main(int argc, char const* argv[])
-{
+TEST Reader_Cell(void) {
     KonState kstate;
     KON_Init(&kstate);
-    // if (!KON_Init(&kstate)) {
-    //     fprintf(stderr, "Could not initialize!\n");
-
-    //     return 1;
-    // }
 
     if (!tb_init(tb_null, tb_null)) {
         return 1;
     }
     // 初始化流
     tb_stream_ref_t istream = tb_stream_init_from_url("~/lang/konscript/kon-c/samples/kon/cell.kon");
-//    tb_stream_ref_t istream = tb_stream_init_from_file("../../../../samples/kon/array.kon", TB_FILE_MODE_RO);
 
     KonReader* reader = KSON_ReaderInit(&kstate);
     if (!reader) {
@@ -48,7 +46,23 @@ int main(int argc, char const* argv[])
         tb_stream_exit(istream);
     }
 
-     tb_exit();
-//    KON_Finish(&kstate);
-    return 0;
+    tb_exit();
+
+    PASS();
+}
+
+
+SUITE(suite) {
+    RUN_TEST(Reader_Cell);
+
+}
+
+GREATEST_MAIN_DEFS();
+
+int main(int argc, char const* argv[])
+{
+    GREATEST_MAIN_BEGIN();
+    greatest_set_verbosity(1);
+    RUN_SUITE(suite);
+    GREATEST_MAIN_END();
 }
