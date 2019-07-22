@@ -198,7 +198,7 @@ KN MakeSymbol(KonReader* reader, KonTokenKind event)
         value->Type = KON_SYM_STRING;
     }
     
-    value->Data = utf8dup(KonStringBuffer_Cstr(reader->Tokenizer->Content));
+    value->Data = utf8dup(KxStringBuffer_Cstr(reader->Tokenizer->Content));
 
     return value;
 }
@@ -207,7 +207,7 @@ KN MakeSymFormWord(KonReader* reader, KonTokenKind event)
 {
     KonSymbol* value = KON_ALLOC_TYPE_TAG(reader->Kstate, KonSymbol, KON_T_SYMBOL);
     value->Type = KON_SYM_IDENTIFER;
-    value->Data = utf8dup(KonStringBuffer_Cstr(reader->Tokenizer->Content));
+    value->Data = utf8dup(KxStringBuffer_Cstr(reader->Tokenizer->Content));
     return value;
 }
 
@@ -216,9 +216,9 @@ KN MakeSymFormWord(KonReader* reader, KonTokenKind event)
 KN MakeNumber(KonReader* reader)
 {
     bool isPositive = reader->Tokenizer->NumIsPositive;
-    char* numStrBeforeDot = KonStringBuffer_Cstr(reader->Tokenizer->NumBeforeDot);
-    char* numStrAfterDot = KonStringBuffer_Cstr(reader->Tokenizer->NumAfterDot);
-    char* numStrAfterPower = KonStringBuffer_Cstr(reader->Tokenizer->NumAfterPower);
+    char* numStrBeforeDot = KxStringBuffer_Cstr(reader->Tokenizer->NumBeforeDot);
+    char* numStrAfterDot = KxStringBuffer_Cstr(reader->Tokenizer->NumAfterDot);
+    char* numStrAfterPower = KxStringBuffer_Cstr(reader->Tokenizer->NumAfterPower);
     
     KN value = KON_ZERO;
     
@@ -256,7 +256,7 @@ KN MakeNumber(KonReader* reader)
 
 KN MakeString(KonReader* reader)
 {
-    KN value = KON_MakeString(reader->Kstate, KonStringBuffer_Cstr(reader->Tokenizer->Content));
+    KN value = KON_MakeString(reader->Kstate, KxStringBuffer_Cstr(reader->Tokenizer->Content));
     return value;
 }
 

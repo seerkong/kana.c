@@ -5,11 +5,11 @@
 
 KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
 {
-    tb_vector_ref_t falseClauseVec = tb_vector_init(TB_VECTOR_GROW_SIZE, tb_element_long());
+    KxVector* falseClauseVec = KxVector_Init();
     
-    tb_vector_ref_t trueClauseVec = tb_vector_init(TB_VECTOR_GROW_SIZE, tb_element_long());
+    KxVector* trueClauseVec = KxVector_Init();
 
-    KonListNode* iter = sentenceRestWords;
+    KonPair* iter = sentenceRestWords;
     
     int state = 1; // 1 parse true exprs, 2 parse false exprs
     do {
@@ -20,19 +20,19 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
                 state = 2;
             }
             else {
-                tb_vector_insert_tail(trueClauseVec, item);
+                KxVector_Push(trueClauseVec, item);
             }
         }
         else {
             // else branch
-            tb_vector_insert_tail(falseClauseVec, item);
+            KxVector_Push(falseClauseVec, item);
         }
 
         iter = kon_cdr(iter);
     } while (iter != KON_NIL);
     
-    KN trueClause = TbVectorToKonList(kstate, trueClauseVec);
-    KN falseClause = TbVectorToKonList(kstate, falseClauseVec);
+    KN trueClause = KON_VectorToKonPairList(kstate, trueClauseVec);
+    KN falseClause = KON_VectorToKonPairList(kstate, falseClauseVec);
     
     return KON_List2(kstate, trueClause, falseClause);
 }
@@ -40,9 +40,9 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
 KN AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KonHashTable* memo = contBeingInvoked->MemoTable;
-    KN trueClause = KonHashTable_AtKey(memo, "TrueClause");
-    KN falseClause = KonHashTable_AtKey(memo, "FalseClause");
+    KxHashTable* memo = contBeingInvoked->MemoTable;
+    KN trueClause = KxHashTable_AtKey(memo, "TrueClause");
+    KN falseClause = KxHashTable_AtKey(memo, "FalseClause");
 
     KonTrampoline* bounce;
     if (kon_is_true(evaledValue)) {
@@ -77,9 +77,9 @@ KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KN env, KonCont
     k->Cont = cont;
     k->Env = cont->Env;
 
-    KonHashTable* memo = KonHashTable_Init(8);
-    KonHashTable_PutKv(memo, "TrueClause", trueClause);
-    KonHashTable_PutKv(memo, "FalseClause", falseClause);
+    KxHashTable* memo = KxHashTable_Init(8);
+    KxHashTable_PutKv(memo, "TrueClause", trueClause);
+    KxHashTable_PutKv(memo, "FalseClause", falseClause);
     k->MemoTable = memo;
     k->NativeCallback = AfterIfConditionEvaled;
     

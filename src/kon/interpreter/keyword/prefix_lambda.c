@@ -15,8 +15,8 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
 
     KonEnv* procBindEnv = KON_MakeChildEnv(kstate, parentEnv);
 
-    KonListNode* iterParam = param;
-    KonListNode* iterArg = kon_cdr(argList);
+    KonPair* iterParam = param;
+    KonPair* iterArg = kon_cdr(argList);
     while (iterParam != KON_NIL) {
         KN param = kon_car(iterParam);
         KN arg = kon_car(iterArg);

@@ -1,5 +1,5 @@
-#ifndef KON_STRINGVIEW_H
-#define KON_STRINGVIEW_H 1
+#ifndef KX_STRINGVIEW_H
+#define KX_STRINGVIEW_H 1
 
 #include <stdint.h>
 

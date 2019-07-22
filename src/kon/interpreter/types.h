@@ -6,7 +6,7 @@ extern "C"{
 #endif
 
 #include "../prefix.h"
-#include "../container/hashtable/kon_hashtable.h"
+#include "../container/hashtable/kx_hashtable.h"
 
 typedef struct _KonTrampoline KonTrampoline;
 typedef struct _KonContinuation KonContinuation;
@@ -35,7 +35,7 @@ struct _KonContinuation {
     KonContinuationType Type;
     KN Env;
     KonContinuation* Cont;
-    KonHashTable* MemoTable;
+    KxHashTable* MemoTable;
 
     union {
         KonContFuncRef NativeCallback;

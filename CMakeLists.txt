@@ -329,30 +329,31 @@ target_link_directories(kon PRIVATE
 target_link_options(kon PRIVATE
 )
 target_sources(kon PRIVATE
-    src/kon/interpreter/keyword/prefix_or.c
+    src/kon/container/vector/kx_vector.c
     src/kon/kon.c
     src/kon/interpreter/keyword/prefix_let.c
     src/kon/interpreter/env.c
+    src/kon/interpreter/keyword/prefix_set.c
     src/kon/interpreter/primary.c
     src/kon/interpreter/keyword/prefix_cond.c
     src/kon/kson/state_stack.c
-    src/kon/container/hashtable/kon_hashtable.c
+    src/kon/string/kx_stringbuffer.c
     src/kon/interpreter/keyword/prefix_blk.c
-    src/kon/interpreter/keyword/prefix_set.c
-    src/kon/kson/writer.c
     src/kon/interpreter/keyword/prefix_do.c
-    src/kon/kson/tokenizer.c
-    src/kon/interpreter/keyword/prefix_func.c
-    src/kon/container/hashtable/murmurhash.c
-    src/kon/interpreter/keyword/prefix_if.c
+    src/kon/kson/writer.c
     src/kon/kson/value_builder.c
-    src/kon/string/kon_stringview.c
+    src/kon/interpreter/keyword/prefix_func.c
+    src/kon/kson/reader.c
+    src/kon/interpreter/keyword/prefix_or.c
+    src/kon/interpreter/keyword/prefix_if.c
+    src/kon/string/kx_stringview.c
+    src/kon/container/hashtable/murmurhash.c
     src/kon/utils/number_utils.c
     src/kon/interpreter/keyword/prefix_lambda.c
-    src/kon/kson/reader.c
+    src/kon/kson/tokenizer.c
     src/kon/interpreter/keyword/prefix_and.c
-    src/kon/kson/node.c
+    src/kon/container/hashtable/kx_hashtable.c
     src/kon/interpreter/cps_interpreter.c
-    src/kon/string/kon_stringbuffer.c
+    src/kon/kson/node.c
 )
 

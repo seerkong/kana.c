@@ -50,13 +50,13 @@ KonBuilder* CreateVectorBuilder()
         return NULL;
     }
     builder->Type = KON_BUILDER_VECTOR;
-    builder->Vector = tb_vector_init(BUILDER_VECTOR_GROW_SIZE, tb_element_ptr(kon_vector_item_ptr_free, "ValueBuilderType"));
+    builder->Vector = KxVector_Init();
     return builder;
 }
 
 void VectorBuilderAddItem(KonBuilder* builder, KN item)
 {
-    tb_vector_insert_tail(builder->Vector, (tb_cpointer_t)item);
+    KxVector_Push(builder->Vector, item);
 }
 
 KN MakeVectorByBuilder(KonState* kstate, KonBuilder* builder)
@@ -74,37 +74,27 @@ KonBuilder* CreateListBuilder()
         return NULL;
     }
     builder->Type = KON_BUILDER_LIST;
-    builder->List = tb_stack_init(BUILDER_VECTOR_GROW_SIZE, tb_element_ptr(builder_vector_item_ptr_free, "ValueBuilderType"));
+    builder->List = KxVector_Init();
     return builder;
 }
 
 void ListBuilderAddItem(KonBuilder* builder, KN item)
 {
-    tb_vector_insert_tail(builder->List, (tb_cpointer_t)item);
+    KxVector_Push(builder->List, item);
 }
 
 KN MakeListByBuilder(KonState* kstate, KonBuilder* builder)
 {
     KN pair = KON_NIL;
     
-    tb_vector_ref_t list = builder->List;
+    KonVector* list = builder->List;
 
     // reverse add
-
-    tb_size_t head = tb_iterator_head(list);
-    tb_size_t itor = tb_iterator_tail(list);
-
-    do {
-        // the previous item
-        itor = tb_iterator_prev(list, itor);
-        
-        KN item = tb_iterator_item(list, itor);
-        if (item == NULL) {
-            break;
-        }
+    int len = KxVector_Length(list);
+    for (int i = len - 1; i >= 0; i--) {
+        KN item = KxVector_AtIndex(list, i);
         pair = kon_cons(kstate, item, pair);
-        
-    } while (itor != head);
+    }
 
     return pair;
 }
@@ -116,15 +106,15 @@ KonBuilder* CreateTableBuilder()
         return NULL;
     }
     builder->Type = KON_BUILDER_TABLE;
-    builder->Table = KonHashTable_Init(16);;
+    builder->Table = KxHashTable_Init(16);;
     return builder;
 }
 
 void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
 {
-    char* key = KonStringBuffer_Cstr(pair->TablePair.Key);
+    char* key = KxStringBuffer_Cstr(pair->TablePair.Key);
     
-    KonHashTable_PutKv(builder->Table, key, pair->TablePair.Value);
+    KxHashTable_PutKv(builder->Table, key, pair->TablePair.Value);
     KON_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
     free(pair);
 }
@@ -144,7 +134,7 @@ KonBuilder* CreateTablePairBuilder()
         return NULL;
     }
     builder->Type = KON_BUILDER_TABLE_PAIR;
-    builder->TablePair.Key = KonStringBuffer_New();
+    builder->TablePair.Key = KxStringBuffer_New();
     builder->TablePair.Value = KON_NULL;
     return builder;
 }
@@ -152,7 +142,7 @@ KonBuilder* CreateTablePairBuilder()
 void TablePairSetKey(KonBuilder* builder, char* key)
 {
     assert(key);
-    KonStringBuffer_AppendCstr(builder->TablePair.Key, key);
+    KxStringBuffer_AppendCstr(builder->TablePair.Key, key);
 }
 
 void TablePairSetValue(KonBuilder* builder, KN value)

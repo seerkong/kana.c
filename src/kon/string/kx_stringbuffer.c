@@ -4,25 +4,25 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "kon_stringbuffer.h"
+#include "kx_stringbuffer.h"
 
 #define DEFAULT_CAPACITY    32
 #define FIRST_STEP_LENGTH    128
 #define STEP_LENGTH    512
  
 #define EXPAND_BUFFER(self, n) \
-    if (KonStringBuffer_Expand(self, (n))) { \
+    if (KxStringBuffer_Expand(self, (n))) { \
         return -1; \
     } \
 
-struct KonStringBuffer {
+struct KxStringBuffer {
     int32_t Length;
     int32_t HeadOffset; 
     int32_t BuffSize;   // include last \0
     char* BuffStart;
 };
  
-static int32_t KonStringBuffer_Expand(KonStringBuffer* self, int32_t min)
+static int32_t KxStringBuffer_Expand(KxStringBuffer* self, int32_t min)
 {
     char* newBuf = NULL;
     int32_t newBuffSize = 0;
@@ -50,11 +50,11 @@ static int32_t KonStringBuffer_Expand(KonStringBuffer* self, int32_t min)
     }
 }
 
-KonStringBuffer* KonStringBuffer_New()
+KxStringBuffer* KxStringBuffer_New()
 {
-    KonStringBuffer* self = NULL;
+    KxStringBuffer* self = NULL;
  
-    self = calloc(1, sizeof(KonStringBuffer));
+    self = calloc(1, sizeof(KxStringBuffer));
     if (self != NULL) {
         self->BuffStart = calloc(DEFAULT_CAPACITY, sizeof(char));
         if (self->BuffStart != NULL) {
@@ -70,7 +70,7 @@ KonStringBuffer* KonStringBuffer_New()
     return self;
 }
 
-void KonStringBuffer_Destroy(KonStringBuffer* self)
+void KxStringBuffer_Destroy(KxStringBuffer* self)
 {
     if (self) {
         if (self->BuffStart) {
@@ -80,22 +80,22 @@ void KonStringBuffer_Destroy(KonStringBuffer* self)
     }
 }
 
-int32_t KonStringBuffer_Length(KonStringBuffer* self)
+int32_t KxStringBuffer_Length(KxStringBuffer* self)
 {
     return self ? self->Length : 0;
 }
 
-int32_t KonStringBuffer_BuffSize(KonStringBuffer* self)
+int32_t KxStringBuffer_BuffSize(KxStringBuffer* self)
 {
     return self ? (self->BuffSize - 1) : 0;
 }
 
-extern const char* KonStringBuffer_Cstr(KonStringBuffer* self)
+extern const char* KxStringBuffer_Cstr(KxStringBuffer* self)
 {
     return self ? (self->BuffStart + self->HeadOffset) : NULL;
 }
 
-void KonStringBuffer_Clear(KonStringBuffer* self)
+void KxStringBuffer_Clear(KxStringBuffer* self)
 {
     if (self != NULL) {
         memset(self->BuffStart, 0, self->BuffSize);
@@ -104,7 +104,7 @@ void KonStringBuffer_Clear(KonStringBuffer* self)
     }
 }
 
-int32_t KonStringBuffer_NAppendCstr(KonStringBuffer* self, const char* str, int32_t n)
+int32_t KxStringBuffer_NAppendCstr(KxStringBuffer* self, const char* str, int32_t n)
 {
     if (self == NULL) {
         return -1;
@@ -117,7 +117,7 @@ int32_t KonStringBuffer_NAppendCstr(KonStringBuffer* self, const char* str, int3
     return n;
 }
 
-int32_t KonStringBuffer_AppendCstrWithFormat(KonStringBuffer* self, const char* format, ...)
+int32_t KxStringBuffer_AppendCstrWithFormat(KxStringBuffer* self, const char* format, ...)
 {
     int32_t n = 0;
     int32_t ret = 0;
@@ -142,7 +142,7 @@ int32_t KonStringBuffer_AppendCstrWithFormat(KonStringBuffer* self, const char* 
             break;
         } else {
             // no enough space in buffer
-            if (KonStringBuffer_Expand(self, ret - n)) {
+            if (KxStringBuffer_Expand(self, ret - n)) {
                 // expand failed
                 ret = -1;
                 break;
@@ -153,7 +153,7 @@ int32_t KonStringBuffer_AppendCstrWithFormat(KonStringBuffer* self, const char* 
     return ret;
 }
 
-int32_t KonStringBuffer_NAppendChar(KonStringBuffer* self, char value, int32_t num)
+int32_t KxStringBuffer_NAppendChar(KxStringBuffer* self, char value, int32_t num)
 {
     if (self == NULL) {
         return -1;
@@ -168,18 +168,18 @@ int32_t KonStringBuffer_NAppendChar(KonStringBuffer* self, char value, int32_t n
 }
 
 
-int32_t KonStringBuffer_AppendCstr(KonStringBuffer* self, const char* str)
+int32_t KxStringBuffer_AppendCstr(KxStringBuffer* self, const char* str)
 {
-    return KonStringBuffer_NAppendCstr(self, str, strlen(str));
+    return KxStringBuffer_NAppendCstr(self, str, strlen(str));
 }
 
-int  KonStringBuffer_AppendStringBuffer(KonStringBuffer* self, KonStringBuffer* other)
+int  KxStringBuffer_AppendStringBuffer(KxStringBuffer* self, KxStringBuffer* other)
 {
-    return KonStringBuffer_NAppendCstr(self, KonStringBuffer_Cstr(other), KonStringBuffer_Length(other));
+    return KxStringBuffer_NAppendCstr(self, KxStringBuffer_Cstr(other), KxStringBuffer_Length(other));
 }
 
 // prepend n chars
-int32_t KonStringBuffer_NPrependCstr(KonStringBuffer* self, const char *str, int32_t n)
+int32_t KxStringBuffer_NPrependCstr(KxStringBuffer* self, const char *str, int32_t n)
 {
     if (self == NULL) {
         return -1;
@@ -216,8 +216,8 @@ int32_t KonStringBuffer_NPrependCstr(KonStringBuffer* self, const char *str, int
 }
 
 // prepend cstr
-int32_t KonStringBuffer_PrependCstr(KonStringBuffer* self, const char *str)
+int32_t KxStringBuffer_PrependCstr(KxStringBuffer* self, const char *str)
 {
-    return KonStringBuffer_NPrependCstr(self, str, strlen(str));
+    return KxStringBuffer_NPrependCstr(self, str, strlen(str));
 }
 

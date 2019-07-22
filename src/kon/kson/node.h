@@ -4,8 +4,9 @@
 #include <stdio.h>
 #include <tbox/tbox.h>
 #include "../prefix/config.h"
-#include "../string/kon_stringbuffer.h"
-#include "../container/hashtable/kon_hashtable.h"
+#include "../string/kx_stringbuffer.h"
+#include "../container/hashtable/kx_hashtable.h"
+#include "../container/vector/kx_vector.h"
 
 ////
 // type alias start
@@ -27,11 +28,6 @@ typedef int kon_int32_t;
 
 // type alias end
 ////
-
-
-#define TB_VECTOR_GROW_SIZE (256)
-
-
 
 
 
@@ -117,7 +113,7 @@ typedef enum {
     KON_T_STATE,
     KON_T_FLONUM,
     KON_T_BIGNUM,
-    KON_T_LIST_NODE,
+    KON_T_PAIR,
     KON_T_SYMBOL,
     KON_T_SYNTAX_MARKER,
     KON_T_BYTES,
@@ -143,7 +139,7 @@ typedef struct KonSyntaxMarker KonSyntaxMarker;
 typedef struct KonString KonString;
 typedef struct KonTable KonTable;
 typedef struct KonVector KonVector;
-typedef struct KonListNode KonListNode;
+typedef struct KonPair KonPair;
 typedef struct KonCell KonCell;
 typedef struct KonQuote KonQuote;
 typedef struct KonQuasiquote KonQuasiquote;
@@ -244,11 +240,11 @@ struct KonSyntaxMarker {
     KonSyntaxMarkerType Type;
 };
 
-struct KonListNode {
+struct KonPair {
     KonBase Base;
-    KonListNode* Prev;
+    KonPair* Prev;
     KN Body;
-    KonListNode* Next;
+    KonPair* Next;
 };
 
 struct KonCell {
@@ -256,7 +252,7 @@ struct KonCell {
     KN Name;
     KonVector* Vector;
     KonTable* Table;
-    KonListNode* List;
+    KonPair* List;
     KonCell* Next;
     KonCell* Prev;
 };
@@ -264,7 +260,7 @@ struct KonCell {
 struct KonEnv {
     KonBase Base;
     KonEnv* Parent;
-    KonHashTable* Bindings;
+    KxHashTable* Bindings;
 };
 
 typedef enum {
@@ -298,8 +294,8 @@ struct KonProcedure {
         KonNativeObjMethodRef NativeObjMethod;
 
         struct {
-            KonListNode* ArgList;
-            KonListNode* Body;
+            KonPair* ArgList;
+            KonPair* Body;
             KonEnv* LexicalEnv;
         } Composite;
     };
@@ -318,18 +314,17 @@ typedef struct KonFlonum {
 // TODO replace to kon string impl
 struct KonString {
     KonBase Base;
-    KonStringBuffer* String;
+    KxStringBuffer* String;
 };
 
-// TODO replace to kon vector impl
 struct KonVector {
     KonBase Base;
-    tb_vector_ref_t Vector;
+    KxVector* Vector;
 };
 
 struct KonTable {
     KonBase Base;
-    KonHashTable* Table;
+    KxHashTable* Table;
 };
 
 union _Kon {
@@ -340,7 +335,7 @@ union _Kon {
     KonString KonString;
     KonTable KonTable;
     KonVector KonVector;
-    KonListNode KonListNode;
+    KonPair KonPair;
     KonCell KonCell;
     KonQuote KonQuote;
     KonQuasiquote KonQuasiquote;
@@ -417,7 +412,7 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 #define KON_IS_PREFIX_MARCRO(x) (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_PREFIX_MARCRO)
 #define kon_is_syntax_marker(x) (kon_check_tag(x, KON_T_SYNTAX_MARKER))
 
-#define kon_is_list_node(x)       (kon_check_tag(x, KON_T_LIST_NODE))
+#define KON_IS_PAIR(x)       (kon_check_tag(x, KON_T_PAIR))
 #define kon_is_vector(x)     (kon_check_tag(x, KON_T_VECTOR))
 #define kon_is_table(x)     (kon_check_tag(x, KON_T_TABLE))
 #define kon_is_cell(x)     (kon_check_tag(x, KON_T_CELL))
@@ -482,14 +477,18 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 
 #define KON_UNBOX_STRING(str) (((KonString*)str)->String)
 
+#define KON_UNBOX_VECTOR(str) (((KonVector*)str)->Vector)
+
+#define KON_UNBOX_TABLE(str) (((KonVector*)str)->Vector)
+
 #define KON_UNBOX_SYMBOL(s) (((KonSymbol*)s)->Data)
 
 #define KON_UNBOX_QUOTE(s) (((KonQuote*)s)->Inner)
 
 // list
 #define kon_cons(kstate, a, b) KON_Cons(kstate, NULL, 2, a, b)
-#define kon_car(x)         (KON_FIELD(x, KonListNode, Body))
-#define kon_cdr(x)         (KON_FIELD(x, KonListNode, Next))
+#define kon_car(x)         (KON_FIELD(x, KonPair, Body))
+#define kon_cdr(x)         (KON_FIELD(x, KonPair, Next))
 
 #define kon_caar(x)      (kon_car(kon_car(x)))
 #define kon_cadr(x)      (kon_car(kon_cdr(x)))
@@ -541,7 +540,7 @@ KON_API KN KON_SymbolStringify(KonState* kstate, KN source);
 KON_API const char* KON_SymbolToCstr(KN sym);
 
 // list
-KON_API KN KON_MakeList(KonState* kstate, ...);
+KON_API KN KON_MakePairList(KonState* kstate, ...);
 KON_API KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail);
 KON_API KN KON_List2(KonState* kstate, KN a, KN b);
 KON_API KN KON_List3(KonState* kstate, KN a, KN b, KN c);
@@ -577,7 +576,7 @@ KON_API tb_void_t kon_vector_item_ptr_free(tb_element_ref_t element, tb_pointer_
 // common utils start
 KON_API const char* KON_HumanFormatTime();
 
-KN TbVectorToKonList(KonState* kstate, tb_vector_ref_t clauseWords);
+KN KON_VectorToKonPairList(KonState* kstate, KxVector* vector);
 
 // common utils end
 

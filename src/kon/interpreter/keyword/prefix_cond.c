@@ -18,9 +18,9 @@ bool IsElseTag(KN predicate)
 KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KonHashTable* memo = contBeingInvoked->MemoTable;
-    KN restPairs = KonHashTable_AtKey(memo, "RestPairs");
-    KN ifTrueAction = KonHashTable_AtKey(memo, "IfTrue");
+    KxHashTable* memo = contBeingInvoked->MemoTable;
+    KN restPairs = KxHashTable_AtKey(memo, "RestPairs");
+    KN ifTrueAction = KxHashTable_AtKey(memo, "IfTrue");
 
     KonTrampoline* bounce;
     if (kon_is_true(evaledValue)) {
@@ -46,9 +46,9 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
             k->Cont = contBeingInvoked->Cont;
             k->Env = env;
 
-            KonHashTable* memo = KonHashTable_Init(8);
-            KonHashTable_PutKv(memo, "RestPairs", kon_cdr(restPairs));
-            KonHashTable_PutKv(memo, "IfTrue", action);
+            KxHashTable* memo = KxHashTable_Init(8);
+            KxHashTable_PutKv(memo, "RestPairs", kon_cdr(restPairs));
+            KxHashTable_PutKv(memo, "IfTrue", action);
 
             k->MemoTable = memo;
             k->NativeCallback = AfterCondClauseEvaled;
@@ -83,9 +83,9 @@ KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KN env, KonCo
         k->Cont = cont;
         k->Env = env;
 
-        KonHashTable* memo = KonHashTable_Init(8);
-        KonHashTable_PutKv(memo, "RestPairs", kon_cdr(expression));
-        KonHashTable_PutKv(memo, "IfTrue", action);
+        KxHashTable* memo = KxHashTable_Init(8);
+        KxHashTable_PutKv(memo, "RestPairs", kon_cdr(expression));
+        KxHashTable_PutKv(memo, "IfTrue", action);
 
         k->MemoTable = memo;
         k->NativeCallback = AfterCondClauseEvaled;

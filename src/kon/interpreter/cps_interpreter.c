@@ -72,11 +72,11 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
     // TODO parse symbol type verb
     
     
-    tb_vector_ref_t clauseListVec = tb_vector_init(TB_VECTOR_GROW_SIZE, tb_element_long());
+    KxVector* clauseListVec = KxVector_Init();
     
-    tb_vector_ref_t clauseVec = tb_vector_init(TB_VECTOR_GROW_SIZE, tb_element_long());
+    KxVector* clauseVec = KxVector_Init();
 
-    KonListNode* iter = sentenceRestWords;
+    KonPair* iter = sentenceRestWords;
     
     int state = 1; // 1 need verb, 2 need objects
     do {
@@ -86,7 +86,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
             if (kon_is_syntax_marker(item)
                 && CAST_Kon(SyntaxMarker, item)->Type != KON_SYNTAX_MARKER_CLAUSE_END
             ) {
-                tb_vector_insert_tail(clauseVec, item);
+                KxVector_Push(clauseVec, item);
                 state = 2;
             }
             else if (kon_is_vector(item)
@@ -97,7 +97,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
                 || kon_is_quasiquote(item)
                 || kon_is_unquote(item)
             ) {
-                tb_vector_insert_tail(clauseVec, item);
+                KxVector_Push(clauseVec, item);
             }
             else {
                 // TODO throw exception
@@ -108,13 +108,13 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
             if (kon_is_syntax_marker(item)
                 && CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_CLAUSE_END
             ) {
-                tb_vector_insert_tail(clauseListVec, clauseVec);
+                KxVector_Push(clauseListVec, clauseVec);
                 // reset state
-                clauseVec = tb_vector_init(TB_VECTOR_GROW_SIZE, tb_element_ptr(kon_vector_item_ptr_free, "ClauseVec"));
+                clauseVec = KxVector_Init();
                 state = 1;
             }
             else {
-                tb_vector_insert_tail(clauseVec, item);
+                KxVector_Push(clauseVec, item);
             }
         }
         
@@ -122,24 +122,16 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
         iter = kon_cdr(iter);
     } while (iter != KON_NIL);
     
-    tb_vector_insert_tail(clauseListVec, clauseVec);
+    KxVector_Push(clauseListVec, clauseVec);
 
-    tb_size_t clauseListHead = tb_iterator_head(clauseListVec);
-    tb_size_t clauseListItor = tb_iterator_tail(clauseListVec);
-    
     KN result = KON_NIL;
-    do {
-        // the previous item
-        clauseListItor = tb_iterator_prev(clauseListVec, clauseListItor);
-        
-        tb_vector_ref_t clauseWords = (tb_vector_ref_t)tb_iterator_item(clauseListVec, clauseListItor);
-        if (clauseWords == NULL) {
-            break;
-        }
-        KN clause = TbVectorToKonList(kstate, clauseWords);
+    int clauseListVecLen = KxVector_Length(clauseListVec);
+    for (int i = 0; i < clauseListVecLen; i++) {
+        KxVector* clauseWords = KxVector_AtIndex(clauseListVec, i);
+        KN clause = KON_VectorToKonPairList(kstate, clauseWords);
         result = kon_cons(kstate, clause, result);
-        
-    } while (clauseListItor != clauseListHead);
+    }
+
     return result;
 }
 

@@ -27,6 +27,7 @@ target("kon")
     add_files("utils/**.c")
     add_files("string/**.c")
     add_files("container/hashtable/**.c")  
+    add_files("container/vector/**.c")  
     add_files("kson/**.c")
     add_files("interpreter/**.c")  
 

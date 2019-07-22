@@ -5,156 +5,156 @@
 
 void KSON_TokenToString(KonTokenizer* tokenizer)
 {
-    KonStringBuffer* tokenKind = KonStringBuffer_New();
+    KxStringBuffer* tokenKind = KxStringBuffer_New();
 
     switch (tokenizer->TokenKind) {
         case KON_TOKEN_EOF:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EOF");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EOF");
             break;
         case KON_TOKEN_LIST_START:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LIST_START");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LIST_START");
             break;
         case KON_TOKEN_LIST_END:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LIST_END");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LIST_END");
             break;
         case KON_TOKEN_VECTOR_START:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_VECTOR_START");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_VECTOR_START");
             break;
         case KON_TOKEN_VECTOR_END:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_VECTOR_END");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_VECTOR_END");
             break;
         case KON_TOKEN_TABLE_START:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_START");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_START");
             break;
         case KON_TOKEN_TABLE_END:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_END");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_END");
             break;
         case KON_TOKEN_CELL_START:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_CELL_START");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_CELL_START");
             break;
         case KON_TOKEN_CELL_END:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_CELL_END");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_CELL_END");
             break;
         case KON_TOKEN_TABLE_TAG:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_TAG");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_TAG");
             break;
         case KON_TOKEN_APPLY:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_APPLY");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_APPLY");
             break;
         case KON_TOKEN_EXEC_MSG:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXEC_MSG");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXEC_MSG");
             break;
         case KON_TOKEN_PIPE:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_PIPE");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_PIPE");
             break;
         
         case KON_TOKEN_CLAUSE_END:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_CLAUSE_END");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_CLAUSE_END");
             break;
         case KON_TOKEN_WHITESPACE:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_WHITESPACE");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_WHITESPACE");
             break;
         case KON_TOKEN_KEYWORD_NIL:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_NIL");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_NIL");
             break;
         case KON_TOKEN_KEYWORD_NULL:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_NULL");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_NULL");
             break;
         case KON_TOKEN_KEYWORD_UKN:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_UKN");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_UKN");
             break;
         case KON_TOKEN_KEYWORD_TRUE:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_TRUE");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_TRUE");
             break;
         case KON_TOKEN_KEYWORD_FALSE:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_FALSE");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_FALSE");
             break;
         case KON_TOKEN_KEYWORD_EITHER:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_EITHER");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_EITHER");
             break;
         case KON_TOKEN_KEYWORD_BOTH:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_BOTH");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_BOTH");
             break;
         case KON_TOKEN_LITERAL_NUMBER:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_NUMBER");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_NUMBER");
             break;
         case KON_TOKEN_LITERAL_STRING:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_STRING");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_STRING");
             break;
         case KON_TOKEN_SYM_WORD:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_WORD");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_WORD");
             break;
         case KON_TOKEN_LITERAL_RAW_STRING:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_RAW_STRING");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_RAW_STRING");
             break;
         case KON_TOKEN_SYM_VARIABLE:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_VARIABLE");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_VARIABLE");
             break;
         case KON_TOKEN_SYM_PREFIX_WORD:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_PREFIX_WORD");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_PREFIX_WORD");
             break;
         case KON_TOKEN_SYM_SUFFIX_WORD:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_SUFFIX_WORD");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_SUFFIX_WORD");
             break;
         case KON_TOKEN_SYM_IDENTIFIER:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_IDENTIFIER");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_IDENTIFIER");
             break;
         case KON_TOKEN_SYM_STRING:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_STRING");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_STRING");
             break;
         case KON_TOKEN_QUOTE_VECTOR:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_VECTOR");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_VECTOR");
             break;
         case KON_TOKEN_QUOTE_LIST:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_LIST");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_LIST");
             break;
         case KON_TOKEN_QUOTE_TABLE:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_TABLE");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_TABLE");
             break;
         case KON_TOKEN_QUOTE_CELL:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_CELL");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_CELL");
             break;
         case KON_TOKEN_QUASI_VECTOR:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_VECTOR");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_VECTOR");
             break;
         case KON_TOKEN_QUASI_LIST:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_LIST");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_LIST");
             break;
         case KON_TOKEN_QUASI_TABLE:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_TABLE");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_TABLE");
             break;
         case KON_TOKEN_QUASI_CELL:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_CELL");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_CELL");
             break;
 
         case KON_TOKEN_EXPAND_REPLACE:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXPAND_REPLACE");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXPAND_REPLACE");
             break;
         case KON_TOKEN_EXPAND_KV:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXPAND_KV");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXPAND_KV");
             break;
         case KON_TOKEN_EXPAND_SEQ:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXPAND_SEQ");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXPAND_SEQ");
             break;
         case KON_TOKEN_UNQUOTE_REPLACE:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_UNQUOTE_REPLACE");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_UNQUOTE_REPLACE");
             break;
         case KON_TOKEN_UNQUOTE_KV:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_UNQUOTE_KV");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_UNQUOTE_KV");
             break;
         case KON_TOKEN_UNQUOTE_SEQ:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_UNQUOTE_SEQ");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_UNQUOTE_SEQ");
             break;
 
         case KON_TOKEN_COMMENT_SINGLE_LINE:
-            KonStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_COMMENT_SINGLE_LINE");
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_COMMENT_SINGLE_LINE");
             break;
         default:
             break;
     }
     // format
-//    KON_DEBUG("<%s (:row %ld, :col %ld, :row-end %ld, :col-end %ld) [%s]>", KonStringBuffer_Cstr(tokenKind), tokenizer->RowStart, tokenizer->ColStart, tokenizer->RowEnd, tokenizer->ColEnd, KonStringBuffer_Cstr(tokenizer->Content));
-    KON_DEBUG("<%s (:row %d, :col %d) [%s]>", KonStringBuffer_Cstr(tokenKind), tokenizer->RowStart, tokenizer->ColStart, KonStringBuffer_Cstr(tokenizer->Content));
+//    KON_DEBUG("<%s (:row %ld, :col %ld, :row-end %ld, :col-end %ld) [%s]>", KxStringBuffer_Cstr(tokenKind), tokenizer->RowStart, tokenizer->ColStart, tokenizer->RowEnd, tokenizer->ColEnd, KxStringBuffer_Cstr(tokenizer->Content));
+    KON_DEBUG("<%s (:row %d, :col %d) [%s]>", KxStringBuffer_Cstr(tokenKind), tokenizer->RowStart, tokenizer->ColStart, KxStringBuffer_Cstr(tokenizer->Content));
 }
 
 KonTokenizer* KSON_TokenizerInit(KonState* kstate)
@@ -164,7 +164,7 @@ KonTokenizer* KSON_TokenizerInit(KonState* kstate)
     tb_assert_and_check_return_val(tokenizer, tb_null);
 
     // init string
-    tokenizer->Content = KonStringBuffer_New();
+    tokenizer->Content = KxStringBuffer_New();
     // stream offset
     tokenizer->CurrRow = 1;
     tokenizer->CurrCol = 1;
@@ -177,9 +177,9 @@ KonTokenizer* KSON_TokenizerInit(KonState* kstate)
 
     tokenizer->NumIsPositive = true;
     tokenizer->NumIsPowerPositive = true;
-    tokenizer->NumBeforeDot = KonStringBuffer_New();
-    tokenizer->NumAfterDot = KonStringBuffer_New();
-    tokenizer->NumAfterPower = KonStringBuffer_New();
+    tokenizer->NumBeforeDot = KxStringBuffer_New();
+    tokenizer->NumAfterDot = KxStringBuffer_New();
+    tokenizer->NumAfterPower = KxStringBuffer_New();
 
     return tokenizer;
 }
@@ -208,7 +208,7 @@ bool KSON_TokenizerOpenStream(KonTokenizer* tokenizer, tb_stream_ref_t stream)
     
     
     // clear text
-    KonStringBuffer_Clear(tokenizer->Content);
+    KxStringBuffer_Clear(tokenizer->Content);
 //    ok = true;
 
     // failed? close it
@@ -232,7 +232,7 @@ void KSON_TokenizerCloseStream(KonTokenizer* tokenizer)
     tokenizer->ReadStream = tb_null;
 
     // clear text
-    KonStringBuffer_Clear(tokenizer->Content);
+    KxStringBuffer_Clear(tokenizer->Content);
 }
 
 void KSON_TokenizerExit(KonTokenizer* tokenizer)
@@ -354,11 +354,11 @@ void ParseIdentifier(KonTokenizer* tokenizer)
 {
     tokenizer->RowStart = tokenizer->CurrRow;
     tokenizer->ColStart = tokenizer->CurrCol;
-    KonStringBuffer_Clear(tokenizer->Content);
+    KxStringBuffer_Clear(tokenizer->Content);
 
     tb_char_t ch = ForwardChar(tokenizer);
     // add identifier first char
-    KonStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
+    KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
 
     tb_char_t* pc = tb_null;
     while ((pc = PeekChars(tokenizer, 1)) && pc) {
@@ -366,7 +366,7 @@ void ParseIdentifier(KonTokenizer* tokenizer)
             break;
         }
         ch = ForwardChar(tokenizer);
-        KonStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
+        KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
     }
     tokenizer->RowEnd = tokenizer->CurrRow;
     tokenizer->ColEnd = tokenizer->CurrCol;
@@ -377,7 +377,7 @@ void ParseString(KonTokenizer* tokenizer)
 {
     tokenizer->RowStart = tokenizer->CurrRow;
     tokenizer->ColStart = tokenizer->CurrCol;
-    KonStringBuffer_Clear(tokenizer->Content);
+    KxStringBuffer_Clear(tokenizer->Content);
 
     tb_char_t ch = ForwardChar(tokenizer);
 
@@ -388,7 +388,7 @@ void ParseString(KonTokenizer* tokenizer)
             break;
         }
         ch = ForwardChar(tokenizer);
-        KonStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
+        KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
     }
     tokenizer->RowEnd = tokenizer->CurrRow;
     tokenizer->ColEnd = tokenizer->CurrCol;
@@ -400,7 +400,7 @@ void ParseRawString(KonTokenizer* tokenizer)
 {
     tokenizer->RowStart = tokenizer->CurrRow;
     tokenizer->ColStart = tokenizer->CurrCol;
-    KonStringBuffer_Clear(tokenizer->Content);
+    KxStringBuffer_Clear(tokenizer->Content);
 
     tb_char_t ch = ForwardChar(tokenizer);
 
@@ -411,7 +411,7 @@ void ParseRawString(KonTokenizer* tokenizer)
             break;
         }
         ch = ForwardChar(tokenizer);
-        KonStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
+        KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
     }
     tokenizer->RowEnd = tokenizer->CurrRow;
     tokenizer->ColEnd = tokenizer->CurrCol;
@@ -422,7 +422,7 @@ void ParseSingleLineComment(KonTokenizer* tokenizer)
 {
     tokenizer->RowStart = tokenizer->CurrRow;
     tokenizer->ColStart = tokenizer->CurrCol;
-    KonStringBuffer_Clear(tokenizer->Content);
+    KxStringBuffer_Clear(tokenizer->Content);
     // forward two char  "//"
     ForwardChar(tokenizer);
     ForwardChar(tokenizer);
@@ -434,7 +434,7 @@ void ParseSingleLineComment(KonTokenizer* tokenizer)
             break;
         }
         ch = ForwardChar(tokenizer);
-        KonStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
+        KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
     }
     tokenizer->RowEnd = tokenizer->CurrRow;
     tokenizer->ColEnd = tokenizer->CurrCol;
@@ -445,16 +445,16 @@ void ParseNumber(KonTokenizer* tokenizer)
     tokenizer->RowStart = tokenizer->CurrRow;
     tokenizer->ColStart = tokenizer->CurrCol;
     // initialize
-    KonStringBuffer_Clear(tokenizer->Content);
+    KxStringBuffer_Clear(tokenizer->Content);
     tokenizer->NumIsPositive = true;
     tokenizer->NumIsPowerPositive = true;
-    KonStringBuffer_Clear(tokenizer->NumBeforeDot);
-    KonStringBuffer_Clear(tokenizer->NumAfterDot);
-    KonStringBuffer_Clear(tokenizer->NumAfterPower);
+    KxStringBuffer_Clear(tokenizer->NumBeforeDot);
+    KxStringBuffer_Clear(tokenizer->NumAfterDot);
+    KxStringBuffer_Clear(tokenizer->NumAfterPower);
 
     // add first char of this num
     tb_char_t ch = ForwardChar(tokenizer);
-    KonStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
+    KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
 
     if (ch == '-') {
         tokenizer->NumIsPositive = false;
@@ -464,7 +464,7 @@ void ParseNumber(KonTokenizer* tokenizer)
     }
     else {
         // is positive number
-        KonStringBuffer_NAppendChar(tokenizer->NumBeforeDot, ch, 1);
+        KxStringBuffer_NAppendChar(tokenizer->NumBeforeDot, ch, 1);
     }
     // state of parsing number
     // 1 parse num before dot, 2 parse num after dot, 3 parse powver
@@ -477,19 +477,19 @@ void ParseNumber(KonTokenizer* tokenizer)
             break;
         }
         ch = ForwardChar(tokenizer);
-        KonStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
+        KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
 
         if (state == 1 && ch != '.' && ch != 'e' && ch != 'E') {
-            KonStringBuffer_NAppendChar(tokenizer->NumBeforeDot, ch, 1);
+            KxStringBuffer_NAppendChar(tokenizer->NumBeforeDot, ch, 1);
         }
         else if (state == 2 && ch != 'e' && ch != 'E') {
-            KonStringBuffer_NAppendChar(tokenizer->NumAfterDot, ch, 1);
+            KxStringBuffer_NAppendChar(tokenizer->NumAfterDot, ch, 1);
         }
         else if (state == 3 && ch == '-') {
             tokenizer->NumIsPowerPositive = false;
         }
         else if (state == 3 && ch != '-') {
-            KonStringBuffer_NAppendChar(tokenizer->NumAfterPower, ch, 1);
+            KxStringBuffer_NAppendChar(tokenizer->NumAfterPower, ch, 1);
         }
 
         if (pc[0] == '.') {
@@ -505,8 +505,8 @@ void ParseNumber(KonTokenizer* tokenizer)
 
 void UpdateTokenContent(KonTokenizer* tokenizer, char* newContent)
 {
-    KonStringBuffer_Clear(tokenizer->Content);
-    KonStringBuffer_AppendCstr(tokenizer->Content, newContent);
+    KxStringBuffer_Clear(tokenizer->Content);
+    KxStringBuffer_AppendCstr(tokenizer->Content, newContent);
 }
 
 KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)

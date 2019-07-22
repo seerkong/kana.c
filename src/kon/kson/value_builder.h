@@ -22,12 +22,12 @@ typedef enum {
 typedef struct {
     KonBuilderType Type;
     union {
-        tb_vector_ref_t Vector; // vector of KN
-        tb_vector_ref_t List; // vector of KN
+        KxVector* Vector; // vector of KN
+        KxVector* List; // vector of KN
 
-        KonHashTable* Table;
+        KxHashTable* Table;
         struct {
-            KonStringBuffer* Key;
+            KxStringBuffer* Key;
             KN Value;
         } TablePair;
 

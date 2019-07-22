@@ -540,19 +540,19 @@ KN KON_PrimaryNewline(KonState* kstate, KN args)
 KN KON_PrimaryDisplay(KonState* kstate, KN args)
 {
     KN iter = args;
-    KonStringBuffer* merged = KonStringBuffer_New();
+    KxStringBuffer* merged = KxStringBuffer_New();
 
     int state = 1; // 1 need verb, 2 need objects
     do {
         KN item = kon_car(iter);
 
         KN formated = KON_ToFormatString(kstate, item, false, 0, "  ");
-        KonStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(formated));
+        KxStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(formated));
 
         iter = kon_cdr(iter);
     } while (iter != KON_NIL);
-    printf("%s", KonStringBuffer_Cstr(merged));
-    int size = KonStringBuffer_Length(merged);
+    printf("%s", KxStringBuffer_Cstr(merged));
+    int size = KxStringBuffer_Length(merged);
     return kon_make_fixnum(size);
 }
 
@@ -567,23 +567,23 @@ KN KON_PrimaryDisplayln(KonState* kstate, KN args)
 KN KON_PrimaryWrite(KonState* kstate, KN args)
 {
     KN iter = args;
-    KonStringBuffer* merged = KonStringBuffer_New();
+    KxStringBuffer* merged = KxStringBuffer_New();
 
     int state = 1; // 1 need verb, 2 need objects
     do {
         KN item = kon_car(iter);
 
         if (kon_is_string(item)) {
-            KonStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(item));
+            KxStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(item));
         }
         else {
             KN formated = KON_ToFormatString(kstate, item, false, 0, "  ");
-            KonStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(formated));
+            KxStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(formated));
         }
         iter = kon_cdr(iter);
     } while (iter != KON_NIL);
-    printf("%s", KonStringBuffer_Cstr(merged));
-    int size = KonStringBuffer_Length(merged);
+    printf("%s", KxStringBuffer_Cstr(merged));
+    int size = KxStringBuffer_Length(merged);
     return kon_make_fixnum(size);
 }
 

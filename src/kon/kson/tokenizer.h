@@ -88,14 +88,14 @@ typedef struct
     tb_stream_ref_t ReadStream;
 
     // the element
-    KonStringBuffer* Content;
+    KxStringBuffer* Content;
 
     // 解析number用的
     bool NumIsPositive;
-    KonStringBuffer* NumBeforeDot;   // 234.
-    KonStringBuffer* NumAfterDot;    // .12
+    KxStringBuffer* NumBeforeDot;   // 234.
+    KxStringBuffer* NumAfterDot;    // .12
     bool NumIsPowerPositive;    // e-2
-    KonStringBuffer* NumAfterPower;  // e5
+    KxStringBuffer* NumAfterPower;  // e5
 
 } KonTokenizer;
 
