@@ -6,8 +6,8 @@
 KN AfterOrConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KonHashMap* memo = contBeingInvoked->MemoTable;
-    KN restConditon = KON_HashMapGet(memo, "RestCondition");
+    KonHashTable* memo = contBeingInvoked->MemoTable;
+    KN restConditon = KonHashTable_AtKey(memo, "RestCondition");
 
     KonTrampoline* bounce;
     if (kon_is_true(evaledValue)) {
@@ -30,8 +30,8 @@ KN AfterOrConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* con
         k->Cont = contBeingInvoked->Cont;
         k->Env = env;
 
-        KonHashMap* memo = KON_HashMapInit(10);
-        KON_HashMapPut(memo, "RestCondition", kon_cdr(restConditon));
+        KonHashTable* memo = KonHashTable_Init(8);
+        KonHashTable_PutKv(memo, "RestCondition", kon_cdr(restConditon));
         k->MemoTable = memo;
         k->NativeCallback = AfterOrConditionEvaled;
 
@@ -51,8 +51,8 @@ KonTrampoline* KON_EvalPrefixOr(KonState* kstate, KN expression, KN env, KonCont
     k->Cont = cont;
     k->Env = env;
 
-    KonHashMap* memo = KON_HashMapInit(10);
-    KON_HashMapPut(memo, "RestCondition", kon_cdr(expression));
+    KonHashTable* memo = KonHashTable_Init(8);
+    KonHashTable_PutKv(memo, "RestCondition", kon_cdr(expression));
     k->MemoTable = memo;
     k->NativeCallback = AfterOrConditionEvaled;
     

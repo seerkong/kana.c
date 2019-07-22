@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <tbox/tbox.h>
 #include "../prefix/config.h"
-#include "hashmap.h"
 #include "../string/kon_stringbuffer.h"
+#include "../container/hashtable/kon_hashtable.h"
 
 ////
 // type alias start
@@ -264,7 +264,7 @@ struct KonCell {
 struct KonEnv {
     KonBase Base;
     KonEnv* Parent;
-    KonHashMap* Bindings;
+    KonHashTable* Bindings;
 };
 
 typedef enum {
@@ -329,7 +329,7 @@ struct KonVector {
 
 struct KonTable {
     KonBase Base;
-    KonHashMap* Table;
+    KonHashTable* Table;
 };
 
 union _Kon {

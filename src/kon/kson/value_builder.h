@@ -25,7 +25,7 @@ typedef struct {
         tb_vector_ref_t Vector; // vector of KN
         tb_vector_ref_t List; // vector of KN
 
-        KonHashMap* Table;
+        KonHashTable* Table;
         struct {
             KonStringBuffer* Key;
             KN Value;

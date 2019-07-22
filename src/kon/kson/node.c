@@ -583,17 +583,17 @@ KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     result->String = KonStringBuffer_New();
 
-    KonHashMap* hashMap = CAST_Kon(Table, source)->Table;
-    KonHashMapIter* iter = KON_HashMapIterHead(hashMap);
+    KonHashTable* hashTable = CAST_Kon(Table, source)->Table;
+    KonHashTableIter iter = KonHashTable_IterHead(hashTable);
 
     if (newLine) {
         KonStringBuffer_AppendCstr(result->String, "(\n");
 
 
-        while (iter) {
-            KonHashMapIter* next = KON_HashMapIterNext(hashMap, iter);
-            char* itemKey = KON_HashMapIterItemKey(hashMap, iter);
-            KN itemValue = (KN)KON_HashMapIterItemValue(hashMap, iter);
+        while (iter != KON_HASH_TABLE_NIL) {
+            KonHashTableIter next = KonHashTable_IterNext(hashTable, iter);
+            char* itemKey = KonHashTable_IterGetKey(hashTable, iter);
+            KN itemValue = (KN)KonHashTable_IterGetVal(hashTable, iter);
 
             KN itemToKonStr = KON_ToFormatString(kstate, itemValue, true, depth + 1, padding);
 
@@ -616,10 +616,10 @@ KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char
     else {
         KonStringBuffer_AppendCstr(result->String, "(");
 
-        while (iter) {
-            KonHashMapIter* next = KON_HashMapIterNext(hashMap, iter);
-            char* itemKey = KON_HashMapIterItemKey(hashMap, iter);
-            KN itemValue = (KN)KON_HashMapIterItemValue(hashMap, iter);
+        while (iter != KON_HASH_TABLE_NIL) {
+            KonHashTableIter next = KonHashTable_IterNext(hashTable, iter);
+            char* itemKey = KonHashTable_IterGetKey(hashTable, iter);
+            KN itemValue = (KN)KonHashTable_IterGetVal(hashTable, iter);
 
             KN itemToKonStr = KON_ToFormatString(kstate, itemValue, false, depth + 1, padding);
 

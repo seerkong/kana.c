@@ -40,9 +40,9 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
 KN AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KonHashMap* memo = contBeingInvoked->MemoTable;
-    KN trueClause = KON_HashMapGet(memo, "TrueClause");
-    KN falseClause = KON_HashMapGet(memo, "FalseClause");
+    KonHashTable* memo = contBeingInvoked->MemoTable;
+    KN trueClause = KonHashTable_AtKey(memo, "TrueClause");
+    KN falseClause = KonHashTable_AtKey(memo, "FalseClause");
 
     KonTrampoline* bounce;
     if (kon_is_true(evaledValue)) {
@@ -77,9 +77,9 @@ KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KN env, KonCont
     k->Cont = cont;
     k->Env = cont->Env;
 
-    KonHashMap* memo = KON_HashMapInit(10);
-    KON_HashMapPut(memo, "TrueClause", trueClause);
-    KON_HashMapPut(memo, "FalseClause", falseClause);
+    KonHashTable* memo = KonHashTable_Init(8);
+    KonHashTable_PutKv(memo, "TrueClause", trueClause);
+    KonHashTable_PutKv(memo, "FalseClause", falseClause);
     k->MemoTable = memo;
     k->NativeCallback = AfterIfConditionEvaled;
     

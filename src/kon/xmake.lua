@@ -25,7 +25,8 @@ target("kon")
     -- add the common source files
     add_files("*.c")
     add_files("utils/**.c")
-    add_files("string/**.c")  
+    add_files("string/**.c")
+    add_files("container/hashtable/**.c")  
     add_files("kson/**.c")
     add_files("interpreter/**.c")  
 

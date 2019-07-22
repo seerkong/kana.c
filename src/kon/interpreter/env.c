@@ -1,11 +1,10 @@
 #include "env.h"
-#include "../kson/hashmap.h"
 
 KN KON_MakeRootEnv(KonState* kstate)
 {
     KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
     env->Parent = KON_NIL;
-    env->Bindings = KON_HashMapInit(20);
+    env->Bindings = KonHashTable_Init(32);
 
     // math
     KON_EnvDefine(kstate, env, "+",
@@ -65,19 +64,19 @@ KN KON_MakeChildEnv(KonState* kstate, KN parentEnv)
 {
     KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
     env->Parent = parentEnv;
-    env->Bindings =  KON_HashMapInit(20);
+    env->Bindings = KonHashTable_Init(32);
     return env;
 }
 
 KN KON_EnvDefine(KonState* kstate, KN env, char* key, KN value)
 {
-    KON_HashMapPut(CAST_Kon(Env, env)->Bindings, key, value);
+    KonHashTable_PutKv(CAST_Kon(Env, env)->Bindings, key, value);
     return KON_TRUE;
 }
 
 KN KON_EnvLookup(KonState* kstate, KN env, char* key)
 {
-    KN value = KON_HashMapGet(CAST_Kon(Env, env)->Bindings, key);
+    KN value = KonHashTable_AtKey(CAST_Kon(Env, env)->Bindings, key);
     if (value) {
         return value;
     }
@@ -91,9 +90,9 @@ KN KON_EnvLookup(KonState* kstate, KN env, char* key)
 
 KN KON_EnvLookupSet(KonState* kstate, KN env, char* key, KN value)
 {
-    KN slot = KON_HashMapGet(CAST_Kon(Env, env)->Bindings, key);
+    KN slot = KonHashTable_AtKey(CAST_Kon(Env, env)->Bindings, key);
     if (slot) {
-        KON_HashMapPut(CAST_Kon(Env, env)->Bindings, key, value);
+        KonHashTable_PutKv(CAST_Kon(Env, env)->Bindings, key, value);
         return KON_TRUE;
     }
     else if (CAST_Kon(Env, env)->Parent == KON_NIL) {

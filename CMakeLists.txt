@@ -113,116 +113,6 @@ target_sources(koni PRIVATE
 )
 
 # target
-add_executable(playreader "")
-set_target_properties(playreader PROPERTIES OUTPUT_NAME "playreader")
-set_target_properties(playreader PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
-add_dependencies(playreader kon)
-target_include_directories(playreader PRIVATE
-    /usr/include
-    /usr/local/include
-)
-target_compile_definitions(playreader PRIVATE
-    DEBUG
-    __tb_prefix__="reader"
-)
-set_property(TARGET playreader PROPERTY C_STANDARD 99)
-if(MSVC)
-    target_compile_options(playreader PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
-endif()
-set_property(TARGET playreader PROPERTY CXX_STANDARD 14)
-target_compile_options(playreader PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
-)
-if(MSVC)
-    target_compile_options(playreader PRIVATE $<$<CONFIG:Debug>:-Od>)
-else()
-    target_compile_options(playreader PRIVATE -O0)
-endif()
-target_link_libraries(playreader PRIVATE
-    tbox
-    pthread
-    kon
-)
-target_link_directories(playreader PRIVATE
-    /usr/local/lib
-    /usr/lib
-)
-target_link_options(playreader PRIVATE
-    -L/usr/local/lib
-    -lpthread
-)
-target_sources(playreader PRIVATE
-    src/playground/kson/reader.c
-)
-
-# target
-add_executable(playdatatypes "")
-set_target_properties(playdatatypes PROPERTIES OUTPUT_NAME "playdatatypes")
-set_target_properties(playdatatypes PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
-add_dependencies(playdatatypes kon)
-target_include_directories(playdatatypes PRIVATE
-    /usr/include
-    /usr/local/include
-)
-target_compile_definitions(playdatatypes PRIVATE
-    DEBUG
-    __tb_prefix__="playdatatypes"
-)
-set_property(TARGET playdatatypes PROPERTY C_STANDARD 99)
-if(MSVC)
-    target_compile_options(playdatatypes PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
-endif()
-set_property(TARGET playdatatypes PROPERTY CXX_STANDARD 14)
-target_compile_options(playdatatypes PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
-)
-if(MSVC)
-    target_compile_options(playdatatypes PRIVATE $<$<CONFIG:Debug>:-Od>)
-else()
-    target_compile_options(playdatatypes PRIVATE -O0)
-endif()
-target_link_libraries(playdatatypes PRIVATE
-    tbox
-    pthread
-    kon
-)
-target_link_directories(playdatatypes PRIVATE
-    /usr/local/lib
-    /usr/lib
-)
-target_link_options(playdatatypes PRIVATE
-    -L/usr/local/lib
-    -lpthread
-)
-target_sources(playdatatypes PRIVATE
-    src/playground/datatypes.cpp
-)
-
-# target
 add_executable(playtokenizer "")
 set_target_properties(playtokenizer PROPERTIES OUTPUT_NAME "playtokenizer")
 set_target_properties(playtokenizer PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
@@ -275,6 +165,60 @@ target_link_options(playtokenizer PRIVATE
 )
 target_sources(playtokenizer PRIVATE
     src/playground/kson/tokenizer.c
+)
+
+# target
+add_executable(testreader "")
+set_target_properties(testreader PROPERTIES OUTPUT_NAME "testreader")
+set_target_properties(testreader PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
+add_dependencies(testreader kon)
+target_include_directories(testreader PRIVATE
+    /usr/include
+    /usr/local/include
+)
+target_compile_definitions(testreader PRIVATE
+    DEBUG
+)
+set_property(TARGET testreader PROPERTY C_STANDARD 99)
+if(MSVC)
+    target_compile_options(testreader PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
+endif()
+set_property(TARGET testreader PROPERTY CXX_STANDARD 14)
+target_compile_options(testreader PRIVATE
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
+    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
+)
+if(MSVC)
+    target_compile_options(testreader PRIVATE $<$<CONFIG:Debug>:-Od>)
+else()
+    target_compile_options(testreader PRIVATE -O0)
+endif()
+target_link_libraries(testreader PRIVATE
+    tbox
+    pthread
+    kon
+)
+target_link_directories(testreader PRIVATE
+    /usr/local/lib
+    /usr/lib
+)
+target_link_options(testreader PRIVATE
+    -L/usr/local/lib
+    -lpthread
+)
+target_sources(testreader PRIVATE
+    test/kson/testreader.c
 )
 
 # target
@@ -333,60 +277,6 @@ target_sources(eval_file PRIVATE
 )
 
 # target
-add_executable(testreader "")
-set_target_properties(testreader PROPERTIES OUTPUT_NAME "testreader")
-set_target_properties(testreader PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
-add_dependencies(testreader kon)
-target_include_directories(testreader PRIVATE
-    /usr/include
-    /usr/local/include
-)
-target_compile_definitions(testreader PRIVATE
-    DEBUG
-)
-set_property(TARGET testreader PROPERTY C_STANDARD 99)
-if(MSVC)
-    target_compile_options(testreader PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
-endif()
-set_property(TARGET testreader PROPERTY CXX_STANDARD 14)
-target_compile_options(testreader PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
-)
-if(MSVC)
-    target_compile_options(testreader PRIVATE $<$<CONFIG:Debug>:-Od>)
-else()
-    target_compile_options(testreader PRIVATE -O0)
-endif()
-target_link_libraries(testreader PRIVATE
-    tbox
-    pthread
-    kon
-)
-target_link_directories(testreader PRIVATE
-    /usr/local/lib
-    /usr/lib
-)
-target_link_options(testreader PRIVATE
-    -L/usr/local/lib
-    -lpthread
-)
-target_sources(testreader PRIVATE
-    test/kson/testreader.c
-)
-
-# target
 add_library(kon STATIC "")
 set_target_properties(kon PROPERTIES OUTPUT_NAME "kon")
 set_target_properties(kon PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
@@ -440,29 +330,29 @@ target_link_options(kon PRIVATE
 )
 target_sources(kon PRIVATE
     src/kon/interpreter/keyword/prefix_or.c
-    src/kon/string/kon_stringbuffer.c
+    src/kon/kon.c
     src/kon/interpreter/keyword/prefix_let.c
     src/kon/interpreter/env.c
     src/kon/interpreter/primary.c
     src/kon/interpreter/keyword/prefix_cond.c
     src/kon/kson/state_stack.c
-    src/kon/interpreter/keyword/prefix_func.c
+    src/kon/container/hashtable/kon_hashtable.c
     src/kon/interpreter/keyword/prefix_blk.c
     src/kon/interpreter/keyword/prefix_set.c
-    src/kon/kson/reader.c
-    src/kon/interpreter/keyword/prefix_do.c
-    src/kon/interpreter/keyword/prefix_lambda.c
     src/kon/kson/writer.c
-    src/kon/kson/murmurhash.c
-    src/kon/interpreter/keyword/prefix_if.c
-    src/kon/string/kon_stringview.c
-    src/kon/kon.c
-    src/kon/kson/value_builder.c
-    src/kon/kson/hashmap.c
+    src/kon/interpreter/keyword/prefix_do.c
     src/kon/kson/tokenizer.c
-    src/kon/interpreter/keyword/prefix_and.c
+    src/kon/interpreter/keyword/prefix_func.c
+    src/kon/container/hashtable/murmurhash.c
+    src/kon/interpreter/keyword/prefix_if.c
+    src/kon/kson/value_builder.c
+    src/kon/string/kon_stringview.c
     src/kon/utils/number_utils.c
-    src/kon/interpreter/cps_interpreter.c
+    src/kon/interpreter/keyword/prefix_lambda.c
+    src/kon/kson/reader.c
+    src/kon/interpreter/keyword/prefix_and.c
     src/kon/kson/node.c
+    src/kon/interpreter/cps_interpreter.c
+    src/kon/string/kon_stringbuffer.c
 )
 

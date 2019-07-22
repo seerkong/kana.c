@@ -39,8 +39,6 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
         if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_APPLY) {
             // TODO assert subj is a procedure
             if (subjProc->Type == KON_NATIVE_FUNC) {
-                // KON_HashMapDumpKeys(env->Bindings);
-                
                 KonNativeFuncRef funcRef = subjProc->NativeFuncRef;
                 KN applyResult = (*funcRef)(kstate, kon_cdr(argList));
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
