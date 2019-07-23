@@ -726,11 +726,13 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             else if (nextChars[1] == '\'') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
+                ParseRawString(tokenizer);
                 tokenizer->TokenKind = KON_TOKEN_SYM_STRING;
             }
             else {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
+                ParseIdentifier(tokenizer);
                 tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
             }
         }

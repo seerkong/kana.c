@@ -157,11 +157,13 @@ typedef struct KonBase {
 typedef volatile union _Kon* KN;
 
 typedef enum {
-    KON_SYM_IDENTIFER,  // abc
-    KON_SYM_STRING, // ''
-    KON_SYM_VAR,    // $abc
-    KON_SYM_PREFIX_MARCRO, // !ass
-    KON_SYM_SUFFIX_MARCRO // ^ass
+    KON_SYM_PREFIX_WORD, // !ass
+    KON_SYM_SUFFIX_WORD, // ^ass
+    KON_SYM_WORD,  // abc
+    KON_SYM_VARIABLE,    // @abc
+    KON_SYM_IDENTIFIER, // $abc
+    KON_SYM_STRING, // $''
+    KON_SYM_SLOT // /tag /. /.. /~
 } KonSymbolType;
 
 struct KonSymbol {
@@ -407,9 +409,9 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 #define kon_is_bytes(x)         (kon_check_tag(x, KON_T_BYTES))
 #define kon_is_string(x)        (kon_check_tag(x, KON_T_STRING))
 #define kon_is_symbol(x)        (kon_check_tag(x, KON_T_SYMBOL))
-#define kon_is_variable(x)      (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_VAR)
-#define KON_IS_IDENTIFER(x)      (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_IDENTIFER)
-#define KON_IS_PREFIX_MARCRO(x) (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_PREFIX_MARCRO)
+#define kon_is_variable(x)      (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_VARIABLE)
+#define KON_IS_WORD(x)      (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_WORD)
+#define KON_IS_PREFIX_MARCRO(x) (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_PREFIX_WORD)
 #define kon_is_syntax_marker(x) (kon_check_tag(x, KON_T_SYNTAX_MARKER))
 
 #define KON_IS_PAIR(x)       (kon_check_tag(x, KON_T_PAIR))

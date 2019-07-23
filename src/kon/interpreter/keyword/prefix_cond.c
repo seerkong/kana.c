@@ -5,7 +5,7 @@
 
 bool IsElseTag(KN predicate)
 {
-    if (KON_IS_IDENTIFER(predicate)
+    if (KON_IS_WORD(predicate)
         && strcmp(KON_UNBOX_SYMBOL(predicate), "else") == 0
     ) {
         return true;

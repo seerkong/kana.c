@@ -50,7 +50,7 @@ KonTrampoline* KON_EvalPrefixLambda(KonState* kstate, KN expression, KN env, Kon
     KN param = KON_NIL;
     KN funcName = KON_NULL;
     KN body = KON_NIL;
-    if (KON_IS_IDENTIFER(first)) {
+    if (KON_IS_WORD(first)) {
         funcName = first;
         param = kon_cadr(expression);
         body = kon_cddr(expression);
@@ -70,7 +70,7 @@ KonTrampoline* KON_EvalPrefixLambda(KonState* kstate, KN expression, KN env, Kon
     proc->Composite.ArgList = param;
     proc->Composite.Body = body;
 
-    if (KON_IS_IDENTIFER(funcName)) {
+    if (KON_IS_WORD(funcName)) {
         const char* varNameCstr = KON_UNBOX_SYMBOL(funcName);
         KON_EnvDefine(kstate, env, varNameCstr, proc);
     }

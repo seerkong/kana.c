@@ -439,7 +439,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
                 bounce->Bounce.Cont = k;
                 bounce->Bounce.Env = cont->Env;
             }
-            else if (kon_is_variable(subj) || KON_IS_IDENTIFER(subj)) {
+            else if (kon_is_variable(subj) || KON_IS_WORD(subj)) {
                 // TODO env lookup this val
                 // KN val = KON_MakeString(kstate, "writeln");
                 KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(subj));
@@ -509,17 +509,17 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             }
             else if (kon_is_vector(arg)) {
                 // TODO !!! verify cell inner content
-                // whether have Quasiquote, Expand, Unquote, KON_SYM_VAR node
+                // whether have Quasiquote, Expand, Unquote, KON_SYM_VARIABLE node
                 bounce = KON_RunContinuation(kstate, cont, arg);
             }
             else if (kon_is_table(arg)) {
                 // TODO !!! verify cell inner content key, value
-                // whether have Quasiquote, Expand, Unquote, KON_SYM_VAR node
+                // whether have Quasiquote, Expand, Unquote, KON_SYM_VARIABLE node
                 bounce = KON_RunContinuation(kstate, cont, arg);
             }
             else if (kon_is_cell(arg)) {
                 // TODO !!! verify cell inner content(tag, list, vector, table )
-                // whether have Quasiquote, Expand, Unquote, KON_SYM_VAR node
+                // whether have Quasiquote, Expand, Unquote, KON_SYM_VARIABLE node
                 bounce = KON_RunContinuation(kstate, cont, arg);
             }
             else if (kon_is_quote(arg)) {

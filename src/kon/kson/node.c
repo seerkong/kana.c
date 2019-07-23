@@ -223,23 +223,39 @@ KN KON_SymbolStringify(KonState* kstate, KN source)
     result->String = KxStringBuffer_New();
 
     switch (type) {
-        case KON_SYM_IDENTIFER: {
+        case KON_SYM_PREFIX_WORD: {
+            KxStringBuffer_AppendCstr(result->String, "!");
             KxStringBuffer_AppendCstr(result->String, data);
             break;
         }
-        case KON_SYM_STRING: {
-            KxStringBuffer_AppendCstr(result->String, "\'");
+        case KON_SYM_SUFFIX_WORD: {
+            KxStringBuffer_AppendCstr(result->String, "^");
             KxStringBuffer_AppendCstr(result->String, data);
-            KxStringBuffer_AppendCstr(result->String, "\'");
             break;
         }
-        case KON_SYM_VAR: {
+
+        case KON_SYM_WORD: {
+            KxStringBuffer_AppendCstr(result->String, data);
+            break;
+        }
+        case KON_SYM_VARIABLE: {
+            KxStringBuffer_AppendCstr(result->String, "@");
+            KxStringBuffer_AppendCstr(result->String, data);
+            break;
+        }
+        case KON_SYM_IDENTIFIER: {
             KxStringBuffer_AppendCstr(result->String, "$");
             KxStringBuffer_AppendCstr(result->String, data);
             break;
         }
-        case KON_SYM_PREFIX_MARCRO: {
-            KxStringBuffer_AppendCstr(result->String, "!");
+        case KON_SYM_STRING: {
+            KxStringBuffer_AppendCstr(result->String, "$\'");
+            KxStringBuffer_AppendCstr(result->String, data);
+            KxStringBuffer_AppendCstr(result->String, "\'");
+            break;
+        }
+        case KON_SYM_SLOT: {
+            KxStringBuffer_AppendCstr(result->String, "/");
             KxStringBuffer_AppendCstr(result->String, data);
             break;
         }

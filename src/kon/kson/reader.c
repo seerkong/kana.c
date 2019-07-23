@@ -92,9 +92,7 @@ bool IsContainerEndToken(tb_size_t event)
 // $e. $[]e. $()e. ${}e.
 bool IsWrapperToken(tb_size_t event)
 {
-    if (event == KON_TOKEN_SYM_IDENTIFIER
-        || event == KON_TOKEN_SYM_STRING
-        || event == KON_TOKEN_QUOTE_VECTOR
+    if (event == KON_TOKEN_QUOTE_VECTOR
         || event == KON_TOKEN_QUOTE_LIST
         || event == KON_TOKEN_QUOTE_TABLE
         || event == KON_TOKEN_QUOTE_CELL
@@ -127,6 +125,7 @@ bool IsLiteralToken(tb_size_t event)
         || event == KON_TOKEN_KEYWORD_BOTH
         || event == KON_TOKEN_LITERAL_NUMBER
         || event == KON_TOKEN_LITERAL_STRING
+        || event == KON_TOKEN_LITERAL_RAW_STRING
     ) {
         return true;
     }
@@ -183,34 +182,32 @@ KN MakeSymbol(KonReader* reader, KonTokenKind event)
 {
     KonSymbol* value = KON_ALLOC_TYPE_TAG(reader->Kstate, KonSymbol, KON_T_SYMBOL);
     if (event == KON_TOKEN_SYM_PREFIX_WORD) {
-        value->Type = KON_SYM_PREFIX_MARCRO;
+        value->Type = KON_SYM_PREFIX_WORD;
     }
     else if (event == KON_TOKEN_SYM_SUFFIX_WORD) {
-        value->Type = KON_SYM_SUFFIX_MARCRO;
+        value->Type = KON_SYM_SUFFIX_WORD;
+    }
+    
+    else if (event == KON_TOKEN_SYM_WORD) {
+        value->Type = KON_SYM_WORD;
     }
     else if (event == KON_TOKEN_SYM_VARIABLE) {
-        value->Type = KON_SYM_VAR;
+        value->Type = KON_SYM_VARIABLE;
     }
-    else if (event == KON_TOKEN_SYM_WORD) {
-        value->Type = KON_SYM_IDENTIFER;
+    else if (event == KON_TOKEN_SYM_IDENTIFIER) {
+        value->Type = KON_SYM_IDENTIFIER;
     }
-    else if (event == KON_TOKEN_LITERAL_RAW_STRING) {
+    else if (event == KON_TOKEN_SYM_STRING) {
         value->Type = KON_SYM_STRING;
+    }
+    else if (event == KON_TOKEN_SYM_SLOT) {
+        value->Type = KON_SYM_SLOT;
     }
     
     value->Data = utf8dup(KxStringBuffer_Cstr(reader->Tokenizer->Content));
 
     return value;
 }
-
-KN MakeSymFormWord(KonReader* reader, KonTokenKind event)
-{
-    KonSymbol* value = KON_ALLOC_TYPE_TAG(reader->Kstate, KonSymbol, KON_T_SYMBOL);
-    value->Type = KON_SYM_IDENTIFER;
-    value->Data = utf8dup(KxStringBuffer_Cstr(reader->Tokenizer->Content));
-    return value;
-}
-
 
 // num token to kon number
 KN MakeNumber(KonReader* reader)
@@ -291,7 +288,9 @@ KN MakeLiteral(KonReader* reader, KonTokenKind event)
     else if (event == KON_TOKEN_LITERAL_STRING) {
         value = MakeString(reader);
     }
-
+    else if (event == KON_TOKEN_LITERAL_RAW_STRING) {
+        value = MakeString(reader);
+    }
     
     return value;
 }
@@ -321,7 +320,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         if (currentState == KON_READER_PARSE_TABLE_KEY) {
             assert(kon_is_symbol(value));
             KonSymbolType symbolType = KON_FIELD(value, KonSymbol, Type);
-            assert(symbolType != KON_SYM_VAR && symbolType != KON_SYM_PREFIX_MARCRO);
+            assert(symbolType != KON_SYM_VARIABLE && symbolType != KON_SYM_PREFIX_WORD);
             // table tag key should not be NULL
             char* tableKey = KON_UNBOX_SYMBOL(value);
             assert(tableKey);
@@ -359,7 +358,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         else {
             assert(kon_is_symbol(value));
             KonSymbolType symbolType = KON_FIELD(value, KonSymbol, Type);
-            assert(symbolType != KON_SYM_PREFIX_MARCRO);
+            assert(symbolType != KON_SYM_PREFIX_WORD);
             CellBuilderSetName(topBuilder, value);
         }
     }
@@ -486,9 +485,7 @@ KN KSON_Parse(KonReader* reader)
             }
             else {
                 // wrapper types
-                if (event == KON_TOKEN_SYM_IDENTIFIER
-                    || event == KON_TOKEN_SYM_STRING
-                    || event == KON_TOKEN_QUOTE_VECTOR
+                if (event == KON_TOKEN_QUOTE_VECTOR
                     || event == KON_TOKEN_QUOTE_LIST
                     || event == KON_TOKEN_QUOTE_TABLE
                     || event == KON_TOKEN_QUOTE_CELL
@@ -594,8 +591,11 @@ KN KSON_Parse(KonReader* reader)
             continue;
         }
         
-        else if (event == KON_TOKEN_LITERAL_RAW_STRING
-            || event == KON_TOKEN_SYM_WORD
+        else if (event == KON_TOKEN_SYM_WORD
+            || event == KON_TOKEN_SYM_VARIABLE
+            || event == KON_TOKEN_SYM_IDENTIFIER
+            || event == KON_TOKEN_SYM_STRING
+            || event == KON_TOKEN_SYM_SLOT
         ) {
             KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);
