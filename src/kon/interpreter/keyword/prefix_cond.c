@@ -46,7 +46,7 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
             k->Cont = contBeingInvoked->Cont;
             k->Env = env;
 
-            KxHashTable* memo = KxHashTable_Init(8);
+            KxHashTable* memo = KxHashTable_Init(4);
             KxHashTable_PutKv(memo, "RestPairs", kon_cdr(restPairs));
             KxHashTable_PutKv(memo, "IfTrue", action);
 
@@ -83,7 +83,7 @@ KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KN env, KonCo
         k->Cont = cont;
         k->Env = env;
 
-        KxHashTable* memo = KxHashTable_Init(8);
+        KxHashTable* memo = KxHashTable_Init(4);
         KxHashTable_PutKv(memo, "RestPairs", kon_cdr(expression));
         KxHashTable_PutKv(memo, "IfTrue", action);
 

@@ -47,7 +47,7 @@ KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KN env, KonCon
         k->Cont = cont;
         k->Env = env;
 
-        KxHashTable* memo = KxHashTable_Init(8);
+        KxHashTable* memo = KxHashTable_Init(4);
         
         KxHashTable_PutKv(memo, "VarName", varNameCstr);
         k->MemoTable = memo;

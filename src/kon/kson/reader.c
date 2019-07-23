@@ -216,15 +216,15 @@ KN MakeSymFormWord(KonReader* reader, KonTokenKind event)
 KN MakeNumber(KonReader* reader)
 {
     bool isPositive = reader->Tokenizer->NumIsPositive;
-    char* numStrBeforeDot = KxStringBuffer_Cstr(reader->Tokenizer->NumBeforeDot);
-    char* numStrAfterDot = KxStringBuffer_Cstr(reader->Tokenizer->NumAfterDot);
-    char* numStrAfterPower = KxStringBuffer_Cstr(reader->Tokenizer->NumAfterPower);
+    const char* numStrBeforeDot = KxStringBuffer_Cstr(reader->Tokenizer->NumBeforeDot);
+    const char* numStrAfterDot = KxStringBuffer_Cstr(reader->Tokenizer->NumAfterDot);
+    const char* numStrAfterPower = KxStringBuffer_Cstr(reader->Tokenizer->NumAfterPower);
     
     KN value = KON_ZERO;
     
     if (isPositive
-        && numStrAfterDot == NULL
-        && numStrAfterPower == NULL
+        && (numStrAfterDot == NULL || strcmp(numStrAfterDot, "") == 0)
+        && (numStrAfterPower == NULL || strcmp(numStrAfterPower, "") == 0)
     ) {
         // TODO add judgment, if out of range
         // 32 bit system : use 4*8-1 bits;

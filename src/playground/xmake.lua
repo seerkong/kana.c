@@ -39,22 +39,3 @@ target("playwriter")
 
     -- add the source files
     add_files("kson/writer.c")
-
-
-target("eval_file")
-    -- add the dependent target
-    -- add_deps("tbox")
-    add_deps("kon")
-
-    add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
-    add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
-
-
-    -- make as a binary
-    set_kind("binary")
-
-    -- add defines
-    add_defines("__tb_prefix__=\"eval_file\"")
-
-    -- add the source files
-    add_files("eval_file.c")

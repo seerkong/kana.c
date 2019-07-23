@@ -106,7 +106,7 @@ KonBuilder* CreateTableBuilder()
         return NULL;
     }
     builder->Type = KON_BUILDER_TABLE;
-    builder->Table = KxHashTable_Init(16);;
+    builder->Table = KxHashTable_Init(10);;
     return builder;
 }
 

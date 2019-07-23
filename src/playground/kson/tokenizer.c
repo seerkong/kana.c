@@ -6,17 +6,12 @@
 
 int main(int argc, char const* argv[])
 {
-    KonState kstate;
-    KON_Init(&kstate);
-    // if (!KON_Init(&kstate)) {
-    //     fprintf(stderr, "Could not initialize!\n");
+    KonState* kstate = KON_Init();
 
+
+    // if (!tb_init(tb_null, tb_null)) {
     //     return 1;
     // }
-
-    if (!tb_init(tb_null, tb_null)) {
-        return 1;
-    }
 
     // 初始化流
     tb_stream_ref_t istream = tb_stream_init_from_url("../../../../samples/kon/cell.kon");
@@ -26,7 +21,7 @@ int main(int argc, char const* argv[])
         // 打开流
         if (tb_stream_open(istream)) {
             // 初始化读取器
-            KonTokenizer* tokenizer = KSON_TokenizerInit(&kstate);
+            KonTokenizer* tokenizer = KSON_TokenizerInit(kstate);
             printf("before KSON_TokenizerOpenStream\n");
 
             // 如果KSON_TokenizerOpen里的最后一个参数owner为true
@@ -70,7 +65,7 @@ int main(int argc, char const* argv[])
         tb_stream_exit(istream);
     }
 
-    tb_exit();
-//    KON_Finish(&kstate);
+    // tb_exit();
+    KON_Finish(kstate);
     return 0;
 }

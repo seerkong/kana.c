@@ -1,4 +1,4 @@
-target("koni")
+target("kli")
     -- add the dependent target
     -- add_deps("tbox")
     add_deps("kon")
@@ -10,10 +10,8 @@ target("koni")
     -- make as a binary
     set_kind("binary")
 
-    -- add defines
-    add_defines("__tb_prefix__=\"koni\"")
-
     -- add the source files
+    add_files("commander.c")
     add_files("main.c")
     
     

@@ -36,35 +36,6 @@ const char* KON_HumanFormatTime()
     return buf;
 }
 
-tb_void_t kon_hash_item_ptr_free(tb_element_ref_t element, tb_pointer_t buff)
-{
-    // tb_assert_and_check_return(element && buff);
-    // KN data = (KN)(*((tb_pointer_t*)buff));
-
-    // TODO release
-    // if (data) {
-    //     tb_free(data);
-    // }
-
-    // TODO clear
-    // *((tb_pointer_t*)buff) = tb_null;
-
-}
-
-tb_void_t kon_vector_item_ptr_free(tb_element_ref_t element, tb_pointer_t buff)
-{
-    // tb_assert_and_check_return(element && buff);
-
-    // KN data = (KN)(*((tb_pointer_t*)buff));
-
-    // TODO release
-    // if (data) {
-    //     tb_free(data);
-    // }
-
-    // TODO clear
-    // *((tb_pointer_t*)buff) = tb_null;
-}
 
 KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
 {

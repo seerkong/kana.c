@@ -4,56 +4,56 @@ KN KON_MakeRootEnv(KonState* kstate)
 {
     KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
     env->Parent = KON_NIL;
-    env->Bindings = KxHashTable_Init(32);
+    env->Bindings = KxHashTable_Init(4);
 
     // math
-    KON_EnvDefine(kstate, env, "+",
+    KON_EnvDefine(kstate, (KN)env, "+",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryPlus)
     );
-    KON_EnvDefine(kstate, env, "-",
+    KON_EnvDefine(kstate, (KN)env, "-",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryMinus)
     );
-    KON_EnvDefine(kstate, env, "*",
+    KON_EnvDefine(kstate, (KN)env, "*",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryMultiply)
     );
-    KON_EnvDefine(kstate, env, "/",
+    KON_EnvDefine(kstate, (KN)env, "/",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryDivide)
     );
-    KON_EnvDefine(kstate, env, "mod",
+    KON_EnvDefine(kstate, (KN)env, "mod",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryMod)
     );
-    KON_EnvDefine(kstate, env, "lt",
+    KON_EnvDefine(kstate, (KN)env, "lt",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryLowerThan)
     );
-    KON_EnvDefine(kstate, env, "lte",
+    KON_EnvDefine(kstate, (KN)env, "lte",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryLowerOrEqual)
     );
-    KON_EnvDefine(kstate, env, "gt",
+    KON_EnvDefine(kstate, (KN)env, "gt",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryGreaterThan)
     );
-    KON_EnvDefine(kstate, env, "gte",
+    KON_EnvDefine(kstate, (KN)env, "gte",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryGreaterOrEqual)
     );
     
 
     // IO
-    KON_EnvDefine(kstate, env, "newline",
+    KON_EnvDefine(kstate, (KN)env, "newline",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryNewline)
     );
-    KON_EnvDefine(kstate, env, "display",
+    KON_EnvDefine(kstate, (KN)env, "display",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryDisplay)
     );
-    KON_EnvDefine(kstate, env, "displayln",
+    KON_EnvDefine(kstate, (KN)env, "displayln",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryDisplayln)
     );
-    KON_EnvDefine(kstate, env, "write",
+    KON_EnvDefine(kstate, (KN)env, "write",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryWrite)
     );
-    KON_EnvDefine(kstate, env, "writeln",
+    KON_EnvDefine(kstate, (KN)env, "writeln",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryWriteln)
     );
 
-    KON_EnvDefine(kstate, env, "stringify",
+    KON_EnvDefine(kstate, (KN)env, "stringify",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryStringify)
     );
 
@@ -64,7 +64,7 @@ KN KON_MakeChildEnv(KonState* kstate, KN parentEnv)
 {
     KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
     env->Parent = parentEnv;
-    env->Bindings = KxHashTable_Init(32);
+    env->Bindings = KxHashTable_Init(4);
     return env;
 }
 
@@ -77,7 +77,7 @@ KN KON_EnvDefine(KonState* kstate, KN env, char* key, KN value)
 KN KON_EnvLookup(KonState* kstate, KN env, char* key)
 {
     KN value = KxHashTable_AtKey(CAST_Kon(Env, env)->Bindings, key);
-    if (value) {
+    if (value && value != KON_NULL) {
         return value;
     }
     else if (CAST_Kon(Env, env)->Parent == KON_NIL) {

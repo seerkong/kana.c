@@ -36,3 +36,40 @@ target("testreader")
 
     -- add the source files
     add_files("kson/testreader.c")
+
+target("testeval")
+    -- add the dependent target
+    -- add_deps("tbox")
+    add_deps("kon")
+
+    add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+    add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+
+    set_optimize("none")
+    set_symbols("debug")
+    add_defines("DEBUG")
+
+    -- make as a binary
+    set_kind("binary")
+
+    -- add the source files
+    add_files("klang/testeval.c")
+
+target("test_table")
+    -- add the dependent target
+    -- add_deps("tbox")
+    add_deps("kon")
+
+    add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+    add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+
+    set_optimize("none")
+    set_symbols("debug")
+    add_defines("DEBUG")
+
+    -- make as a binary
+    set_kind("binary")
+
+    -- add the source files
+    add_files("container/test_hashtable.c")
+    add_files("container/test_table.c")

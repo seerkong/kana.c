@@ -16,11 +16,19 @@ xmake install
 
 ```
 
-# generate xcode project after add custom c files
+# run kon script file
+kli -f <file_path>
+eg: 
+```
+xmake run kli -f ~/lang/konscript/kon-c/samples/knative/do.kl
+```
 
+# generate xcode project
+run the command below after add new files
+```
 xmake project -k cmakelists
 
 mkdir -p xcode
 cd xcode
 cmake .. -G "Xcode"
-
+```

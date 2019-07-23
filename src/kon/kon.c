@@ -12,8 +12,12 @@
 
 
 
-int KON_Init(KonState* kstate)
+KonState* KON_Init()
 {
+    KonState* kstate = (KonState*)calloc(1, sizeof(KonState));
+    if (kstate == NULL) {
+        return NULL;
+    }
     kstate->Base.Tag = KON_T_STATE;
 
     // init root env
@@ -21,9 +25,9 @@ int KON_Init(KonState* kstate)
     // KON_DEBUG("root env addr %x", env);     
     // kstate->Value.Context.RootEnv = env;
     // if (!tb_init(tb_null, tb_null)) {
-    //     return 1;
+    //     return NULL;
     // }
-    return 0;
+    return kstate;
 }
 
 
@@ -48,6 +52,8 @@ KN KON_EvalFile(KonState* kstate, char* filePath)
         exit(1);
     }
 
+    KN result = KON_NULL;
+
     if (istream) {
         bool openRes = KSON_ReaderOpenStream(reader, istream, false);
         if (openRes) {
@@ -57,7 +63,7 @@ KN KON_EvalFile(KonState* kstate, char* filePath)
                 KN env = KON_MakeRootEnv(kstate);
 
                 // KN result = KON_ProcessSentences(kstate, root, kstate->Value.Context.RootEnv);
-                KN result = KON_ProcessSentences(kstate, root, env);
+                result = KON_ProcessSentences(kstate, root, env);
                 
                 
                 KON_DEBUG("eval sentences success");
@@ -76,4 +82,6 @@ KN KON_EvalFile(KonState* kstate, char* filePath)
         // KSON_ReaderOpen的最后一个参数，如果是false，需要主动释放流
         tb_stream_exit(istream);
     }
+
+    return result;
 }

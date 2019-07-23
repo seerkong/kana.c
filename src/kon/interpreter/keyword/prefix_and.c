@@ -30,7 +30,7 @@ KN AfterAndConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* co
         k->Cont = contBeingInvoked->Cont;
         k->Env = env;
 
-        KxHashTable* memo = KxHashTable_Init(8);
+        KxHashTable* memo = KxHashTable_Init(4);
         KxHashTable_PutKv(memo, "RestCondition", kon_cdr(restConditon));
         k->MemoTable = memo;
         k->NativeCallback = AfterAndConditionEvaled;
@@ -51,7 +51,7 @@ KonTrampoline* KON_EvalPrefixAnd(KonState* kstate, KN expression, KN env, KonCon
     k->Cont = cont;
     k->Env = env;
 
-    KxHashTable* memo = KxHashTable_Init(8);
+    KxHashTable* memo = KxHashTable_Init(4);
     KxHashTable_PutKv(memo, "RestCondition", kon_cdr(expression));
     k->MemoTable = memo;
     k->NativeCallback = AfterAndConditionEvaled;

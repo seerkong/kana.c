@@ -604,7 +604,7 @@ int KxHashTable_PutKv(KxHashTable* self, char* key, XN value)
     // insert new key entry as bucket first
     if (self->Buckets[hashIndex] != KX_HASH_TABLE_NIL) {
         self->Buckets[hashIndex]->Prev = keyEntry;
-        keyEntry->Next = self->Buckets[hashIndex]->Prev;
+        keyEntry->Next = self->Buckets[hashIndex];
     }
     else {
         self->Buckets[hashIndex] += 1;

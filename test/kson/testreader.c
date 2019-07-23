@@ -7,15 +7,12 @@
 #include "../greatest.h"
 #include "../../src/kon/kon.h"
 #include <tbox/tbox.h>
+
+KonState* kstate;
 SUITE(suite);
 
 TEST Reader_Cell(void) {
-    KonState kstate;
-    KON_Init(&kstate);
-
-    if (!tb_init(tb_null, tb_null)) {
-        return 1;
-    }
+    
     // 初始化流
     tb_stream_ref_t istream = tb_stream_init_from_url("~/lang/konscript/kon-c/samples/kon/cell.kon");
 
@@ -46,8 +43,6 @@ TEST Reader_Cell(void) {
         tb_stream_exit(istream);
     }
 
-    tb_exit();
-
     PASS();
 }
 
@@ -63,6 +58,13 @@ int main(int argc, char const* argv[])
 {
     GREATEST_MAIN_BEGIN();
     greatest_set_verbosity(1);
+    if (!tb_init(tb_null, tb_null)) {
+        return NULL;
+    }
+    kstate = KON_Init();
     RUN_SUITE(suite);
+
+    KON_Finish(kstate);
+    tb_exit();
     GREATEST_MAIN_END();
 }

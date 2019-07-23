@@ -570,9 +570,6 @@ KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef
 
 // data structure apis end
 
-KON_API tb_void_t kon_hash_item_ptr_free(tb_element_ref_t element, tb_pointer_t buff);
-KON_API tb_void_t kon_vector_item_ptr_free(tb_element_ref_t element, tb_pointer_t buff);
-
 // common utils start
 KON_API const char* KON_HumanFormatTime();
 

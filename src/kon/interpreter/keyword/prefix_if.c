@@ -77,7 +77,7 @@ KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KN env, KonCont
     k->Cont = cont;
     k->Env = cont->Env;
 
-    KxHashTable* memo = KxHashTable_Init(8);
+    KxHashTable* memo = KxHashTable_Init(4);
     KxHashTable_PutKv(memo, "TrueClause", trueClause);
     KxHashTable_PutKv(memo, "FalseClause", falseClause);
     k->MemoTable = memo;
