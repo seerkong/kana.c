@@ -227,7 +227,7 @@ KN MakeNumber(KonReader* reader)
         // 32 bit system : use 4*8-1 bits;
         // 64 bit system : use 8*8-1 bits;
         int numBeforeDot = atoi(numStrBeforeDot);
-        value = kon_make_fixnum(numBeforeDot);
+        value = KON_MAKE_FIXNUM(numBeforeDot);
     }
     else {
         // TODO add exp suport
@@ -352,7 +352,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         else if (kon_is_table(value)) {
             CellBuilderSetTable(topBuilder, value);
         }
-        else if (KON_IsList(value)) {
+        else if (KON_IsPairList(value)) {
             CellBuilderSetList(topBuilder, value);
         }
         else {

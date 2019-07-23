@@ -34,7 +34,7 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
     KN trueClause = KON_VectorToKonPairList(kstate, trueClauseVec);
     KN falseClause = KON_VectorToKonPairList(kstate, falseClauseVec);
     
-    return KON_List2(kstate, trueClause, falseClause);
+    return KON_PairList2(kstate, trueClause, falseClause);
 }
 
 KN AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)

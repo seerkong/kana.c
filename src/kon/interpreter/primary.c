@@ -101,7 +101,7 @@ KN KON_PrimaryPlus(KonState* kstate, KN args)
     KN iter = args;
     KN first = kon_car(iter);
     if (first == KON_NIL) {
-        return kon_make_fixnum(0);
+        return KON_MAKE_FIXNUM(0);
     }
 
     int resFixnum = 0;
@@ -116,7 +116,7 @@ KN KON_PrimaryPlus(KonState* kstate, KN args)
         KN item = kon_car(iter);
 
         if (KON_IS_FIXNUM(item)) {
-            int num = kon_unbox_fixnum(item);
+            int num = KON_UNBOX_FIXNUM(item);
             if (isFixNum) {
                 resFixnum += num;
             }
@@ -140,7 +140,7 @@ KN KON_PrimaryPlus(KonState* kstate, KN args)
     
     if (isFixNum) {
         // TODO overflow check
-        return kon_make_fixnum(resFixnum);
+        return KON_MAKE_FIXNUM(resFixnum);
     }
     else {
         KN result = KON_MAKE_FLONUM(kstate, resFlonum);
@@ -155,7 +155,7 @@ KN KON_PrimaryMinus(KonState* kstate, KN args)
     KN first = kon_car(iter);
     iter = kon_cdr(iter);
     if (first == KON_NIL) {
-        return kon_make_fixnum(0);
+        return KON_MAKE_FIXNUM(0);
     }
     else if (iter == KON_NIL) {
         return first;
@@ -168,7 +168,7 @@ KN KON_PrimaryMinus(KonState* kstate, KN args)
     // the result type is determined by the first arg
     if (KON_IS_FIXNUM(first)) {
         isFixNum = true;
-        resFixnum = kon_unbox_fixnum(first);
+        resFixnum = KON_UNBOX_FIXNUM(first);
     }
     else {
         resFlonum =  KON_UNBOX_FLONUM(first);
@@ -178,7 +178,7 @@ KN KON_PrimaryMinus(KonState* kstate, KN args)
         KN item = kon_car(iter);
 
         if (KON_IS_FIXNUM(item)) {
-            int num = kon_unbox_fixnum(item);
+            int num = KON_UNBOX_FIXNUM(item);
             if (isFixNum) {
                 resFixnum -= num;
             }
@@ -202,7 +202,7 @@ KN KON_PrimaryMinus(KonState* kstate, KN args)
     
     if (isFixNum) {
         // TODO overflow check
-        return kon_make_fixnum(resFixnum);
+        return KON_MAKE_FIXNUM(resFixnum);
     }
     else {
         KN result = KON_MAKE_FLONUM(kstate, resFlonum);
@@ -216,7 +216,7 @@ KN KON_PrimaryMultiply(KonState* kstate, KN args)
     KN iter = args;
     KN first = kon_car(iter);
     if (first == KON_NIL) {
-        return kon_make_fixnum(0);
+        return KON_MAKE_FIXNUM(0);
     }
 
     int resFixnum = 1;
@@ -231,7 +231,7 @@ KN KON_PrimaryMultiply(KonState* kstate, KN args)
         KN item = kon_car(iter);
 
         if (KON_IS_FIXNUM(item)) {
-            int num = kon_unbox_fixnum(item);
+            int num = KON_UNBOX_FIXNUM(item);
             if (isFixNum) {
                 resFixnum *= num;
             }
@@ -255,7 +255,7 @@ KN KON_PrimaryMultiply(KonState* kstate, KN args)
     
     if (isFixNum) {
         // TODO overflow check
-        return kon_make_fixnum(resFixnum);
+        return KON_MAKE_FIXNUM(resFixnum);
     }
     else {
         KN result = KON_MAKE_FLONUM(kstate, resFlonum);
@@ -269,7 +269,7 @@ KN KON_PrimaryDivide(KonState* kstate, KN args)
     KN first = kon_car(iter);
     iter = kon_cdr(iter);
     if (first == KON_NIL) {
-        return kon_make_fixnum(0);
+        return KON_MAKE_FIXNUM(0);
     }
     else if (iter == KON_NIL) {
         return first;
@@ -282,7 +282,7 @@ KN KON_PrimaryDivide(KonState* kstate, KN args)
     // the result type is determined by the first arg
     if (KON_IS_FIXNUM(first)) {
         isFixNum = true;
-        resFixnum = kon_unbox_fixnum(first);
+        resFixnum = KON_UNBOX_FIXNUM(first);
     }
     else {
         resFlonum = KON_UNBOX_FLONUM(first);
@@ -292,7 +292,7 @@ KN KON_PrimaryDivide(KonState* kstate, KN args)
         KN item = kon_car(iter);
 
         if (KON_IS_FIXNUM(item)) {
-            int num = kon_unbox_fixnum(item);
+            int num = KON_UNBOX_FIXNUM(item);
             if (isFixNum) {
                 resFixnum /= num;
             }
@@ -316,7 +316,7 @@ KN KON_PrimaryDivide(KonState* kstate, KN args)
     
     if (isFixNum) {
         // TODO overflow check
-        return kon_make_fixnum(resFixnum);
+        return KON_MAKE_FIXNUM(resFixnum);
     }
     else {
         KN result = KON_MAKE_FLONUM(kstate, resFlonum);
@@ -331,7 +331,7 @@ KN KON_PrimaryMod(KonState* kstate, KN args)
     KN first = kon_car(iter);
     iter = kon_cdr(iter);
     if (first == KON_NIL) {
-        return kon_make_fixnum(0);
+        return KON_MAKE_FIXNUM(0);
     }
     else if (iter == KON_NIL) {
         return first;
@@ -342,7 +342,7 @@ KN KON_PrimaryMod(KonState* kstate, KN args)
 
     int resFixnum = 0;
     if (KON_IS_FIXNUM(first)) {
-        resFixnum = kon_unbox_fixnum(first);
+        resFixnum = KON_UNBOX_FIXNUM(first);
     }
     else {
         resFixnum = (int)(KON_UNBOX_FLONUM(first));
@@ -350,13 +350,13 @@ KN KON_PrimaryMod(KonState* kstate, KN args)
 
     int mod = 1;
     if (KON_IS_FIXNUM(first)) {
-        mod = kon_unbox_fixnum(second);
+        mod = KON_UNBOX_FIXNUM(second);
     }
     else {
         mod = (int)(KON_UNBOX_FLONUM(second));
     }
  
-    return kon_make_fixnum(resFixnum % mod);
+    return KON_MAKE_FIXNUM(resFixnum % mod);
 }
 
 KN KON_PrimaryLowerThan(KonState* kstate, KN args)
@@ -371,7 +371,7 @@ KN KON_PrimaryLowerThan(KonState* kstate, KN args)
     double lastNum = 0.0;
 
     if (KON_IS_FIXNUM(first)) {
-        lastNum = 1.0 * kon_unbox_fixnum(first);
+        lastNum = 1.0 * KON_UNBOX_FIXNUM(first);
     }
     else {
         lastNum = KON_UNBOX_FLONUM(first);
@@ -382,7 +382,7 @@ KN KON_PrimaryLowerThan(KonState* kstate, KN args)
 
         double cmpNum = 0.0;
         if (KON_IS_FIXNUM(item)) {
-            cmpNum = kon_unbox_fixnum(item);
+            cmpNum = KON_UNBOX_FIXNUM(item);
         }
         else if (KON_IS_FLONUM(item)) {
             cmpNum = KON_UNBOX_FLONUM(item);
@@ -414,7 +414,7 @@ KN KON_PrimaryLowerOrEqual(KonState* kstate, KN args)
     double lastNum = 0.0;
 
     if (KON_IS_FIXNUM(first)) {
-        lastNum = 1.0 * kon_unbox_fixnum(first);
+        lastNum = 1.0 * KON_UNBOX_FIXNUM(first);
     }
     else {
         lastNum = KON_UNBOX_FLONUM(first);
@@ -425,7 +425,7 @@ KN KON_PrimaryLowerOrEqual(KonState* kstate, KN args)
 
         double cmpNum = 0.0;
         if (KON_IS_FIXNUM(item)) {
-            cmpNum = kon_unbox_fixnum(item);
+            cmpNum = KON_UNBOX_FIXNUM(item);
         }
         else if (KON_IS_FLONUM(item)) {
             cmpNum = KON_UNBOX_FLONUM(item);
@@ -457,7 +457,7 @@ KN KON_PrimaryGreaterThan(KonState* kstate, KN args)
     double lastNum = 0.0;
 
     if (KON_IS_FIXNUM(first)) {
-        lastNum = 1.0 * kon_unbox_fixnum(first);
+        lastNum = 1.0 * KON_UNBOX_FIXNUM(first);
     }
     else {
         lastNum = KON_UNBOX_FLONUM(first);
@@ -468,7 +468,7 @@ KN KON_PrimaryGreaterThan(KonState* kstate, KN args)
 
         double cmpNum = 0.0;
         if (KON_IS_FIXNUM(item)) {
-            cmpNum = kon_unbox_fixnum(item);
+            cmpNum = KON_UNBOX_FIXNUM(item);
         }
         else if (KON_IS_FLONUM(item)) {
             cmpNum = KON_UNBOX_FLONUM(item);
@@ -500,7 +500,7 @@ KN KON_PrimaryGreaterOrEqual(KonState* kstate, KN args)
     double lastNum = 0.0;
 
     if (KON_IS_FIXNUM(first)) {
-        lastNum = 1.0 * kon_unbox_fixnum(first);
+        lastNum = 1.0 * KON_UNBOX_FIXNUM(first);
     }
     else {
         lastNum = KON_UNBOX_FLONUM(first);
@@ -511,7 +511,7 @@ KN KON_PrimaryGreaterOrEqual(KonState* kstate, KN args)
 
         double cmpNum = 0.0;
         if (KON_IS_FIXNUM(item)) {
-            cmpNum = kon_unbox_fixnum(item);
+            cmpNum = KON_UNBOX_FIXNUM(item);
         }
         else if (KON_IS_FLONUM(item)) {
             cmpNum = KON_UNBOX_FLONUM(item);
@@ -534,7 +534,7 @@ KN KON_PrimaryGreaterOrEqual(KonState* kstate, KN args)
 KN KON_PrimaryNewline(KonState* kstate, KN args)
 {
     printf("\n");
-    return kon_make_fixnum(1);
+    return KON_MAKE_FIXNUM(1);
 }
 
 KN KON_PrimaryDisplay(KonState* kstate, KN args)
@@ -553,14 +553,14 @@ KN KON_PrimaryDisplay(KonState* kstate, KN args)
     } while (iter != KON_NIL);
     printf("%s", KxStringBuffer_Cstr(merged));
     int size = KxStringBuffer_Length(merged);
-    return kon_make_fixnum(size);
+    return KON_MAKE_FIXNUM(size);
 }
 
 KN KON_PrimaryDisplayln(KonState* kstate, KN args)
 {
     KN size = KON_PrimaryDisplay(kstate, args);
     KON_PrimaryNewline(kstate, args);
-    return kon_make_fixnum(kon_unbox_fixnum(size) + 1);
+    return KON_MAKE_FIXNUM(KON_UNBOX_FIXNUM(size) + 1);
 }
 
 // TODO select output
@@ -584,7 +584,7 @@ KN KON_PrimaryWrite(KonState* kstate, KN args)
     } while (iter != KON_NIL);
     printf("%s", KxStringBuffer_Cstr(merged));
     int size = KxStringBuffer_Length(merged);
-    return kon_make_fixnum(size);
+    return KON_MAKE_FIXNUM(size);
 }
 
 // TODO select output
@@ -592,7 +592,7 @@ KN KON_PrimaryWriteln(KonState* kstate, KN args)
 {
     KN size = KON_PrimaryWrite(kstate, args);
     KON_PrimaryNewline(kstate, args);
-    return kon_make_fixnum(kon_unbox_fixnum(size) + 1);
+    return KON_MAKE_FIXNUM(KON_UNBOX_FIXNUM(size) + 1);
 }
 
 KN KON_PrimaryStringify(KonState* kstate, KN args)

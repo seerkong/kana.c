@@ -82,8 +82,8 @@ KN KON_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char
     else if (kon_is_vector(source)) {
         return KON_VectorStringify(kstate, source, newLine, depth, padding);
     }
-    else if (KON_IsList(source)) {
-        return KON_ListStringify(kstate, source, newLine, depth, padding);
+    else if (KON_IsPairList(source)) {
+        return KON_PairListStringify(kstate, source, newLine, depth, padding);
     }
     else if (kon_is_table(source)) {
         return KON_TableStringify(kstate, source, newLine, depth, padding);
@@ -126,7 +126,7 @@ KN KON_FixnumStringify(KonState* kstate, KN source)
         return KON_MakeEmptyString(kstate);
     }
     char buf[128] = { '\0' };
-    kon_int_t num = kon_unbox_fixnum(source);
+    kon_int_t num = KON_UNBOX_FIXNUM(source);
     itoa(num, buf, 10);
 
     KonString* value = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
@@ -442,7 +442,7 @@ KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, cha
     return result;
 }
 
-bool KON_IsList(KN source)
+bool KON_IsPairList(KN source)
 {
     KonPair* iter = source;
     bool isList = true;
@@ -459,9 +459,9 @@ bool KON_IsList(KN source)
     return isList;
 }
 
-KN KON_ListStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
+KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    assert(KON_IsList(source));
+    assert(KON_IsPairList(source));
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     result->String = KxStringBuffer_New();
 
@@ -514,7 +514,7 @@ KN KON_ListStringify(KonState* kstate, KN source, bool newLine, int depth, char*
     return result;
 }
 
-KN Kon_ListRevert(KonState* kstate, KN source)
+KN KON_PairListRevert(KonState* kstate, KN source)
 {
     KN result = KON_NIL;
     if (source != KON_NIL && KON_IS_PAIR(source)) {
@@ -531,6 +531,24 @@ KN Kon_ListRevert(KonState* kstate, KN source)
     return result;
 }
 
+KN KON_PairListLength(KonState* kstate, KN source)
+{
+    int length = 0;
+    if (source != KON_NIL && KON_IS_PAIR(source)) {
+        KonPair* iter = source;
+        while (iter != KON_NIL) {
+            KN item = kon_car(iter);
+            KN next = kon_cdr(iter);
+
+            length += 1;
+
+            iter = next;
+        }
+    }
+    return KON_MAKE_FIXNUM(length);
+}
+
+
 KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail)
 {
   KonPair* node = KON_ALLOC_TYPE_TAG(kstate, KonPair, KON_T_PAIR);
@@ -546,16 +564,16 @@ KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail)
   return node;
 }
 
-KN KON_List2(KonState* kstate, KN a, KN b)
+KN KON_PairList2(KonState* kstate, KN a, KN b)
 {
   KN res = kon_cons(kstate, b, KON_NIL);
   res = kon_cons(kstate, a, res);
   return res;
 }
 
-KN KON_List3(KonState* kstate, KN a, KN b, KN c)
+KN KON_PairList3(KonState* kstate, KN a, KN b, KN c)
 {
-  KN res = KON_List2(kstate, b, c);
+  KN res = KON_PairList2(kstate, b, c);
   res = kon_cons(kstate, a, res);
   return res;
 }
@@ -720,6 +738,55 @@ KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef
     return result;
 }
 
+KN MakeMsgDispatcher(KonState* kstate)
+{
+    KonMsgDispatcher* result = KON_ALLOC_TYPE_TAG(kstate, KonMsgDispatcher, KON_T_MSG_DISPATCHER);
+    result->OnApplyArgs = KON_NULL;
+    result->OnSelectPath = KON_NULL;
+    result->OnMethodCall = KON_NULL;
+    result->OnVisitVector = KON_NULL;
+    result->OnVisitTable = KON_NULL;
+    result->OnVisitCell = KON_NULL;
+    result->Config = KON_NULL;
+    return result;
+}
+
+KN MakeAttrSlotLeaf(KonState* kstate, KN value, char* mod)
+{
+    KonAttrSlot* result = KON_ALLOC_TYPE_TAG(kstate, KonAttrSlot, KON_T_ATTR_SLOT);
+    result->IsDir = false;
+    result->OpenToChildren = true;
+    result->OpenToSibling = true;
+    result->CanWrite = true;
+    result->IsProc = false;
+    result->IsMethod = false;
+    result->Value = value;
+    result->Folder = KON_NIL;
+    // set mod
+    if (mod != NULL) {
+        if (strchr(mod, 'p')) {
+            result->IsProc = true;
+        }
+        else if (strchr(mod, 'm')) {
+            result->IsMethod = true;
+        }
+    }
+    return result;
+}
+
+KN MakeAttrSlotFolder(KonState* kstate, char* mod)
+{
+    KonAttrSlot* result = KON_ALLOC_TYPE_TAG(kstate, KonAttrSlot, KON_T_ATTR_SLOT);
+    result->IsDir = true;
+    result->OpenToChildren = true;
+    result->OpenToSibling = true;
+    result->CanWrite = true;
+    result->IsProc = false;
+    result->IsMethod = false;
+    result->Value = KON_NIL;
+    result->Folder = KxHashTable_Init(4);
+    return result;
+}
 
 KN KON_VectorToKonPairList(KonState* kstate, KxVector* vector)
 {

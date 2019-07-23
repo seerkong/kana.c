@@ -90,7 +90,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
                 state = 2;
             }
             else if (kon_is_vector(item)
-                || KON_IsList(item)
+                || KON_IsPairList(item)
                 || kon_is_cell(item)
                 || kon_is_symbol(item)
                 || kon_is_quote(item)
@@ -262,7 +262,7 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
 
         if (restArgList == KON_NIL) {
             // this clause args all eval finished
-            KN argList = Kon_ListRevert(kstate, evaledArgList);
+            KN argList = KON_PairListRevert(kstate, evaledArgList);
             // next continuation should be KON_CONT_EVAL_CLAUSE_LIST
             return ApplySubjVerbAndObjects(kstate, subj, argList, contBeingInvoked->Env, contBeingInvoked->Cont);
         }
@@ -292,7 +292,7 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
 KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonContinuation* cont)
 {
     KonTrampoline* bounce;
-    if (KON_IsList(expression)) {
+    if (KON_IsPairList(expression)) {
         // passed a sentence like {writeln % "abc" "efg"}
         KN words = expression;
         KN first = kon_car(words);
@@ -424,7 +424,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             KonContinuation* cont = bounce->Bounce.Cont;
             KN env = bounce->Bounce.Env;
             KN subj = bounce->Bounce.Value;
-            if (KON_IsList(subj)) {
+            if (KON_IsPairList(subj)) {
                 // the subj position is a list, should be evaluated
                 // like the first sentence in this eg block {{ {zhangsan name} |upcase }}
                 KN words = subj;
@@ -492,7 +492,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             KonContinuation* cont = bounce->Bounce.Cont;
             KN env = bounce->Bounce.Env;
             KN arg = bounce->Bounce.Value;
-            if (KON_IsList(arg)) {
+            if (KON_IsPairList(arg)) {
                 // the subj position is a list, should be evaluated
                 // like the first sentence in this eg block {{ {zhangsan name} |upcase }}
                 KN words = arg;

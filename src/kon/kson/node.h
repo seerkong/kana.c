@@ -126,6 +126,8 @@ typedef enum {
     KON_T_EXPAND,
     KON_T_UNQUOTE,
     KON_T_ENV,
+    KON_T_ATTR_SLOT,
+    KON_T_MSG_DISPATCHER,
     // KON_T_CONTINUATION,
     // KON_T_TRAMPOLINE,
     KON_T_PROCEDURE,
@@ -146,6 +148,8 @@ typedef struct KonQuasiquote KonQuasiquote;
 typedef struct KonExpand KonExpand;
 typedef struct KonUnquote KonUnquote;
 typedef struct KonEnv KonEnv;
+typedef struct KonAttrSlot KonAttrSlot;
+typedef struct KonMsgDispatcher KonMsgDispatcher;
 typedef struct KonProcedure KonProcedure;
 
 
@@ -263,6 +267,30 @@ struct KonEnv {
     KonBase Base;
     KonEnv* Parent;
     KxHashTable* Bindings;
+    KxHashTable* MsgDispatchers;
+};
+
+struct KonAttrSlot {
+    KonBase Base;
+    bool IsDir;
+    bool OpenToChildren;
+    bool OpenToSibling;
+    bool CanWrite;
+    bool IsProc;    // func, blk, lambda
+    bool IsMethod;  // func(self, p2, p3)
+    KN Value;
+    KxHashTable* Folder;
+};
+
+struct KonMsgDispatcher {
+    KonBase Base;
+    KN Config;
+    KonProcedure* OnApplyArgs;  // % p1 p2;
+    KonProcedure* OnSelectPath;  // /abc /efg
+    KonProcedure* OnMethodCall; // . push 1 2;
+    KonProcedure* OnVisitVector;  // []
+    KonProcedure* OnVisitTable; // ()
+    KonProcedure* OnVisitCell;  // <>
 };
 
 typedef enum {
@@ -448,22 +476,22 @@ static inline KonType kon_type(KN obj) {
 ////
 // data structure util start
 
-#define KON_NEG_ONE kon_make_fixnum(-1)
-#define KON_ZERO    kon_make_fixnum(0)
-#define KON_ONE     kon_make_fixnum(1)
-#define KON_TWO     kon_make_fixnum(2)
-#define KON_THREE   kon_make_fixnum(3)
-#define KON_FOUR    kon_make_fixnum(4)
-#define KON_FIVE    kon_make_fixnum(5)
-#define KON_SIX     kon_make_fixnum(6)
-#define KON_SEVEN   kon_make_fixnum(7)
-#define KON_EIGHT   kon_make_fixnum(8)
-#define KON_NINE    kon_make_fixnum(9)
-#define KON_TEN     kon_make_fixnum(10)
+#define KON_NEG_ONE KON_MAKE_FIXNUM(-1)
+#define KON_ZERO    KON_MAKE_FIXNUM(0)
+#define KON_ONE     KON_MAKE_FIXNUM(1)
+#define KON_TWO     KON_MAKE_FIXNUM(2)
+#define KON_THREE   KON_MAKE_FIXNUM(3)
+#define KON_FOUR    KON_MAKE_FIXNUM(4)
+#define KON_FIVE    KON_MAKE_FIXNUM(5)
+#define KON_SIX     KON_MAKE_FIXNUM(6)
+#define KON_SEVEN   KON_MAKE_FIXNUM(7)
+#define KON_EIGHT   KON_MAKE_FIXNUM(8)
+#define KON_NINE    KON_MAKE_FIXNUM(9)
+#define KON_TEN     KON_MAKE_FIXNUM(10)
 
 
-#define kon_make_fixnum(n)    ((KN) ((((kon_int_t)(n))*(kon_int_t)((kon_int_t)1<<KON_FIXNUM_BITS)) | KON_FIXNUM_TAG))
-#define kon_unbox_fixnum(n)   (((kon_int_t)((kon_uint_t)(n) & ~KON_FIXNUM_TAG))/(kon_int_t)((kon_int_t)1<<KON_FIXNUM_BITS))
+#define KON_MAKE_FIXNUM(n)    ((KN) ((((kon_int_t)(n))*(kon_int_t)((kon_int_t)1<<KON_FIXNUM_BITS)) | KON_FIXNUM_TAG))
+#define KON_UNBOX_FIXNUM(n)   (((kon_int_t)((kon_uint_t)(n) & ~KON_FIXNUM_TAG))/(kon_int_t)((kon_int_t)1<<KON_FIXNUM_BITS))
 
 static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
   KonFlonum* result = (KonFlonum*)KON_AllocTagged(kstate, sizeof(KonFlonum), KON_T_FLONUM);
@@ -544,11 +572,12 @@ KON_API const char* KON_SymbolToCstr(KN sym);
 // list
 KON_API KN KON_MakePairList(KonState* kstate, ...);
 KON_API KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail);
-KON_API KN KON_List2(KonState* kstate, KN a, KN b);
-KON_API KN KON_List3(KonState* kstate, KN a, KN b, KN c);
-KON_API bool KON_IsList(KN source);
-KN KON_ListStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
-KN Kon_ListRevert(KonState* kstate, KN source);
+KON_API KN KON_PairList2(KonState* kstate, KN a, KN b);
+KON_API KN KON_PairList3(KonState* kstate, KN a, KN b, KN c);
+KON_API bool KON_IsPairList(KN source);
+KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KON_PairListRevert(KonState* kstate, KN source);
+KN KON_PairListLength(KonState* kstate, KN source);
 
 // table
 KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
@@ -569,6 +598,11 @@ KN KON_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 
 
 KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef);
+
+KN MakeMsgDispatcher(KonState* kstate);
+
+KN MakeAttrSlotLeaf(KonState* kstate, KN value, char* mod);
+KN MakeAttrSlotFolder(KonState* kstate, char* mod);
 
 // data structure apis end
 

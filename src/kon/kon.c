@@ -58,7 +58,7 @@ KN KON_EvalFile(KonState* kstate, char* filePath)
         bool openRes = KSON_ReaderOpenStream(reader, istream, false);
         if (openRes) {
             KN root = KSON_Parse(reader);
-            if (KON_IsList(root)) {
+            if (KON_IsPairList(root)) {
 
                 KN env = KON_MakeRootEnv(kstate);
 

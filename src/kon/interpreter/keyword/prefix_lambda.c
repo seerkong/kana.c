@@ -55,7 +55,7 @@ KonTrampoline* KON_EvalPrefixLambda(KonState* kstate, KN expression, KN env, Kon
         param = kon_cadr(expression);
         body = kon_cddr(expression);
     }
-    else if (KON_IsList(first)) {
+    else if (KON_IsPairList(first)) {
         param = first;
         body = kon_cdr(expression);
     }
