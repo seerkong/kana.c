@@ -26,7 +26,7 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
         ) {
             arg = iterArg;
         }
-        const char* varName = KON_UNBOX_SYMBOL(KON_UNBOX_QUOTE(param));
+        const char* varName = KON_UNBOX_SYMBOL(param);
         KON_DEBUG("arg %s cstr %s, bind value %s",
             KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")),
             varName,

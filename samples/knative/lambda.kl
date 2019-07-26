@@ -1,13 +1,13 @@
 {
   {!let m
-    {!lambda {@x @y}
+    {!lambda {$x $y}
       {displayln % "before add x y"}
       {+ % x y}
     }
   }
   {m % 1 3}
 
-  {!lambda n {@x @y}
+  {!lambda n {$x $y}
     {* % x y}
   }
   {n % 2 3}
