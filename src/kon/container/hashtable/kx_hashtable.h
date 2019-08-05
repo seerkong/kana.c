@@ -49,7 +49,6 @@ struct _KxHashTableKeyEntry {
 struct _KxHashTableValEntry {
     KxHashTableValEntry* Prev;
     KxHashTableValEntry* Next;
-    KxHashTableKeyEntry* KeyEntry;
     char* Key;
     XN Val;
 };
