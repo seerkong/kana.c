@@ -6,7 +6,7 @@
 KN AfterAndConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->MemoTable;
+    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KN restConditon = KxHashTable_AtKey(memo, "RestCondition");
 
     KonTrampoline* bounce;
@@ -32,8 +32,8 @@ KN AfterAndConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* co
 
         KxHashTable* memo = KxHashTable_Init(4);
         KxHashTable_PutKv(memo, "RestCondition", KON_CDR(restConditon));
-        k->MemoTable = memo;
-        k->NativeCallback = AfterAndConditionEvaled;
+        k->Native.MemoTable = memo;
+        k->Native.Callback = AfterAndConditionEvaled;
 
         bounce = KON_EvalExpression(kstate, nextExpr, env, k);
         return bounce;
@@ -53,8 +53,8 @@ KonTrampoline* KON_EvalPrefixAnd(KonState* kstate, KN expression, KN env, KonCon
 
     KxHashTable* memo = KxHashTable_Init(4);
     KxHashTable_PutKv(memo, "RestCondition", KON_CDR(expression));
-    k->MemoTable = memo;
-    k->NativeCallback = AfterAndConditionEvaled;
+    k->Native.MemoTable = memo;
+    k->Native.Callback = AfterAndConditionEvaled;
     
     KonTrampoline* bounce;
     bounce = KON_EvalExpression(kstate, KON_CAR(expression), env, k);

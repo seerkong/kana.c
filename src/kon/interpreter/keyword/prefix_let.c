@@ -7,7 +7,7 @@
 KN AfterLetValExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->MemoTable;
+    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     char* varName = KxHashTable_AtKey(memo, "VarName");
 
     KON_EnvDefine(kstate, env, varName, evaledValue);
@@ -50,8 +50,8 @@ KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KN env, KonCon
         KxHashTable* memo = KxHashTable_Init(4);
         
         KxHashTable_PutKv(memo, "VarName", varNameCstr);
-        k->MemoTable = memo;
-        k->NativeCallback = AfterLetValExprEvaled;
+        k->Native.MemoTable = memo;
+        k->Native.Callback = AfterLetValExprEvaled;
 
         bounce = KON_EvalExpression(kstate, initVal, env, k);
     }

@@ -40,7 +40,7 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
 KN AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->MemoTable;
+    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KN trueClause = KxHashTable_AtKey(memo, "TrueClause");
     KN falseClause = KxHashTable_AtKey(memo, "FalseClause");
 
@@ -80,8 +80,8 @@ KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KN env, KonCont
     KxHashTable* memo = KxHashTable_Init(4);
     KxHashTable_PutKv(memo, "TrueClause", trueClause);
     KxHashTable_PutKv(memo, "FalseClause", falseClause);
-    k->MemoTable = memo;
-    k->NativeCallback = AfterIfConditionEvaled;
+    k->Native.MemoTable = memo;
+    k->Native.Callback = AfterIfConditionEvaled;
     
     KonTrampoline* bounce;
     bounce = KON_EvalExpression(kstate, condition, env, k);

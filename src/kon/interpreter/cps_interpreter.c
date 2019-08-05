@@ -261,14 +261,14 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
         return bounce;
     }
     else if (kon_continuation_type(contBeingInvoked) == KON_CONT_NATIVE_CALLBACK) {
-        KonContFuncRef callbackFunc = contBeingInvoked->NativeCallback;
+        KonContFuncRef callbackFunc = contBeingInvoked->Native.Callback;
         KonTrampoline* bounce = callbackFunc(kstate, val, contBeingInvoked);
         return bounce;
     }
     else if (kon_continuation_type(contBeingInvoked) == KON_CONT_EVAL_SENTENCE_LIST) {
         KN lastSentenceVal = val;
         KN env = contBeingInvoked->Env;
-        KN restSentences = contBeingInvoked->EvalSentenceList.RestSentenceList;
+        KN restSentences = contBeingInvoked->RestJobs;
         if (restSentences == KON_NIL) {
             // block sentences all finished
             KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
@@ -283,7 +283,7 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
     else if (kon_continuation_type(contBeingInvoked) == KON_CONT_EVAL_SUBJ) {
         // subj evaled, now should eval clauses
         KN subj = val;
-        KN restWords = contBeingInvoked->EvalSubj.RestWordList;
+        KN restWords = contBeingInvoked->RestJobs;
 
         if (restWords == KON_NIL) {
             // no other words besids subj, is a sentence like {"abc"}
@@ -312,7 +312,7 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
             KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_LIST);
             k->Cont = contBeingInvoked->Cont;
             k->Env = contBeingInvoked->Env;
-            k->EvalClauseList.RestClauseList = KON_CDR(clauses);
+            k->RestJobs = KON_CDR(clauses);
             
             KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_CLAUSE_LIST);
             bounce->SubjBounce.Subj = subj;
@@ -327,7 +327,7 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
         // last clause eval finshed, eval next clause
         // last clause eval result is the subj of the next clause
         KN subj = val;
-        KN restClauseList = contBeingInvoked->EvalClauseList.RestClauseList;
+        KN restClauseList = contBeingInvoked->RestJobs;
         if (restClauseList == KON_NIL) {
             // no other clauses, is a sentence like {writeln % "abc"}
             // finish this sentence. use last clause eval result as return val
@@ -341,7 +341,7 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
             KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_LIST);
             k->Cont = contBeingInvoked->Cont;
             k->Env = contBeingInvoked->Env;
-            k->EvalClauseList.RestClauseList = KON_CDR(restClauseList);
+            k->RestJobs = KON_CDR(restClauseList);
             
             KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_CLAUSE_LIST);
             bounce->SubjBounce.Subj = subj;
@@ -456,7 +456,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
             k->Cont = cont;
             k->Env = env;
-            k->EvalSubj.RestWordList = KON_CDR(words);
+            k->RestJobs = KON_CDR(words);
             
             bounce->Bounce.Value = first;  // get subj word
             bounce->Bounce.Cont = k;
@@ -494,7 +494,7 @@ KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonCont
         KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SENTENCE_LIST);
         k->Cont = cont;
         k->Env = env;
-        k->EvalSentenceList.RestSentenceList = KON_CDR(sentences);
+        k->RestJobs = KON_CDR(sentences);
         
         bounce->Bounce.Value = KON_CAR(sentences);
         bounce->Bounce.Cont = k;

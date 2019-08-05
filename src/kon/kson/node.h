@@ -368,32 +368,22 @@ struct _KonContinuation {
     KonContinuationType Type;
     KN Env;
     KonContinuation* Cont;
-    KxHashTable* MemoTable;
-
     union {
-        KonContFuncRef NativeCallback;
-
-        struct {
-            KN RestSentenceList;
-        } EvalSentenceList;
-
-        struct {
-            KN WordList;
-        } EvalSentence;
-
-        struct {
-            KN RestWordList;
-        } EvalSubj;
-
-        struct {
-            KN RestClauseList;
-        } EvalClauseList;
-
+        // most continuations use this store rest jobs to do
+        KN RestJobs;
+        
+        // for continuations need sentence subject
         struct {
             KN Subj;
             KN RestArgList;
             KN EvaledArgList;
         } EvalClauseArgs;
+
+        struct {
+            KonContFuncRef Callback;
+            // used for native marcros, save more custom info
+            KxHashTable* MemoTable;
+        } Native;
     };
 };
 
