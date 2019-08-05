@@ -114,6 +114,12 @@ KN KON_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char
     else if (source == KON_NULL) {
         return KON_MakeString(kstate, "#null;");
     }
+    else if (KON_IS_CONTINUATION(source)) {
+        return KON_MakeString(kstate, "<continuation>");
+    }
+    else if (KON_IS_PROCEDURE(source)) {
+        return KON_MakeString(kstate, "<procedure>");
+    }
     // TODO other data types
     else {
         return KON_MakeEmptyString(kstate);

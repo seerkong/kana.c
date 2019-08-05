@@ -40,7 +40,7 @@ KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KN env, KonCon
         bounce->Run.Cont = cont;
     }
     else {
-        KN initVal = kon_cadr(expression);
+        KN initVal = KON_CADR(expression);
         KON_DEBUG("initVal %s", KON_StringToCstr(KON_ToFormatString(kstate, initVal, true, 0, "  ")));
 
         KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);

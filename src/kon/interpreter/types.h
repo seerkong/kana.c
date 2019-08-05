@@ -9,60 +9,7 @@ extern "C"{
 #include "../container/hashtable/kx_hashtable.h"
 
 typedef struct _KonTrampoline KonTrampoline;
-typedef struct _KonContinuation KonContinuation;
 
-typedef enum {
-    // should be the first continuation created
-    KON_CONT_RETURN,
-    // sentences like {{1 + 2} {2 + 3}}
-    KON_CONT_EVAL_SENTENCE_LIST,
-    // sentence like {"Abc" + "Efg" | to-upcase; | Length; | + 2}
-    KON_CONT_EVAL_SENTENCE,
-    // subject is the first item of a sentence, like the 'abc' in {abc + 2}
-    KON_CONT_EVAL_SUBJ,
-    KON_CONT_EVAL_CLAUSE_LIST,
-    KON_CONT_EVAL_CLAUSE,
-    KON_CONT_EVAL_CLAUSE_ARGS,
-
-    // native callback, use a MemoTable to store info
-    KON_CONT_NATIVE_CALLBACK
-
-} KonContinuationType;
-
-typedef KN (*KonContFuncRef)(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
-
-struct _KonContinuation {
-    KonContinuationType Type;
-    KN Env;
-    KonContinuation* Cont;
-    KxHashTable* MemoTable;
-
-    union {
-        KonContFuncRef NativeCallback;
-
-        struct {
-            KN RestSentenceList;
-        } EvalSentenceList;
-
-        struct {
-            KN WordList;
-        } EvalSentence;
-
-        struct {
-            KN RestWordList;
-        } EvalSubj;
-
-        struct {
-            KN RestClauseList;
-        } EvalClauseList;
-
-        struct {
-            KN Subj;
-            KN RestArgList;
-            KN EvaledArgList;
-        } EvalClauseArgs;
-    };
-};
 
 typedef enum {
     // Land just returns the value. It should only ever be created

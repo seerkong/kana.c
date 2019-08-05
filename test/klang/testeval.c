@@ -78,6 +78,12 @@ TEST Native_Writeln(void) {
     PASS();
 }
 
+TEST Native_CallCC(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/callcc.kl";
+    KON_EvalFile(kstate, path);
+    PASS();
+}
+
 TEST Native_AttrSlot(void) {
     char* path = "~/lang/konscript/kon-c/samples/knative/attr-slot.kl";
     KON_EvalFile(kstate, path);
@@ -114,11 +120,11 @@ SUITE(suite) {
     // RUN_TEST(Native_Func);
     // RUN_TEST(Native_Lambda);
 
+    RUN_TEST(Native_CallCC);
+    
     // RUN_TEST(Native_AttrSlot);
-
     // RUN_TEST(Native_MkDispatcher);
-
-    RUN_TEST(Native_Shell);
+    // RUN_TEST(Native_Shell);
 }
 
 GREATEST_MAIN_DEFS();
@@ -131,6 +137,7 @@ int main(int argc, char const* argv[])
         return NULL;
     }
     kstate = KON_Init();
+    ENABLE_DEBUG = 0;
     RUN_SUITE(suite);
 
     KON_Finish(kstate);

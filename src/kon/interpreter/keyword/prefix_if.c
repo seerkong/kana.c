@@ -67,7 +67,7 @@ KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KN env, KonCont
     KN condition = KON_CAR(expression);
     KN parsed = SplitIfClauses(kstate, KON_CDR(expression));
     KN trueClause = KON_CAR(parsed);
-    KN falseClause = kon_cadr(parsed);
+    KN falseClause = KON_CADR(parsed);
 
     KON_DEBUG("condition %s", KON_StringToCstr(KON_ToFormatString(kstate, condition, true, 0, "  ")));
     KON_DEBUG("trueClause %s", KON_StringToCstr(KON_ToFormatString(kstate, trueClause, true, 0, "  ")));

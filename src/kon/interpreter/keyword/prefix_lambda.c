@@ -16,7 +16,7 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
     KonEnv* procBindEnv = KON_MakeChildEnv(kstate, parentEnv);
 
     KonPair* iterParam = param;
-    KonPair* iterArg = KON_CDR(argList);
+    KonPair* iterArg = argList;
     while (iterParam != KON_NIL) {
         KN param = KON_CAR(iterParam);
         KN arg = KON_CAR(iterArg);
@@ -52,7 +52,7 @@ KonTrampoline* KON_EvalPrefixLambda(KonState* kstate, KN expression, KN env, Kon
     KN body = KON_NIL;
     if (KON_IS_WORD(first)) {
         funcName = first;
-        param = kon_cadr(expression);
+        param = KON_CADR(expression);
         body = kon_cddr(expression);
     }
     else if (KON_IsPairList(first)) {

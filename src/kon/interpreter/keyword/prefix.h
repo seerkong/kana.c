@@ -12,6 +12,7 @@
 #include "prefix_and.h"
 #include "prefix_or.h"
 #include "prefix_cond.h"
+#include "prefix_callcc.h"
 
 #include "prefix_def_builder.h"
 #include "prefix_def_dispatcher.h"

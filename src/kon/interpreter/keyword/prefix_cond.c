@@ -34,7 +34,7 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
     else {
         KN condPair = KON_CAR(restPairs);
         KN predicate = KON_CAR(condPair);
-        KN action = kon_cadr(condPair);
+        KN action = KON_CADR(condPair);
 
         if (IsElseTag(predicate)) {
             // do else action
@@ -71,7 +71,7 @@ KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KN env, KonCo
 
     KN condPair = KON_CAR(expression);
     KN predicate = KON_CAR(condPair);
-    KN action = kon_cadr(condPair);
+    KN action = KON_CADR(condPair);
 
     KonTrampoline* bounce;
     if (IsElseTag(predicate)) {

@@ -44,15 +44,26 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
     if (kon_is_syntax_marker(firstObj)) {
         // apply args to a procedure like % 1 2;
         if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_APPLY) {
+            // call-cc, subject is a continuation
+            if (KON_IS_CONTINUATION(subj)) {
+                // call-cc's continuation, just receive 1 argument;
+                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce->Run.Value = KON_CADR(argList);
+                // goto this continuation directly. skip next exprs
+                bounce->Run.Cont = subj;
+                return bounce;
+            }
+
             // unbox attr slot
             if (KON_IS_ATTR_SLOT(subj)) {
                 subj = ((KonAttrSlot*)subj)->Value;
             }
             KonProcedure* subjProc = (KonProcedure*)subj;
+            argList = KON_CDR(argList);
             // TODO assert subj is a procedure
             if (subjProc->Type == KON_NATIVE_FUNC) {
                 KonNativeFuncRef funcRef = subjProc->NativeFuncRef;
-                KN applyResult = (*funcRef)(kstate, KON_CDR(argList));
+                KN applyResult = (*funcRef)(kstate, argList);
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = applyResult;
                 bounce->Run.Cont = cont;
@@ -61,7 +72,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
                 // treat as plain procedure when apply arg list
                 // the first item in arg list is the object
                 KonNativeFuncRef funcRef = subjProc->NativeFuncRef;
-                KN applyResult = (*funcRef)(kstate, KON_CDR(argList));
+                KN applyResult = (*funcRef)(kstate, argList);
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = applyResult;
                 bounce->Run.Cont = cont;
@@ -226,6 +237,7 @@ KonContinuation* AllocContinuationWithType(KonContinuationType type)
 {
     KonContinuation* cont = (KonContinuation*)malloc(sizeof(KonContinuation));
     assert(cont);
+    cont->Base.Tag = KON_T_CONTINUATION;
     cont->Type = type;
     return cont;
 }
@@ -418,6 +430,9 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             else if (strcmp(prefix, "cond") == 0) {
                 bounce = KON_EvalPrefixCond(kstate, KON_CDR(words), env, cont);
             }
+            else if (strcmp(prefix, "call-cc") == 0) {
+                bounce = KON_EvalPrefixCallcc(kstate, KON_CDR(words), env, cont);
+            }
             else if (strcmp(prefix, "def-dispatcher") == 0) {
                 bounce = KON_EvalPrefixDefDispatcher(kstate, KON_CDR(words), env, cont);
             }
@@ -448,7 +463,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             bounce->Bounce.Env = env;
         }
     }
-    else if (KON_IS_SYMBOL(expression)) {
+    else if (kon_is_variable(expression) || KON_IS_WORD(expression)) {
         // a code block like { a }
         // TODO asert should be a SYM_IDENTIFIER
         // env lookup this val

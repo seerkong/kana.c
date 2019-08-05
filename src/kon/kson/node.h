@@ -129,7 +129,7 @@ typedef enum {
     KON_T_ENV,
     KON_T_ATTR_SLOT,
     KON_T_MSG_DISPATCHER,
-    // KON_T_CONTINUATION,
+    KON_T_CONTINUATION,
     // KON_T_TRAMPOLINE,
     KON_T_PROCEDURE,
     KON_T_CPOINTER,
@@ -339,6 +339,65 @@ struct KonProcedure {
     };
 };
 
+
+
+typedef struct _KonContinuation KonContinuation;
+
+typedef enum {
+    // should be the first continuation created
+    KON_CONT_RETURN,
+    // sentences like {{1 + 2} {2 + 3}}
+    KON_CONT_EVAL_SENTENCE_LIST,
+    // sentence like {"Abc" + "Efg" | to-upcase; | Length; | + 2}
+    KON_CONT_EVAL_SENTENCE,
+    // subject is the first item of a sentence, like the 'abc' in {abc + 2}
+    KON_CONT_EVAL_SUBJ,
+    KON_CONT_EVAL_CLAUSE_LIST,
+    KON_CONT_EVAL_CLAUSE,
+    KON_CONT_EVAL_CLAUSE_ARGS,
+
+    // native callback, use a MemoTable to store info
+    KON_CONT_NATIVE_CALLBACK
+
+} KonContinuationType;
+
+typedef KN (*KonContFuncRef)(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
+
+struct _KonContinuation {
+    KonBase Base;
+    KonContinuationType Type;
+    KN Env;
+    KonContinuation* Cont;
+    KxHashTable* MemoTable;
+
+    union {
+        KonContFuncRef NativeCallback;
+
+        struct {
+            KN RestSentenceList;
+        } EvalSentenceList;
+
+        struct {
+            KN WordList;
+        } EvalSentence;
+
+        struct {
+            KN RestWordList;
+        } EvalSubj;
+
+        struct {
+            KN RestClauseList;
+        } EvalClauseList;
+
+        struct {
+            KN Subj;
+            KN RestArgList;
+            KN EvaledArgList;
+        } EvalClauseArgs;
+    };
+};
+
+
 struct KonState {
     KonBase Base;
     KonEnv* RootEnv;
@@ -383,6 +442,7 @@ union _Kon {
     KonEnv KonEnv;
     KonAttrSlot KonAttrSlot;
     KonProcedure KonProcedure;
+    KonContinuation KonContinuation;
 };
 
 // types end
@@ -467,7 +527,8 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 
 
 #define kon_is_env(x)        (kon_check_tag(x, KON_T_ENV))
-#define kon_is_continuation(x)        (kon_check_tag(x, KON_T_CONTINUATION))
+#define KON_IS_PROCEDURE(x)        (kon_check_tag(x, KON_T_PROCEDURE))
+#define KON_IS_CONTINUATION(x)        (kon_check_tag(x, KON_T_CONTINUATION))
 #define kon_is_trampoline(x)        (kon_check_tag(x, KON_T_TRAMPOLINE))
 #define kon_is_cpointer(x)   (kon_check_tag(x, KON_T_CPOINTER))
 #define kon_is_exception(x)  (kon_check_tag(x, KON_T_EXCEPTION))
@@ -534,18 +595,18 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 #define KON_CDR(x)         (KON_FIELD(x, KonPair, Next))
 
 #define kon_caar(x)      (KON_CAR(KON_CAR(x)))
-#define kon_cadr(x)      (KON_CAR(KON_CDR(x)))
+#define KON_CADR(x)      (KON_CAR(KON_CDR(x)))
 #define kon_cdar(x)      (KON_CDR(KON_CAR(x)))
 #define kon_cddr(x)      (KON_CDR(KON_CDR(x)))
 #define kon_caaar(x)     (KON_CAR(kon_caar(x)))
-#define kon_caadr(x)     (KON_CAR(kon_cadr(x)))
+#define kon_caadr(x)     (KON_CAR(KON_CADR(x)))
 #define kon_cadar(x)     (KON_CAR(kon_cdar(x)))
 #define kon_caddr(x)     (KON_CAR(kon_cddr(x)))
 #define kon_cdaar(x)     (KON_CDR(kon_caar(x)))
-#define kon_cdadr(x)     (KON_CDR(kon_cadr(x)))
+#define kon_cdadr(x)     (KON_CDR(KON_CADR(x)))
 #define kon_cddar(x)     (KON_CDR(kon_cdar(x)))
 #define kon_cdddr(x)     (KON_CDR(kon_cddr(x)))
-#define kon_cadddr(x)    (kon_cadr(kon_cddr(x))) /* just these two */
+#define kon_cadddr(x)    (KON_CADR(kon_cddr(x))) /* just these two */
 #define kon_cddddr(x)    (kon_cddr(kon_cddr(x)))
 
 #define kon_list1(kstate,a)        KON_CONS((kstate), (a), KON_NIL)

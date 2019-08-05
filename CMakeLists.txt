@@ -384,6 +384,7 @@ target_link_options(kon PRIVATE
 )
 target_sources(kon PRIVATE
     src/kon/interpreter/mod/kon_list.c
+    src/kon/interpreter/keyword/prefix_callcc.c
     src/kon/interpreter/mod/kon_module.c
     src/kon/container/vector/kx_vector.c
     src/kon/interpreter/keyword/prefix_set.c
