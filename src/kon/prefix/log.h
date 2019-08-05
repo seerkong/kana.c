@@ -1,6 +1,8 @@
 #ifndef KON_LOG_H
 #define KON_LOG_H
 
+extern int ENABLE_DEBUG;
+
 #if 0
 #define KON_VERBOSE(msg, ...) _kon_log->verbose(NULL, _kon_context->get_id(), msg, ##__VA_ARGS__)
 #define KON_INFO(msg, ...)    _kon_log->info(NULL, _kon_context->get_id(), msg, ##__VA_ARGS__)
@@ -56,23 +58,47 @@ fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n")
 #include <string.h>
 #include <errno.h>
 #define KON_VERBOSE(msg, ...) \
-fprintf(stdout, "[V][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
-fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n")
+do { \
+    if (ENABLE_DEBUG) { \
+        fprintf(stdout, "[V][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
 #define KON_DEBUG(msg, ...) \
-fprintf(stdout, "[D][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
-fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n")
+do {    \
+    if (ENABLE_DEBUG) { \
+        fprintf(stdout, "[D][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
 #define KON_INFO(msg, ...) \
-fprintf(stdout, "[I][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
-fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n")
+do { \
+    if (ENABLE_DEBUG) { \
+        fprintf(stdout, "[I][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
 #define KON_TRACE(msg, ...) \
-fprintf(stdout, "[T][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
-fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n")
+do { \
+    if (ENABLE_DEBUG) { \
+        fprintf(stdout, "[T][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
 #define KON_WARN(msg, ...) \
-fprintf(stdout, "[W][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
-fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n")
+do { \
+    if (ENABLE_DEBUG) { \
+        fprintf(stdout, "[W][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
 #define KON_ERROR(msg, ...) \
-fprintf(stdout, "[E][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
-fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n")
+do { \
+    if (ENABLE_DEBUG) { \
+        fprintf(stdout, "[E][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
 #endif
 
 

@@ -3,6 +3,7 @@
 #include "../kon/kon.h"
 #include "commander.h"
 
+
 KonState* kstate;
 
 KonState* InitKonState()
@@ -29,31 +30,36 @@ void ExitSuccess(KonState* kstate)
 }
 
 static void Repl(command_t *self) {
-  printf("start repl: enabled\n");
+    KON_DEBUG("start repl: enabled\n");
+}
+
+static void DisableLog(command_t* self) {
+    ENABLE_DEBUG = 0;
 }
 
 static void EvalFile(command_t *self) {
-    printf("eval file: %s\n", self->arg);
+    KON_DEBUG("eval file: %s\n", self->arg);
     KON_EvalFile(kstate, self->arg);
 }
 
 static void PrintHelp(command_t *self)
 {
-    printf("? help -h\n");
+    KON_DEBUG("? help -h\n");
 }
 
 int RunMain(int argc, char **argv)
 {
     command_t cmd;
     command_init(&cmd, argv[0], "0.0.1");
+    command_option(&cmd, "-q", "--quiet", "disable log", DisableLog);
     command_option(&cmd, "-r", "--repl", "start repl", Repl);
     command_option(&cmd, "-f", "--file <arg>", "script file path arg", EvalFile);
     command_option(&cmd, "-h", "--help [arg]", "help info", PrintHelp);
     command_parse(&cmd, argc, argv);
 
-    // printf("additional args:\n");
+    // KON_DEBUG("additional args:\n");
     // for (int i = 0; i < cmd.argc; ++i) {
-    //     printf("  - '%s'\n", cmd.argv[i]);
+    //     KON_DEBUG("  - '%s'\n", cmd.argv[i]);
     // }
 
     command_free(&cmd);

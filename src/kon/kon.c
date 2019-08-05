@@ -10,6 +10,8 @@
 #include "utils/number_utils.h"
 #include "interpreter/cps_interpreter.h"
 
+int ENABLE_DEBUG = 1;
+
 KonState* KON_Init()
 {
     KonState* kstate = (KonState*)calloc(1, sizeof(KonState));

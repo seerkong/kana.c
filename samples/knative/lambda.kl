@@ -19,7 +19,7 @@
 
   {!lambda bar {}
     {!let a 3}
-    {writeln % a}
+    {writeln % "var a value in lambda bar " a}
     {foo %}
   }
 
