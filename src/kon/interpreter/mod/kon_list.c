@@ -7,7 +7,7 @@ KN KonList_New(KonState* kstate, KN args)
 
 KN KonList_Length(KonState* kstate, KN args)
 {
-    KN self = kon_car(args);
+    KN self = KON_CAR(args);
     return KON_PairListLength(kstate, self);
 }
 

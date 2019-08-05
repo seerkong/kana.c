@@ -32,8 +32,8 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
         bounce->Run.Value = KON_FALSE;
     }
     else {
-        KN condPair = kon_car(restPairs);
-        KN predicate = kon_car(condPair);
+        KN condPair = KON_CAR(restPairs);
+        KN predicate = KON_CAR(condPair);
         KN action = kon_cadr(condPair);
 
         if (IsElseTag(predicate)) {
@@ -47,7 +47,7 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
             k->Env = env;
 
             KxHashTable* memo = KxHashTable_Init(4);
-            KxHashTable_PutKv(memo, "RestPairs", kon_cdr(restPairs));
+            KxHashTable_PutKv(memo, "RestPairs", KON_CDR(restPairs));
             KxHashTable_PutKv(memo, "IfTrue", action);
 
             k->MemoTable = memo;
@@ -69,8 +69,8 @@ KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KN env, KonCo
     
     
 
-    KN condPair = kon_car(expression);
-    KN predicate = kon_car(condPair);
+    KN condPair = KON_CAR(expression);
+    KN predicate = KON_CAR(condPair);
     KN action = kon_cadr(condPair);
 
     KonTrampoline* bounce;
@@ -84,7 +84,7 @@ KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KN env, KonCo
         k->Env = env;
 
         KxHashTable* memo = KxHashTable_Init(4);
-        KxHashTable_PutKv(memo, "RestPairs", kon_cdr(expression));
+        KxHashTable_PutKv(memo, "RestPairs", KON_CDR(expression));
         KxHashTable_PutKv(memo, "IfTrue", action);
 
         k->MemoTable = memo;

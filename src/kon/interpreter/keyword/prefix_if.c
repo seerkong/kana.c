@@ -13,7 +13,7 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
     
     int state = 1; // 1 parse true exprs, 2 parse false exprs
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
         
         if (state == 1) {
             if (KON_IS_WORD(item) && strcmp(KON_UNBOX_SYMBOL(item), "else") == 0) {
@@ -28,7 +28,7 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
             KxVector_Push(falseClauseVec, item);
         }
 
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
     
     KN trueClause = KON_VectorToKonPairList(kstate, trueClauseVec);
@@ -64,9 +64,9 @@ KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KN env, KonCont
 {
     KON_DEBUG("meet prefix marcro if");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN condition = kon_car(expression);
-    KN parsed = SplitIfClauses(kstate, kon_cdr(expression));
-    KN trueClause = kon_car(parsed);
+    KN condition = KON_CAR(expression);
+    KN parsed = SplitIfClauses(kstate, KON_CDR(expression));
+    KN trueClause = KON_CAR(parsed);
     KN falseClause = kon_cadr(parsed);
 
     KON_DEBUG("condition %s", KON_StringToCstr(KON_ToFormatString(kstate, condition, true, 0, "  ")));

@@ -58,43 +58,43 @@ fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n")
 #include <string.h>
 #include <errno.h>
 #define KON_VERBOSE(msg, ...) \
-do { \
-    if (ENABLE_DEBUG) { \
+do {\
+    if (ENABLE_DEBUG) {\
         fprintf(stdout, "[V][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
         fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
     }\
 } while (0)
 #define KON_DEBUG(msg, ...) \
 do {    \
-    if (ENABLE_DEBUG) { \
+    if (ENABLE_DEBUG) {\
         fprintf(stdout, "[D][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
         fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
     }\
 } while (0)
 #define KON_INFO(msg, ...) \
-do { \
-    if (ENABLE_DEBUG) { \
+do {\
+    if (ENABLE_DEBUG) {\
         fprintf(stdout, "[I][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
         fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
     }\
 } while (0)
 #define KON_TRACE(msg, ...) \
-do { \
-    if (ENABLE_DEBUG) { \
+do {\
+    if (ENABLE_DEBUG) {\
         fprintf(stdout, "[T][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
         fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
     }\
 } while (0)
 #define KON_WARN(msg, ...) \
-do { \
-    if (ENABLE_DEBUG) { \
+do {\
+    if (ENABLE_DEBUG) {\
         fprintf(stdout, "[W][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
         fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
     }\
 } while (0)
 #define KON_ERROR(msg, ...) \
-do { \
-    if (ENABLE_DEBUG) { \
+do {\
+    if (ENABLE_DEBUG) {\
         fprintf(stdout, "[E][%s][%s] ", KON_HumanFormatTime(), __FUNCTION__);\
         fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
     }\

@@ -16,13 +16,13 @@ KonTrampoline* KON_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN a
     KonEnv* procBindEnv = KON_MakeChildEnv(kstate, parentEnv);
 
     KonPair* iterParam = param;
-    KonPair* iterArg = kon_cdr(argList);
+    KonPair* iterArg = KON_CDR(argList);
     while (iterParam != KON_NIL) {
-        KN param = kon_car(iterParam);
-        KN arg = kon_car(iterArg);
+        KN param = KON_CAR(iterParam);
+        KN arg = KON_CAR(iterArg);
         // if this param is the last, the rest args should bind this param
-        if (kon_cdr(iterParam) == KON_NIL
-            && kon_cdr(iterArg) != KON_NIL
+        if (KON_CDR(iterParam) == KON_NIL
+            && KON_CDR(iterArg) != KON_NIL
         ) {
             arg = iterArg;
         }
@@ -34,8 +34,8 @@ KonTrampoline* KON_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN a
         );
         KON_EnvDefine(kstate, procBindEnv, varName, arg);
 
-        iterParam = kon_cdr(iterParam);
-        iterArg = kon_cdr(iterArg);
+        iterParam = KON_CDR(iterParam);
+        iterArg = KON_CDR(iterArg);
     };
 
     KonTrampoline* bounce = KON_EvalSentences(kstate, body, procBindEnv, cont);
@@ -46,7 +46,7 @@ KonTrampoline* KON_EvalPrefixFunc(KonState* kstate, KN expression, KN env, KonCo
 {
     KON_DEBUG("meet prefix marcro func");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN first = kon_car(expression);
+    KN first = KON_CAR(expression);
     KN param = KON_NIL;
     KN funcName = KON_NULL;
     KN body = KON_NIL;
@@ -57,7 +57,7 @@ KonTrampoline* KON_EvalPrefixFunc(KonState* kstate, KN expression, KN env, KonCo
     }
     else if (KON_IsPairList(first)) {
         param = first;
-        body = kon_cdr(expression);
+        body = KON_CDR(expression);
     }
 
     KON_DEBUG("funcName %s", KON_StringToCstr(KON_ToFormatString(kstate, funcName, true, 0, "  ")));

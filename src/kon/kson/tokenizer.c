@@ -593,6 +593,10 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 tokenizer->TokenKind = KON_TOKEN_LITERAL_NUMBER;
                 break;
             }
+            else {
+                ParseIdentifier(tokenizer);
+                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+            }
         }
         else if (pc[0] == '+') {
             tb_char_t* nextChars = PeekChars(tokenizer, 2);

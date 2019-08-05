@@ -466,7 +466,7 @@ bool KON_IsPairList(KN source)
             isList = false;
             break;
         }
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
     return isList;
 }
@@ -484,8 +484,8 @@ KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, c
             KonPair* iter = source;
 
             while (iter != KON_NIL) {
-                KN item = kon_car(iter);
-                KN next = kon_cdr(iter);
+                KN item = KON_CAR(iter);
+                KN next = KON_CDR(iter);
 
                 KN itemToKonStr = KON_ToFormatString(kstate, item, true, depth + 1, padding);
                 
@@ -508,8 +508,8 @@ KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, c
             KonPair* iter = source;
 
             while (iter != KON_NIL) {
-                KN item = kon_car(iter);
-                KN next = kon_cdr(iter);
+                KN item = KON_CAR(iter);
+                KN next = KON_CDR(iter);
                 
                 KN itemToKonStr = KON_ToFormatString(kstate, item, false, depth + 1, padding);
                 KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
@@ -532,8 +532,8 @@ KN KON_PairListRevert(KonState* kstate, KN source)
     if (source != KON_NIL && KON_IS_PAIR(source)) {
         KonPair* iter = source;
         while (iter != KON_NIL) {
-            KN item = kon_car(iter);
-            KN next = kon_cdr(iter);
+            KN item = KON_CAR(iter);
+            KN next = KON_CDR(iter);
 
             result = KON_CONS(kstate, item, result);
 
@@ -549,8 +549,8 @@ KN KON_PairListLength(KonState* kstate, KN source)
     if (source != KON_NIL && KON_IS_PAIR(source)) {
         KonPair* iter = source;
         while (iter != KON_NIL) {
-            KN item = kon_car(iter);
-            KN next = kon_cdr(iter);
+            KN item = KON_CAR(iter);
+            KN next = KON_CDR(iter);
 
             length += 1;
 
@@ -571,8 +571,8 @@ KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail)
   if (KON_IS_PAIR(tail)) {
       CAST_Kon(Pair, tail)->Prev = node;
   }
-  kon_car(node) = head;
-  kon_cdr(node) = tail;
+  KON_CAR(node) = head;
+  KON_CDR(node) = tail;
   return node;
 }
 

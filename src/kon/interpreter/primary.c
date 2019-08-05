@@ -99,7 +99,7 @@
 KN KON_PrimaryPlus(KonState* kstate, KN args)
 {
     KN iter = args;
-    KN first = kon_car(iter);
+    KN first = KON_CAR(iter);
     if (first == KON_NIL) {
         return KON_MAKE_FIXNUM(0);
     }
@@ -113,7 +113,7 @@ KN KON_PrimaryPlus(KonState* kstate, KN args)
     }
     // Unbox
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
 
         if (KON_IS_FIXNUM(item)) {
             int num = KON_UNBOX_FIXNUM(item);
@@ -134,7 +134,7 @@ KN KON_PrimaryPlus(KonState* kstate, KN args)
             }
         }
 
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
 
     
@@ -152,8 +152,8 @@ KN KON_PrimaryPlus(KonState* kstate, KN args)
 KN KON_PrimaryMinus(KonState* kstate, KN args)
 {
     KN iter = args;
-    KN first = kon_car(iter);
-    iter = kon_cdr(iter);
+    KN first = KON_CAR(iter);
+    iter = KON_CDR(iter);
     if (first == KON_NIL) {
         return KON_MAKE_FIXNUM(0);
     }
@@ -175,7 +175,7 @@ KN KON_PrimaryMinus(KonState* kstate, KN args)
     }
     // Unbox
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
 
         if (KON_IS_FIXNUM(item)) {
             int num = KON_UNBOX_FIXNUM(item);
@@ -196,7 +196,7 @@ KN KON_PrimaryMinus(KonState* kstate, KN args)
             }
         }
 
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
 
     
@@ -214,7 +214,7 @@ KN KON_PrimaryMinus(KonState* kstate, KN args)
 KN KON_PrimaryMultiply(KonState* kstate, KN args)
 {
     KN iter = args;
-    KN first = kon_car(iter);
+    KN first = KON_CAR(iter);
     if (first == KON_NIL) {
         return KON_MAKE_FIXNUM(0);
     }
@@ -228,7 +228,7 @@ KN KON_PrimaryMultiply(KonState* kstate, KN args)
     }
     // Unbox
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
 
         if (KON_IS_FIXNUM(item)) {
             int num = KON_UNBOX_FIXNUM(item);
@@ -249,7 +249,7 @@ KN KON_PrimaryMultiply(KonState* kstate, KN args)
             }
         }
 
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
 
     
@@ -266,8 +266,8 @@ KN KON_PrimaryMultiply(KonState* kstate, KN args)
 KN KON_PrimaryDivide(KonState* kstate, KN args)
 {
     KN iter = args;
-    KN first = kon_car(iter);
-    iter = kon_cdr(iter);
+    KN first = KON_CAR(iter);
+    iter = KON_CDR(iter);
     if (first == KON_NIL) {
         return KON_MAKE_FIXNUM(0);
     }
@@ -289,7 +289,7 @@ KN KON_PrimaryDivide(KonState* kstate, KN args)
     }
     // Unbox
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
 
         if (KON_IS_FIXNUM(item)) {
             int num = KON_UNBOX_FIXNUM(item);
@@ -310,7 +310,7 @@ KN KON_PrimaryDivide(KonState* kstate, KN args)
             }
         }
 
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
 
     
@@ -328,8 +328,8 @@ KN KON_PrimaryDivide(KonState* kstate, KN args)
 KN KON_PrimaryMod(KonState* kstate, KN args)
 {
     KN iter = args;
-    KN first = kon_car(iter);
-    iter = kon_cdr(iter);
+    KN first = KON_CAR(iter);
+    iter = KON_CDR(iter);
     if (first == KON_NIL) {
         return KON_MAKE_FIXNUM(0);
     }
@@ -337,7 +337,7 @@ KN KON_PrimaryMod(KonState* kstate, KN args)
         return first;
     }
 
-    KN second = kon_car(iter);
+    KN second = KON_CAR(iter);
 
 
     int resFixnum = 0;
@@ -362,11 +362,11 @@ KN KON_PrimaryMod(KonState* kstate, KN args)
 KN KON_PrimaryLowerThan(KonState* kstate, KN args)
 {
     KN iter = args;
-    KN first = kon_car(iter);
+    KN first = KON_CAR(iter);
     if (first == KON_NIL) {
         return KON_TRUE;
     }
-    iter = kon_cdr(iter);
+    iter = KON_CDR(iter);
 
     double lastNum = 0.0;
 
@@ -378,7 +378,7 @@ KN KON_PrimaryLowerThan(KonState* kstate, KN args)
     }
 
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
 
         double cmpNum = 0.0;
         if (KON_IS_FIXNUM(item)) {
@@ -395,7 +395,7 @@ KN KON_PrimaryLowerThan(KonState* kstate, KN args)
             lastNum = cmpNum;
         }
 
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
 
     
@@ -405,11 +405,11 @@ KN KON_PrimaryLowerThan(KonState* kstate, KN args)
 KN KON_PrimaryLowerOrEqual(KonState* kstate, KN args)
 {
     KN iter = args;
-    KN first = kon_car(iter);
+    KN first = KON_CAR(iter);
     if (first == KON_NIL) {
         return KON_TRUE;
     }
-    iter = kon_cdr(iter);
+    iter = KON_CDR(iter);
 
     double lastNum = 0.0;
 
@@ -421,7 +421,7 @@ KN KON_PrimaryLowerOrEqual(KonState* kstate, KN args)
     }
 
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
 
         double cmpNum = 0.0;
         if (KON_IS_FIXNUM(item)) {
@@ -438,7 +438,7 @@ KN KON_PrimaryLowerOrEqual(KonState* kstate, KN args)
             lastNum = cmpNum;
         }
 
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
 
     
@@ -448,11 +448,11 @@ KN KON_PrimaryLowerOrEqual(KonState* kstate, KN args)
 KN KON_PrimaryGreaterThan(KonState* kstate, KN args)
 {
     KN iter = args;
-    KN first = kon_car(iter);
+    KN first = KON_CAR(iter);
     if (first == KON_NIL) {
         return KON_TRUE;
     }
-    iter = kon_cdr(iter);
+    iter = KON_CDR(iter);
 
     double lastNum = 0.0;
 
@@ -464,7 +464,7 @@ KN KON_PrimaryGreaterThan(KonState* kstate, KN args)
     }
 
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
 
         double cmpNum = 0.0;
         if (KON_IS_FIXNUM(item)) {
@@ -481,7 +481,7 @@ KN KON_PrimaryGreaterThan(KonState* kstate, KN args)
             lastNum = cmpNum;
         }
 
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
 
     
@@ -491,11 +491,11 @@ KN KON_PrimaryGreaterThan(KonState* kstate, KN args)
 KN KON_PrimaryGreaterOrEqual(KonState* kstate, KN args)
 {
     KN iter = args;
-    KN first = kon_car(iter);
+    KN first = KON_CAR(iter);
     if (first == KON_NIL) {
         return KON_TRUE;
     }
-    iter = kon_cdr(iter);
+    iter = KON_CDR(iter);
 
     double lastNum = 0.0;
 
@@ -507,7 +507,7 @@ KN KON_PrimaryGreaterOrEqual(KonState* kstate, KN args)
     }
 
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
 
         double cmpNum = 0.0;
         if (KON_IS_FIXNUM(item)) {
@@ -524,7 +524,7 @@ KN KON_PrimaryGreaterOrEqual(KonState* kstate, KN args)
             lastNum = cmpNum;
         }
 
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
 
     
@@ -544,12 +544,12 @@ KN KON_PrimaryDisplay(KonState* kstate, KN args)
 
     int state = 1; // 1 need verb, 2 need objects
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
 
         KN formated = KON_ToFormatString(kstate, item, false, 0, "  ");
         KxStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(formated));
 
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
     printf("%s", KxStringBuffer_Cstr(merged));
     int size = KxStringBuffer_Length(merged);
@@ -571,7 +571,7 @@ KN KON_PrimaryWrite(KonState* kstate, KN args)
 
     int state = 1; // 1 need verb, 2 need objects
     do {
-        KN item = kon_car(iter);
+        KN item = KON_CAR(iter);
 
         if (kon_is_string(item)) {
             KxStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(item));
@@ -580,7 +580,7 @@ KN KON_PrimaryWrite(KonState* kstate, KN args)
             KN formated = KON_ToFormatString(kstate, item, false, 0, "  ");
             KxStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(formated));
         }
-        iter = kon_cdr(iter);
+        iter = KON_CDR(iter);
     } while (iter != KON_NIL);
     printf("%s", KxStringBuffer_Cstr(merged));
     int size = KxStringBuffer_Length(merged);
@@ -597,7 +597,7 @@ KN KON_PrimaryWriteln(KonState* kstate, KN args)
 
 KN KON_PrimaryStringify(KonState* kstate, KN args)
 {
-    KN item = kon_car(args);
+    KN item = KON_CAR(args);
     KN formated = KON_ToFormatString(&kstate, item, false, 0, "  ");
 
     return formated;

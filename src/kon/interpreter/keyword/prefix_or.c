@@ -25,13 +25,13 @@ KN AfterOrConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* con
     }
     else {
         // next condition
-        KN nextExpr = kon_car(restConditon);
+        KN nextExpr = KON_CAR(restConditon);
         KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
         k->Cont = contBeingInvoked->Cont;
         k->Env = env;
 
         KxHashTable* memo = KxHashTable_Init(4);
-        KxHashTable_PutKv(memo, "RestCondition", kon_cdr(restConditon));
+        KxHashTable_PutKv(memo, "RestCondition", KON_CDR(restConditon));
         k->MemoTable = memo;
         k->NativeCallback = AfterOrConditionEvaled;
 
@@ -52,12 +52,12 @@ KonTrampoline* KON_EvalPrefixOr(KonState* kstate, KN expression, KN env, KonCont
     k->Env = env;
 
     KxHashTable* memo = KxHashTable_Init(4);
-    KxHashTable_PutKv(memo, "RestCondition", kon_cdr(expression));
+    KxHashTable_PutKv(memo, "RestCondition", KON_CDR(expression));
     k->MemoTable = memo;
     k->NativeCallback = AfterOrConditionEvaled;
     
     KonTrampoline* bounce;
-    bounce = KON_EvalExpression(kstate, kon_car(expression), env, k);
+    bounce = KON_EvalExpression(kstate, KON_CAR(expression), env, k);
 
     return bounce;
 }

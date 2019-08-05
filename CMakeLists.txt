@@ -384,14 +384,15 @@ target_link_options(kon PRIVATE
 )
 target_sources(kon PRIVATE
     src/kon/interpreter/mod/kon_list.c
-    src/kon/container/vector/kx_vector.c
     src/kon/interpreter/mod/kon_module.c
-    src/kon/kon.c
+    src/kon/container/vector/kx_vector.c
     src/kon/interpreter/keyword/prefix_set.c
-    src/kon/interpreter/keyword/prefix_let.c
+    src/kon/kon.c
     src/kon/interpreter/keyword/prefix_do.c
-    src/kon/interpreter/env.c
+    src/kon/interpreter/keyword/prefix_let.c
     src/kon/kson/value_builder.c
+    src/kon/interpreter/env.c
+    src/kon/interpreter/keyword/prefix_sh.c
     src/kon/interpreter/primary.c
     src/kon/interpreter/keyword/prefix_cond.c
     src/kon/kson/state_stack.c

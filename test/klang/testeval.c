@@ -90,6 +90,12 @@ TEST Native_MkDispatcher(void) {
     PASS();
 }
 
+TEST Native_Shell(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/sh.kl";
+    KON_EvalFile(kstate, path);
+    PASS();
+}
+
 SUITE(suite) {
     // RUN_TEST(Native_Math);
     
@@ -108,9 +114,11 @@ SUITE(suite) {
     // RUN_TEST(Native_Func);
     // RUN_TEST(Native_Lambda);
 
-    RUN_TEST(Native_AttrSlot);
+    // RUN_TEST(Native_AttrSlot);
 
     // RUN_TEST(Native_MkDispatcher);
+
+    RUN_TEST(Native_Shell);
 }
 
 GREATEST_MAIN_DEFS();

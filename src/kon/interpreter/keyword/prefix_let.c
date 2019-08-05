@@ -25,7 +25,7 @@ KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KN env, KonCon
 {
     KON_DEBUG("meet prefix marcro let");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN varName = kon_car(expression);
+    KN varName = KON_CAR(expression);
     
 
     const char* varNameCstr = KON_UNBOX_SYMBOL(varName);
@@ -33,7 +33,7 @@ KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KN env, KonCon
     KON_DEBUG("varName %s", varNameCstr);
     
     KonTrampoline* bounce;
-    if ((KN)kon_cdr(expression) == KON_NIL) {
+    if ((KN)KON_CDR(expression) == KON_NIL) {
         KON_EnvDefine(kstate, env, varNameCstr, KON_NULL);
         bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
         bounce->Run.Value = KON_ONE;
