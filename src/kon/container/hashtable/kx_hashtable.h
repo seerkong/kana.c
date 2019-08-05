@@ -44,14 +44,13 @@ struct _KxHashTableKeyEntry {
     uint32_t HashCode;      // hash(Key)
     uint32_t KeyLen;
     uint32_t VerifyCode;    // hash(Key+KeyLen+ HashCode)
-
-    char* Key;
 };
 
 struct _KxHashTableValEntry {
     KxHashTableValEntry* Prev;
     KxHashTableValEntry* Next;
     KxHashTableKeyEntry* KeyEntry;
+    char* Key;
     XN Val;
 };
 

@@ -70,7 +70,6 @@ void KxHashTable_ClearBucketKeys(KxHashTable* self, KxHashTableKeyEntry* bucket)
         if (iter->ValEntry != KX_HASH_TABLE_NIL) {
             iter->ValEntry->KeyEntry = KX_HASH_TABLE_NIL;
         }
-        free(iter->Key);
         free(iter);
         iter = next;
     }
@@ -111,7 +110,6 @@ void KxHashTable_DelKeyEntry(KxHashTable* self, KxHashTableKeyEntry* keyEntry) {
         keyEntry->Prev->Next = keyEntry->Next;
     }
 
-    free(keyEntry->Key);
     free(keyEntry);
 
     KxHashTable_CheckRehash(self);
@@ -124,6 +122,9 @@ void KxHashTable_ClearValues(KxHashTable* self)
     KxHashTableValEntry* iter = self->ValListHead;
     while (iter != KX_HASH_TABLE_NIL) {
         KxHashTableValEntry* next = iter->Next;
+        if (iter->Key != NULL) {
+            free(iter->Key);
+        }
         free(iter);
         iter = next;
     }
@@ -316,10 +317,7 @@ const char* KxHashTable_KeyAtIndex(KxHashTable* self, int index)
     if (valEntry == NULL) {
         return NULL;
     }
-    if (valEntry->KeyEntry == (void*)KX_HASH_TABLE_NIL) {
-        return NULL;
-    }
-    return valEntry->KeyEntry->Key;    
+    return valEntry->Key;    
 }
 
 XN KxHashTable_FirstVal(KxHashTable* self)
@@ -343,13 +341,6 @@ KxHashTableKeyEntry* KxHashTable_CreateKeyEntry(KxHashTable* self, char* key)
         return NULL;
     }
     entry->KeyLen = strlen(key);
-    char* copiedKey = (char*)calloc((entry->KeyLen + 1), sizeof(char));
-    if (copiedKey == NULL) {
-        return NULL;
-    }
-    strncpy(copiedKey, key, entry->KeyLen);
-    copiedKey[entry->KeyLen] = '\0';
-    entry->Key = copiedKey;
 
     uint32_t keyLen = strlen(key);
     uint32_t hashCode = KxHashTable_KeyHashCode(key, keyLen);
@@ -371,6 +362,7 @@ KxHashTableValEntry* KxHashTable_CreateValEntry(KxHashTable* self, XN value)
     if (entry == NULL) {
         return NULL;
     }
+    entry->Key = NULL;
     entry->Val = value;
     entry->Prev = KX_HASH_TABLE_NIL;
     entry->Next = KX_HASH_TABLE_NIL;
@@ -479,6 +471,7 @@ KxHashTableKeyEntry* KxHashTable_AddOrUpdateKeyEntry(KxHashTable* self, char* ke
 
     keyEntry->ValEntry = valEntry;
     valEntry->KeyEntry = keyEntry;
+    valEntry->Key = key;
 
     KxHashTable_CheckRehash(self);
     return keyEntry;
@@ -600,6 +593,7 @@ int KxHashTable_PutKv(KxHashTable* self, char* key, XN value)
 
     keyEntry->ValEntry = valEntry;
     valEntry->KeyEntry = keyEntry;
+    valEntry->Key = key;
 
     // insert new key entry as bucket first
     if (self->Buckets[hashIndex] != KX_HASH_TABLE_NIL) {
@@ -754,10 +748,7 @@ const char* KxHashTable_IterGetKey(KxHashTable* self, KxHashTableIter iter)
         return NULL;
     }
     KxHashTableValEntry* valEntry = (KxHashTableValEntry*)iter;
-    if (valEntry->KeyEntry == KX_HASH_TABLE_NIL) {
-        return NULL;
-    }
-    return valEntry->KeyEntry->Key;
+    return valEntry->Key;
 }
 
 XN KxHashTable_IterGetVal(KxHashTable* self, KxHashTableIter iter)
