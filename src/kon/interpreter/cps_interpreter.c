@@ -525,17 +525,8 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             if (KON_IsPairList(subj)) {
                 // the subj position is a list, should be evaluated
                 // like the first sentence in this eg block {{ {zhangsan name} |upcase }}
-                KN words = subj;
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_SUBJ);
-                    
-                KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
-                k->Cont = cont;
-                k->Env = env;
-                k->EvalSubj.RestWordList = KON_CDR(words);
-                
-                bounce->Bounce.Value = KON_CAR(words);
-                bounce->Bounce.Cont = k;
-                bounce->Bounce.Env = cont->Env;
+                KN subjExpr = subj;
+                bounce = KON_EvalExpression(kstate, subjExpr, env, cont);
             }
             else if (kon_is_variable(subj) || KON_IS_WORD(subj)) {
                 // lookup subject in env
@@ -578,7 +569,6 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             else if (KON_IS_SYMBOL(firstArg)) {
                 // a clause like {{kon /list}}
                 // should dispatch this msg to the object's visitor protocol
-                KON_DEBUG("meet slot");
                 KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_ARGS);
                 k->Cont = cont;
                 k->Env = env;
@@ -606,18 +596,9 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             KN arg = bounce->Bounce.Value;
             if (KON_IsPairList(arg)) {
                 // the subj position is a list, should be evaluated
-                // like the first sentence in this eg block {{ {zhangsan name} |upcase }}
-                KN words = arg;
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_SUBJ);
-                    
-                KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
-                k->Cont = cont;
-                k->Env = env;
-                k->EvalSubj.RestWordList = KON_CDR(words);
-                
-                bounce->Bounce.Value = KON_CAR(words);
-                bounce->Bounce.Cont = k;
-                bounce->Bounce.Env = env;
+                // like the first sentence in this eg block {{ + % 5 {+ % 1 2} }}
+                KN argExpr = arg;
+                bounce = KON_EvalExpression(kstate, argExpr, env, cont);
             }
             else if (kon_is_vector(arg)) {
                 // TODO !!! verify cell inner content

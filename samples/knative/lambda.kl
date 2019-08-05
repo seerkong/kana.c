@@ -24,4 +24,8 @@
   }
 
   {bar %}
+
+  ` nested lambda, should return 4
+  ` TODO add this line as a seperate test case
+  {{!lambda t {$x} x } % 4}
 }
