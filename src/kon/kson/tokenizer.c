@@ -84,6 +84,9 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_SYM_WORD:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_WORD");
             break;
+        case KON_TOKEN_SYM_SLOT:
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_SLOT");
+            break;
         case KON_TOKEN_LITERAL_RAW_STRING:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_RAW_STRING");
             break;
@@ -808,18 +811,24 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (nextChars == tb_null) {
                 break;
             }
-            if (nextChars[1] == '/') {
-                ParseSingleLineComment(tokenizer);
-                tokenizer->TokenKind = KON_TOKEN_COMMENT_SINGLE_LINE;
-                break;
-            }
-            else {
+            if (IsSpace(nextChars[1])) {
                 // divide identifier
                 UpdateTokenContent(tokenizer, "/");
                 ForwardToken(tokenizer, 1);
                 tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
                 break;
             }
+            else {
+                ForwardToken(tokenizer, 1);
+                ParseIdentifier(tokenizer);
+                tokenizer->TokenKind = KON_TOKEN_SYM_SLOT;
+                break;
+            }
+            // if (nextChars[1] == '/') {
+            //     ParseSingleLineComment(tokenizer);
+            //     tokenizer->TokenKind = KON_TOKEN_COMMENT_SINGLE_LINE;
+            //     break;
+            // }
         }
         else if (pc[0] == '*') {
             // multiply identifier

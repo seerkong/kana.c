@@ -78,8 +78,20 @@ TEST Native_Writeln(void) {
     PASS();
 }
 
+TEST Native_AttrSlot(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/attr-slot.kl";
+    KON_EvalFile(kstate, path);
+    PASS();
+}
+
+TEST Native_MkDispatcher(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/mk-dispatcher.kl";
+    KON_EvalFile(kstate, path);
+    PASS();
+}
+
 SUITE(suite) {
-    RUN_TEST(Native_Math);
+    // RUN_TEST(Native_Math);
     
     // RUN_TEST(Native_Writeln);
 
@@ -96,6 +108,9 @@ SUITE(suite) {
     // RUN_TEST(Native_Func);
     // RUN_TEST(Native_Lambda);
 
+    RUN_TEST(Native_AttrSlot);
+
+    // RUN_TEST(Native_MkDispatcher);
 }
 
 GREATEST_MAIN_DEFS();

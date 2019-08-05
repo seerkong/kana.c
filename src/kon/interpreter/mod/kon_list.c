@@ -2,7 +2,7 @@
 
 KN KonList_New(KonState* kstate, KN args)
 {
-    return KON_NIL;
+    return args;
 }
 
 KN KonList_Length(KonState* kstate, KN args)
@@ -17,7 +17,10 @@ KonAttrSlot* KonList_Init(KonState* kstate)
 
     KxHashTable_PutKv(slot->Folder,
         "new",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_New)
+        MakeAttrSlotLeaf(kstate,
+            MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_New),
+            "p"
+        )
     );
 
 
@@ -30,7 +33,10 @@ KonAttrSlot* KonList_Init(KonState* kstate)
 
     KxHashTable_PutKv(methods->Folder,
         "length",
-        MakeNativeProcedure(kstate, KON_NATIVE_OBJ_METHOD, KonList_Length)
+        MakeAttrSlotLeaf(kstate,
+            MakeNativeProcedure(kstate, KON_NATIVE_OBJ_METHOD, KonList_Length),
+            "pm"
+        )
     );
-
+    return slot;
 }

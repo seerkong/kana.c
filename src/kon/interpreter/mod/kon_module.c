@@ -9,4 +9,5 @@ KN KonModule_Init(KonState* kstate)
         "list",
         KonList_Init(kstate)
     );
+    return (KN)module;
 }

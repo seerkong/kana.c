@@ -41,6 +41,7 @@ typedef enum
     KON_TOKEN_SYM_IDENTIFIER,  // $abc
     KON_TOKEN_SYM_STRING, // $''
     KON_TOKEN_SYM_SLOT, // /tag /. /.. /~
+    KON_TOKEN_EXEC_MSG,     // .length
 
     KON_TOKEN_QUOTE_VECTOR, // $[]
     KON_TOKEN_QUOTE_LIST,   // ${}
@@ -63,9 +64,8 @@ typedef enum
     KON_TOKEN_TABLE_TAG,    // :
     
     KON_TOKEN_APPLY,        // %
-    KON_TOKEN_EXEC_MSG,     // .
+    KON_TOKEN_PIPE,         // |abc
     KON_TOKEN_REST,     // ... like scheme . eg {!func {a ... b}}
-    KON_TOKEN_PIPE,         // |
     KON_TOKEN_CLAUSE_END,   // ;
 
 } KonTokenKind;

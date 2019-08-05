@@ -11,12 +11,12 @@ extern "C"{
 
 KN KON_MakeRootEnv(KonState* kstate);
 KN KON_MakeChildEnv(KonState* kstate, KN parentEnv);
-KN KON_EnvDefine(KonState* kstate, KN env, char* key, KN value);
-KN KON_EnvLookup(KonState* kstate, KN env, char* key);
+KN KON_EnvDefine(KonState* kstate, KN env, const char* key, KN value);
+KN KON_EnvLookup(KonState* kstate, KN env, const char* key);
 
-KN KON_EnvDispatcherDefine(KonState* kstate, KN env, char* key, KN value);
-KN KON_EnvDispatcherLookup(KonState* kstate, KN env, char* key);
-KN KON_EnvDispatcherLookupSet(KonState* kstate, KN env, char* key, KN value);
+KN KON_EnvDispatcherDefine(KonState* kstate, KN env, const char* key, KN value);
+KN KON_EnvDispatcherLookup(KonState* kstate, KN env, const char* key);
+KN KON_EnvDispatcherLookupSet(KonState* kstate, KN env, const char* key, KN value);
 
 #ifdef __cplusplus
 }

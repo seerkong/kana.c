@@ -42,6 +42,17 @@ KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
     KN res = (KN) KON_GC_MALLOC(size);
     if (res && ! kon_is_exception(res)) {
         ((KonBase*)res)->Tag = tag;
+        // set dispatcher id
+        if (tag == KON_T_FIXNUM || tag == KON_T_FLONUM || tag == KON_T_BIGNUM) {
+            ((KonBase*)res)->MsgDispatcherId = KON_MAKE_FIXNUM(KON_T_NUMBER);
+        }
+        else if (tag == KON_T_NIL || tag == KON_T_PAIR) {
+            ((KonBase*)res)->MsgDispatcherId = KON_MAKE_FIXNUM(KON_T_PAIRLIST);
+        }
+        else {
+            ((KonBase*)res)->MsgDispatcherId = KON_MAKE_FIXNUM(tag);
+        }
+        
     }
     return res;
 }
@@ -61,7 +72,7 @@ KN KON_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char
     else if (kon_is_string(source)) {
         return KON_StringStringify(kstate, source);
     }
-    else if (kon_is_symbol(source)) {
+    else if (KON_IS_SYMBOL(source)) {
         return KON_SymbolStringify(kstate, source);
     }
     else if (kon_is_syntax_marker(source)) {
@@ -259,6 +270,11 @@ KN KON_SymbolStringify(KonState* kstate, KN source)
             KxStringBuffer_AppendCstr(result->String, data);
             break;
         }
+        case KON_SYM_EXEC_MSG: {
+            KxStringBuffer_AppendCstr(result->String, ".");
+            KxStringBuffer_AppendCstr(result->String, data);
+            break;
+        }
     }
     return result;
 }
@@ -278,10 +294,6 @@ KN KON_SyntaxMarkerStringify(KonState* kstate, KN source)
     switch (type) {
         case KON_SYNTAX_MARKER_APPLY: {
             KxStringBuffer_AppendCstr(result->String, "%");
-            break;
-        }
-        case KON_SYNTAX_MARKER_EXEC_MSG: {
-            KxStringBuffer_AppendCstr(result->String, ".");
             break;
         }
         case KON_SYNTAX_MARKER_PIPE: {
@@ -523,7 +535,7 @@ KN KON_PairListRevert(KonState* kstate, KN source)
             KN item = kon_car(iter);
             KN next = kon_cdr(iter);
 
-            result = kon_cons(kstate, item, result);
+            result = KON_CONS(kstate, item, result);
 
             iter = next;
         }
@@ -566,18 +578,17 @@ KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail)
 
 KN KON_PairList2(KonState* kstate, KN a, KN b)
 {
-  KN res = kon_cons(kstate, b, KON_NIL);
-  res = kon_cons(kstate, a, res);
+  KN res = KON_CONS(kstate, b, KON_NIL);
+  res = KON_CONS(kstate, a, res);
   return res;
 }
 
 KN KON_PairList3(KonState* kstate, KN a, KN b, KN c)
 {
   KN res = KON_PairList2(kstate, b, c);
-  res = kon_cons(kstate, a, res);
+  res = KON_CONS(kstate, a, res);
   return res;
 }
-
 
 
 KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
@@ -741,6 +752,7 @@ KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef
 KN MakeMsgDispatcher(KonState* kstate)
 {
     KonMsgDispatcher* result = KON_ALLOC_TYPE_TAG(kstate, KonMsgDispatcher, KON_T_MSG_DISPATCHER);
+    result->Name = KON_NULL;
     result->OnApplyArgs = KON_NULL;
     result->OnSelectPath = KON_NULL;
     result->OnMethodCall = KON_NULL;
@@ -795,7 +807,7 @@ KN KON_VectorToKonPairList(KonState* kstate, KxVector* vector)
     int len = KxVector_Length(vector);
     for (int i = len - 1; i >= 0; i--) {
         KN item = KxVector_AtIndex(vector, i);
-        list = kon_cons(kstate, item, list);
+        list = KON_CONS(kstate, item, list);
     }
 
     return list;

@@ -167,60 +167,6 @@ target_sources(playwriter PRIVATE
 )
 
 # target
-add_executable(testeval "")
-set_target_properties(testeval PROPERTIES OUTPUT_NAME "testeval")
-set_target_properties(testeval PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
-add_dependencies(testeval kon)
-target_include_directories(testeval PRIVATE
-    /usr/include
-    /usr/local/include
-)
-target_compile_definitions(testeval PRIVATE
-    DEBUG
-)
-set_property(TARGET testeval PROPERTY C_STANDARD 99)
-if(MSVC)
-    target_compile_options(testeval PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
-endif()
-set_property(TARGET testeval PROPERTY CXX_STANDARD 14)
-target_compile_options(testeval PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
-)
-if(MSVC)
-    target_compile_options(testeval PRIVATE $<$<CONFIG:Debug>:-Od>)
-else()
-    target_compile_options(testeval PRIVATE -O0)
-endif()
-target_link_libraries(testeval PRIVATE
-    tbox
-    pthread
-    kon
-)
-target_link_directories(testeval PRIVATE
-    /usr/local/lib
-    /usr/lib
-)
-target_link_options(testeval PRIVATE
-    -L/usr/local/lib
-    -lpthread
-)
-target_sources(testeval PRIVATE
-    test/klang/testeval.c
-)
-
-# target
 add_executable(playtokenizer "")
 set_target_properties(playtokenizer PROPERTIES OUTPUT_NAME "playtokenizer")
 set_target_properties(playtokenizer PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
@@ -276,24 +222,23 @@ target_sources(playtokenizer PRIVATE
 )
 
 # target
-add_executable(eval_file "")
-set_target_properties(eval_file PROPERTIES OUTPUT_NAME "eval_file")
-set_target_properties(eval_file PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
-add_dependencies(eval_file kon)
-target_include_directories(eval_file PRIVATE
+add_executable(testeval "")
+set_target_properties(testeval PROPERTIES OUTPUT_NAME "testeval")
+set_target_properties(testeval PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
+add_dependencies(testeval kon)
+target_include_directories(testeval PRIVATE
     /usr/include
     /usr/local/include
 )
-target_compile_definitions(eval_file PRIVATE
+target_compile_definitions(testeval PRIVATE
     DEBUG
-    __tb_prefix__="eval_file"
 )
-set_property(TARGET eval_file PROPERTY C_STANDARD 99)
+set_property(TARGET testeval PROPERTY C_STANDARD 99)
 if(MSVC)
-    target_compile_options(eval_file PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
+    target_compile_options(testeval PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
 endif()
-set_property(TARGET eval_file PROPERTY CXX_STANDARD 14)
-target_compile_options(eval_file PRIVATE
+set_property(TARGET testeval PROPERTY CXX_STANDARD 14)
+target_compile_options(testeval PRIVATE
     $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
     $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
     $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
@@ -309,25 +254,25 @@ target_compile_options(eval_file PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
 )
 if(MSVC)
-    target_compile_options(eval_file PRIVATE $<$<CONFIG:Debug>:-Od>)
+    target_compile_options(testeval PRIVATE $<$<CONFIG:Debug>:-Od>)
 else()
-    target_compile_options(eval_file PRIVATE -O0)
+    target_compile_options(testeval PRIVATE -O0)
 endif()
-target_link_libraries(eval_file PRIVATE
+target_link_libraries(testeval PRIVATE
     tbox
     pthread
     kon
 )
-target_link_directories(eval_file PRIVATE
+target_link_directories(testeval PRIVATE
     /usr/local/lib
     /usr/lib
 )
-target_link_options(eval_file PRIVATE
+target_link_options(testeval PRIVATE
     -L/usr/local/lib
     -lpthread
 )
-target_sources(eval_file PRIVATE
-    src/playground/eval_file.c
+target_sources(testeval PRIVATE
+    test/klang/testeval.c
 )
 
 # target
@@ -438,20 +383,24 @@ target_link_directories(kon PRIVATE
 target_link_options(kon PRIVATE
 )
 target_sources(kon PRIVATE
+    src/kon/interpreter/mod/kon_list.c
     src/kon/container/vector/kx_vector.c
+    src/kon/interpreter/mod/kon_module.c
     src/kon/kon.c
-    src/kon/interpreter/keyword/prefix_let.c
-    src/kon/interpreter/env.c
     src/kon/interpreter/keyword/prefix_set.c
+    src/kon/interpreter/keyword/prefix_let.c
+    src/kon/interpreter/keyword/prefix_do.c
+    src/kon/interpreter/env.c
+    src/kon/kson/value_builder.c
     src/kon/interpreter/primary.c
     src/kon/interpreter/keyword/prefix_cond.c
     src/kon/kson/state_stack.c
     src/kon/string/kx_stringbuffer.c
     src/kon/interpreter/keyword/prefix_blk.c
-    src/kon/interpreter/keyword/prefix_do.c
+    src/kon/interpreter/keyword/prefix_def_builder.c
     src/kon/kson/writer.c
-    src/kon/kson/value_builder.c
     src/kon/interpreter/keyword/prefix_func.c
+    src/kon/interpreter/keyword/prefix_def_dispatcher.c
     src/kon/kson/reader.c
     src/kon/interpreter/keyword/prefix_or.c
     src/kon/interpreter/keyword/prefix_if.c

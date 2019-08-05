@@ -138,7 +138,6 @@ bool IsLiteralToken(tb_size_t event)
 bool IsSyntaxToken(tb_size_t event)
 {
     if (event == KON_TOKEN_APPLY
-        || event == KON_TOKEN_EXEC_MSG
         || event == KON_TOKEN_PIPE
         || event == KON_TOKEN_CLAUSE_END
     ) {
@@ -159,16 +158,12 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
             value->Type = KON_SYNTAX_MARKER_APPLY;
             break;
         }
-        case KON_TOKEN_EXEC_MSG: {
-            value->Type = KON_SYNTAX_MARKER_EXEC_MSG;
+        case KON_TOKEN_CLAUSE_END: {
+            value->Type = KON_SYNTAX_MARKER_CLAUSE_END;
             break;
         }
         case KON_TOKEN_PIPE: {
             value->Type = KON_SYNTAX_MARKER_PIPE;
-            break;
-        }
-        case KON_TOKEN_CLAUSE_END: {
-            value->Type = KON_SYNTAX_MARKER_CLAUSE_END;
             break;
         }
         default: {
@@ -202,6 +197,9 @@ KN MakeSymbol(KonReader* reader, KonTokenKind event)
     }
     else if (event == KON_TOKEN_SYM_SLOT) {
         value->Type = KON_SYM_SLOT;
+    }
+    else if (event == KON_TOKEN_EXEC_MSG) {
+        value->Type = KON_SYM_EXEC_MSG;
     }
     
     value->Data = utf8dup(KxStringBuffer_Cstr(reader->Tokenizer->Content));
@@ -318,7 +316,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
     }
     else if (builderType == KON_BUILDER_TABLE_PAIR) {
         if (currentState == KON_READER_PARSE_TABLE_KEY) {
-            assert(kon_is_symbol(value));
+            assert(KON_IS_SYMBOL(value));
             KonSymbolType symbolType = KON_FIELD(value, KonSymbol, Type);
             assert(symbolType != KON_SYM_VARIABLE && symbolType != KON_SYM_PREFIX_WORD);
             // table tag key should not be NULL
@@ -356,7 +354,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
             CellBuilderSetList(topBuilder, value);
         }
         else {
-            assert(kon_is_symbol(value));
+            assert(KON_IS_SYMBOL(value));
             KonSymbolType symbolType = KON_FIELD(value, KonSymbol, Type);
             assert(symbolType != KON_SYM_PREFIX_WORD);
             CellBuilderSetName(topBuilder, value);
@@ -596,6 +594,7 @@ KN KSON_Parse(KonReader* reader)
             || event == KON_TOKEN_SYM_IDENTIFIER
             || event == KON_TOKEN_SYM_STRING
             || event == KON_TOKEN_SYM_SLOT
+            || event == KON_TOKEN_EXEC_MSG
         ) {
             KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);

@@ -10,8 +10,6 @@
 #include "utils/number_utils.h"
 #include "interpreter/cps_interpreter.h"
 
-
-
 KonState* KON_Init()
 {
     KonState* kstate = (KonState*)calloc(1, sizeof(KonState));
@@ -19,6 +17,8 @@ KonState* KON_Init()
         return NULL;
     }
     kstate->Base.Tag = KON_T_STATE;
+
+    kstate->LastMsgDispatcherId = 1000;
 
     // init root env
     // KN env = KON_MakeRootEnv(kstate);
@@ -61,6 +61,8 @@ KN KON_EvalFile(KonState* kstate, char* filePath)
             if (KON_IsPairList(root)) {
 
                 KN env = KON_MakeRootEnv(kstate);
+
+                // DefineReservedDispatcher(kstate, env);
 
                 // KN result = KON_ProcessSentences(kstate, root, kstate->Value.Context.RootEnv);
                 result = KON_ProcessSentences(kstate, root, env);

@@ -76,13 +76,13 @@ KN KON_MakeChildEnv(KonState* kstate, KN parentEnv)
     return env;
 }
 
-KN KON_EnvDefine(KonState* kstate, KN env, char* key, KN value)
+KN KON_EnvDefine(KonState* kstate, KN env, const char* key, KN value)
 {
     KxHashTable_PutKv(CAST_Kon(Env, env)->Bindings, key, value);
     return KON_TRUE;
 }
 
-KN KON_EnvLookup(KonState* kstate, KN env, char* key)
+KN KON_EnvLookup(KonState* kstate, KN env, const char* key)
 {
     KN value = KxHashTable_AtKey(CAST_Kon(Env, env)->Bindings, key);
     if (value && value != KON_NULL) {
@@ -96,7 +96,7 @@ KN KON_EnvLookup(KonState* kstate, KN env, char* key)
     }
 }
 
-KN KON_EnvLookupSet(KonState* kstate, KN env, char* key, KN value)
+KN KON_EnvLookupSet(KonState* kstate, KN env, const char* key, KN value)
 {
     KN slot = KxHashTable_AtKey(CAST_Kon(Env, env)->Bindings, key);
     if (slot) {
@@ -112,13 +112,13 @@ KN KON_EnvLookupSet(KonState* kstate, KN env, char* key, KN value)
 }
 
 
-KN KON_EnvDispatcherDefine(KonState* kstate, KN env, char* key, KN value)
+KN KON_EnvDispatcherDefine(KonState* kstate, KN env, const char* key, KN value)
 {
     KxHashTable_PutKv(CAST_Kon(Env, env)->MsgDispatchers, key, value);
     return KON_TRUE;
 }
 
-KN KON_EnvDispatcherLookup(KonState* kstate, KN env, char* key)
+KN KON_EnvDispatcherLookup(KonState* kstate, KN env, const char* key)
 {
     KN value = KxHashTable_AtKey(CAST_Kon(Env, env)->MsgDispatchers, key);
     if (value && value != KON_NULL) {
@@ -132,7 +132,7 @@ KN KON_EnvDispatcherLookup(KonState* kstate, KN env, char* key)
     }
 }
 
-KN KON_EnvDispatcherLookupSet(KonState* kstate, KN env, char* key, KN value)
+KN KON_EnvDispatcherLookupSet(KonState* kstate, KN env, const char* key, KN value)
 {
     KN slot = KxHashTable_AtKey(CAST_Kon(Env, env)->MsgDispatchers, key);
     if (slot) {

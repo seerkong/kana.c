@@ -13,7 +13,14 @@ bool IsSelfEvaluated(KN source)
         || KON_IS_FLONUM(source)
         || kon_is_string(source)
         || kon_is_syntax_marker(source)
-        || (kon_is_symbol(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_STRING)
+        // /abc
+        || KON_IS_SYM_SLOT(source)
+        // .append
+        || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_EXEC_MSG)
+        // $abc
+        || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_IDENTIFIER)
+        // $'abc'
+        || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_STRING)
         || kon_is_quote(source)
         || source == KON_TRUE
         || source == KON_FALSE
@@ -35,10 +42,24 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
 
     KonTrampoline* bounce;
     if (kon_is_syntax_marker(firstObj)) {
-        KonProcedure* subjProc = (KonProcedure*)subj;
+        // apply args to a procedure like % 1 2;
         if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_APPLY) {
+            // unbox attr slot
+            if (KON_IS_ATTR_SLOT(subj)) {
+                subj = ((KonAttrSlot*)subj)->Value;
+            }
+            KonProcedure* subjProc = (KonProcedure*)subj;
             // TODO assert subj is a procedure
             if (subjProc->Type == KON_NATIVE_FUNC) {
+                KonNativeFuncRef funcRef = subjProc->NativeFuncRef;
+                KN applyResult = (*funcRef)(kstate, kon_cdr(argList));
+                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce->Run.Value = applyResult;
+                bounce->Run.Cont = cont;
+            }
+            else if (subjProc->Type == KON_NATIVE_OBJ_METHOD) {
+                // treat as plain procedure when apply arg list
+                // the first item in arg list is the object
                 KonNativeFuncRef funcRef = subjProc->NativeFuncRef;
                 KN applyResult = (*funcRef)(kstate, kon_cdr(argList));
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
@@ -54,7 +75,63 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             else if (subjProc->Type == KON_COMPOSITE_BLK) {
                 bounce = KON_ApplyCompositeBlk(kstate, subjProc, KON_NIL, env, cont);
             }
+            else if (subjProc->Type == KON_COMPOSITE_OBJ_METHOD) {
+                // treat as plain procedure when apply arg list
+                // the first item in arg list is the object
+                bounce = KON_ApplyCompositeLambda(kstate, subjProc, argList, env, cont);
+            }
         }
+        
+    }
+    //  get attr value like /abc
+    else if (KON_IS_ATTR_SLOT(subj) && KON_IS_SYM_SLOT(firstObj)) {
+        KonAttrSlot* slot = (KonAttrSlot*)subj;
+        KN slotValue = KxHashTable_AtKey(slot->Folder, KON_UNBOX_SYMBOL(firstObj));
+        KON_DEBUG("get slotValue %s", KON_UNBOX_SYMBOL(firstObj));
+        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+        bounce->Run.Value = slotValue;
+        bounce->Run.Cont = cont;
+    }
+
+    // send msg like .add 1 2;
+    else if (KON_IS_SYMBOL(firstObj) && ((KonSymbol*)firstObj)->Type == KON_SYM_EXEC_MSG) {
+        // get dispatcher and eval OnMethodCall
+        // this dispatcherId is unboxed
+        KN dispatcherId = ((KonBase*)subj)->MsgDispatcherId;
+        char dispatcherIdStr[64] = { '\0' };
+        itoa(dispatcherId, dispatcherIdStr, 10);
+        KonMsgDispatcher* dispatcher = KON_EnvDispatcherLookup(kstate, env, dispatcherIdStr);
+
+        KonProcedure* procedure = dispatcher->OnMethodCall;
+        // dispatcher functions should receive 3 arg
+        // 1st is the object
+        // 2nd is the message symbol
+        // 3rd is the argument list
+        KN dispatchArgList = KON_NIL;
+        dispatchArgList = KON_CONS(kstate, kon_cdr(argList), dispatchArgList);
+        dispatchArgList = KON_CONS(kstate, firstObj, dispatchArgList);
+        dispatchArgList = KON_CONS(kstate, subj, dispatchArgList);
+
+        // call method
+        if (procedure->Type == KON_NATIVE_FUNC) {
+            KonNativeFuncRef funcRef = procedure->NativeFuncRef;
+            KN applyResult = (*funcRef)(kstate, dispatchArgList);
+            bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+            bounce->Run.Value = applyResult;
+            bounce->Run.Cont = cont;
+        }
+        else if (procedure->Type == KON_COMPOSITE_LAMBDA) {
+            bounce = KON_ApplyCompositeLambda(kstate, procedure, dispatchArgList, env, cont);
+        }
+        else if (procedure->Type == KON_COMPOSITE_FUNC) {
+            bounce = KON_ApplyCompositeFunc(kstate, procedure, dispatchArgList, env, cont);
+        }
+        else if (procedure->Type == KON_COMPOSITE_OBJ_METHOD) {
+            // treat as plain procedure when apply arg list
+            // the first item in arg list is the object
+            bounce = KON_ApplyCompositeLambda(kstate, procedure, dispatchArgList, env, cont);
+        }
+
     }
 
     return bounce;
@@ -86,19 +163,27 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
             if (kon_is_syntax_marker(item)
                 && CAST_Kon(SyntaxMarker, item)->Type != KON_SYNTAX_MARKER_CLAUSE_END
             ) {
+                // meet %
                 KxVector_Push(clauseVec, item);
                 state = 2;
+            }
+            // meet slot like /abc
+            else if (KON_IS_SYM_SLOT(item)) {
+                KxVector* slotClause = KxVector_Init();
+                KxVector_Push(slotClause, item);
+                KxVector_Push(clauseListVec, slotClause);
             }
             else if (kon_is_vector(item)
                 || KON_IsPairList(item)
                 || kon_is_cell(item)
-                || kon_is_symbol(item)
+                || KON_IS_SYMBOL(item)
                 || kon_is_quote(item)
                 || kon_is_quasiquote(item)
                 || kon_is_unquote(item)
             ) {
                 KxVector_Push(clauseVec, item);
             }
+            
             else {
                 // TODO throw exception
             }
@@ -122,14 +207,16 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
         iter = kon_cdr(iter);
     } while (iter != KON_NIL);
     
-    KxVector_Push(clauseListVec, clauseVec);
+    if (KxVector_Length(clauseVec) > 0) {
+        KxVector_Push(clauseListVec, clauseVec);
+    }
 
     KN result = KON_NIL;
     int clauseListVecLen = KxVector_Length(clauseListVec);
-    for (int i = 0; i < clauseListVecLen; i++) {
+    for (int i = clauseListVecLen - 1; i >= 0; i--) {
         KxVector* clauseWords = KxVector_AtIndex(clauseListVec, i);
         KN clause = KON_VectorToKonPairList(kstate, clauseWords);
-        result = kon_cons(kstate, clause, result);
+        result = KON_CONS(kstate, clause, result);
     }
 
     return result;
@@ -199,6 +286,7 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
             // TODO split % xxx; .xxx a a ; | xx aaa; sss
             // as {{% xxx} {. xxx a a} {| xx aaa} {sss}}
             KN clauses = SplitClauses(kstate, restWords);
+            KON_DEBUG("splited clauses %s", KON_StringToCstr(KON_Stringify(kstate, clauses)));
             
             if (clauses == KON_NIL) {
                 // no clauses like {{a}}
@@ -258,11 +346,12 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
         KN evaledArgList = contBeingInvoked->EvalClauseArgs.EvaledArgList;
         // NOTE! the evaluated arg list here is reverted saved
         // should reverted back when apply the arguments
-        evaledArgList = kon_cons(kstate, lastArgEvaled, evaledArgList);
+        evaledArgList = KON_CONS(kstate, lastArgEvaled, evaledArgList);
 
         if (restArgList == KON_NIL) {
             // this clause args all eval finished
             KN argList = KON_PairListRevert(kstate, evaledArgList);
+            KON_DEBUG("before ApplySubjVerbAndObjects");
             // next continuation should be KON_CONT_EVAL_CLAUSE_LIST
             return ApplySubjVerbAndObjects(kstate, subj, argList, contBeingInvoked->Env, contBeingInvoked->Cont);
         }
@@ -329,6 +418,12 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             else if (strcmp(prefix, "cond") == 0) {
                 bounce = KON_EvalPrefixCond(kstate, kon_cdr(words), env, cont);
             }
+            else if (strcmp(prefix, "def-dispatcher") == 0) {
+                bounce = KON_EvalPrefixDefDispatcher(kstate, kon_cdr(words), env, cont);
+            }
+            else if (strcmp(prefix, "def-builder") == 0) {
+                bounce = KON_EvalPrefixDefBuilder(kstate, kon_cdr(words), env, cont);
+            }
             else {
                 KON_DEBUG("error! unhandled prefix marcro %s", prefix);
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
@@ -350,7 +445,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             bounce->Bounce.Env = env;
         }
     }
-    else if (kon_is_symbol(expression)) {
+    else if (KON_IS_SYMBOL(expression)) {
         // a code block like { a }
         // TODO asert should be a SYM_IDENTIFIER
         // env lookup this val
@@ -440,8 +535,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
                 bounce->Bounce.Env = cont->Env;
             }
             else if (kon_is_variable(subj) || KON_IS_WORD(subj)) {
-                // TODO env lookup this val
-                // KN val = KON_MakeString(kstate, "writeln");
+                // lookup subject in env
                 KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(subj));
                 assert(val != KON_NULL);
                 bounce = KON_RunContinuation(kstate, cont, val);
@@ -478,10 +572,25 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
                 bounce->Bounce.Value = kon_car(clauseArgList); // the first arg is % or . or |
 
             }
-            else if (kon_is_symbol(clauseArgList)) {
+            else if (KON_IS_SYMBOL(firstArg)) {
+                // a clause like {{kon /list}}
+                // should dispatch this msg to the object's visitor protocol
+                KON_DEBUG("meet slot");
+                KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_ARGS);
+                k->Cont = cont;
+                k->Env = env;
+                k->EvalClauseArgs.Subj = subj;
+                k->EvalClauseArgs.RestArgList = kon_cdr(clauseArgList);
+                k->EvalClauseArgs.EvaledArgList = KON_NIL;
+                
+                bounce = AllocBounceWithType(KON_TRAMPOLINE_ARG_LIST);
+                bounce->Bounce.Cont = k;
+                bounce->Bounce.Env = env;
+                bounce->Bounce.Value = kon_car(clauseArgList); // the first arg is /abc
+            }
+            else if (KON_IS_SYMBOL(clauseArgList)) {
                 // a clause like {length} in sentence {{"abc" length}}
                 // should dispatch this msg to the object's visitor protocol
-
             }
 
         }
@@ -534,7 +643,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             else if (kon_is_unquote(arg)) {
                 // TODO
             }
-            else if (kon_is_symbol(arg)) {
+            else if (KON_IS_WORD(arg) || kon_is_variable(arg)) {
                 // env lookup this val
                 KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(arg));;
                 assert(val != NULL);

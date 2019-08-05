@@ -93,7 +93,7 @@ KN MakeListByBuilder(KonState* kstate, KonBuilder* builder)
     int len = KxVector_Length(list);
     for (int i = len - 1; i >= 0; i--) {
         KN item = KxVector_AtIndex(list, i);
-        pair = kon_cons(kstate, item, pair);
+        pair = KON_CONS(kstate, item, pair);
     }
 
     return pair;

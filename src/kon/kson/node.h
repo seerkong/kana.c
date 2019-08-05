@@ -108,6 +108,7 @@ typedef enum {
 
     // determined by tagging system and ((KonBase*)x)->Tag
     KON_T_NUMBER,
+    KON_T_PAIRLIST, // KON_T_NIL AND KON_T_PAIR
 
     // determined by ((KonBase*)x)->Tag
     KON_T_STATE,
@@ -155,6 +156,12 @@ typedef struct KonProcedure KonProcedure;
 
 typedef struct KonBase {
     KonType Tag;
+    
+    // boxed fixnum
+    // for types in KonType enum, the MsgDispatcherId is same as KonType
+    unsigned int MsgDispatcherId;
+
+    
     char IsMarked;
 } KonBase;
 
@@ -167,7 +174,8 @@ typedef enum {
     KON_SYM_VARIABLE,    // @abc
     KON_SYM_IDENTIFIER, // $abc
     KON_SYM_STRING, // $''
-    KON_SYM_SLOT // /tag /. /.. /~
+    KON_SYM_SLOT, // /tag /. /.. /~
+    KON_SYM_EXEC_MSG, // .add 5 2;
 } KonSymbolType;
 
 struct KonSymbol {
@@ -235,7 +243,6 @@ struct KonUnquote {
 
 typedef enum {
     KON_SYNTAX_MARKER_APPLY,        // %
-    KON_SYNTAX_MARKER_EXEC_MSG,     // .
     KON_SYNTAX_MARKER_PIPE,         // |
     KON_SYNTAX_MARKER_CLAUSE_END    // ;
 } KonSyntaxMarkerType;
@@ -285,6 +292,7 @@ struct KonAttrSlot {
 struct KonMsgDispatcher {
     KonBase Base;
     KN Config;
+    char* Name;
     KonProcedure* OnApplyArgs;  // % p1 p2;
     KonProcedure* OnSelectPath;  // /abc /efg
     KonProcedure* OnMethodCall; // . push 1 2;
@@ -334,6 +342,7 @@ struct KonProcedure {
 struct KonState {
     KonBase Base;
     KonEnv* RootEnv;
+    unsigned int LastMsgDispatcherId;
 };
 
 typedef struct KonFlonum {
@@ -372,6 +381,7 @@ union _Kon {
     KonExpand KonExpand;
     KonUnquote KonUnquote;
     KonEnv KonEnv;
+    KonAttrSlot KonAttrSlot;
     KonProcedure KonProcedure;
 };
 
@@ -436,11 +446,14 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 
 #define kon_is_bytes(x)         (kon_check_tag(x, KON_T_BYTES))
 #define kon_is_string(x)        (kon_check_tag(x, KON_T_STRING))
-#define kon_is_symbol(x)        (kon_check_tag(x, KON_T_SYMBOL))
+#define KON_IS_SYMBOL(x)        (kon_check_tag(x, KON_T_SYMBOL))
 #define kon_is_variable(x)      (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_VARIABLE)
 #define KON_IS_WORD(x)      (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_WORD)
 #define KON_IS_PREFIX_MARCRO(x) (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_PREFIX_WORD)
 #define kon_is_syntax_marker(x) (kon_check_tag(x, KON_T_SYNTAX_MARKER))
+#define KON_IS_SYM_SLOT(x) (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_SLOT)
+
+#define KON_IS_ATTR_SLOT(x) (kon_check_tag(x, KON_T_ATTR_SLOT))
 
 #define KON_IS_PAIR(x)       (kon_check_tag(x, KON_T_PAIR))
 #define kon_is_vector(x)     (kon_check_tag(x, KON_T_VECTOR))
@@ -516,7 +529,7 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 #define KON_UNBOX_QUOTE(s) (((KonQuote*)s)->Inner)
 
 // list
-#define kon_cons(kstate, a, b) KON_Cons(kstate, NULL, 2, a, b)
+#define KON_CONS(kstate, a, b) KON_Cons(kstate, NULL, 2, a, b)
 #define kon_car(x)         (KON_FIELD(x, KonPair, Body))
 #define kon_cdr(x)         (KON_FIELD(x, KonPair, Next))
 
@@ -535,7 +548,7 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 #define kon_cadddr(x)    (kon_cadr(kon_cddr(x))) /* just these two */
 #define kon_cddddr(x)    (kon_cddr(kon_cddr(x)))
 
-#define kon_list1(kstate,a)        kon_cons((kstate), (a), KON_NIL)
+#define kon_list1(kstate,a)        KON_CONS((kstate), (a), KON_NIL)
 
 
 // data structure util end
@@ -570,7 +583,7 @@ KON_API KN KON_SymbolStringify(KonState* kstate, KN source);
 KON_API const char* KON_SymbolToCstr(KN sym);
 
 // list
-KON_API KN KON_MakePairList(KonState* kstate, ...);
+// KON_API KN KON_MakePairList(KonState* kstate, ...);
 KON_API KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail);
 KON_API KN KON_PairList2(KonState* kstate, KN a, KN b);
 KON_API KN KON_PairList3(KonState* kstate, KN a, KN b, KN c);
