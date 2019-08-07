@@ -408,6 +408,7 @@ bool KON_IsPrefixMarcro(KN word) {
         || strcmp(prefix, "break") == 0
         || strcmp(prefix, "call-cc") == 0
         || strcmp(prefix, "cond") == 0
+        || strcmp(prefix, "continue") == 0
         || strcmp(prefix, "def-builder") == 0
         || strcmp(prefix, "def-dispatcher") == 0
         || strcmp(prefix, "do") == 0
@@ -480,6 +481,9 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             }
             else if (strcmp(prefix, "break") == 0) {
                 bounce = KON_EvalPrefixBreak(kstate, KON_CDR(words), env, cont);
+            }
+            else if (strcmp(prefix, "continue") == 0) {
+                bounce = KON_EvalPrefixContinue(kstate, KON_CDR(words), env, cont);
             }
             else if (strcmp(prefix, "def-dispatcher") == 0) {
                 bounce = KON_EvalPrefixDefDispatcher(kstate, KON_CDR(words), env, cont);

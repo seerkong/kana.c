@@ -130,9 +130,9 @@ SUITE(suite) {
 
     RUN_TEST(Native_For);
     
-    RUN_TEST(Native_AttrSlot);
+    // RUN_TEST(Native_AttrSlot);
     // RUN_TEST(Native_MkDispatcher);
-    RUN_TEST(Native_Shell);
+    // RUN_TEST(Native_Shell);
 }
 
 GREATEST_MAIN_DEFS();

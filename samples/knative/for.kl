@@ -2,17 +2,28 @@
   {for {let i 0} {lt % i 8} {set i {+ % i 1}}
     {writeln % "i : " i}
 
+    
+
     {for {let j 0} {lt % j 4} {set j {+ % j 1}}
       {if {gt % j 2}
         {break}
       }
       {writeln % "    j : " j}
     }
-    `` should print #ukn;
-    {writeln % "  j in for i env " j}
+
     {if {gt % i 4}
       {break}
     }
+    
+    {if {gt % i 2}
+      {continue}
+    }
+    {writeln % "should not print this line when i > 2"}
+
+    `` should print #ukn;
+    {writeln % "  j in for i env " j}
+    
+    
     
   }
   `` should print #ukn;

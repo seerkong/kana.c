@@ -15,6 +15,7 @@
 #include "prefix_callcc.h"
 #include "prefix_for.h"
 #include "prefix_break.h"
+#include "prefix_continue.h"
 
 #include "prefix_def_builder.h"
 #include "prefix_def_dispatcher.h"

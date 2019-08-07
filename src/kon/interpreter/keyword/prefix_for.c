@@ -9,7 +9,6 @@ KN AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBei
 KN BeforeForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KN predictExpr = KxHashTable_AtKey(memo, "PredictExpr");
 
@@ -52,7 +51,6 @@ KN AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBei
 KN AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KN afterBodyExpr = KxHashTable_AtKey(memo, "AfterExpr");
 
@@ -73,7 +71,6 @@ KonTrampoline* KON_EvalPrefixFor(KonState* kstate, KN expression, KN env, KonCon
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
 
     KonEnv* loopBindEnv = KON_MakeChildEnv(kstate, env);
-    KON_EnvDefine(kstate, loopBindEnv, "break", cont);
 
     KN initExpr = KON_CAR(expression);
     KN predictExpr = KON_CADR(expression);
@@ -95,6 +92,17 @@ KonTrampoline* KON_EvalPrefixFor(KonState* kstate, KN expression, KN env, KonCon
     KxHashTable_PutKv(memo, "BodyExprs", bodyExprs);
     k->Native.MemoTable = memo;
     k->Native.Callback = BeforeForPrediction;
+
+    // set break keyword continuation
+    KON_EnvDefine(kstate, loopBindEnv, "break", cont);
+    // set continue keyword continuation
+    KonContinuation* continueKeywordCont = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    continueKeywordCont->Cont = cont;
+    continueKeywordCont->Env = loopBindEnv;
+    continueKeywordCont->Native.MemoTable = memo;
+    continueKeywordCont->Native.Callback = AfterForBodyEvaled;
+    KON_EnvDefine(kstate, loopBindEnv, "continue", continueKeywordCont);
+
     
     KonTrampoline* bounce;
     bounce = KON_EvalExpression(kstate, initExpr, loopBindEnv, k);
