@@ -60,7 +60,7 @@ KxVector* KxVector_InitWithSize(int32_t size)
     if (self == NULL) {
         return NULL;
     }
-    memset(self->BuffStart, KX_VECTOR_UKN, size);
+    memset(self->BuffStart, KX_VECTOR_NULL, size);
     self->Length = size;
     return self;
 }

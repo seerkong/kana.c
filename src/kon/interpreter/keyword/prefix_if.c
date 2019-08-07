@@ -45,10 +45,10 @@ KN AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* con
     KN falseClause = KxHashTable_AtKey(memo, "FalseClause");
 
     KonTrampoline* bounce;
-    if (kon_is_true(evaledValue)) {
+    if (KON_IS_TRUE(evaledValue)) {
         bounce = KON_EvalSentences(kstate, trueClause, env, contBeingInvoked->Cont);
     }
-    else if (kon_is_false(evaledValue) && falseClause != KON_NIL) {
+    else if (KON_IS_FALSE(evaledValue) && falseClause != KON_NIL) {
         bounce = KON_EvalSentences(kstate, falseClause, env, contBeingInvoked->Cont);
     }
     else {

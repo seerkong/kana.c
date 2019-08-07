@@ -17,7 +17,7 @@ KonTrampoline* KON_EvalPrefixSh(KonState* kstate, KN expression, KN env, KonCont
         if (KON_IS_SYMBOL(item)) {
             KxStringBuffer_AppendCstr(sb, KON_UNBOX_SYMBOL(item));
         }
-        else if (kon_is_string(item)) {
+        else if (KON_IS_STRING(item)) {
             KxStringBuffer_AppendCstr(sb, KxStringBuffer_Cstr(KON_UNBOX_STRING(item)));
         }
 

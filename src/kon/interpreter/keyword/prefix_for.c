@@ -36,7 +36,7 @@ KN AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBei
     k->Native.Callback = AfterForBodyEvaled;
 
     KonTrampoline* bounce;
-    if (kon_is_true(evaledValue)) {
+    if (KON_IS_TRUE(evaledValue)) {
         bounce = KON_EvalSentences(kstate, bodyExprs, env, k);
     }
     else {

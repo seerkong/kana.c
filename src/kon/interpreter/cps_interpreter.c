@@ -11,8 +11,8 @@ bool IsSelfEvaluated(KN source)
 {
     if (KON_IS_FIXNUM(source)
         || KON_IS_FLONUM(source)
-        || kon_is_string(source)
-        || kon_is_syntax_marker(source)
+        || KON_IS_STRING(source)
+        || KON_IS_SYNTAX_MARKER(source)
         // /abc
         || KON_IS_SYM_SLOT(source)
         // .append
@@ -21,7 +21,7 @@ bool IsSelfEvaluated(KN source)
         || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_IDENTIFIER)
         // $'abc'
         || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_STRING)
-        || kon_is_quote(source)
+        || KON_IS_QUOTE(source)
         || source == KON_TRUE
         || source == KON_FALSE
     ) {
@@ -41,7 +41,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
     KN firstObj = KON_CAR(argList);
 
     KonTrampoline* bounce;
-    if (kon_is_syntax_marker(firstObj)) {
+    if (KON_IS_SYNTAX_MARKER(firstObj)) {
         // apply args to a procedure like % 1 2;
         if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_APPLY) {
             // call-cc, subject is a continuation
@@ -216,7 +216,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
         KN item = KON_CAR(iter);
         
         if (state == 1) {
-            if (kon_is_syntax_marker(item)
+            if (KON_IS_SYNTAX_MARKER(item)
                 && CAST_Kon(SyntaxMarker, item)->Type != KON_SYNTAX_MARKER_CLAUSE_END
             ) {
                 // meet %
@@ -229,13 +229,13 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
                 KxVector_Push(slotClause, item);
                 KxVector_Push(clauseListVec, slotClause);
             }
-            else if (kon_is_vector(item)
+            else if (KON_IS_VECTOR(item)
                 || KON_IsPairList(item)
-                || kon_is_cell(item)
+                || KON_IS_CELL(item)
                 || KON_IS_SYMBOL(item)
-                || kon_is_quote(item)
-                || kon_is_quasiquote(item)
-                || kon_is_unquote(item)
+                || KON_IS_QUOTE(item)
+                || KON_IS_QUASIQUOTE(item)
+                || KON_IS_UNQUOTE(item)
             ) {
                 KxVector_Push(clauseVec, item);
             }
@@ -246,7 +246,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
         }
         else {
             // meet ;
-            if (kon_is_syntax_marker(item)
+            if (KON_IS_SYNTAX_MARKER(item)
                 && CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_CLAUSE_END
             ) {
                 KxVector_Push(clauseListVec, clauseVec);
@@ -436,7 +436,7 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
 }
 
 bool KON_IsPrefixMarcro(KN word) {
-    if (!(kon_check_tag(word, KON_T_SYMBOL))) {
+    if (!(KON_CHECK_TAG(word, KON_T_SYMBOL))) {
         return false;
     }
     int type = ((KonSymbol*)word)->Type;
@@ -560,7 +560,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             bounce->Bounce.Env = env;
         }
     }
-    else if (kon_is_variable(expression) || KON_IS_WORD(expression)) {
+    else if (KON_IS_VARIABLE(expression) || KON_IS_WORD(expression)) {
         // a code block like { a }
         // TODO asert should be a SYM_IDENTIFIER
         // env lookup this val
@@ -640,7 +640,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
                 KN subjExpr = subj;
                 bounce = KON_EvalExpression(kstate, subjExpr, env, cont);
             }
-            else if (kon_is_variable(subj) || KON_IS_WORD(subj)) {
+            else if (KON_IS_VARIABLE(subj) || KON_IS_WORD(subj)) {
                 // lookup subject in env
                 KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(subj));
                 assert(val != KON_NULL);
@@ -661,7 +661,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             KN subj = bounce->SubjBounce.Subj;
             KN firstArg = KON_CAR(clauseArgList);
 
-            if (kon_is_syntax_marker(firstArg)) {
+            if (KON_IS_SYNTAX_MARKER(firstArg)) {
                 // % . |
                 // this kind bouce value is a clause word list like {% "a" "b"}
 
@@ -712,34 +712,34 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
                 KN argExpr = arg;
                 bounce = KON_EvalExpression(kstate, argExpr, env, cont);
             }
-            else if (kon_is_vector(arg)) {
+            else if (KON_IS_VECTOR(arg)) {
                 // TODO !!! verify cell inner content
                 // whether have Quasiquote, Expand, Unquote, KON_SYM_VARIABLE node
                 bounce = KON_RunContinuation(kstate, cont, arg);
             }
-            else if (kon_is_table(arg)) {
+            else if (KON_IS_TABLE(arg)) {
                 // TODO !!! verify cell inner content key, value
                 // whether have Quasiquote, Expand, Unquote, KON_SYM_VARIABLE node
                 bounce = KON_RunContinuation(kstate, cont, arg);
             }
-            else if (kon_is_cell(arg)) {
+            else if (KON_IS_CELL(arg)) {
                 // TODO !!! verify cell inner content(tag, list, vector, table )
                 // whether have Quasiquote, Expand, Unquote, KON_SYM_VARIABLE node
                 bounce = KON_RunContinuation(kstate, cont, arg);
             }
-            else if (kon_is_quote(arg)) {
+            else if (KON_IS_QUOTE(arg)) {
                 // TODO
             }
-            else if (kon_is_quasiquote(arg)) {
+            else if (KON_IS_QUASIQUOTE(arg)) {
                 // TODO
             }
-            else if (kon_is_expand(arg)) {
+            else if (KON_IS_EXPAND(arg)) {
                 // TODO
             }
-            else if (kon_is_unquote(arg)) {
+            else if (KON_IS_UNQUOTE(arg)) {
                 // TODO
             }
-            else if (KON_IS_WORD(arg) || kon_is_variable(arg)) {
+            else if (KON_IS_WORD(arg) || KON_IS_VARIABLE(arg)) {
                 // env lookup this val
                 KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(arg));;
                 assert(val != NULL);

@@ -446,7 +446,7 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 // inline KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
 // {
 //   KN res = (KN) KON_GC_MALLOC(size);
-//   if (res && ! kon_is_exception(res)) {
+//   if (res && ! KON_IS_EXCEPTION(res)) {
 //     ((KonBase*)res)->Tag = tag;
 //   }
 //   return res;
@@ -470,58 +470,56 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 
 
 
-#define kon_is_true(x)    ((x) != KON_FALSE)
-#define kon_is_false(x)      ((x) == KON_FALSE)
-
-#define kon_is_null(x)    ((x) == KON_NULL)
-#define kon_is_nil(x)    ((x) == KON_NIL)
-#define kon_is_pointer(x) (((kon_uint_t)(size_t)(x) & KON_POINTER_MASK) == KON_POINTER_TAG)
+#define KON_IS_TRUE(x)    ((x) != KON_FALSE)
+#define KON_IS_FALSE(x)      ((x) == KON_FALSE)
+#define KON_IS_UKN(x)    ((x) == KON_UKN)
+#define KON_IS_NULL(x)    ((x) == KON_NULL)
+#define KON_IS_NIL(x)    ((x) == KON_NIL)
+#define KON_IS_POINTER(x) (((kon_uint_t)(size_t)(x) & KON_POINTER_MASK) == KON_POINTER_TAG)
 #define KON_IS_FIXNUM(x)  (((kon_uint_t)(x) & KON_FIXNUM_MASK) == KON_FIXNUM_TAG)
 
-#define kon_is_immediate_symbol(x) (((kon_uint_t)(x) & KON_IMMEDIATE_MASK) == KON_ISYMBOL_TAG)
-#define kon_is_char(x)    (((kon_uint_t)(x) & KON_EXTENDED_MASK) == KON_CHAR_TAG)
-#define kon_is_reader_label(x) (((kon_uint_t)(x) & KON_EXTENDED_MASK) == KON_READER_LABEL_TAG)
-#define kon_is_boolean(x) (((x) == KON_TRUE) || ((x) == KON_FALSE))
+#define KON_IS_IMMEDIATE_SYMBOL(x) (((kon_uint_t)(x) & KON_IMMEDIATE_MASK) == KON_ISYMBOL_TAG)
+#define KON_IS_CHAR(x)    (((kon_uint_t)(x) & KON_EXTENDED_MASK) == KON_CHAR_TAG)
+#define KON_IS_BOOLEAN(x) (((x) == KON_TRUE) || ((x) == KON_FALSE))
 
 #define KON_GET_PTR_TAG(x)      (((KonBase*)x)->Tag)
 
-#define kon_check_tag(x,t)  (kon_is_pointer(x) && (KON_PTR_TYPE(x) == (t)))
+#define KON_CHECK_TAG(x,t)  (KON_IS_POINTER(x) && (KON_PTR_TYPE(x) == (t)))
 
 // #define kon_slot_ref(x,i)   (((KN)&((x)->Value))[i])
 // #define kon_slot_set(x,i,v) (((KN)&((x)->Value))[i] = (v))
 
-#define KON_IS_FLONUM(x)      (kon_check_tag(x, KON_T_FLONUM))
-#define kon_flonum_value(f) (((KonFlonum*)f)->Flonum)
-#define kon_flonum_value_set(f, x) (((KonFlonum*)f)->Flonum = x)
+#define KON_IS_FLONUM(x)      (KON_CHECK_TAG(x, KON_T_FLONUM))
+#define KON_FLONUM_VALUE(f) (((KonFlonum*)f)->Flonum)
+#define KON_FLONUM_VALUE_SET(f, x) (((KonFlonum*)f)->Flonum = x)
 
-#define kon_is_bytes(x)         (kon_check_tag(x, KON_T_BYTES))
-#define kon_is_string(x)        (kon_check_tag(x, KON_T_STRING))
-#define KON_IS_SYMBOL(x)        (kon_check_tag(x, KON_T_SYMBOL))
-#define kon_is_variable(x)      (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_VARIABLE)
-#define KON_IS_WORD(x)      (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_WORD)
-#define KON_IS_PREFIX_MARCRO(x) (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_PREFIX_WORD)
-#define kon_is_syntax_marker(x) (kon_check_tag(x, KON_T_SYNTAX_MARKER))
-#define KON_IS_SYM_SLOT(x) (kon_check_tag(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_SLOT)
+#define KON_IS_BYTES(x)         (KON_CHECK_TAG(x, KON_T_BYTES))
+#define KON_IS_STRING(x)        (KON_CHECK_TAG(x, KON_T_STRING))
+#define KON_IS_SYMBOL(x)        (KON_CHECK_TAG(x, KON_T_SYMBOL))
+#define KON_IS_VARIABLE(x)      (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_VARIABLE)
+#define KON_IS_IDENTIFIER(x)      (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_IDENTIFIER)
+#define KON_IS_WORD(x)      (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_WORD)
+#define KON_IS_PREFIX_MARCRO(x) (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_PREFIX_WORD)
+#define KON_IS_SYNTAX_MARKER(x) (KON_CHECK_TAG(x, KON_T_SYNTAX_MARKER))
+#define KON_IS_SYM_SLOT(x) (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_SLOT)
 
-#define KON_IS_ATTR_SLOT(x) (kon_check_tag(x, KON_T_ATTR_SLOT))
+#define KON_IS_ATTR_SLOT(x) (KON_CHECK_TAG(x, KON_T_ATTR_SLOT))
 
-#define KON_IS_PAIR(x)       (kon_check_tag(x, KON_T_PAIR))
-#define kon_is_vector(x)     (kon_check_tag(x, KON_T_VECTOR))
-#define kon_is_table(x)     (kon_check_tag(x, KON_T_TABLE))
-#define kon_is_cell(x)     (kon_check_tag(x, KON_T_CELL))
+#define KON_IS_PAIR(x)       (KON_CHECK_TAG(x, KON_T_PAIR))
+#define KON_IS_VECTOR(x)     (KON_CHECK_TAG(x, KON_T_VECTOR))
+#define KON_IS_TABLE(x)     (KON_CHECK_TAG(x, KON_T_TABLE))
+#define KON_IS_CELL(x)     (KON_CHECK_TAG(x, KON_T_CELL))
 
-#define kon_is_quote(x)    (kon_check_tag(x, KON_T_QUOTE))
-#define kon_is_quasiquote(x)    (kon_check_tag(x, KON_T_QUASIQUOTE))
-#define kon_is_expand(x)    (kon_check_tag(x, KON_T_EXPAND))
-#define kon_is_unquote(x)    (kon_check_tag(x, KON_T_UNQUOTE))
+#define KON_IS_QUOTE(x)    (KON_CHECK_TAG(x, KON_T_QUOTE))
+#define KON_IS_QUASIQUOTE(x)    (KON_CHECK_TAG(x, KON_T_QUASIQUOTE))
+#define KON_IS_EXPAND(x)    (KON_CHECK_TAG(x, KON_T_EXPAND))
+#define KON_IS_UNQUOTE(x)    (KON_CHECK_TAG(x, KON_T_UNQUOTE))
 
-
-#define kon_is_env(x)        (kon_check_tag(x, KON_T_ENV))
-#define KON_IS_PROCEDURE(x)        (kon_check_tag(x, KON_T_PROCEDURE))
-#define KON_IS_CONTINUATION(x)        (kon_check_tag(x, KON_T_CONTINUATION))
-#define kon_is_trampoline(x)        (kon_check_tag(x, KON_T_TRAMPOLINE))
-#define kon_is_cpointer(x)   (kon_check_tag(x, KON_T_CPOINTER))
-#define kon_is_exception(x)  (kon_check_tag(x, KON_T_EXCEPTION))
+#define KON_IS_ENV(x)        (KON_CHECK_TAG(x, KON_T_ENV))
+#define KON_IS_PROCEDURE(x)        (KON_CHECK_TAG(x, KON_T_PROCEDURE))
+#define KON_IS_CONTINUATION(x)        (KON_CHECK_TAG(x, KON_T_CONTINUATION))
+#define KON_IS_CPOINTER(x)   (KON_CHECK_TAG(x, KON_T_CPOINTER))
+#define KON_IS_EXCEPTION(x)  (KON_CHECK_TAG(x, KON_T_EXCEPTION))
 
 
 /// either immediate (NUM,BOOL,NIL) or a fwd
@@ -567,7 +565,7 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 #define KON_FIELD(x, type, field) (((type *)x)->field)
 
 #define kon_make_character(n)  ((KN) ((((kon_int_t)(n))<<KON_EXTENDED_BITS) + KON_CHAR_TAG))
-#define kon_unbox_character(n) ((int) (((kon_int_t)(n))>>KON_EXTENDED_BITS))
+#define KON_UNBOX_CHAR(n) ((int) (((kon_int_t)(n))>>KON_EXTENDED_BITS))
 
 #define KON_UNBOX_STRING(str) (((KonString*)str)->String)
 

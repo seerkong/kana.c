@@ -39,7 +39,7 @@ KxVector* KxVector_Init();
 // set capacity, but item num is 0
 KxVector* KxVector_InitWithCapacity(int32_t initCapacity);
 
-// set capacity, and item num is `size`, default value set to KX_VECTOR_UKN
+// set capacity, and item num is `size`, default value set to KX_VECTOR_NULL
 KxVector* KxVector_InitWithSize(int32_t size);
 
 int32_t KxVector_Destroy(KxVector* self);

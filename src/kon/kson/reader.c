@@ -344,10 +344,10 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         }
     }
     else if (builderType == KON_BUILDER_CELL) {
-        if (kon_is_vector(value)) {
+        if (KON_IS_VECTOR(value)) {
             CellBuilderSetVector(topBuilder, value);
         }
-        else if (kon_is_table(value)) {
+        else if (KON_IS_TABLE(value)) {
             CellBuilderSetTable(topBuilder, value);
         }
         else if (KON_IsPairList(value)) {

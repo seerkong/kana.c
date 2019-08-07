@@ -1,8 +1,8 @@
-#ifndef KON_LIST_H
-#define KON_LIST_H 1
+#ifndef KON_MOD_MODULE_H
+#define KON_MOD_MODULE_H 1
 
 #include "../../kson/node.h"
 
-KN KonModule_Init(KonState* kstate);
+KN KonModule_Export(KonState* kstate, KonEnv* env);
 
 #endif

@@ -31,6 +31,8 @@ KN KON_PrimaryWrite(KonState* kstate, KN args);
 KN KON_PrimaryWriteln(KonState* kstate, KN args);
 KN KON_PrimaryStringify(KonState* kstate, KN args);
 
+KN KON_PrimaryOpExport(KonState* kstate, KonEnv* env);
+
 #ifdef __cplusplus
 }
 #endif

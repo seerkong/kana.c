@@ -10,7 +10,7 @@ KN AfterAndConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* co
     KN restConditon = KxHashTable_AtKey(memo, "RestCondition");
 
     KonTrampoline* bounce;
-    if (kon_is_false(evaledValue) || evaledValue == KON_NIL) {
+    if (KON_IS_FALSE(evaledValue) || evaledValue == KON_NIL) {
         KON_DEBUG("break and");
         bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
         bounce->Run.Cont = contBeingInvoked->Cont;

@@ -23,7 +23,7 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
     KN ifTrueAction = KxHashTable_AtKey(memo, "IfTrue");
 
     KonTrampoline* bounce;
-    if (kon_is_true(evaledValue)) {
+    if (KON_IS_TRUE(evaledValue)) {
         bounce = KON_EvalExpression(kstate, ifTrueAction, env, contBeingInvoked->Cont);
     }
     else if (restPairs == KON_NIL) {

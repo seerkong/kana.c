@@ -1,534 +1,94 @@
 #include "primary.h"
 
-// bool KON_IsPrimaryFunc(KonState* kstate, char* funcName)
-// {
-//     if (
-//         // math
-//         strcmp(funcName, "+")
-//         || strcmp(funcName, "-")
-//         || strcmp(funcName, "*")
-//         || strcmp(funcName, "/")
-//         || strcmp(funcName, "mod")   // %
-//         || strcmp(funcName, "lt")    // <
-//         || strcmp(funcName, "lte")   // <=
-//         || strcmp(funcName, "gt")    // >
-//         || strcmp(funcName, "gte")   // >=
-        
-
-//         // value
-//         || strcmp(funcName, "eq")   // == value eq
-//         || strcmp(funcName, "equal")   // === pointer equal, deep
-//         || strcmp(funcName, "neq")   // != value not eq
-//         || strcmp(funcName, "nequal")   // !== pointer not equal, deep
-//         || strcmp(funcName, "not")   // !
-        
-
-//         // predicate
-//         || strcmp(funcName, "is-null")
-//         || strcmp(funcName, "is-symbol")
-//         || strcmp(funcName, "is-string-sym")
-
-//         // list
-//         || strcmp(funcName, "make-list")
-//         || strcmp(funcName, "is-nil")
-//         || strcmp(funcName, "is-list")
-//         || strcmp(funcName, "is-pair")
-//         || strcmp(funcName, "car")
-//         || strcmp(funcName, "cdr")
-//         || strcmp(funcName, "cons")
-//         || strcmp(funcName, "append")
-        
-
-//         // vector
-//         || strcmp(funcName, "make-vector")
-//         || strcmp(funcName, "is-vector")
-//         || strcmp(funcName, "vector-push")   // add tail
-//         || strcmp(funcName, "vector-pop")    // get tail and remove
-//         || strcmp(funcName, "vector-shift")  // get head and remove
-//         || strcmp(funcName, "vector-unshift")    // add head
-//         || strcmp(funcName, "vector-head")
-//         || strcmp(funcName, "vector-tail")
-//         || strcmp(funcName, "vector-at")
-//         || strcmp(funcName, "vector-del")
-
-//         // table
-//         || strcmp(funcName, "make-table")
-//         || strcmp(funcName, "is-table")
-//         || strcmp(funcName, "table-set")
-//         || strcmp(funcName, "table-at")
-//         || strcmp(funcName, "table-del")
-
-//         // cell
-//         || strcmp(funcName, "make-cell")
-//         || strcmp(funcName, "is-cell")
-//         || strcmp(funcName, "cell-set-tag")
-//         || strcmp(funcName, "cell-set-vector")
-//         || strcmp(funcName, "cell-set-table")
-//         || strcmp(funcName, "cell-set-list")
-//         || strcmp(funcName, "cell-get-tag")
-//         || strcmp(funcName, "cell-get-vector")
-//         || strcmp(funcName, "cell-get-table")
-//         || strcmp(funcName, "cell-get-list")
-//         || strcmp(funcName, "cell-del-tag")  // KON_NULL
-//         || strcmp(funcName, "cell-del-vector")   // KON_NULL
-//         || strcmp(funcName, "cell-del-table")    // KON_NULL
-//         || strcmp(funcName, "cell-del-list") // KON_NULL
-//         || strcmp(funcName, "cell-clear-vector") // []
-//         || strcmp(funcName, "cell-clear-table")  // ()
-//         || strcmp(funcName, "cell-clear-list")   // {}
-
-//         // env
-
-//         // io
-//         || strcmp(funcName, "newline")
-//         || strcmp(funcName, "display")
-//         || strcmp(funcName, "displayln")
-//         || strcmp(funcName, "write")
-//         || strcmp(funcName, "writeln")
-//         || strcmp(funcName, "stringify") // like JSON.stringify
-//         || strcmp(funcName, "parse") // like JSON.parse
-
-//     ) {
-//         return true;
-//     }
-//     else {
-//         return false;
-//     }
-// }
-
-KN KON_PrimaryPlus(KonState* kstate, KN args)
+// not(kon_false) => true, not(other) => false
+KN KON_PrimaryNot(KonState* kstate, KN args)
 {
-    KN iter = args;
-    KN first = KON_CAR(iter);
-    if (first == KON_NIL) {
-        return KON_MAKE_FIXNUM(0);
-    }
-
-    int resFixnum = 0;
-    double resFlonum = 0.0;
-    bool isFixNum = false;
-    // the result type is determined by the first arg
-    if (KON_IS_FIXNUM(first)) {
-        isFixNum = true;
-    }
-    // Unbox
-    do {
-        KN item = KON_CAR(iter);
-
-        if (KON_IS_FIXNUM(item)) {
-            int num = KON_UNBOX_FIXNUM(item);
-            if (isFixNum) {
-                resFixnum += num;
-            }
-            else {
-                resFlonum += num;
-            }
-        }
-        else if (KON_IS_FLONUM(item)) {
-            double num = KON_UNBOX_FLONUM(item);
-            if (isFixNum) {
-                resFixnum += num;
-            }
-            else {
-                resFlonum += num;
-            }
-        }
-
-        iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
-
-    
-    if (isFixNum) {
-        // TODO overflow check
-        return KON_MAKE_FIXNUM(resFixnum);
-    }
-    else {
-        KN result = KON_MAKE_FLONUM(kstate, resFlonum);
-        return result;
-    }
-}
-
-
-KN KON_PrimaryMinus(KonState* kstate, KN args)
-{
-    KN iter = args;
-    KN first = KON_CAR(iter);
-    iter = KON_CDR(iter);
-    if (first == KON_NIL) {
-        return KON_MAKE_FIXNUM(0);
-    }
-    else if (iter == KON_NIL) {
-        return first;
-    }
-    
-
-    int resFixnum = 0;
-    double resFlonum = 0.0;
-    bool isFixNum = false;
-    // the result type is determined by the first arg
-    if (KON_IS_FIXNUM(first)) {
-        isFixNum = true;
-        resFixnum = KON_UNBOX_FIXNUM(first);
-    }
-    else {
-        resFlonum =  KON_UNBOX_FLONUM(first);
-    }
-    // Unbox
-    do {
-        KN item = KON_CAR(iter);
-
-        if (KON_IS_FIXNUM(item)) {
-            int num = KON_UNBOX_FIXNUM(item);
-            if (isFixNum) {
-                resFixnum -= num;
-            }
-            else {
-                resFlonum -= num;
-            }
-        }
-        else if (KON_IS_FLONUM(item)) {
-            double num = KON_UNBOX_FLONUM(item);
-            if (isFixNum) {
-                resFixnum -= num;
-            }
-            else {
-                resFlonum -= num;
-            }
-        }
-
-        iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
-
-    
-    if (isFixNum) {
-        // TODO overflow check
-        return KON_MAKE_FIXNUM(resFixnum);
-    }
-    else {
-        KN result = KON_MAKE_FLONUM(kstate, resFlonum);
-        return result;
-    }
-}
-
-
-KN KON_PrimaryMultiply(KonState* kstate, KN args)
-{
-    KN iter = args;
-    KN first = KON_CAR(iter);
-    if (first == KON_NIL) {
-        return KON_MAKE_FIXNUM(0);
-    }
-
-    int resFixnum = 1;
-    double resFlonum = 1.0;
-    bool isFixNum = false;
-    // the result type is determined by the first arg
-    if (KON_IS_FIXNUM(first)) {
-        isFixNum = true;
-    }
-    // Unbox
-    do {
-        KN item = KON_CAR(iter);
-
-        if (KON_IS_FIXNUM(item)) {
-            int num = KON_UNBOX_FIXNUM(item);
-            if (isFixNum) {
-                resFixnum *= num;
-            }
-            else {
-                resFlonum *= num;
-            }
-        }
-        else if (KON_IS_FLONUM(item)) {
-            double num = KON_UNBOX_FLONUM(item);
-            if (isFixNum) {
-                resFixnum *= num;
-            }
-            else {
-                resFlonum *= num;
-            }
-        }
-
-        iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
-
-    
-    if (isFixNum) {
-        // TODO overflow check
-        return KON_MAKE_FIXNUM(resFixnum);
-    }
-    else {
-        KN result = KON_MAKE_FLONUM(kstate, resFlonum);
-        return result;
-    }
-}
-
-KN KON_PrimaryDivide(KonState* kstate, KN args)
-{
-    KN iter = args;
-    KN first = KON_CAR(iter);
-    iter = KON_CDR(iter);
-    if (first == KON_NIL) {
-        return KON_MAKE_FIXNUM(0);
-    }
-    else if (iter == KON_NIL) {
-        return first;
-    }
-    
-
-    int resFixnum = 0;
-    double resFlonum = 0.0;
-    bool isFixNum = false;
-    // the result type is determined by the first arg
-    if (KON_IS_FIXNUM(first)) {
-        isFixNum = true;
-        resFixnum = KON_UNBOX_FIXNUM(first);
-    }
-    else {
-        resFlonum = KON_UNBOX_FLONUM(first);
-    }
-    // Unbox
-    do {
-        KN item = KON_CAR(iter);
-
-        if (KON_IS_FIXNUM(item)) {
-            int num = KON_UNBOX_FIXNUM(item);
-            if (isFixNum) {
-                resFixnum /= num;
-            }
-            else {
-                resFlonum /= num;
-            }
-        }
-        else if (KON_IS_FLONUM(item)) {
-            double num = KON_UNBOX_FLONUM(item);
-            if (isFixNum) {
-                resFixnum /= num;
-            }
-            else {
-                resFlonum /= num;
-            }
-        }
-
-        iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
-
-    
-    if (isFixNum) {
-        // TODO overflow check
-        return KON_MAKE_FIXNUM(resFixnum);
-    }
-    else {
-        KN result = KON_MAKE_FLONUM(kstate, resFlonum);
-        return result;
-    }
-}
-
-
-KN KON_PrimaryMod(KonState* kstate, KN args)
-{
-    KN iter = args;
-    KN first = KON_CAR(iter);
-    iter = KON_CDR(iter);
-    if (first == KON_NIL) {
-        return KON_MAKE_FIXNUM(0);
-    }
-    else if (iter == KON_NIL) {
-        return first;
-    }
-
-    KN second = KON_CAR(iter);
-
-
-    int resFixnum = 0;
-    if (KON_IS_FIXNUM(first)) {
-        resFixnum = KON_UNBOX_FIXNUM(first);
-    }
-    else {
-        resFixnum = (int)(KON_UNBOX_FLONUM(first));
-    }
-
-    int mod = 1;
-    if (KON_IS_FIXNUM(first)) {
-        mod = KON_UNBOX_FIXNUM(second);
-    }
-    else {
-        mod = (int)(KON_UNBOX_FLONUM(second));
-    }
- 
-    return KON_MAKE_FIXNUM(resFixnum % mod);
-}
-
-KN KON_PrimaryLowerThan(KonState* kstate, KN args)
-{
-    KN iter = args;
-    KN first = KON_CAR(iter);
-    if (first == KON_NIL) {
+    KN item = KON_CAR(args);
+    if (KON_IS_FALSE(item)) {
         return KON_TRUE;
     }
-    iter = KON_CDR(iter);
-
-    double lastNum = 0.0;
-
-    if (KON_IS_FIXNUM(first)) {
-        lastNum = 1.0 * KON_UNBOX_FIXNUM(first);
-    }
     else {
-        lastNum = KON_UNBOX_FLONUM(first);
+        return KON_FALSE;
     }
-
-    do {
-        KN item = KON_CAR(iter);
-
-        double cmpNum = 0.0;
-        if (KON_IS_FIXNUM(item)) {
-            cmpNum = KON_UNBOX_FIXNUM(item);
-        }
-        else if (KON_IS_FLONUM(item)) {
-            cmpNum = KON_UNBOX_FLONUM(item);
-        }
-
-        if (lastNum >= cmpNum) {
-            return KON_FALSE;
-        }
-        else {
-            lastNum = cmpNum;
-        }
-
-        iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
-
-    
-    return KON_TRUE;
 }
 
-KN KON_PrimaryLowerOrEqual(KonState* kstate, KN args)
+// pointer check
+KN KON_PrimaryEqual(KonState* kstate, KN args)
 {
-    KN iter = args;
-    KN first = KON_CAR(iter);
-    if (first == KON_NIL) {
+    KN left = KON_CAR(args);
+    KN right = KON_CADR(args);
+    if (left == right) {
         return KON_TRUE;
     }
-    iter = KON_CDR(iter);
-
-    double lastNum = 0.0;
-
-    if (KON_IS_FIXNUM(first)) {
-        lastNum = 1.0 * KON_UNBOX_FIXNUM(first);
-    }
     else {
-        lastNum = KON_UNBOX_FLONUM(first);
+        return KON_FALSE;
     }
-
-    do {
-        KN item = KON_CAR(iter);
-
-        double cmpNum = 0.0;
-        if (KON_IS_FIXNUM(item)) {
-            cmpNum = KON_UNBOX_FIXNUM(item);
-        }
-        else if (KON_IS_FLONUM(item)) {
-            cmpNum = KON_UNBOX_FLONUM(item);
-        }
-
-        if (lastNum > cmpNum) {
-            return KON_FALSE;
-        }
-        else {
-            lastNum = cmpNum;
-        }
-
-        iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
-
-    
-    return KON_TRUE;
 }
 
-KN KON_PrimaryGreaterThan(KonState* kstate, KN args)
+// basic types, boolean, number, char symbol, string value check
+KN KON_PrimaryEqv(KonState* kstate, KN args)
 {
-    KN iter = args;
-    KN first = KON_CAR(iter);
-    if (first == KON_NIL) {
-        return KON_TRUE;
+    KN left = KON_CAR(args);
+    KN right = KON_CADR(args);
+    if (left == KON_NULL || left == KON_NIL || left == KON_UKN) {
+        return (left == right) ? KON_TRUE: KON_FALSE;
     }
-    iter = KON_CDR(iter);
-
-    double lastNum = 0.0;
-
-    if (KON_IS_FIXNUM(first)) {
-        lastNum = 1.0 * KON_UNBOX_FIXNUM(first);
+    else if (KON_IS_BOOLEAN(left) && KON_IS_BOOLEAN(right)) {
+        return (left == right) ? KON_TRUE: KON_FALSE;
+    }
+    else if (KON_IS_FIXNUM(left) && KON_IS_FIXNUM(right)) {
+        return (left == right) ? KON_TRUE: KON_FALSE;
+    }
+    else if (KON_IS_FLONUM(left) && KON_IS_FLONUM(right)) {
+        return (KON_UNBOX_FLONUM(left) == KON_UNBOX_FLONUM(right)) ? KON_TRUE: KON_FALSE;
+    }
+    else if (KON_IS_CHAR(left) && KON_IS_CHAR(right)) {
+        return (KON_UNBOX_CHAR(left) == KON_UNBOX_CHAR(right)) ? KON_TRUE: KON_FALSE;
+    }
+    // TODO KON_IS_BYTE
+    else if (KON_IS_SYMBOL(left) && KON_IS_SYMBOL(right)) {
+        const char* leftStr = KON_UNBOX_SYMBOL(left);
+        const char* rightStr = KON_UNBOX_SYMBOL(right);
+        return (strcmp(leftStr, rightStr) == 0) ? KON_TRUE: KON_FALSE;;
+    }
+    
+    else if (KON_IS_STRING(left) && KON_IS_STRING(right)) {
+        const char* leftStr = KxStringBuffer_Cstr(KON_UNBOX_STRING(left));
+        const char* rightStr = KxStringBuffer_Cstr(KON_UNBOX_STRING(right));
+        return (strcmp(leftStr, rightStr) == 0) ? KON_TRUE: KON_FALSE;;
     }
     else {
-        lastNum = KON_UNBOX_FLONUM(first);
+        return KON_FALSE;
     }
-
-    do {
-        KN item = KON_CAR(iter);
-
-        double cmpNum = 0.0;
-        if (KON_IS_FIXNUM(item)) {
-            cmpNum = KON_UNBOX_FIXNUM(item);
-        }
-        else if (KON_IS_FLONUM(item)) {
-            cmpNum = KON_UNBOX_FLONUM(item);
-        }
-
-        if (lastNum <= cmpNum) {
-            return KON_FALSE;
-        }
-        else {
-            lastNum = cmpNum;
-        }
-
-        iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
-
-    
-    return KON_TRUE;
 }
 
-KN KON_PrimaryGreaterOrEqual(KonState* kstate, KN args)
+KN KON_PrimaryEq(KonState* kstate, KN args)
 {
-    KN iter = args;
-    KN first = KON_CAR(iter);
-    if (first == KON_NIL) {
-        return KON_TRUE;
-    }
-    iter = KON_CDR(iter);
-
-    double lastNum = 0.0;
-
-    if (KON_IS_FIXNUM(first)) {
-        lastNum = 1.0 * KON_UNBOX_FIXNUM(first);
+    KN left = KON_CAR(args);
+    if (left == KON_NULL || left == KON_NIL || left == KON_UKN
+        || KON_IS_BOOLEAN(left)
+        || KON_IS_FIXNUM(left)
+        || KON_IS_FLONUM(left)
+        || KON_IS_CHAR(left)
+        || KON_IS_SYMBOL(left)
+        || KON_IS_STRING(left)
+    ) {
+        return KON_PrimaryEqv(kstate, args);
     }
     else {
-        lastNum = KON_UNBOX_FLONUM(first);
+        return KON_PrimaryEqual(kstate, args);
     }
+}
 
-    do {
-        KN item = KON_CAR(iter);
-
-        double cmpNum = 0.0;
-        if (KON_IS_FIXNUM(item)) {
-            cmpNum = KON_UNBOX_FIXNUM(item);
-        }
-        else if (KON_IS_FLONUM(item)) {
-            cmpNum = KON_UNBOX_FLONUM(item);
-        }
-
-        if (lastNum < cmpNum) {
-            return KON_FALSE;
-        }
-        else {
-            lastNum = cmpNum;
-        }
-
-        iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
-
-    
-    return KON_TRUE;
+KN KON_PrimaryNeq(KonState* kstate, KN args)
+{
+    KN result = KON_PrimaryEq(kstate, args);
+    if (result == KON_FALSE) {
+        return KON_TRUE;
+    }
+    else {
+        return KON_FALSE;
+    }
 }
 
 KN KON_PrimaryNewline(KonState* kstate, KN args)
@@ -573,7 +133,7 @@ KN KON_PrimaryWrite(KonState* kstate, KN args)
     do {
         KN item = KON_CAR(iter);
 
-        if (kon_is_string(item)) {
+        if (KON_IS_STRING(item)) {
             KxStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(item));
         }
         else {
@@ -601,4 +161,323 @@ KN KON_PrimaryStringify(KonState* kstate, KN args)
     KN formated = KON_ToFormatString(&kstate, item, false, 0, "  ");
 
     return formated;
+}
+
+// TODO
+KN KON_PrimaryParse(KonState* kstate, KN args)
+{
+    // KN item = KON_CAR(args);
+    
+    // return item;
+    return KON_NULL;
+}
+
+KN KON_PrimaryIsTrue(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_TRUE(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsFalse(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_FALSE(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsNil(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_NIL(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsNull(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_NULL(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsUkn(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_UKN(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsPointer(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_POINTER(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsFixnum(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_FIXNUM(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsFlonum(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_FLONUM(item)) ? KON_TRUE : KON_FALSE;
+}
+
+
+KN KON_PrimaryIsImmediateSymbol(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_IMMEDIATE_SYMBOL(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsChar(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_CHAR(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsBoolean(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_BOOLEAN(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsBytes(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_BYTES(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsString(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_STRING(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsSymbol(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_SYMBOL(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsVariable(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_VARIABLE(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsIdentifier(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_IDENTIFIER(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsWord(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_WORD(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsSymSlot(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_SYM_SLOT(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsAttrSlot(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_ATTR_SLOT(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsPair(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_PAIR(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsPairList(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IsPairList(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsVector(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_VECTOR(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsTable(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_TABLE(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsCell(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_CELL(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsEnv(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_ENV(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsProcedure(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_PROCEDURE(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsContinuation(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_CONTINUATION(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsCpointer(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_CPOINTER(item)) ? KON_TRUE : KON_FALSE;
+}
+
+KN KON_PrimaryIsException(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    return (KON_IS_EXCEPTION(item)) ? KON_TRUE : KON_FALSE;
+}
+
+
+KN KON_PrimaryOpExport(KonState* kstate, KonEnv* env)
+{
+    
+    KON_EnvDefine(kstate, env, "not",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryNot)
+    );
+    KON_EnvDefine(kstate, env, "equal",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryEqual)
+    );
+    KON_EnvDefine(kstate, env, "eqv",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryEqv)
+    );
+    KON_EnvDefine(kstate, env, "eq",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryEq)
+    );
+    KON_EnvDefine(kstate, env, "neq",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryNeq)
+    );
+
+    // IO
+    KON_EnvDefine(kstate, env, "newline",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryNewline)
+    );
+    KON_EnvDefine(kstate, env, "display",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryDisplay)
+    );
+    KON_EnvDefine(kstate, env, "displayln",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryDisplayln)
+    );
+    KON_EnvDefine(kstate, env, "write",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryWrite)
+    );
+    KON_EnvDefine(kstate, env, "writeln",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryWriteln)
+    );
+
+    KON_EnvDefine(kstate, env, "stringify",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryStringify)
+    );
+
+    KON_EnvDefine(kstate, env, "kon-from-str",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryParse)
+    );
+
+    // predict
+    KON_EnvDefine(kstate, env, "is-true",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsTrue)
+    );
+    KON_EnvDefine(kstate, env, "is-false",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsFalse)
+    );
+    KON_EnvDefine(kstate, env, "is-nil",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsNil)
+    );
+    KON_EnvDefine(kstate, env, "is-null",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsNull)
+    );
+    KON_EnvDefine(kstate, env, "is-null",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsUkn)
+    );
+    KON_EnvDefine(kstate, env, "is-pointer",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsPointer)
+    );
+    KON_EnvDefine(kstate, env, "is-fixnum",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsFixnum)
+    );
+    KON_EnvDefine(kstate, env, "is-flonum",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsFlonum)
+    );
+    KON_EnvDefine(kstate, env, "is-immediate-symbol",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsImmediateSymbol)
+    );
+    KON_EnvDefine(kstate, env, "is-char",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsChar)
+    );
+    KON_EnvDefine(kstate, env, "is-boolean",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsBoolean)
+    );
+    KON_EnvDefine(kstate, env, "is-bytes",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsBytes)
+    );
+    KON_EnvDefine(kstate, env, "is-string",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsString)
+    );
+    KON_EnvDefine(kstate, env, "is-symbol",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsSymbol)
+    );
+    KON_EnvDefine(kstate, env, "is-variable",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsVariable)
+    );
+    KON_EnvDefine(kstate, env, "is-identifier",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsIdentifier)
+    );
+    KON_EnvDefine(kstate, env, "is-word",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsWord)
+    );
+    KON_EnvDefine(kstate, env, "is-sym-slot",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsSymSlot)
+    );
+    KON_EnvDefine(kstate, env, "is-attr-slot",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsAttrSlot)
+    );
+    KON_EnvDefine(kstate, env, "is-pair",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsPair)
+    );
+    KON_EnvDefine(kstate, env, "is-pair-list",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsPairList)
+    );
+    KON_EnvDefine(kstate, env, "is-vector",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsVector)
+    );
+    KON_EnvDefine(kstate, env, "is-table",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsTable)
+    );
+    KON_EnvDefine(kstate, env, "is-cell",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsCell)
+    );
+    KON_EnvDefine(kstate, env, "is-env",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsEnv)
+    );
+    KON_EnvDefine(kstate, env, "is-procedure",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsProcedure)
+    );
+    KON_EnvDefine(kstate, env, "is-continuation",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsContinuation)
+    );
+    KON_EnvDefine(kstate, env, "is-cpointer",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsCpointer)
+    );
+    KON_EnvDefine(kstate, env, "is-exception",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsException)
+    );
 }

@@ -40,7 +40,7 @@ const char* KON_HumanFormatTime()
 KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
 {
     KN res = (KN) KON_GC_MALLOC(size);
-    if (res && ! kon_is_exception(res)) {
+    if (res && ! KON_IS_EXCEPTION(res)) {
         ((KonBase*)res)->Tag = tag;
         // set dispatcher id
         if (tag == KON_T_FIXNUM || tag == KON_T_FLONUM || tag == KON_T_BIGNUM) {
@@ -66,40 +66,40 @@ KN KON_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char
     else if (KON_IS_FLONUM(source)) {
         return KON_FlonumStringify(kstate, source);
     }
-    else if (kon_is_char(source)) {
+    else if (KON_IS_CHAR(source)) {
         return KON_CharStringify(kstate, source);
     }
-    else if (kon_is_string(source)) {
+    else if (KON_IS_STRING(source)) {
         return KON_StringStringify(kstate, source);
     }
     else if (KON_IS_SYMBOL(source)) {
         return KON_SymbolStringify(kstate, source);
     }
-    else if (kon_is_syntax_marker(source)) {
+    else if (KON_IS_SYNTAX_MARKER(source)) {
         return KON_SyntaxMarkerStringify(kstate, source);
     }
-    else if (kon_is_quote(source)) {
+    else if (KON_IS_QUOTE(source)) {
         return KON_QuoteStringify(kstate, source, newLine, depth, padding);
     }
-    else if (kon_is_quasiquote(source)) {
+    else if (KON_IS_QUASIQUOTE(source)) {
         return KON_QuasiquoteStringify(kstate, source, newLine, depth, padding);
     }
-    else if (kon_is_expand(source)) {
+    else if (KON_IS_EXPAND(source)) {
         return KON_ExpandStringify(kstate, source, newLine, depth, padding);
     }
-    else if (kon_is_unquote(source)) {
+    else if (KON_IS_UNQUOTE(source)) {
         return KON_UnquoteStringify(kstate, source, newLine, depth, padding);
     }
-    else if (kon_is_vector(source)) {
+    else if (KON_IS_VECTOR(source)) {
         return KON_VectorStringify(kstate, source, newLine, depth, padding);
     }
     else if (KON_IsPairList(source)) {
         return KON_PairListStringify(kstate, source, newLine, depth, padding);
     }
-    else if (kon_is_table(source)) {
+    else if (KON_IS_TABLE(source)) {
         return KON_TableStringify(kstate, source, newLine, depth, padding);
     }
-    else if (kon_is_cell(source)) {
+    else if (KON_IS_CELL(source)) {
         return KON_CellStringify(kstate, source, newLine, depth, padding);
     }
     else if (source == KON_UKN) {
@@ -164,7 +164,7 @@ KN KON_FlonumStringify(KonState* kstate, KN source)
         return KON_MakeEmptyString(kstate);
     }
     char buf[128] = {'\0'};
-    double num = kon_flonum_value(source);
+    double num = KON_FLONUM_VALUE(source);
     double_to_str(num, 2, buf);
 
     KonString* value = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
@@ -176,14 +176,14 @@ KN KON_FlonumStringify(KonState* kstate, KN source)
 // 转换char为 #c,A;
 KN KON_CharStringify(KonState* kstate, KN source)
 {
-    if (!kon_is_char(source)) {
+    if (!KON_IS_CHAR(source)) {
         return KON_MakeEmptyString(kstate);
     }
 
     KonString* value = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     value->String = KxStringBuffer_New();
     KxStringBuffer_AppendCstr(value->String, "#c,");
-    int charcode = kon_unbox_character(source);
+    int charcode = KON_UNBOX_CHAR(source);
     char buf[10] = {'\0'};
     snprintf(buf, 10, "%c", charcode);
     KxStringBuffer_AppendCstr(value->String, buf);
@@ -218,7 +218,7 @@ KN KON_MakeEmptyString(KonState* kstate)
 
 const char* KON_StringToCstr(KN str)
 {
-    if (!kon_is_string(str)) {
+    if (!KON_IS_STRING(str)) {
         return NULL;
     }
     return KxStringBuffer_Cstr(KON_UNBOX_STRING(str));
@@ -570,7 +570,7 @@ KN KON_PairListLength(KonState* kstate, KN source)
 KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail)
 {
   KonPair* node = KON_ALLOC_TYPE_TAG(kstate, KonPair, KON_T_PAIR);
-  if (kon_is_exception(node)) {
+  if (KON_IS_EXCEPTION(node)) {
       return node;
   }
   node->Prev = KON_NIL;
