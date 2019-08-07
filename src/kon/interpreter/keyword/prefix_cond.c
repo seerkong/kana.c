@@ -24,7 +24,7 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
 
     KonTrampoline* bounce;
     if (KON_IS_TRUE(evaledValue)) {
-        bounce = KON_EvalExpression(kstate, ifTrueAction, env, contBeingInvoked->Cont);
+        bounce = KON_EvalSentences(kstate, ifTrueAction, env, contBeingInvoked->Cont);
     }
     else if (restPairs == KON_NIL) {
         bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
@@ -34,11 +34,11 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
     else {
         KN condPair = KON_CAR(restPairs);
         KN predicate = KON_CAR(condPair);
-        KN action = KON_CADR(condPair);
+        KN action = KON_CDR(condPair);
 
         if (IsElseTag(predicate)) {
             // do else action
-            bounce = KON_EvalExpression(kstate, action, env, contBeingInvoked->Cont);
+            bounce = KON_EvalSentences(kstate, action, env, contBeingInvoked->Cont);
         }
         else {
             // next condition
@@ -67,16 +67,14 @@ KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KN env, KonCo
     KON_DEBUG("meet prefix marcro cond");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     
-    
-
     KN condPair = KON_CAR(expression);
     KN predicate = KON_CAR(condPair);
-    KN action = KON_CADR(condPair);
+    KN action = KON_CDR(condPair);
 
     KonTrampoline* bounce;
     if (IsElseTag(predicate)) {
         // do else action
-        bounce = KON_EvalExpression(kstate, action, env, cont);
+        bounce = KON_EvalSentences(kstate, action, env, cont);
     }
     else {
         KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
