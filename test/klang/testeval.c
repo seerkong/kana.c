@@ -90,6 +90,12 @@ TEST Native_For(void) {
     PASS();
 }
 
+TEST Native_Pipe(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/pipe.kl";
+    KON_EvalFile(kstate, path);
+    PASS();
+}
+
 TEST Native_AttrSlot(void) {
     char* path = "~/lang/konscript/kon-c/samples/knative/attr-slot.kl";
     KON_EvalFile(kstate, path);
@@ -129,6 +135,7 @@ SUITE(suite) {
     RUN_TEST(Native_CallCC);
 
     RUN_TEST(Native_For);
+    RUN_TEST(Native_Pipe);
     
     // RUN_TEST(Native_AttrSlot);
     // RUN_TEST(Native_MkDispatcher);
@@ -145,7 +152,7 @@ int main(int argc, char const* argv[])
         return NULL;
     }
     kstate = KON_Init();
-    ENABLE_DEBUG = 0;
+    // ENABLE_DEBUG = 0;
     RUN_SUITE(suite);
 
     KON_Finish(kstate);

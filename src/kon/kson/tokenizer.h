@@ -64,7 +64,7 @@ typedef enum
     KON_TOKEN_TABLE_TAG,    // :
     
     KON_TOKEN_APPLY,        // %
-    KON_TOKEN_PIPE,         // |abc
+    KON_TOKEN_PIPE,         // | abc
     KON_TOKEN_REST,     // ... like scheme . eg {!func {a ... b}}
     KON_TOKEN_CLAUSE_END,   // ;
 

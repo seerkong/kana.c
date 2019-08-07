@@ -92,8 +92,53 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
                 bounce = KON_ApplyCompositeLambda(kstate, subjProc, argList, env, cont);
             }
         }
-        
+        // pipe args to a procedure like | add 1 2;
+        else if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_PIPE) {
+
+            // unbox attr slot
+            KN pipeArg = KON_CADR(argList);
+            if (KON_IS_ATTR_SLOT(pipeArg)) {
+                pipeArg = ((KonAttrSlot*)pipeArg)->Value;
+            }
+            if (KON_IS_ATTR_SLOT(subj)) {
+                subj = ((KonAttrSlot*)subj)->Value;
+            }
+            
+            KonProcedure* pipeProc = (KonProcedure*)pipeArg;
+            // prepend the subject to arg list
+            argList = KON_CONS(kstate, subj, KON_CDDR(argList));
+            // TODO assert subj is a procedure
+            if (pipeProc->Type == KON_NATIVE_FUNC) {
+                KonNativeFuncRef funcRef = pipeProc->NativeFuncRef;
+                KN applyResult = (*funcRef)(kstate, argList);
+                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce->Run.Value = applyResult;
+                bounce->Run.Cont = cont;
+            }
+            else if (pipeProc->Type == KON_NATIVE_OBJ_METHOD) {
+                // treat as plain procedure when apply arg list
+                // the first item in arg list is the object
+                KonNativeFuncRef funcRef = pipeProc->NativeFuncRef;
+                KN applyResult = (*funcRef)(kstate, argList);
+                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce->Run.Value = applyResult;
+                bounce->Run.Cont = cont;
+            }
+            else if (pipeProc->Type == KON_COMPOSITE_LAMBDA) {
+                bounce = KON_ApplyCompositeLambda(kstate, pipeProc, argList, env, cont);
+            }
+            else if (pipeProc->Type == KON_COMPOSITE_FUNC) {
+                bounce = KON_ApplyCompositeFunc(kstate, pipeProc, argList, env, cont);
+            }
+            else if (pipeProc->Type == KON_COMPOSITE_OBJ_METHOD) {
+                // treat as plain procedure when apply arg list
+                // the first item in arg list is the object
+                bounce = KON_ApplyCompositeLambda(kstate, pipeProc, argList, env, cont);
+            }
+        }
     }
+
+
     //  get attr value like /abc
     else if (KON_IS_ATTR_SLOT(subj) && KON_IS_SYM_SLOT(firstObj)) {
         KonAttrSlot* slot = (KonAttrSlot*)subj;
