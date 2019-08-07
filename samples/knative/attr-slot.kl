@@ -1,5 +1,5 @@
 {
-  {!let list-new-alias {kon /list /new}}
-  {!let my-list {list-new-alias % 1 2 3 "abc"}}
+  {let list-new-alias {kon /list /new}}
+  {let my-list {list-new-alias % 1 2 3 "abc"}}
   {kon /list /methods /length % my-list} `` should be 3
 }

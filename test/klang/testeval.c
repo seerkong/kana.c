@@ -103,28 +103,28 @@ TEST Native_Shell(void) {
 }
 
 SUITE(suite) {
-    // RUN_TEST(Native_Math);
+    RUN_TEST(Native_Math);
     
-    // RUN_TEST(Native_Writeln);
+    RUN_TEST(Native_Writeln);
 
-    // RUN_TEST(Native_And);
-    // RUN_TEST(Native_Or);
+    RUN_TEST(Native_And);
+    RUN_TEST(Native_Or);
 
-    // RUN_TEST(Native_Letset);
+    RUN_TEST(Native_Letset);
 
-    // RUN_TEST(Native_If);
-    // RUN_TEST(Native_Do);
-    // RUN_TEST(Native_Cond);
+    RUN_TEST(Native_If);
+    RUN_TEST(Native_Do);
+    RUN_TEST(Native_Cond);
     
-    // RUN_TEST(Native_Blk);
-    // RUN_TEST(Native_Func);
-    // RUN_TEST(Native_Lambda);
+    RUN_TEST(Native_Blk);
+    RUN_TEST(Native_Func);
+    RUN_TEST(Native_Lambda);
 
     RUN_TEST(Native_CallCC);
     
-    // RUN_TEST(Native_AttrSlot);
+    RUN_TEST(Native_AttrSlot);
     // RUN_TEST(Native_MkDispatcher);
-    // RUN_TEST(Native_Shell);
+    RUN_TEST(Native_Shell);
 }
 
 GREATEST_MAIN_DEFS();

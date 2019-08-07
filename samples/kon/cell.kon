@@ -15,7 +15,7 @@
     @[1 2 @~.c]
     `@(:a 1 $%(:b 2))
 
-    {!define x -50}
+    {define x -50}
     {writeln % x}
   }
 >

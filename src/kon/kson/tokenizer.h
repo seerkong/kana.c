@@ -11,7 +11,7 @@ typedef enum
     KON_TOKEN_NONE = 0,
     KON_TOKEN_EOF,
     KON_TOKEN_WHITESPACE,
-    KON_TOKEN_COMMENT_SINGLE_LINE, // //
+    KON_TOKEN_COMMENT_SINGLE_LINE, // `
     
     KON_TOKEN_LIST_START,   // {
     KON_TOKEN_LIST_END,     // }

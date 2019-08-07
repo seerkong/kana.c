@@ -7,8 +7,8 @@
 
   
 
-  {!let f
-    {!func {$return}
+  {let f
+    {func {$return}
       {return % 2}
       3
     }
@@ -16,20 +16,20 @@
 
   `` writes 3
   `{displayln %
-  `  {f % {!lambda {$x} x } }
+  `  {f % {lambda {$x} x}}
   `}
 
   `` writes 2
-  {displayln % {!call-cc f}}
+  {displayln % {call-cc f}}
 
-  {!let g
-    {!func {$return}
+  {let g
+    {func {$return}
       3
     }
   }
 
   `` writes 3
-  {displayln % {!call-cc g}}
+  {displayln % {call-cc g}}
 }
 
 `` Calling f with a regular function argument first applies this function to the value 2, 

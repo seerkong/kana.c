@@ -1,6 +1,6 @@
 {
-  {!let a 5}
-  {!cond
+  {let a 5}
+  {cond
     {{lt % 5 4}
       "condition 1 pass"
     }
@@ -8,7 +8,7 @@
       {writeln % "condition 2 pass"}
     }
     {{lt % 3 4}
-      {!do
+      {do
         {writeln % "condition 3 pass"}
         {writeln % "do something more here"}
       }

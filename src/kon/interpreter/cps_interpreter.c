@@ -390,6 +390,48 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
     }
 }
 
+bool KON_IsPrefixMarcro(KN word) {
+    if (!(kon_check_tag(word, KON_T_SYMBOL))) {
+        return false;
+    }
+    int type = ((KonSymbol*)word)->Type;
+    if (type != KON_SYM_PREFIX_WORD && type != KON_SYM_WORD) {
+        return false;
+    }
+    
+    // check reserved keywords
+    const char* prefix = KON_UNBOX_SYMBOL(word);
+
+    if (strcmp(prefix, "and") == 0
+        || strcmp(prefix, "apply") == 0
+        || strcmp(prefix, "blk") == 0
+        || strcmp(prefix, "break") == 0
+        || strcmp(prefix, "call-cc") == 0
+        || strcmp(prefix, "cond") == 0
+        || strcmp(prefix, "def-builder") == 0
+        || strcmp(prefix, "def-dispatcher") == 0
+        || strcmp(prefix, "do") == 0
+        || strcmp(prefix, "eval") == 0
+        || strcmp(prefix, "for") == 0
+        || strcmp(prefix, "func") == 0
+        || strcmp(prefix, "global") == 0
+        || strcmp(prefix, "if") == 0
+        || strcmp(prefix, "lambda") == 0
+        || strcmp(prefix, "let") == 0
+        || strcmp(prefix, "letrec") == 0
+        || strcmp(prefix, "letstar") == 0
+        || strcmp(prefix, "local") == 0
+        || strcmp(prefix, "or") == 0
+        || strcmp(prefix, "set") == 0
+        || strcmp(prefix, "sh") == 0
+    ) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonContinuation* cont)
 {
     KonTrampoline* bounce;
@@ -397,7 +439,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
         // passed a sentence like {writeln % "abc" "efg"}
         KN words = expression;
         KN first = KON_CAR(words);
-        if (KON_IS_PREFIX_MARCRO(first)) {
+        if (KON_IsPrefixMarcro(first)) {
             const char* prefix = KON_UNBOX_SYMBOL(first);
 
             if (strcmp(prefix, "if") == 0) {
