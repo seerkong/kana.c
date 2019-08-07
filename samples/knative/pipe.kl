@@ -1,7 +1,8 @@
-{
-  {lambda add5 {$x}
-    {+ % x 5}
-  }
+[
+  [lambda add5 [$x]
+    [+ % x 5]
+  ]
 
-  {+ % 1 2; |add5; |add5}
-}
+  [+ % 1 2; |add5; |add5]
+  `[+ % 1 2 |add5 |add5]
+]

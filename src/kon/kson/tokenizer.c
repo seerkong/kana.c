@@ -541,26 +541,26 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             tokenizer->TokenKind = KON_TOKEN_TABLE_END;
             break;
         }
-        else if (pc[0] == '[') {
-            UpdateTokenContent(tokenizer, "[");
+        else if (pc[0] == '{') {
+            UpdateTokenContent(tokenizer, "{");
             ForwardToken(tokenizer, 1);
             tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
             break;
         }
-        else if (pc[0] == ']') {
-            UpdateTokenContent(tokenizer, "]");
+        else if (pc[0] == '}') {
+            UpdateTokenContent(tokenizer, "}");
             ForwardToken(tokenizer, 1);
             tokenizer->TokenKind = KON_TOKEN_VECTOR_END;
             break;
         }
-        else if (pc[0] == '{') {
-            UpdateTokenContent(tokenizer, "{");
+        else if (pc[0] == '[') {
+            UpdateTokenContent(tokenizer, "[");
             ForwardToken(tokenizer, 1);
             tokenizer->TokenKind = KON_TOKEN_LIST_START;
             break;
         }
-        else if (pc[0] == '}') {
-            UpdateTokenContent(tokenizer, "}");
+        else if (pc[0] == ']') {
+            UpdateTokenContent(tokenizer, "]");
             ForwardToken(tokenizer, 1);
             tokenizer->TokenKind = KON_TOKEN_LIST_END;
             break;
@@ -710,7 +710,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 ForwardToken(tokenizer, 3);
                 tokenizer->TokenKind = KON_TOKEN_EXPAND_SEQ;
             }
-            else if (nextChars[1] == '[') {
+            else if (nextChars[1] == '{') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
                 tokenizer->TokenKind = KON_TOKEN_QUOTE_VECTOR;
@@ -725,7 +725,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 ForwardToken(tokenizer, 1);
                 tokenizer->TokenKind = KON_TOKEN_QUOTE_CELL;
             }
-            else if (nextChars[1] == '{') {
+            else if (nextChars[1] == '[') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
                 tokenizer->TokenKind = KON_TOKEN_QUOTE_LIST;
@@ -763,7 +763,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 ForwardToken(tokenizer, 3);
                 tokenizer->TokenKind = KON_TOKEN_UNQUOTE_SEQ;
             }
-            else if (nextChars[1] == '[') {
+            else if (nextChars[1] == '{') {
                 UpdateTokenContent(tokenizer, "@");
                 ForwardToken(tokenizer, 1);
                 tokenizer->TokenKind = KON_TOKEN_QUASI_VECTOR;
@@ -778,7 +778,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 ForwardToken(tokenizer, 1);
                 tokenizer->TokenKind = KON_TOKEN_QUASI_CELL;
             }
-            else if (nextChars[1] == '{') {
+            else if (nextChars[1] == '[') {
                 UpdateTokenContent(tokenizer, "@");
                 ForwardToken(tokenizer, 1);
                 tokenizer->TokenKind = KON_TOKEN_QUASI_LIST;

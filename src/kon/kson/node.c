@@ -423,7 +423,7 @@ KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, cha
     int vecLen = KxVector_Length(items);
     
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "[\n");
+        KxStringBuffer_AppendCstr(result->String, "{\n");
 
         
         for (int i = 0; i < vecLen; i++) {
@@ -437,10 +437,10 @@ KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, cha
         }
 
         AddLeftPadding(result->String, depth, padding);
-        KxStringBuffer_AppendCstr(result->String, "]");
+        KxStringBuffer_AppendCstr(result->String, "}");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "[");
+        KxStringBuffer_AppendCstr(result->String, "{");
         
         for (int i = 0; i < vecLen; i++) {
             KN item = KxVector_AtIndex(items, i);
@@ -454,7 +454,7 @@ KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, cha
             
         }
 
-        KxStringBuffer_AppendCstr(result->String, "]");
+        KxStringBuffer_AppendCstr(result->String, "}");
     }
 
     return result;
@@ -485,7 +485,7 @@ KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, c
 
     
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "{\n");
+        KxStringBuffer_AppendCstr(result->String, "[\n");
         if (source != KON_NIL && KON_IS_PAIR(source)) {
             KonPair* iter = source;
 
@@ -505,10 +505,10 @@ KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, c
         }
 
         AddLeftPadding(result->String, depth, padding);
-        KxStringBuffer_AppendCstr(result->String, "}");
+        KxStringBuffer_AppendCstr(result->String, "]");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "{");
+        KxStringBuffer_AppendCstr(result->String, "[");
         
         if (source != KON_NIL && KON_IS_PAIR(source)) {
             KonPair* iter = source;
@@ -526,7 +526,7 @@ KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, c
             }
         }
 
-        KxStringBuffer_AppendCstr(result->String, "}");
+        KxStringBuffer_AppendCstr(result->String, "]");
     }
 
     return result;

@@ -13,10 +13,10 @@ typedef enum
     KON_TOKEN_WHITESPACE,
     KON_TOKEN_COMMENT_SINGLE_LINE, // `
     
-    KON_TOKEN_LIST_START,   // {
-    KON_TOKEN_LIST_END,     // }
-    KON_TOKEN_VECTOR_START,  // [
-    KON_TOKEN_VECTOR_END,    // ]
+    KON_TOKEN_LIST_START,   // [
+    KON_TOKEN_LIST_END,     // ]
+    KON_TOKEN_VECTOR_START,  // {
+    KON_TOKEN_VECTOR_END,    // }
     KON_TOKEN_TABLE_START,    // (
     KON_TOKEN_TABLE_END,      // )
     KON_TOKEN_CELL_START,   // <
@@ -40,16 +40,20 @@ typedef enum
     KON_TOKEN_SYM_VARIABLE, // @abc
     KON_TOKEN_SYM_IDENTIFIER,  // $abc
     KON_TOKEN_SYM_STRING, // $''
+
+    // TODO change slot(/abc), exec msg(.length), pipe(|abc)
+    // to wrapper type
     KON_TOKEN_SYM_SLOT, // /tag /. /.. /~
     KON_TOKEN_EXEC_MSG,     // .length
+    KON_TOKEN_PIPE,         // |abc TODO change to a sym type
 
-    KON_TOKEN_QUOTE_VECTOR, // $[]
-    KON_TOKEN_QUOTE_LIST,   // ${}
+    KON_TOKEN_QUOTE_VECTOR, // ${}
+    KON_TOKEN_QUOTE_LIST,   // $[]
     KON_TOKEN_QUOTE_TABLE,  // $()
     KON_TOKEN_QUOTE_CELL,   // $<>
 
-    KON_TOKEN_QUASI_VECTOR, // @[]
-    KON_TOKEN_QUASI_LIST,   // @{}
+    KON_TOKEN_QUASI_VECTOR, // @{}
+    KON_TOKEN_QUASI_LIST,   // @[]
     KON_TOKEN_QUASI_TABLE,  // @()
     KON_TOKEN_QUASI_CELL,   // @<>
 
@@ -57,15 +61,14 @@ typedef enum
     KON_TOKEN_EXPAND_KV,        // $%.abc
     KON_TOKEN_EXPAND_SEQ,        // $~.abc
 
-    KON_TOKEN_UNQUOTE_REPLACE,  // @.abc @.{5 .+ $.a}
+    KON_TOKEN_UNQUOTE_REPLACE,  // @.abc @.[5 .+ $.a]
     KON_TOKEN_UNQUOTE_KV,        // @%.abc
     KON_TOKEN_UNQUOTE_SEQ,        // @~.abc
 
     KON_TOKEN_TABLE_TAG,    // :
     
     KON_TOKEN_APPLY,        // %
-    KON_TOKEN_PIPE,         // | abc
-    KON_TOKEN_REST,     // ... like scheme . eg {!func {a ... b}}
+    KON_TOKEN_REST,     // ... like scheme . eg [func [a ... b]]
     KON_TOKEN_CLAUSE_END,   // ;
 
 } KonTokenKind;

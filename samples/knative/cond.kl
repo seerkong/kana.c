@@ -1,18 +1,18 @@
-{
-  {let a 5}
-  {cond
-    {{lt % 5 4}
+[
+  [let a 5]
+  [cond
+    [[lt % 5 4]
       "condition 1 pass"
-    }
-    {{lt % a 4}
-      {writeln % "condition 2 pass"}
-    }
-    {{lt % 3 4}
-      {writeln % "condition 3 pass"}
-      {writeln % "do something more here"}
-    }
-    {else
+    ]
+    [[lt % a 4]
+      [writeln % "condition 2 pass"]
+    ]
+    [[lt % 3 4]
+      [writeln % "condition 3 pass"]
+      [writeln % "do something more here"]
+    ]
+    [else
       "else branch"
-    }
-  }
-}
+    ]
+  ]
+]
