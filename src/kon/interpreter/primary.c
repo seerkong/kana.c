@@ -275,10 +275,10 @@ KN KON_PrimaryIsWord(KonState* kstate, KN args)
     return (KON_IS_WORD(item)) ? KON_TRUE : KON_FALSE;
 }
 
-KN KON_PrimaryIsSymSlot(KonState* kstate, KN args)
+KN KON_PrimaryIsPathQuery(KonState* kstate, KN args)
 {
     KN item = KON_CAR(args);
-    return (KON_IS_SYM_SLOT(item)) ? KON_TRUE : KON_FALSE;
+    return (KON_IS_QUERY_PATH(item)) ? KON_TRUE : KON_FALSE;
 }
 
 KN KON_PrimaryIsAttrSlot(KonState* kstate, KN args)
@@ -444,8 +444,8 @@ KN KON_PrimaryOpExport(KonState* kstate, KonEnv* env)
     KON_EnvDefine(kstate, env, "is-word",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsWord)
     );
-    KON_EnvDefine(kstate, env, "is-sym-slot",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsSymSlot)
+    KON_EnvDefine(kstate, env, "is-path-query",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsPathQuery)
     );
     KON_EnvDefine(kstate, env, "is-attr-slot",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsAttrSlot)

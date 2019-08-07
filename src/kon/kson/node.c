@@ -271,12 +271,12 @@ KN KON_SymbolStringify(KonState* kstate, KN source)
             KxStringBuffer_AppendCstr(result->String, "\'");
             break;
         }
-        case KON_SYM_SLOT: {
+        case KON_QUERY_PATH: {
             KxStringBuffer_AppendCstr(result->String, "/");
             KxStringBuffer_AppendCstr(result->String, data);
             break;
         }
-        case KON_SYM_EXEC_MSG: {
+        case KON_MSG_SIGNAL: {
             KxStringBuffer_AppendCstr(result->String, ".");
             KxStringBuffer_AppendCstr(result->String, data);
             break;
@@ -302,7 +302,7 @@ KN KON_SyntaxMarkerStringify(KonState* kstate, KN source)
             KxStringBuffer_AppendCstr(result->String, "%");
             break;
         }
-        case KON_SYNTAX_MARKER_PIPE: {
+        case KON_SYNTAX_MARKER_PROC_PIPE: {
             KxStringBuffer_AppendCstr(result->String, "|");
             break;
         }

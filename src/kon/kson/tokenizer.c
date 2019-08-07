@@ -41,11 +41,11 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_APPLY:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_APPLY");
             break;
-        case KON_TOKEN_EXEC_MSG:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXEC_MSG");
+        case KON_TOKEN_MSG_SIGNAL:
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_MSG_SIGNAL");
             break;
-        case KON_TOKEN_PIPE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_PIPE");
+        case KON_TOKEN_PROC_PIPE:
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_PROC_PIPE");
             break;
         
         case KON_TOKEN_CLAUSE_END:
@@ -84,8 +84,8 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_SYM_WORD:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_WORD");
             break;
-        case KON_TOKEN_SYM_SLOT:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_SLOT");
+        case KON_TOKEN_QUERY_PATH:
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUERY_PATH");
             break;
         case KON_TOKEN_LITERAL_RAW_STRING:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_RAW_STRING");
@@ -670,12 +670,12 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
         else if (pc[0] == '.') {
             UpdateTokenContent(tokenizer, ".");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_EXEC_MSG;
+            tokenizer->TokenKind = KON_TOKEN_MSG_SIGNAL;
         }
         else if (pc[0] == '|') {
             UpdateTokenContent(tokenizer, "|");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_PIPE;
+            tokenizer->TokenKind = KON_TOKEN_PROC_PIPE;
         }
         else if (pc[0] == ';') {
             UpdateTokenContent(tokenizer, ";");
@@ -825,7 +825,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             else {
                 ForwardToken(tokenizer, 1);
                 ParseIdentifier(tokenizer);
-                tokenizer->TokenKind = KON_TOKEN_SYM_SLOT;
+                tokenizer->TokenKind = KON_TOKEN_QUERY_PATH;
                 break;
             }
             // if (nextChars[1] == '/') {

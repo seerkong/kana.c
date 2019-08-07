@@ -41,11 +41,11 @@ typedef enum
     KON_TOKEN_SYM_IDENTIFIER,  // $abc
     KON_TOKEN_SYM_STRING, // $''
 
-    // TODO change slot(/abc), exec msg(.length), pipe(|abc)
+    // TODO change select path(/abc), exec msg(.length), pipe proc(|abc)
     // to wrapper type
-    KON_TOKEN_SYM_SLOT, // /tag /. /.. /~
-    KON_TOKEN_EXEC_MSG,     // .length
-    KON_TOKEN_PIPE,         // |abc TODO change to a sym type
+    KON_TOKEN_QUERY_PATH, // /tag /. /.. /~
+    KON_TOKEN_MSG_SIGNAL,     // .length
+    KON_TOKEN_PROC_PIPE,         // |abc TODO change to a sym type
 
     KON_TOKEN_QUOTE_VECTOR, // ${}
     KON_TOKEN_QUOTE_LIST,   // $[]

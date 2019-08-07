@@ -138,7 +138,7 @@ bool IsLiteralToken(tb_size_t event)
 bool IsSyntaxToken(tb_size_t event)
 {
     if (event == KON_TOKEN_APPLY
-        || event == KON_TOKEN_PIPE
+        || event == KON_TOKEN_PROC_PIPE
         || event == KON_TOKEN_CLAUSE_END
     ) {
         return true;
@@ -162,8 +162,8 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
             value->Type = KON_SYNTAX_MARKER_CLAUSE_END;
             break;
         }
-        case KON_TOKEN_PIPE: {
-            value->Type = KON_SYNTAX_MARKER_PIPE;
+        case KON_TOKEN_PROC_PIPE: {
+            value->Type = KON_SYNTAX_MARKER_PROC_PIPE;
             break;
         }
         default: {
@@ -195,11 +195,11 @@ KN MakeSymbol(KonReader* reader, KonTokenKind event)
     else if (event == KON_TOKEN_SYM_STRING) {
         value->Type = KON_SYM_STRING;
     }
-    else if (event == KON_TOKEN_SYM_SLOT) {
-        value->Type = KON_SYM_SLOT;
+    else if (event == KON_TOKEN_QUERY_PATH) {
+        value->Type = KON_QUERY_PATH;
     }
-    else if (event == KON_TOKEN_EXEC_MSG) {
-        value->Type = KON_SYM_EXEC_MSG;
+    else if (event == KON_TOKEN_MSG_SIGNAL) {
+        value->Type = KON_MSG_SIGNAL;
     }
     
     value->Data = utf8dup(KxStringBuffer_Cstr(reader->Tokenizer->Content));
@@ -593,8 +593,8 @@ KN KSON_Parse(KonReader* reader)
             || event == KON_TOKEN_SYM_VARIABLE
             || event == KON_TOKEN_SYM_IDENTIFIER
             || event == KON_TOKEN_SYM_STRING
-            || event == KON_TOKEN_SYM_SLOT
-            || event == KON_TOKEN_EXEC_MSG
+            || event == KON_TOKEN_QUERY_PATH
+            || event == KON_TOKEN_MSG_SIGNAL
         ) {
             KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);

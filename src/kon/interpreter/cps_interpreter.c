@@ -14,9 +14,9 @@ bool IsSelfEvaluated(KN source)
         || KON_IS_STRING(source)
         || KON_IS_SYNTAX_MARKER(source)
         // /abc
-        || KON_IS_SYM_SLOT(source)
+        || KON_IS_QUERY_PATH(source)
         // .append
-        || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_EXEC_MSG)
+        || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_MSG_SIGNAL)
         // $abc
         || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_IDENTIFIER)
         // $'abc'
@@ -93,7 +93,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             }
         }
         // pipe args to a procedure like | add 1 2;
-        else if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_PIPE) {
+        else if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_PROC_PIPE) {
 
             // unbox attr slot
             KN pipeArg = KON_CADR(argList);
@@ -140,7 +140,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
 
 
     //  get attr value like /abc
-    else if (KON_IS_ATTR_SLOT(subj) && KON_IS_SYM_SLOT(firstObj)) {
+    else if (KON_IS_ATTR_SLOT(subj) && KON_IS_QUERY_PATH(firstObj)) {
         KonAttrSlot* slot = (KonAttrSlot*)subj;
         KN slotValue = KxHashTable_AtKey(slot->Folder, KON_UNBOX_SYMBOL(firstObj));
         KON_DEBUG("get slotValue %s", KON_UNBOX_SYMBOL(firstObj));
@@ -150,7 +150,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
     }
 
     // send msg like .add 1 2;
-    else if (KON_IS_SYMBOL(firstObj) && ((KonSymbol*)firstObj)->Type == KON_SYM_EXEC_MSG) {
+    else if (KON_IS_SYMBOL(firstObj) && ((KonSymbol*)firstObj)->Type == KON_MSG_SIGNAL) {
         // get dispatcher and eval OnMethodCall
         // this dispatcherId is unboxed
         KN dispatcherId = ((KonBase*)subj)->MsgDispatcherId;
@@ -224,7 +224,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
                 state = 2;
             }
             // meet slot like /abc
-            else if (KON_IS_SYM_SLOT(item)) {
+            else if (KON_IS_QUERY_PATH(item)) {
                 KxVector* slotClause = KxVector_Init();
                 KxVector_Push(slotClause, item);
                 KxVector_Push(clauseListVec, slotClause);
