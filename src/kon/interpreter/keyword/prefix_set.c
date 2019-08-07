@@ -39,7 +39,7 @@ KonTrampoline* KON_EvalPrefixSet(KonState* kstate, KN expression, KN env, KonCon
         KON_EnvLookupSet(kstate, env, varNameCstr, KON_NULL);
 
         bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-        bounce->Run.Value = KON_ONE;
+        bounce->Run.Value = KON_TRUE;
         bounce->Run.Cont = cont;
     }
     else {

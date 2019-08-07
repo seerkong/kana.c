@@ -584,22 +584,22 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 #define KON_CAR(x)         (KON_FIELD(x, KonPair, Body))
 #define KON_CDR(x)         (KON_FIELD(x, KonPair, Next))
 
-#define kon_caar(x)      (KON_CAR(KON_CAR(x)))
+#define KON_CAAR(x)      (KON_CAR(KON_CAR(x)))
 #define KON_CADR(x)      (KON_CAR(KON_CDR(x)))
-#define kon_cdar(x)      (KON_CDR(KON_CAR(x)))
-#define kon_cddr(x)      (KON_CDR(KON_CDR(x)))
-#define kon_caaar(x)     (KON_CAR(kon_caar(x)))
-#define kon_caadr(x)     (KON_CAR(KON_CADR(x)))
-#define kon_cadar(x)     (KON_CAR(kon_cdar(x)))
-#define kon_caddr(x)     (KON_CAR(kon_cddr(x)))
-#define kon_cdaar(x)     (KON_CDR(kon_caar(x)))
-#define kon_cdadr(x)     (KON_CDR(KON_CADR(x)))
-#define kon_cddar(x)     (KON_CDR(kon_cdar(x)))
-#define kon_cdddr(x)     (KON_CDR(kon_cddr(x)))
-#define kon_cadddr(x)    (KON_CADR(kon_cddr(x))) /* just these two */
-#define kon_cddddr(x)    (kon_cddr(kon_cddr(x)))
+#define KON_CDAR(x)      (KON_CDR(KON_CAR(x)))
+#define KON_CDDR(x)      (KON_CDR(KON_CDR(x)))
+#define KON_CAAAR(x)     (KON_CAR(KON_CAAR(x)))
+#define KON_CAADR(x)     (KON_CAR(KON_CADR(x)))
+#define KON_CADAR(x)     (KON_CAR(KON_CDAR(x)))
+#define KON_CADDR(x)     (KON_CAR(KON_CDDR(x)))
+#define KON_CDAAR(x)     (KON_CDR(KON_CAAR(x)))
+#define KON_CDADR(x)     (KON_CDR(KON_CADR(x)))
+#define KON_CDDAR(x)     (KON_CDR(KON_CDAR(x)))
+#define KON_CDDDR(x)     (KON_CDR(KON_CDDR(x)))
+#define KON_CADDDR(x)    (KON_CADR(KON_CDDR(x))) /* just these two */
+#define KON_CDDDDR(x)    (KON_CDDR(KON_CDDR(x)))
 
-#define kon_list1(kstate,a)        KON_CONS((kstate), (a), KON_NIL)
+#define KON_LIST1(kstate,a)        KON_CONS((kstate), (a), KON_NIL)
 
 
 // data structure util end

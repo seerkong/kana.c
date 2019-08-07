@@ -53,7 +53,7 @@ KonTrampoline* KON_EvalPrefixFunc(KonState* kstate, KN expression, KN env, KonCo
     if (KON_IS_WORD(first)) {
         funcName = first;
         param = KON_CADR(expression);
-        body = kon_cddr(expression);
+        body = KON_CDDR(expression);
     }
     else if (KON_IsPairList(first)) {
         param = first;

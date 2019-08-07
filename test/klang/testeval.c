@@ -84,6 +84,12 @@ TEST Native_CallCC(void) {
     PASS();
 }
 
+TEST Native_For(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/for.kl";
+    KON_EvalFile(kstate, path);
+    PASS();
+}
+
 TEST Native_AttrSlot(void) {
     char* path = "~/lang/konscript/kon-c/samples/knative/attr-slot.kl";
     KON_EvalFile(kstate, path);
@@ -121,6 +127,8 @@ SUITE(suite) {
     RUN_TEST(Native_Lambda);
 
     RUN_TEST(Native_CallCC);
+
+    RUN_TEST(Native_For);
     
     RUN_TEST(Native_AttrSlot);
     // RUN_TEST(Native_MkDispatcher);

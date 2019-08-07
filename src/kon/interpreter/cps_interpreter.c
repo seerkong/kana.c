@@ -475,6 +475,12 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             else if (strcmp(prefix, "call-cc") == 0) {
                 bounce = KON_EvalPrefixCallcc(kstate, KON_CDR(words), env, cont);
             }
+            else if (strcmp(prefix, "for") == 0) {
+                bounce = KON_EvalPrefixFor(kstate, KON_CDR(words), env, cont);
+            }
+            else if (strcmp(prefix, "break") == 0) {
+                bounce = KON_EvalPrefixBreak(kstate, KON_CDR(words), env, cont);
+            }
             else if (strcmp(prefix, "def-dispatcher") == 0) {
                 bounce = KON_EvalPrefixDefDispatcher(kstate, KON_CDR(words), env, cont);
             }
