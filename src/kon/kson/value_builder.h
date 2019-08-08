@@ -32,7 +32,7 @@ typedef struct {
         } TablePair;
 
         struct {
-            KN Name;
+            KN Core;
             KN Vector; // vector of KN
             KN Table;  // vector of TablePair*
             KN List; // vector of KN

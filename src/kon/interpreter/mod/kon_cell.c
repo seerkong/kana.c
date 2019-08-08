@@ -5,30 +5,30 @@
 KN KonCell_Init(KonState* kstate, KN args)
 {
     KonCell* value = KON_ALLOC_TYPE_TAG(kstate, KonCell, KON_T_CELL);
-    value->Name = KON_NULL;
+    value->Core = KON_NULL;
     value->Vector = KON_NULL;
     value->Table = KON_NULL;
     value->List = KON_NULL;
     return value;
 }
 
-KN KonCell_SetName(KonState* kstate, KN args)
+KN KonCell_SetCore(KonState* kstate, KN args)
 {
     KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Name = KON_CADR(args);
+    self->Core = KON_CADR(args);
     return self;
 }
 
-KN KonCell_GetName(KonState* kstate, KN args)
+KN KonCell_GetCore(KonState* kstate, KN args)
 {
     KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    return self->Name;
+    return self->Core;
 }
 
-KN KonCell_DelName(KonState* kstate, KN args)
+KN KonCell_DelCore(KonState* kstate, KN args)
 {
     KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Name = KON_NULL;
+    self->Core = KON_NULL;
     return self;
 }
 
@@ -121,14 +121,14 @@ KonAttrSlot* KonCell_Export(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_Init)
     );
 
-    KON_EnvDefine(kstate, env, "cell-set-name",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetName)
+    KON_EnvDefine(kstate, env, "cell-set-core",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetCore)
     );
-    KON_EnvDefine(kstate, env, "cell-get-name",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetName)
+    KON_EnvDefine(kstate, env, "cell-get-core",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetCore)
     );
-    KON_EnvDefine(kstate, env, "cell-del-name",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelName)
+    KON_EnvDefine(kstate, env, "cell-del-core",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelCore)
     );
     KON_EnvDefine(kstate, env, "cell-set-vector",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetVector)

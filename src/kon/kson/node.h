@@ -264,7 +264,7 @@ struct KonPair {
 
 struct KonCell {
     KonBase Base;
-    KN Name;
+    KN Core;
     KonVector* Vector;
     KonTable* Table;
     KonPair* List;

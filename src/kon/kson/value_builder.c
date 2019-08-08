@@ -169,7 +169,7 @@ KonBuilder* CreateCellBuilder()
         return NULL;
     }
     builder->Type = KON_BUILDER_CELL;
-    builder->Cell.Name = KON_NULL;
+    builder->Cell.Core = KON_NULL;
     builder->Cell.Vector = KON_NULL;
     builder->Cell.Table = KON_NULL;
     builder->Cell.List = KON_NULL;
@@ -179,7 +179,7 @@ KonBuilder* CreateCellBuilder()
 void CellBuilderSetName(KonBuilder* builder, KN name)
 {
     KON_DEBUG("CellBuilderSetName");
-    builder->Cell.Name = name;
+    builder->Cell.Core = name;
 }
 
 void CellBuilderSetVector(KonBuilder* builder, KN vector)
@@ -200,7 +200,7 @@ void CellBuilderSetTable(KonBuilder* builder, KN table)
 KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder)
 {
     KonCell* value = KON_ALLOC_TYPE_TAG(kstate, KonCell, KON_T_CELL);
-    value->Name = builder->Cell.Name;
+    value->Core = builder->Cell.Core;
     value->Vector = builder->Cell.Vector;
     value->Table = builder->Cell.Table;
     value->List = builder->Cell.List;

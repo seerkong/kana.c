@@ -667,7 +667,7 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     result->String = KxStringBuffer_New();
 
-    KN name = CAST_Kon(Cell, source)->Name;
+    KN name = CAST_Kon(Cell, source)->Core;
     KonVector* innerVector = CAST_Kon(Cell, source)->Vector;
     KonTable* innerTable = CAST_Kon(Cell, source)->Table;
     KonPair* innerList = CAST_Kon(Cell, source)->List;
