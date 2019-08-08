@@ -14,6 +14,7 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
     KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 
     KonEnv* procBindEnv = KON_MakeChildEnv(kstate, parentEnv);
+    KON_EnvDefine(kstate, procBindEnv, "return", cont);
 
     KonPair* iterParam = param;
     KonPair* iterArg = argList;

@@ -1,0 +1,10 @@
+[
+  [func bar []
+    [return % 42]
+    2
+  ]
+  [let a 1]
+  [set a [bar %]]
+  [set b 6]
+  [+ % a b]
+]

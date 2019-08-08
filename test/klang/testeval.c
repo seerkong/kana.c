@@ -114,6 +114,34 @@ TEST Native_Shell(void) {
     PASS();
 }
 
+TEST Native_ReturnFromRoot(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/return-from-root.kl";
+    KN result = KON_EvalFile(kstate, path);
+    ASSERT_EQ_FMT(KON_MAKE_FIXNUM(42), result, "%d");
+    PASS();
+}
+
+TEST Native_ReturnFromLambda(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/return-from-lambda.kl";
+    KN result = KON_EvalFile(kstate, path);
+    ASSERT_EQ_FMT(KON_MAKE_FIXNUM(48), result, "%d");
+    PASS();
+}
+
+TEST Native_ReturnFromFunc(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/return-from-func.kl";
+    KN result = KON_EvalFile(kstate, path);
+    ASSERT_EQ_FMT(KON_MAKE_FIXNUM(48), result, "%d");
+    PASS();
+}
+
+TEST Native_ReturnFromBlk(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/return-from-blk.kl";
+    KN result = KON_EvalFile(kstate, path);
+    ASSERT_EQ_FMT(KON_MAKE_FIXNUM(42), result, "%d");
+    PASS();
+}
+
 SUITE(suite) {
     RUN_TEST(Native_Math);
     
@@ -136,6 +164,12 @@ SUITE(suite) {
 
     RUN_TEST(Native_For);
     RUN_TEST(Native_Pipe);
+
+    RUN_TEST(Native_ReturnFromRoot);
+    RUN_TEST(Native_ReturnFromLambda);
+    RUN_TEST(Native_ReturnFromFunc);
+    RUN_TEST(Native_ReturnFromBlk);
+    
     
     // RUN_TEST(Native_AttrSlot);
     // RUN_TEST(Native_MkDispatcher);

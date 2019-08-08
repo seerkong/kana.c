@@ -611,6 +611,8 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
     
     KonContinuation* firstCont = AllocContinuationWithType(KON_CONT_RETURN);
     firstCont->Env = rootEnv;
+    // set root level return
+    KON_EnvDefine(kstate, rootEnv, "return", firstCont);
     KonTrampoline* bounce = KON_EvalSentences(kstate, sentences, rootEnv, firstCont);
 
     while (kon_bounce_type(bounce) != KON_TRAMPOLINE_LAND) {

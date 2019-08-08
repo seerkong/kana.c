@@ -14,7 +14,8 @@ KonTrampoline* KON_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN a
     KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 
     KonEnv* procBindEnv = KON_MakeChildEnv(kstate, parentEnv);
-
+    KON_EnvDefine(kstate, procBindEnv, "return", cont);
+    
     KonPair* iterParam = param;
     KonPair* iterArg = argList;
     while (iterParam != KON_NIL) {
