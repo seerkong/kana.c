@@ -8,12 +8,20 @@ KN KonList_Init(KonState* kstate, KN args)
 KN KonList_Length(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
+    // unbox QUOTE_LIST
+    if (KON_IS_QUOTE(self) && KON_QUOTE_TYPE(self) == KON_QUOTE_LIST) {
+        self = KON_UNBOX_QUOTE(self);
+    }
     return KON_PairListLength(kstate, self);
 }
 
 KN KonList_Append(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
+    // unbox QUOTE_LIST
+    if (KON_IS_QUOTE(self) && KON_QUOTE_TYPE(self) == KON_QUOTE_LIST) {
+        self = KON_UNBOX_QUOTE(self);
+    }
     KN other = KON_CADR(args);
 
     if (other == KON_NIL) {
@@ -37,6 +45,10 @@ KN KonList_Append(KonState* kstate, KN args)
 KN KonList_Prepend(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
+    // unbox QUOTE_LIST
+    if (KON_IS_QUOTE(self) && KON_QUOTE_TYPE(self) == KON_QUOTE_LIST) {
+        self = KON_UNBOX_QUOTE(self);
+    }
     KN other = KON_CADR(args);
 
     if (self == KON_NIL) {
@@ -67,12 +79,20 @@ KN KonList_Cons(KonState* kstate, KN args)
 KN KonList_Car(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
+    // unbox QUOTE_LIST
+    if (KON_IS_QUOTE(self) && KON_QUOTE_TYPE(self) == KON_QUOTE_LIST) {
+        self = KON_UNBOX_QUOTE(self);
+    }
     return KON_CAR(self);
 }
 
 KN KonList_Cdr(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
+    // unbox QUOTE_LIST
+    if (KON_IS_QUOTE(self) && KON_QUOTE_TYPE(self) == KON_QUOTE_LIST) {
+        self = KON_UNBOX_QUOTE(self);
+    }
     return KON_CDR(self);
 }
 

@@ -90,6 +90,12 @@ TEST Native_For(void) {
     PASS();
 }
 
+TEST Native_ForLoopList(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/for-loop-list.kl";
+    KON_EvalFile(kstate, path);
+    PASS();
+}
+
 TEST Native_Pipe(void) {
     char* path = "~/lang/konscript/kon-c/samples/knative/pipe.kl";
     KON_EvalFile(kstate, path);
@@ -142,6 +148,13 @@ TEST Native_ReturnFromBlk(void) {
     PASS();
 }
 
+TEST Native_Quote(void) {
+    char* path = "~/lang/konscript/kon-c/samples/sicp/symbol.kl";
+    KN result = KON_EvalFile(kstate, path);
+    // ASSERT_EQ_FMT(KON_MAKE_FIXNUM(42), result, "%d");
+    PASS();
+}
+
 SUITE(suite) {
     RUN_TEST(Native_Math);
     
@@ -163,6 +176,7 @@ SUITE(suite) {
     RUN_TEST(Native_CallCC);
 
     RUN_TEST(Native_For);
+    RUN_TEST(Native_ForLoopList);
     RUN_TEST(Native_Pipe);
 
     RUN_TEST(Native_ReturnFromRoot);
@@ -170,6 +184,8 @@ SUITE(suite) {
     RUN_TEST(Native_ReturnFromFunc);
     RUN_TEST(Native_ReturnFromBlk);
     
+    
+    // RUN_TEST(Native_Quote);
     
     // RUN_TEST(Native_AttrSlot);
     // RUN_TEST(Native_MkDispatcher);
@@ -186,7 +202,7 @@ int main(int argc, char const* argv[])
         return NULL;
     }
     kstate = KON_Init();
-    // ENABLE_DEBUG = 0;
+    ENABLE_DEBUG = 0;
     RUN_SUITE(suite);
 
     KON_Finish(kstate);

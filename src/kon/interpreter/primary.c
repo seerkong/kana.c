@@ -30,8 +30,11 @@ KN KON_PrimaryEqv(KonState* kstate, KN args)
 {
     KN left = KON_CAR(args);
     KN right = KON_CADR(args);
-    if (left == KON_NULL || left == KON_NIL || left == KON_UKN) {
+    if (left == KON_NULL || left == KON_UKN) {
         return (left == right) ? KON_TRUE: KON_FALSE;
+    }
+    else if (KON_IS_NIL(left) || KON_IS_NIL(right)) {
+        return (KON_IS_NIL(left) && KON_IS_NIL(right)) ? KON_TRUE: KON_FALSE;
     }
     else if (KON_IS_BOOLEAN(left) && KON_IS_BOOLEAN(right)) {
         return (left == right) ? KON_TRUE: KON_FALSE;
@@ -57,6 +60,10 @@ KN KON_PrimaryEqv(KonState* kstate, KN args)
         const char* rightStr = KxStringBuffer_Cstr(KON_UNBOX_STRING(right));
         return (strcmp(leftStr, rightStr) == 0) ? KON_TRUE: KON_FALSE;;
     }
+    // treat quote a empty list $[] equal to #nil;
+    else if (KON_IS_QUOTE_NIL(left) || KON_IS_QUOTE_NIL(right)) {
+
+    }
     else {
         return KON_FALSE;
     }
@@ -65,7 +72,8 @@ KN KON_PrimaryEqv(KonState* kstate, KN args)
 KN KON_PrimaryEq(KonState* kstate, KN args)
 {
     KN left = KON_CAR(args);
-    if (left == KON_NULL || left == KON_NIL || left == KON_UKN
+    if (left == KON_NULL || left == KON_UKN
+        || KON_IS_NIL(left)
         || KON_IS_BOOLEAN(left)
         || KON_IS_FIXNUM(left)
         || KON_IS_FLONUM(left)

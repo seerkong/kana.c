@@ -24,6 +24,8 @@ bool IsSelfEvaluated(KN source)
         || KON_IS_QUOTE(source)
         || source == KON_TRUE
         || source == KON_FALSE
+        || source == KON_NIL
+        || source == KON_NULL
     ) {
         return true;
     }
@@ -481,7 +483,10 @@ bool KON_IsPrefixMarcro(KN word) {
 KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonContinuation* cont)
 {
     KonTrampoline* bounce;
-    if (KON_IsPairList(expression)) {
+    if (IsSelfEvaluated(expression)) {
+        bounce = KON_RunContinuation(kstate, cont, expression);
+    }
+    else if (KON_IsPairList(expression)) {
         // passed a sentence like {writeln % "abc" "efg"}
         KN words = expression;
         KN first = KON_CAR(words);
@@ -567,9 +572,6 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
         KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(expression));
         assert(val != KON_NULL);
         bounce = KON_RunContinuation(kstate, cont, val);
-    }
-    else if (IsSelfEvaluated(expression)) {
-        bounce = KON_RunContinuation(kstate, cont, expression);
     }
     else {
         KON_DEBUG("unhandled expression type");
@@ -730,16 +732,20 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
                 bounce = KON_RunContinuation(kstate, cont, arg);
             }
             else if (KON_IS_QUOTE(arg)) {
-                // TODO
+                // treat as pure data, don't eval
+                bounce = KON_RunContinuation(kstate, cont, arg);
             }
             else if (KON_IS_QUASIQUOTE(arg)) {
-                // TODO
+                // TODO eval the EXPAND, UNQUOTE nodes in ast
+                bounce = KON_RunContinuation(kstate, cont, arg);
             }
             else if (KON_IS_EXPAND(arg)) {
                 // TODO
+                bounce = KON_RunContinuation(kstate, cont, arg);
             }
             else if (KON_IS_UNQUOTE(arg)) {
                 // TODO
+                bounce = KON_RunContinuation(kstate, cont, arg);
             }
             else if (KON_IS_WORD(arg) || KON_IS_VARIABLE(arg)) {
                 // env lookup this val

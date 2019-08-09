@@ -17,8 +17,7 @@ KN AfterOrConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* con
         bounce->Run.Value = KON_TRUE;
     }
     else if (restConditon == KON_NIL) {
-        // all conditions passed, return true
-        KON_DEBUG("all or condition return true");
+        KON_DEBUG("all or condition fail, return false");
         bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
         bounce->Run.Cont = contBeingInvoked->Cont;
         bounce->Run.Value = KON_FALSE;

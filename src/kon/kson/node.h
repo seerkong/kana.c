@@ -189,8 +189,8 @@ struct KonSymbol {
 typedef enum {
     KON_QUOTE_IDENTIFER,    // @abc
     KON_QUOTE_SYMBOL,       // @'zhang san'
-    KON_QUOTE_VECTOR,        // @[1 2 3]
-    KON_QUOTE_LIST,         // @{1 2 3}
+    KON_QUOTE_VECTOR,        // @{1 2 3}
+    KON_QUOTE_LIST,         // @[1 2 3]
     KON_QUOTE_TABLE,        // @(:a 1 :b 2)
     KON_QUOTE_CELL          // @<ojb (:a 1 :b 2)>
 } KonQuoteType;
@@ -476,7 +476,7 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 #define KON_IS_FALSE(x)      ((x) == KON_FALSE)
 #define KON_IS_UKN(x)    ((x) == KON_UKN)
 #define KON_IS_NULL(x)    ((x) == KON_NULL)
-#define KON_IS_NIL(x)    ((x) == KON_NIL)
+#define KON_IS_NIL(x)    ((x) == KON_NIL || (KON_CHECK_TAG(x, KON_T_QUOTE) && KON_QUOTE_TYPE(x) == KON_QUOTE_LIST && ((KonQuote*)x)->Inner == KON_NIL))
 #define KON_IS_POINTER(x) (((kon_uint_t)(size_t)(x) & KON_POINTER_MASK) == KON_POINTER_TAG)
 #define KON_IS_FIXNUM(x)  (((kon_uint_t)(x) & KON_FIXNUM_MASK) == KON_FIXNUM_TAG)
 
@@ -513,6 +513,7 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 #define KON_IS_CELL(x)     (KON_CHECK_TAG(x, KON_T_CELL))
 
 #define KON_IS_QUOTE(x)    (KON_CHECK_TAG(x, KON_T_QUOTE))
+#define KON_IS_QUOTE_NIL(x)    (KON_CHECK_TAG(x, KON_T_QUOTE) && KON_QUOTE_TYPE(x) == KON_QUOTE_LIST && ((KonQuote*)x)->Inner == KON_NIL)
 #define KON_IS_QUASIQUOTE(x)    (KON_CHECK_TAG(x, KON_T_QUASIQUOTE))
 #define KON_IS_EXPAND(x)    (KON_CHECK_TAG(x, KON_T_EXPAND))
 #define KON_IS_UNQUOTE(x)    (KON_CHECK_TAG(x, KON_T_UNQUOTE))
@@ -575,9 +576,10 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 
 #define KON_UNBOX_TABLE(str) (((KonVector*)str)->Vector)
 
-#define KON_UNBOX_SYMBOL(s) (((KonSymbol*)s)->Data)
+#define KON_UNBOX_SYMBOL(x) (((KonSymbol*)x)->Data)
 
-#define KON_UNBOX_QUOTE(s) (((KonQuote*)s)->Inner)
+#define KON_UNBOX_QUOTE(x) (((KonQuote*)x)->Inner)
+#define KON_QUOTE_TYPE(x) (((KonQuote*)x)->Type)
 
 // list
 #define KON_CONS(kstate, a, b) KON_Cons(kstate, NULL, 2, a, b)

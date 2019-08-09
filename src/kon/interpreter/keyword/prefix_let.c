@@ -16,7 +16,7 @@ KN AfterLetValExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
 
     bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
     bounce->Run.Cont = contBeingInvoked->Cont;
-    bounce->Run.Value = KON_TWO;
+    bounce->Run.Value = KON_TRUE;
 
     return bounce;
 }
