@@ -19,6 +19,9 @@ typedef struct
     StateStack* StateStack;
     BuilderStack * BuilderStack;
 
+    // convert word to identifer when in quote and quasiquote scope
+    bool WordAsIdentifier;
+
     KonTokenizer* Tokenizer;
 
     KN Root;

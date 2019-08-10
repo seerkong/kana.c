@@ -8,8 +8,8 @@ KN KonList_Init(KonState* kstate, KN args)
 KN KonList_Length(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
-    // unbox QUOTE_LIST
-    if (KON_IS_QUOTE(self) && KON_QUOTE_TYPE(self) == KON_QUOTE_LIST) {
+    // auto unbox QUOTE_LIST
+    if (KON_IS_QUOTE_LIST(self)) {
         self = KON_UNBOX_QUOTE(self);
     }
     return KON_PairListLength(kstate, self);
@@ -18,8 +18,8 @@ KN KonList_Length(KonState* kstate, KN args)
 KN KonList_Append(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
-    // unbox QUOTE_LIST
-    if (KON_IS_QUOTE(self) && KON_QUOTE_TYPE(self) == KON_QUOTE_LIST) {
+    // auto unbox QUOTE_LIST
+    if (KON_IS_QUOTE_LIST(self)) {
         self = KON_UNBOX_QUOTE(self);
     }
     KN other = KON_CADR(args);
@@ -32,8 +32,13 @@ KN KonList_Append(KonState* kstate, KN args)
         KN next = KON_CDR(iter);
         if (next == KON_NIL) {
             // append
-            CAST_Kon(Pair, iter)->Next = other;
-            CAST_Kon(Pair, other)->Prev = iter;
+            KonPair* node = KON_ALLOC_TYPE_TAG(kstate, KonPair, KON_T_PAIR);
+            node->Body = other;
+            node->Next = KON_NIL;
+            node->Prev = iter;
+            
+            CAST_Kon(Pair, iter)->Next = node;
+
             break;
         }
         iter = next;
@@ -45,28 +50,19 @@ KN KonList_Append(KonState* kstate, KN args)
 KN KonList_Prepend(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
-    // unbox QUOTE_LIST
-    if (KON_IS_QUOTE(self) && KON_QUOTE_TYPE(self) == KON_QUOTE_LIST) {
+    // auto unbox QUOTE_LIST
+    if (KON_IS_QUOTE_LIST(self)) {
         self = KON_UNBOX_QUOTE(self);
     }
     KN other = KON_CADR(args);
+    
+    KonPair* node = KON_ALLOC_TYPE_TAG(kstate, KonPair, KON_T_PAIR);
+    node->Body = other;
+    node->Next = self;
+    node->Prev = KON_NIL;
 
-    if (self == KON_NIL) {
-        return other;
-    }
-    KonPair* iter = other;
-    while (iter != KON_NIL) {
-        KN next = KON_CDR(iter);
-        if (next == KON_NIL) {
-            // append
-            CAST_Kon(Pair, iter)->Next = self;
-            CAST_Kon(Pair, self)->Prev = iter;
-            break;
-        }
-        iter = next;
-    }
-
-    return other;
+    
+    return node;
 }
 
 KN KonList_Cons(KonState* kstate, KN args)
@@ -79,8 +75,8 @@ KN KonList_Cons(KonState* kstate, KN args)
 KN KonList_Car(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
-    // unbox QUOTE_LIST
-    if (KON_IS_QUOTE(self) && KON_QUOTE_TYPE(self) == KON_QUOTE_LIST) {
+    // auto unbox QUOTE_LIST
+    if (KON_IS_QUOTE_LIST(self)) {
         self = KON_UNBOX_QUOTE(self);
     }
     return KON_CAR(self);
@@ -89,8 +85,8 @@ KN KonList_Car(KonState* kstate, KN args)
 KN KonList_Cdr(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
-    // unbox QUOTE_LIST
-    if (KON_IS_QUOTE(self) && KON_QUOTE_TYPE(self) == KON_QUOTE_LIST) {
+    // auto unbox QUOTE_LIST
+    if (KON_IS_QUOTE_LIST(self)) {
         self = KON_UNBOX_QUOTE(self);
     }
     return KON_CDR(self);

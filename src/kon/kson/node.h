@@ -257,9 +257,9 @@ struct KonSyntaxMarker {
 
 struct KonPair {
     KonBase Base;
-    KonPair* Prev;
+    KN Prev;
     KN Body;
-    KonPair* Next;
+    KN Next;
 };
 
 struct KonCell {
@@ -513,6 +513,7 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 #define KON_IS_CELL(x)     (KON_CHECK_TAG(x, KON_T_CELL))
 
 #define KON_IS_QUOTE(x)    (KON_CHECK_TAG(x, KON_T_QUOTE))
+#define KON_IS_QUOTE_LIST(x)    (KON_CHECK_TAG(x, KON_T_QUOTE) && KON_QUOTE_TYPE(x) == KON_QUOTE_LIST)
 #define KON_IS_QUOTE_NIL(x)    (KON_CHECK_TAG(x, KON_T_QUOTE) && KON_QUOTE_TYPE(x) == KON_QUOTE_LIST && ((KonQuote*)x)->Inner == KON_NIL)
 #define KON_IS_QUASIQUOTE(x)    (KON_CHECK_TAG(x, KON_T_QUASIQUOTE))
 #define KON_IS_EXPAND(x)    (KON_CHECK_TAG(x, KON_T_EXPAND))

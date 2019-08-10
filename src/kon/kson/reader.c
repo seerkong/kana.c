@@ -21,6 +21,7 @@ KonReader* KSON_ReaderInit(KonState* kstate)
     
     reader->BuilderStack = BuilderStackInit();
     reader->StateStack = StateStackInit();
+    reader->WordAsIdentifier = false;
     
     tb_assert_and_check_return_val(reader->BuilderStack, tb_null);
     tb_assert_and_check_return_val(reader->StateStack, tb_null);
@@ -184,7 +185,13 @@ KN MakeSymbol(KonReader* reader, KonTokenKind event)
     }
     
     else if (event == KON_TOKEN_SYM_WORD) {
-        value->Type = KON_SYM_WORD;
+        // if in quote or quasiquote scope, convert word to symbol
+        if (reader->WordAsIdentifier) {
+            value->Type = KON_SYM_IDENTIFIER;
+        }
+        else {
+            value->Type = KON_SYM_WORD;
+        }
     }
     else if (event == KON_TOKEN_SYM_VARIABLE) {
         value->Type = KON_SYM_VARIABLE;
@@ -411,6 +418,10 @@ void ExitTopBuilder(KonReader* reader)
         || builderType == KON_BUILDER_UNQUOTE
     ) {
         value = MakeWrapperByBuilder(reader->Kstate, topBuilder);
+        if (builderType == KON_BUILDER_QUOTE || builderType == KON_BUILDER_QUASIQUOTE) {
+            // close word to identifier mode ( abc to abc)
+            reader->WordAsIdentifier = false;
+        }
     }
 
     // resume last container builder
@@ -494,6 +505,11 @@ KN KSON_Parse(KonReader* reader)
 //                    );
                     StateStackPush(reader->StateStack, KON_READER_PARSE_QUOTE);
                     builder = CreateWrapperBuilder(KON_BUILDER_QUOTE, event);
+
+
+                    // open word to identifier mode ( abc to $abc)
+                    reader->WordAsIdentifier = true;
+    
                 }
                 else if (event == KON_TOKEN_QUASI_VECTOR
                     || event == KON_TOKEN_QUASI_LIST
@@ -506,6 +522,9 @@ KN KSON_Parse(KonReader* reader)
 //                    );
                     StateStackPush(reader->StateStack, KON_READER_PARSE_QUASIQUOTE);
                     builder = CreateWrapperBuilder(KON_BUILDER_QUASIQUOTE, event);
+
+                    // open word to identifier mode ( abc to $abc)
+                    reader->WordAsIdentifier = true;
                 }
                 else if (event == KON_TOKEN_UNQUOTE_REPLACE
                     || event == KON_TOKEN_UNQUOTE_KV

@@ -60,10 +60,6 @@ KN KON_PrimaryEqv(KonState* kstate, KN args)
         const char* rightStr = KxStringBuffer_Cstr(KON_UNBOX_STRING(right));
         return (strcmp(leftStr, rightStr) == 0) ? KON_TRUE: KON_FALSE;;
     }
-    // treat quote a empty list $[] equal to #nil;
-    else if (KON_IS_QUOTE_NIL(left) || KON_IS_QUOTE_NIL(right)) {
-
-    }
     else {
         return KON_FALSE;
     }
@@ -298,12 +294,20 @@ KN KON_PrimaryIsAttrSlot(KonState* kstate, KN args)
 KN KON_PrimaryIsPair(KonState* kstate, KN args)
 {
     KN item = KON_CAR(args);
+    // auto unbox QUOTE_LIST
+    if (KON_IS_QUOTE_LIST(item)) {
+        item = KON_UNBOX_QUOTE(item);
+    }
     return (KON_IS_PAIR(item)) ? KON_TRUE : KON_FALSE;
 }
 
 KN KON_PrimaryIsPairList(KonState* kstate, KN args)
 {
     KN item = KON_CAR(args);
+    // auto unbox QUOTE_LIST
+    if (KON_IS_QUOTE_LIST(item)) {
+        item = KON_UNBOX_QUOTE(item);
+    }
     return (KON_IsPairList(item)) ? KON_TRUE : KON_FALSE;
 }
 
@@ -461,7 +465,7 @@ KN KON_PrimaryOpExport(KonState* kstate, KonEnv* env)
     KON_EnvDefine(kstate, env, "is-pair",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsPair)
     );
-    KON_EnvDefine(kstate, env, "is-pair-list",
+    KON_EnvDefine(kstate, env, "is-list",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsPairList)
     );
     KON_EnvDefine(kstate, env, "is-vector",
