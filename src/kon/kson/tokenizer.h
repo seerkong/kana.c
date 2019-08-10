@@ -5,6 +5,7 @@
 
 #include "prefix.h"
 #include "node.h"
+#include "../string/kx_stringbuffer.h"
 
 typedef enum
 {
@@ -87,8 +88,10 @@ typedef struct
     int ColStart;
     int ColEnd;
 
-    // the reader stream
-    tb_stream_ref_t ReadStream;
+    // full code string
+    KxStringBuffer* CodeString;
+    int CodeLen;
+    int ReadCursor;
 
     // the element
     KxStringBuffer* Content;
@@ -104,9 +107,9 @@ typedef struct
 
 KonTokenizer* KSON_TokenizerInit(KonState* kstate);
 
-bool KSON_TokenizerOpenStream(KonTokenizer* reader, tb_stream_ref_t stream);
+bool KSON_TokenizerBegin(KonTokenizer* reader, KxStringBuffer* codeString);
 
-void KSON_TokenizerCloseStream(KonTokenizer* reader);
+void KSON_TokenizerEnd(KonTokenizer* reader);
 
 void KSON_TokenizerExit(KonTokenizer* reader);
 

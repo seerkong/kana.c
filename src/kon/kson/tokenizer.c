@@ -1,5 +1,4 @@
 #include "tokenizer.h"
-#include <tbox/tbox.h>
 #include <ctype.h>
 
 
@@ -164,10 +163,11 @@ KonTokenizer* KSON_TokenizerInit(KonState* kstate)
 {
     // init
     KonTokenizer* tokenizer = (KonTokenizer*)malloc(sizeof(KonTokenizer));
-    tb_assert_and_check_return_val(tokenizer, tb_null);
 
     // init string
     tokenizer->Content = KxStringBuffer_New();
+
+    tokenizer->ReadCursor = 0;
     // stream offset
     tokenizer->CurrRow = 1;
     tokenizer->CurrCol = 1;
@@ -187,52 +187,19 @@ KonTokenizer* KSON_TokenizerInit(KonState* kstate)
     return tokenizer;
 }
 
-bool KSON_TokenizerOpenStream(KonTokenizer* tokenizer, tb_stream_ref_t stream)
+bool KSON_TokenizerBegin(KonTokenizer* tokenizer, KxStringBuffer* codeString)
 {
-    // check
-    tb_assert_and_check_return_val(tokenizer && stream, false);
-
-    // done
-    bool ok = false;
-//    do {
-//        // open the reade stream if be not opened
-//        if (!tb_stream_is_opened(tokenizer->ReadStream) && !tb_stream_open(tokenizer->ReadStream)) {
-//            break;
-//        }
-//        ok = true;
-//    } while (0);
-    
-    if (!tb_stream_open(stream)) {
-        return false;
-    }
-    
     // init the reade stream
-    tokenizer->ReadStream = stream;
-    
-    
+    tokenizer->CodeString = codeString;
+    tokenizer->CodeLen = KxStringBuffer_Length(codeString);
     // clear text
     KxStringBuffer_Clear(tokenizer->Content);
-//    ok = true;
 
-    // failed? close it
-//    if (!ok) {
-//        KSON_TokenizerCloseStream(tokenizer);
-//    }
-
-    // ok?
     return true;
 }
 
-void KSON_TokenizerCloseStream(KonTokenizer* tokenizer)
+void KSON_TokenizerEnd(KonTokenizer* tokenizer)
 {
-    // check
-    tb_assert_and_check_return(tokenizer);
-
-    // clos the reade stream
-    if (tokenizer->ReadStream) {
-        tb_stream_clos(tokenizer->ReadStream);
-    }
-    tokenizer->ReadStream = tb_null;
 
     // clear text
     KxStringBuffer_Clear(tokenizer->Content);
@@ -244,24 +211,29 @@ void KSON_TokenizerExit(KonTokenizer* tokenizer)
 }
 
 // don't move stream offset
-tb_char_t* PeekChars(KonTokenizer* tokenizer, int n)
+const char* PeekChars(KonTokenizer* tokenizer, int n)
 {
     if (n <= 0) {
         n = 1;
     }
-    tb_char_t* pc = tb_null;
-    if (!tb_stream_need(tokenizer->ReadStream, (tb_byte_t**)&pc, n) || !pc) {
-        // peek char to stream end
-        return tb_null;
+
+    if (tokenizer->ReadCursor + n > tokenizer->CodeLen) {
+        return NULL;
     }
+    const char* pc = KxStringBuffer_Cstr(tokenizer->CodeString) + tokenizer->ReadCursor;
+
     return pc;
 }
 
 // move stream offset
-tb_char_t ForwardChar(KonTokenizer* tokenizer)
+const char ForwardChar(KonTokenizer* tokenizer)
 {
-    tb_char_t ch = '\0';
-    if (tb_stream_bread_s8(tokenizer->ReadStream, (tb_sint8_t*)&ch)) {
+    if (tokenizer->ReadCursor >= tokenizer->CodeLen) {
+        return '\0';
+    }
+    
+    const char ch = KxStringBuffer_CharAt(tokenizer->CodeString, tokenizer->ReadCursor);
+    if (ch != '\0') {
         if (ch == '\n') {
             tokenizer->CurrRow = tokenizer->CurrRow + 1;
             tokenizer->CurrCol = 1;
@@ -269,17 +241,19 @@ tb_char_t ForwardChar(KonTokenizer* tokenizer)
         else {
             tokenizer->CurrCol = tokenizer->CurrCol + 1;
         }
+
+        tokenizer->ReadCursor += 1;
         return ch;
     }
     else {
-        return -1;
+        return ch;
     }
 }
 
 void SkipWhiteSpaces(KonTokenizer* tokenizer)
 {
-    tb_char_t* pc = PeekChars(tokenizer, 1);
-    if (pc == tb_null) {
+    const char* pc = PeekChars(tokenizer, 1);
+    if (pc == NULL) {
         // file end
         return;
     }
@@ -289,7 +263,7 @@ void SkipWhiteSpaces(KonTokenizer* tokenizer)
     return;
 }
 
-bool IsDigit(tb_char_t ch)
+bool IsDigit(char ch)
 {
     if (ch >= '0' && ch <= '9') {
         return true;
@@ -299,7 +273,7 @@ bool IsDigit(tb_char_t ch)
     }
 }
 
-bool IsIdentiferPrefixChar(tb_char_t ch)
+bool IsIdentiferPrefixChar(char ch)
 {
     if ((ch >= 'A' && ch <= 'Z')
         || (ch >= 'a' && ch <= 'z')
@@ -312,7 +286,7 @@ bool IsIdentiferPrefixChar(tb_char_t ch)
     }
 }
 
-bool IsIdentiferChar(tb_char_t ch)
+bool IsIdentiferChar(char ch)
 {
     if ((ch >= 'A' && ch <= 'Z')
         || (ch >= 'a' && ch <= 'z')
@@ -326,12 +300,12 @@ bool IsIdentiferChar(tb_char_t ch)
     }
 }
 
-bool IsSpace(tb_char_t ch)
+bool IsSpace(char ch)
 {
     return isspace(ch);
 }
 
-bool IsStopWord(tb_char_t ch)
+bool IsStopWord(char ch)
 {
     char dest[16] = ":%.|![](){}<>;";
     if (strchr(dest, ch) > 0) {
@@ -359,11 +333,11 @@ void ParseIdentifier(KonTokenizer* tokenizer)
     tokenizer->ColStart = tokenizer->CurrCol;
     KxStringBuffer_Clear(tokenizer->Content);
 
-    tb_char_t ch = ForwardChar(tokenizer);
+    char ch = ForwardChar(tokenizer);
     // add identifier first char
     KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
 
-    tb_char_t* pc = tb_null;
+    const char* pc = NULL;
     while ((pc = PeekChars(tokenizer, 1)) && pc) {
         if (IsSpace(pc[0]) || IsStopWord(pc[0])) {
             break;
@@ -382,9 +356,9 @@ void ParseString(KonTokenizer* tokenizer)
     tokenizer->ColStart = tokenizer->CurrCol;
     KxStringBuffer_Clear(tokenizer->Content);
 
-    tb_char_t ch = ForwardChar(tokenizer);
+    char ch = ForwardChar(tokenizer);
 
-    tb_char_t* pc = tb_null;
+    char* pc = NULL;
     while ((pc = PeekChars(tokenizer, 1)) && pc) {
         if (pc[0] == '\"') {
             ForwardChar(tokenizer);
@@ -405,9 +379,9 @@ void ParseRawString(KonTokenizer* tokenizer)
     tokenizer->ColStart = tokenizer->CurrCol;
     KxStringBuffer_Clear(tokenizer->Content);
 
-    tb_char_t ch = ForwardChar(tokenizer);
+    char ch = ForwardChar(tokenizer);
 
-    tb_char_t* pc = tb_null;
+    char* pc = NULL;
     while ((pc = PeekChars(tokenizer, 1)) && pc) {
         if (pc[0] == '\'') {
             ForwardChar(tokenizer);
@@ -430,8 +404,8 @@ void ParseSingleLineComment(KonTokenizer* tokenizer)
     ForwardChar(tokenizer);
     ForwardChar(tokenizer);
 
-    tb_char_t ch = '\0';
-    tb_char_t* pc = tb_null;
+    char ch = '\0';
+    char* pc = NULL;
     while ((pc = PeekChars(tokenizer, 1)) && pc) {
         if (pc[0] == '\n') {
             break;
@@ -456,7 +430,7 @@ void ParseNumber(KonTokenizer* tokenizer)
     KxStringBuffer_Clear(tokenizer->NumAfterPower);
 
     // add first char of this num
-    tb_char_t ch = ForwardChar(tokenizer);
+    char ch = ForwardChar(tokenizer);
     KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
 
     if (ch == '-') {
@@ -473,7 +447,7 @@ void ParseNumber(KonTokenizer* tokenizer)
     // 1 parse num before dot, 2 parse num after dot, 3 parse powver
     int state = 1;
 
-    tb_char_t* pc = tb_null;
+    char* pc = NULL;
     while ((pc = PeekChars(tokenizer, 1)) && pc) {
         char stopChars[16] = ":%|![](){}<>;";
         if (IsSpace(pc[0]) || strchr(stopChars, pc[0]) > 0) {
@@ -514,14 +488,12 @@ void UpdateTokenContent(KonTokenizer* tokenizer, char* newContent)
 
 KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
 {
-    tb_assert_and_check_return_val(tokenizer && tokenizer->ReadStream, KON_TOKEN_EOF);
-
     // reset
     tokenizer->TokenKind = KON_TOKEN_EOF;
     while (tokenizer->TokenKind == KON_TOKEN_EOF) {
         // peek character
-        tb_char_t* pc = PeekChars(tokenizer, 1);
-        if (pc == tb_null) {
+        char* pc = PeekChars(tokenizer, 1);
+        if (pc == NULL) {
             // reach file end
             break;
         }
@@ -578,8 +550,8 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             break;
         }
         else if (pc[0] == '-') {
-            tb_char_t* nextChars = PeekChars(tokenizer, 2);
-            if (nextChars == tb_null) {
+            const char* nextChars = PeekChars(tokenizer, 2);
+            if (nextChars == NULL) {
                 break;
             }
             if (IsSpace(nextChars[1])) {
@@ -599,8 +571,8 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             }
         }
         else if (pc[0] == '+') {
-            tb_char_t* nextChars = PeekChars(tokenizer, 2);
-            if (nextChars == tb_null) {
+            const char* nextChars = PeekChars(tokenizer, 2);
+            if (nextChars == NULL) {
                 break;
             }
             if (IsSpace(nextChars[1])) {
@@ -621,8 +593,8 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             break;
         }
         else if (pc[0] == '#') {
-            tb_char_t* nextChars = PeekChars(tokenizer, 3);
-            if (nextChars == tb_null) {
+            const char* nextChars = PeekChars(tokenizer, 3);
+            if (nextChars == NULL) {
                 break;
             }
             // TODO other immediate atom builders
@@ -691,8 +663,8 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             tokenizer->TokenKind = KON_TOKEN_LITERAL_RAW_STRING;
         }
         else if (pc[0] == '$') {
-            tb_char_t* nextChars = PeekChars(tokenizer, 3);
-            if (nextChars == tb_null) {
+            const char* nextChars = PeekChars(tokenizer, 3);
+            if (nextChars == NULL) {
                 break;
             }
             else if (nextChars[1] == '.') {
@@ -744,8 +716,8 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             }
         }
         else if (pc[0] == '@') {
-            tb_char_t* nextChars = PeekChars(tokenizer, 3);
-            if (nextChars == tb_null) {
+            const char* nextChars = PeekChars(tokenizer, 3);
+            if (nextChars == NULL) {
                 break;
             }
             else if (nextChars[1] == '.') {
@@ -811,8 +783,8 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             break;
         }
         else if (pc[0] == '/') {
-            tb_char_t* nextChars = PeekChars(tokenizer, 3);
-            if (nextChars == tb_null) {
+            const char* nextChars = PeekChars(tokenizer, 3);
+            if (nextChars == NULL) {
                 break;
             }
             if (IsSpace(nextChars[1])) {

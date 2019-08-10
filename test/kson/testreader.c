@@ -12,36 +12,43 @@ KonState* kstate;
 SUITE(suite);
 
 TEST Reader_Cell(void) {
+    char* filePathOrigin = "~/lang/konscript/kon-c/samples/kon/cell.kon";
     
-    // 初始化流
-    tb_stream_ref_t istream = tb_stream_init_from_url("~/lang/konscript/kon-c/samples/kon/cell.kon");
-
     KonReader* reader = KSON_ReaderInit(&kstate);
     if (!reader) {
-        printf("reader init failed\n");
+        KON_DEBUG("KON_EvalFile init failed");
         exit(1);
     }
-    printf("istream addr %x\n", istream);
-    if (istream) {
-        bool openRes = KSON_ReaderOpenStream(reader, istream, false);
-        if (openRes) {
-            printf("open stream success\n");
-            KN root = KSON_Parse(reader);
-            // TODO 打印为字符串
-            printf("parse success\n");
-            KN formated = KON_ToFormatString(&kstate, root, true, 0, "  ");
+
+    KN result = KON_NULL;
+
+    bool openRes = KSON_ReaderFromFile(reader, filePathOrigin);
+    if (openRes) {
+        KN root = KSON_Parse(reader);
+        if (KON_IsPairList(root)) {
+
+            KN env = KON_MakeRootEnv(kstate);
+
+            // DefineReservedDispatcher(kstate, env);
+
+            // KN result = KON_ProcessSentences(kstate, root, kstate->Value.Context.RootEnv);
+            result = KON_ProcessSentences(kstate, root, env);
+            
+            
+            KON_DEBUG("eval sentences success");
+            KN formated = KON_ToFormatString(kstate, result, true, 0, "  ");
             //  KN formated = KON_ToFormatString(&kstate, root, false, 0, " ");
-            printf("%s\n", KON_StringToCstr(formated));
+            KON_DEBUG("%s", KON_StringToCstr(formated));
         }
-        else {
-            printf("open stream failed\n");
-        }
-        KSON_ReaderCloseStream(reader);
-        // 释放读取器 
-        KSON_ReaderExit(reader);
-        // KSON_ReaderOpen的最后一个参数，如果是false，需要主动释放流
-        tb_stream_exit(istream);
+        
     }
+    else {
+        KON_DEBUG("open stream failed");
+    }
+    KSON_ReaderCloseStream(reader);
+    // 释放读取器 
+    KSON_ReaderExit(reader);
+    
 
     PASS();
 }
@@ -67,4 +74,6 @@ int main(int argc, char const* argv[])
     KON_Finish(kstate);
     tb_exit();
     GREATEST_MAIN_END();
+
+    return 0;
 }

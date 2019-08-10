@@ -5,11 +5,11 @@ target("kon")
 
     set_optimize("none")
     set_symbols("debug")
-    add_defines("DEBUG", "__tb_debug__")
+    add_defines("DEBUG", "__debug__")
 
 
     -- add defines
-    add_defines("__tb_prefix__=\"kon\"")
+    add_defines("__kon_prefix__=\"kon\"")
 
     -- add include directories
     add_includedirs("..", {public = true})

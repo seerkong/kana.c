@@ -20,13 +20,11 @@ KonState* InitKonState()
 void ExitFailure(KonState* kstate)
 {
     KON_Finish(kstate);
-    tb_exit();
 }
 
 void ExitSuccess(KonState* kstate)
 {
     KON_Finish(kstate);
-    tb_exit();
 }
 
 static void Repl(command_t *self) {
@@ -68,9 +66,6 @@ int RunMain(int argc, char **argv)
 
 int main(int argc, char const* argv[])
 {
-    if (!tb_init(tb_null, tb_null)) {
-        return NULL;
-    }
     KonState* kstate = InitKonState();
     
     if (RunMain(argc, argv)) {

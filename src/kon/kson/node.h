@@ -2,7 +2,6 @@
 #define KON_KSON_NODE_H
 
 #include <stdio.h>
-#include <tbox/tbox.h>
 #include "../prefix/config.h"
 #include "../string/kx_stringbuffer.h"
 #include "../container/hashtable/kx_hashtable.h"
@@ -674,6 +673,7 @@ KN MakeAttrSlotFolder(KonState* kstate, char* mod);
 // data structure apis end
 
 // common utils start
+KON_API KxStringBuffer* KON_ReadFileContent(const char* filePathOrigin);
 KON_API const char* KON_HumanFormatTime();
 
 KN KON_VectorToKonPairList(KonState* kstate, KxVector* vector);

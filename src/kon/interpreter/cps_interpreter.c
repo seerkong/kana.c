@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <assert.h>
-#include <tbox/tbox.h>
 #include "cps_interpreter.h"
 #include "keyword/prefix.h"
 

@@ -27,6 +27,8 @@ extern int32_t KxStringBuffer_BuffSize(KxStringBuffer* self);
 // Get the c string
 extern const char *KxStringBuffer_Cstr(KxStringBuffer* self);
 
+extern const char KxStringBuffer_CharAt(KxStringBuffer* self, int index);
+
 // Clear all data in the buffer
 extern void KxStringBuffer_Clear(KxStringBuffer* self);
 

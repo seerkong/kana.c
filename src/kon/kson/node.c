@@ -8,6 +8,80 @@
 #include "node.h"
 #include "../utils/number_utils.h"
 
+#include <pwd.h>
+#include <sys/types.h>
+#include <limits.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <string.h>
+#include <stdint.h>
+
+
+KxStringBuffer* KON_ReadFileContent(const char* filePathOrigin)
+{
+    int originPathStrLen = strlen(filePathOrigin);
+    if ((originPathStrLen + 1) > PATH_MAX) {
+        printf("file path exceeded");
+        exit(1);
+    }
+    char* replaceHomePath = (char*)calloc(PATH_MAX, sizeof(char));
+    // check if has user home prefix
+    if (filePathOrigin != NULL
+        && originPathStrLen > 2
+        && filePathOrigin[0] == '~'
+        && filePathOrigin[1] == '/'
+    ) {
+        struct passwd *pw = getpwuid(getuid());
+        const char *homeDir = pw->pw_dir;
+        int homeDirLen = strlen(homeDir);
+        // printf("the home path is %s\n", homeDir);
+
+        if (homeDirLen + originPathStrLen > PATH_MAX) {
+            // printf("file path exceeded");
+            exit(2);
+        }
+
+        memcpy(replaceHomePath, homeDir, homeDirLen);
+        // copy rest
+        memcpy(replaceHomePath + homeDirLen, filePathOrigin + 1, originPathStrLen - 1);
+    }
+    else {
+        strncpy(replaceHomePath, filePathOrigin, originPathStrLen);
+    }
+    // printf("replaceHomePath %s\n", replaceHomePath);
+    
+    char* absoluteFilePath = (char*)calloc(PATH_MAX, sizeof(char));
+    char *realpathRes = realpath(replaceHomePath, absoluteFilePath);
+    
+    free(replaceHomePath);
+    if (realpathRes == NULL) {
+        printf("abs file path exceeded");
+        exit(3);
+    }
+
+    // printf("absoluteFilePath %s\n", absoluteFilePath);
+
+
+    FILE* fp = fopen(absoluteFilePath, "r");
+    free(absoluteFilePath);
+    // open readonly file path
+    if (fp == NULL) {
+        printf("The file <%s> can not be opened.\n", absoluteFilePath);
+        return 1;
+    }
+    KxStringBuffer* sb = KxStringBuffer_New();
+
+    int ch;
+
+    ch = fgetc(fp);
+    while (ch != EOF) {
+        KxStringBuffer_NAppendChar(sb, ch, 1);
+        ch = fgetc(fp);
+    }
+    fclose(fp);
+    return sb;
+}
+
 
 const char* KON_HumanFormatTime()
 {

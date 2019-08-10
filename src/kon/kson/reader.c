@@ -1,5 +1,4 @@
 #include "reader.h"
-#include <tbox/tbox.h>
 
 void ExitTopBuilder(KonReader* reader);
 void AddValueToTopBuilder(KonReader* reader, KN value);
@@ -10,9 +9,7 @@ KonReader* KSON_ReaderInit(KonState* kstate)
     // init reader
     KonReader* reader = (KonReader*)malloc(sizeof(KonReader));
     KON_DEBUG("malloc reader %x", reader);
-    KON_DEBUG("before tb_assert_and_check_return_val");
-    tb_assert_and_check_return_val(reader, tb_null);
-    
+
     reader->Kstate = kstate;
     
     
@@ -22,30 +19,27 @@ KonReader* KSON_ReaderInit(KonState* kstate)
     reader->BuilderStack = BuilderStackInit();
     reader->StateStack = StateStackInit();
     reader->WordAsIdentifier = false;
-    
-    tb_assert_and_check_return_val(reader->BuilderStack, tb_null);
-    tb_assert_and_check_return_val(reader->StateStack, tb_null);
+
     return reader;
 }
 
-bool KSON_ReaderOpenStream(KonReader* reader, tb_stream_ref_t stream, bool isOwnedStream)
+bool KSON_ReaderFromFile(KonReader* reader, const char* sourceFilePath)
 {
-    KON_DEBUG("IsOwnedStream %d reader %x", isOwnedStream, reader);
-    reader->IsOwnedStream = isOwnedStream;
-    if (stream) {
-        bool openRes = KSON_TokenizerOpenStream(reader->Tokenizer, stream);
-        if (!openRes) {
-            return false;
-        }
-        reader->ReadStream = stream;
-    }
-    else {
-        return false;
-    }
+    KxStringBuffer* sb = KON_ReadFileContent(sourceFilePath);
+    bool res = KSON_ReaderFromCstr(reader, KxStringBuffer_Cstr(sb));
+    KxStringBuffer_Clear(sb);
+    return res;
+}
+
+bool KSON_ReaderFromCstr(KonReader* reader, const char* sourceCstr)
+{
+    reader->ReadStream = KxStringBuffer_New();
+    KxStringBuffer_AppendCstr(reader->ReadStream, sourceCstr);
+    KSON_TokenizerBegin(reader->Tokenizer, reader->ReadStream);
     return true;
 }
 
-bool IsSkipToken(tb_size_t event)
+bool IsSkipToken(int event)
 {
     if (event == KON_TOKEN_NONE
         || event == KON_TOKEN_WHITESPACE
@@ -59,7 +53,7 @@ bool IsSkipToken(tb_size_t event)
 }
 
 // { [ ( <
-bool IsContainerStartToken(tb_size_t event)
+bool IsContainerStartToken(int event)
 {
     if (event == KON_TOKEN_LIST_START
         || event == KON_TOKEN_VECTOR_START
@@ -73,7 +67,7 @@ bool IsContainerStartToken(tb_size_t event)
     }
 }
 
-bool IsContainerEndToken(tb_size_t event)
+bool IsContainerEndToken(int event)
 {
     if (event == KON_TOKEN_LIST_END
         || event == KON_TOKEN_VECTOR_END
@@ -91,7 +85,7 @@ bool IsContainerEndToken(tb_size_t event)
 // $[] $() $<> ${}
 // $. $[]. $(). ${}.
 // $e. $[]e. $()e. ${}e.
-bool IsWrapperToken(tb_size_t event)
+bool IsWrapperToken(int event)
 {
     if (event == KON_TOKEN_QUOTE_VECTOR
         || event == KON_TOKEN_QUOTE_LIST
@@ -115,7 +109,7 @@ bool IsWrapperToken(tb_size_t event)
     }
 }
 
-bool IsLiteralToken(tb_size_t event)
+bool IsLiteralToken(int event)
 {
     if (event == KON_TOKEN_KEYWORD_NIL
         || event == KON_TOKEN_KEYWORD_NULL
@@ -136,7 +130,7 @@ bool IsLiteralToken(tb_size_t event)
 }
 
 // % . | ;
-bool IsSyntaxToken(tb_size_t event)
+bool IsSyntaxToken(int event)
 {
     if (event == KON_TOKEN_APPLY
         || event == KON_TOKEN_PROC_PIPE
@@ -440,11 +434,11 @@ void ExitAllStackBuilders()
 
 KN KSON_Parse(KonReader* reader)
 {
-    tb_size_t initState = KON_READER_ROOT;
+    int initState = KON_READER_ROOT;
     StateStackPush(reader->StateStack, initState);
     KON_DEBUG("start");
 
-    tb_size_t event = KON_TOKEN_NONE;
+    int event = KON_TOKEN_NONE;
     while ((event = KSON_TokenizerNext(reader->Tokenizer)) && event != KON_TOKEN_EOF) {
         KSON_TokenToString(reader->Tokenizer);
         if (IsSkipToken(event)) {
@@ -637,10 +631,9 @@ KN KSON_Parse(KonReader* reader)
 
 void KSON_ReaderCloseStream(KonReader* reader)
 {
-    KSON_TokenizerCloseStream(reader->Tokenizer);
-    if (reader->IsOwnedStream) {
-        tb_stream_exit(reader->ReadStream);
-    }
+    KSON_TokenizerEnd(reader->Tokenizer);
+
+    KxStringBuffer_Clear(reader->ReadStream);
 }
 
 void KSON_ReaderExit(KonReader* reader)

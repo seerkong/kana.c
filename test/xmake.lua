@@ -18,6 +18,23 @@ add_linkdirs("/usr/local/lib", "/usr/lib")
 add_cxflags("-stdnolib", "-fno-strict-aliasing")
 add_ldflags("-L/usr/local/lib", "-lpthread", {force = true})
 
+target("test_tokenizer")
+    -- add the dependent target
+    -- add_deps("tbox")
+    add_deps("kon")
+
+    add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+    add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+
+    set_optimize("none")
+    set_symbols("debug")
+    add_defines("DEBUG")
+
+    -- make as a binary
+    set_kind("binary")
+
+    -- add the source files
+    add_files("kson/test_tokenizer.c")
 
 target("testreader")
     -- add the dependent target

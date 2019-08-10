@@ -1,11 +1,4 @@
 #include "value_builder.h"
-#include <tbox/tbox.h>
-
-#define BUILDER_VECTOR_GROW_SIZE 20
-// TODO
-static tb_void_t builder_vector_item_ptr_free(tb_element_ref_t element, tb_pointer_t buff)
-{
-}
 
 const char* BuilderTypeToCStr(KonBuilderType type)
 {

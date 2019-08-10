@@ -95,6 +95,16 @@ extern const char* KxStringBuffer_Cstr(KxStringBuffer* self)
     return self ? (self->BuffStart + self->HeadOffset) : NULL;
 }
 
+const char KxStringBuffer_CharAt(KxStringBuffer* self, int index)
+{
+    if (index >= self->Length) {
+        return '\0';
+    }
+    else {
+        return *(self->BuffStart + self->HeadOffset + index);
+    }
+}
+
 void KxStringBuffer_Clear(KxStringBuffer* self)
 {
     if (self != NULL) {
