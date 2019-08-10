@@ -17,7 +17,7 @@ bool IsSelfEvaluated(KN source)
         // .append
         || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_MSG_SIGNAL)
         // $abc
-        || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_IDENTIFIER)
+        || (KON_IS_IDENTIFIER(source))
         // $'abc'
         || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_SYM_STRING)
         || KON_IS_QUOTE(source)
@@ -491,8 +491,10 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
         KN first = KON_CAR(words);
         if (KON_IsPrefixMarcro(first)) {
             const char* prefix = KON_UNBOX_SYMBOL(first);
-
-            if (strcmp(prefix, "if") == 0) {
+            if (strcmp(prefix, "apply") == 0) {
+                bounce = KON_EvalPrefixApply(kstate, KON_CDR(words), env, cont);
+            }
+            else if (strcmp(prefix, "if") == 0) {
                 bounce = KON_EvalPrefixIf(kstate, KON_CDR(words), env, cont);
             }
             else if (strcmp(prefix, "let") == 0) {
@@ -524,6 +526,9 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             }
             else if (strcmp(prefix, "call-cc") == 0) {
                 bounce = KON_EvalPrefixCallcc(kstate, KON_CDR(words), env, cont);
+            }
+            else if (strcmp(prefix, "eval") == 0) {
+                bounce = KON_EvalPrefixEval(kstate, KON_CDR(words), env, cont);
             }
             else if (strcmp(prefix, "for") == 0) {
                 bounce = KON_EvalPrefixFor(kstate, KON_CDR(words), env, cont);

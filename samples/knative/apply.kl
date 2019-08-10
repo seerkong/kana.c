@@ -1,0 +1,13 @@
+[
+  [lambda foo []
+    [writeln % "code in foo"]
+    $+
+  ]
+
+  [lambda bar []
+    [writeln % "code in bar"]
+    $[10 10 10]
+  ]
+
+  [apply [foo %] [bar %] ]
+]

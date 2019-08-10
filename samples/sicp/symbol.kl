@@ -1,0 +1,44 @@
+`` SICP 2.3
+[
+  `[let a 222]
+  `[let b 2]
+  `[let c 5]
+  `[list-init % a b]
+
+  `[list-init % $a $b]
+
+  `[list-init % $a b]
+  `[car % [list-init % $a b]]
+  `[writeln % [car % $[$a b c]]]
+  `[cdr % $[a b c]]
+  `[eq % $[] #nil;]
+  `[neq % $[] 5]
+  `[car % $[]]
+
+  `[let c $[a b c]]
+  `[for [let iter c] [neq % iter #nil;] [set iter [cdr % iter]]
+  `  [writeln % [car % iter]]
+  `]
+
+  `[lambda memq [$item $x]
+  `  [cond
+  `    [[is-nil % x]
+  `      #f;
+  `    ]
+  `    [[eq % item [car % x]]
+  `      x
+  `    ]
+  `    [else
+  `      [memq % item [cdr % x]]
+  `    ]
+  `  ]
+  `]
+
+  `[memq % $apple $[pear]]
+  `[list-init % [list-init % $george]]
+  `[is-list %  #nil;]
+  `[is-pair % $[a short list]]
+  `[list-append % $[x y] $a]
+
+  
+]

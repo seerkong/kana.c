@@ -1,7 +1,8 @@
 #ifndef KON_INTERPRETER_KEYWORD_PREFIX_H
 #define KON_INTERPRETER_KEYWORD_PREFIX_H
 
-
+#include "prefix_eval.h"
+#include "prefix_apply.h"
 #include "prefix_if.h"
 #include "prefix_let.h"
 #include "prefix_set.h"

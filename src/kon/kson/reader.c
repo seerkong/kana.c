@@ -180,12 +180,12 @@ KN MakeSymbol(KonReader* reader, KonTokenKind event)
     
     else if (event == KON_TOKEN_SYM_WORD) {
         // if in quote or quasiquote scope, convert word to symbol
-        if (reader->WordAsIdentifier) {
-            value->Type = KON_SYM_IDENTIFIER;
-        }
-        else {
+        // if (reader->WordAsIdentifier) {
+        //     value->Type = KON_SYM_IDENTIFIER;
+        // }
+        // else {
             value->Type = KON_SYM_WORD;
-        }
+        // }
     }
     else if (event == KON_TOKEN_SYM_VARIABLE) {
         value->Type = KON_SYM_VARIABLE;

@@ -149,9 +149,23 @@ TEST Native_ReturnFromBlk(void) {
 }
 
 TEST Native_Quote(void) {
-    char* path = "~/lang/konscript/kon-c/samples/sicp/symbol.kl";
+    char* path = "~/lang/konscript/kon-c/samples/knative/symbol.kl";
     KN result = KON_EvalFile(kstate, path);
     // ASSERT_EQ_FMT(KON_MAKE_FIXNUM(42), result, "%d");
+    PASS();
+}
+
+TEST Native_Eval(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/eval.kl";
+    KN result = KON_EvalFile(kstate, path);
+    ASSERT_EQ_FMT(KON_MAKE_FIXNUM(4), result, "%d");
+    PASS();
+}
+
+TEST Native_Apply(void) {
+    char* path = "~/lang/konscript/kon-c/samples/knative/apply.kl";
+    KN result = KON_EvalFile(kstate, path);
+    ASSERT_EQ_FMT(KON_MAKE_FIXNUM(30), result, "%d");
     PASS();
 }
 
@@ -185,7 +199,11 @@ SUITE(suite) {
     RUN_TEST(Native_ReturnFromBlk);
     
     
-    // RUN_TEST(Native_Quote);
+    RUN_TEST(Native_Quote);
+
+    RUN_TEST(Native_Eval);
+
+    RUN_TEST(Native_Apply);
     
     // RUN_TEST(Native_AttrSlot);
     // RUN_TEST(Native_MkDispatcher);

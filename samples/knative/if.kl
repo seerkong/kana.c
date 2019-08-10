@@ -1,5 +1,5 @@
 [
-  [if #f;
+  [if #t;
     [displayln % "if branch"]
     [displayln % "if branch2"]
   else

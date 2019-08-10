@@ -36,7 +36,7 @@ target("test_tokenizer")
     -- add the source files
     add_files("kson/test_tokenizer.c")
 
-target("testreader")
+target("test_reader")
     -- add the dependent target
     -- add_deps("tbox")
     add_deps("kon")
@@ -52,9 +52,9 @@ target("testreader")
     set_kind("binary")
 
     -- add the source files
-    add_files("kson/testreader.c")
+    add_files("kson/test_reader.c")
 
-target("testeval")
+target("test_eval")
     -- add the dependent target
     -- add_deps("tbox")
     add_deps("kon")
@@ -70,7 +70,7 @@ target("testeval")
     set_kind("binary")
 
     -- add the source files
-    add_files("klang/testeval.c")
+    add_files("klang/test_eval.c")
 
 target("test_table")
     -- add the dependent target
