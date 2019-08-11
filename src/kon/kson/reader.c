@@ -112,7 +112,7 @@ bool IsWrapperToken(int event)
 bool IsLiteralToken(int event)
 {
     if (event == KON_TOKEN_KEYWORD_NIL
-        || event == KON_TOKEN_KEYWORD_NULL
+        || event == KON_TOKEN_KEYWORD_UNDEF
         || event == KON_TOKEN_KEYWORD_UKN
         || event == KON_TOKEN_KEYWORD_TRUE
         || event == KON_TOKEN_KEYWORD_FALSE
@@ -263,8 +263,8 @@ KN MakeLiteral(KonReader* reader, KonTokenKind event)
     if (event == KON_TOKEN_KEYWORD_NIL) {
         value = KON_NIL;
     }
-    else if (event == KON_TOKEN_KEYWORD_NULL) {
-        value = KON_NULL;
+    else if (event == KON_TOKEN_KEYWORD_UNDEF) {
+        value = KON_UNDEF;
     }
     else if (event == KON_TOKEN_KEYWORD_UKN) {
         value = KON_UKN;

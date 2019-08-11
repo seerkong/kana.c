@@ -128,7 +128,7 @@ KonBuilder* CreateTablePairBuilder()
     }
     builder->Type = KON_BUILDER_TABLE_PAIR;
     builder->TablePair.Key = KxStringBuffer_New();
-    builder->TablePair.Value = KON_NULL;
+    builder->TablePair.Value = KON_UNDEF;
     return builder;
 }
 
@@ -162,10 +162,10 @@ KonBuilder* CreateCellBuilder()
         return NULL;
     }
     builder->Type = KON_BUILDER_CELL;
-    builder->Cell.Core = KON_NULL;
-    builder->Cell.Vector = KON_NULL;
-    builder->Cell.Table = KON_NULL;
-    builder->Cell.List = KON_NULL;
+    builder->Cell.Core = KON_UNDEF;
+    builder->Cell.Vector = KON_UNDEF;
+    builder->Cell.Table = KON_UNDEF;
+    builder->Cell.List = KON_UNDEF;
     return builder;
 }
 
@@ -208,7 +208,7 @@ KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind)
         return NULL;
     }
     builder->Type = type;
-    builder->Wrapper.Inner = KON_NULL;
+    builder->Wrapper.Inner = KON_UNDEF;
     builder->Wrapper.TokenKind = tokenKind;
     return builder;
 }
@@ -223,7 +223,7 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
     KN inner = builder->Wrapper.Inner;
     KonBuilderType type = builder->Type;
     KonTokenKind tokenKind = builder->Wrapper.TokenKind;
-    KN result = KON_NULL;
+    KN result = KON_UNDEF;
     if (type == KON_BUILDER_QUOTE) {
         KonQuote* tmp = KON_ALLOC_TYPE_TAG(kstate, KonQuote, KON_T_QUOTE);
         tmp->Inner = inner;

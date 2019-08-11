@@ -43,7 +43,7 @@ KN KON_EvalFile(KonState* kstate, char* filePath)
         exit(1);
     }
 
-    KN result = KON_NULL;
+    KN result = KON_UNDEF;
 
     bool openRes = KSON_ReaderFromFile(reader, filePath);
     if (openRes) {

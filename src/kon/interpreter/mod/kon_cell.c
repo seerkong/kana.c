@@ -5,10 +5,10 @@
 KN KonCell_Init(KonState* kstate, KN args)
 {
     KonCell* value = KON_ALLOC_TYPE_TAG(kstate, KonCell, KON_T_CELL);
-    value->Core = KON_NULL;
-    value->Vector = KON_NULL;
-    value->Table = KON_NULL;
-    value->List = KON_NULL;
+    value->Core = KON_UNDEF;
+    value->Vector = KON_UNDEF;
+    value->Table = KON_UNDEF;
+    value->List = KON_UNDEF;
     return value;
 }
 
@@ -28,7 +28,7 @@ KN KonCell_GetCore(KonState* kstate, KN args)
 KN KonCell_DelCore(KonState* kstate, KN args)
 {
     KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Core = KON_NULL;
+    self->Core = KON_UNDEF;
     return self;
 }
 
@@ -48,7 +48,7 @@ KN KonCell_GetVector(KonState* kstate, KN args)
 KN KonCell_DelVector(KonState* kstate, KN args)
 {
     KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Vector = KON_NULL;
+    self->Vector = KON_UNDEF;
     return self;
 }
 
@@ -76,7 +76,7 @@ KN KonCell_GetTable(KonState* kstate, KN args)
 KN KonCell_DelTable(KonState* kstate, KN args)
 {
     KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Table = KON_NULL;
+    self->Table = KON_UNDEF;
     return self;
 }
 
@@ -104,7 +104,7 @@ KN KonCell_GetList(KonState* kstate, KN args)
 KN KonCell_DelList(KonState* kstate, KN args)
 {
     KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->List = KON_NULL;
+    self->List = KON_UNDEF;
     return self;
 }
 

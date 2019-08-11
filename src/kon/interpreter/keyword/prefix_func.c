@@ -49,7 +49,7 @@ KonTrampoline* KON_EvalPrefixFunc(KonState* kstate, KN expression, KN env, KonCo
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     KN first = KON_CAR(expression);
     KN param = KON_NIL;
-    KN funcName = KON_NULL;
+    KN funcName = KON_UNDEF;
     KN body = KON_NIL;
     if (KON_IS_WORD(first)) {
         funcName = first;

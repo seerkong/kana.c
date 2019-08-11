@@ -30,7 +30,7 @@ KN KON_PrimaryEqv(KonState* kstate, KN args)
 {
     KN left = KON_CAR(args);
     KN right = KON_CADR(args);
-    if (left == KON_NULL || left == KON_UKN) {
+    if (left == KON_UNDEF || left == KON_UKN) {
         return (left == right) ? KON_TRUE: KON_FALSE;
     }
     else if (KON_IS_NIL(left) || KON_IS_NIL(right)) {
@@ -68,7 +68,7 @@ KN KON_PrimaryEqv(KonState* kstate, KN args)
 KN KON_PrimaryEq(KonState* kstate, KN args)
 {
     KN left = KON_CAR(args);
-    if (left == KON_NULL || left == KON_UKN
+    if (left == KON_UNDEF || left == KON_UKN
         || KON_IS_NIL(left)
         || KON_IS_BOOLEAN(left)
         || KON_IS_FIXNUM(left)
@@ -173,7 +173,7 @@ KN KON_PrimaryParse(KonState* kstate, KN args)
     // KN item = KON_CAR(args);
     
     // return item;
-    return KON_NULL;
+    return KON_UNDEF;
 }
 
 KN KON_PrimaryIsTrue(KonState* kstate, KN args)
@@ -197,7 +197,7 @@ KN KON_PrimaryIsNil(KonState* kstate, KN args)
 KN KON_PrimaryIsNull(KonState* kstate, KN args)
 {
     KN item = KON_CAR(args);
-    return (KON_IS_NULL(item)) ? KON_TRUE : KON_FALSE;
+    return (KON_IS_UNDEF(item)) ? KON_TRUE : KON_FALSE;
 }
 
 KN KON_PrimaryIsUkn(KonState* kstate, KN args)
@@ -225,10 +225,10 @@ KN KON_PrimaryIsFlonum(KonState* kstate, KN args)
 }
 
 
-KN KON_PrimaryIsImmediateSymbol(KonState* kstate, KN args)
+KN KON_PrimaryIsImdtSymbol(KonState* kstate, KN args)
 {
     KN item = KON_CAR(args);
-    return (KON_IS_IMMEDIATE_SYMBOL(item)) ? KON_TRUE : KON_FALSE;
+    return (KON_IS_IMDT_SYMBOL(item)) ? KON_TRUE : KON_FALSE;
 }
 
 KN KON_PrimaryIsChar(KonState* kstate, KN args)
@@ -429,8 +429,8 @@ KN KON_PrimaryOpExport(KonState* kstate, KonEnv* env)
     KON_EnvDefine(kstate, env, "is-flonum",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsFlonum)
     );
-    KON_EnvDefine(kstate, env, "is-immediate-symbol",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsImmediateSymbol)
+    KON_EnvDefine(kstate, env, "is-imdt-symbol",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsImdtSymbol)
     );
     KON_EnvDefine(kstate, env, "is-char",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsChar)

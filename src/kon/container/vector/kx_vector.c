@@ -27,14 +27,14 @@ KxVector* KxVector_Init()
     return self;
 }
 
-// alloc pool
+// alloc pool, default value set to KX_VECTOR_UNDEF
 XN* KxVector_AllocPoolWithCapacity(int32_t capacity)
 {
     XN* poolStart = (XN*)calloc(capacity, sizeof(XN));
     if (poolStart == NULL) {
         return NULL;
     }
-    memset(poolStart, KX_VECTOR_NULL, capacity);
+    memset(poolStart, KX_VECTOR_UNDEF, capacity);
     return poolStart;
 }
 
@@ -60,7 +60,7 @@ KxVector* KxVector_InitWithSize(int32_t size)
     if (self == NULL) {
         return NULL;
     }
-    memset(self->BuffStart, KX_VECTOR_NULL, size);
+    memset(self->BuffStart, KX_VECTOR_UKN, size);
     self->Length = size;
     return self;
 }
@@ -81,7 +81,7 @@ int32_t KxVector_Clear(KxVector* self)
 {
     self->Length = 0;
     self->HeadOffset = 0;
-    memset(self->BuffStart, KX_VECTOR_NULL, self->BuffSize);
+    memset(self->BuffStart, KX_VECTOR_UNDEF, self->BuffSize);
 }
 
 int32_t KxVector_BuffSize(KxVector* self)
@@ -235,7 +235,7 @@ XN KxVector_Shift(KxVector* self)
 XN KxVector_AtIndex(KxVector* self, int32_t index)
 {
     if (index < 0 || index >= self->Length) {
-        return KX_VECTOR_NULL;
+        return KX_VECTOR_UNDEF;
     }
     XN* slotPtr = self->BuffStart + self->HeadOffset + index;
     XN value = *(slotPtr);

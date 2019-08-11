@@ -21,9 +21,9 @@ typedef struct _KxVector KxVector;
 // typedef void* XN;
 typedef volatile union _Kon* XN;
 
-#define KX_VECTOR_UKN 0x3e     // 00111110
-#define KX_VECTOR_NULL 0x33e    // 11000111110
-#define KX_VECTOR_NIL 0x43e    // 10000111110
+#define KX_VECTOR_UNDEF 0x0e
+#define KX_VECTOR_NIL 0x1e
+#define KX_VECTOR_UKN 0x2e
 
 struct _KxVector {
     int32_t BuffSize;
@@ -39,7 +39,7 @@ KxVector* KxVector_Init();
 // set capacity, but item num is 0
 KxVector* KxVector_InitWithCapacity(int32_t initCapacity);
 
-// set capacity, and item num is `size`, default value set to KX_VECTOR_NULL
+// set capacity, and item num is `size`, default value set to KX_VECTOR_UKN
 KxVector* KxVector_InitWithSize(int32_t size);
 
 int32_t KxVector_Destroy(KxVector* self);

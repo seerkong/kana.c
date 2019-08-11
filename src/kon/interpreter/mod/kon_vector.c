@@ -18,7 +18,7 @@ KN KonVector_InitWithCapacity(KonState* kstate, KN args)
     return value;
 }
 
-// set capacity, and item num is `size`, default value set to KON_NULL
+// set capacity, and item num is `size`, default value set to KON_UKN
 KN KonVector_InitWithSize(KonState* kstate, KN args)
 {
     KN size = KON_CAR(args);

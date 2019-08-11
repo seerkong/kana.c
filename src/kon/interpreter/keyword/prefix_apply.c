@@ -49,7 +49,7 @@ KN AfterApplyArgsExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* c
 
     KON_DEBUG("applySym %s", KON_StringToCstr(KON_ToFormatString(kstate, applySym, true, 0, "  ")));
 
-    KN proc = KON_NULL;
+    KN proc = KON_UNDEF;
     // lookup procedure in env
     if (KON_IS_IDENTIFIER(applySym) || KON_IS_VARIABLE(applySym) || KON_IS_WORD(applySym)) {
         proc = KON_EnvLookup(kstate, env, KON_SymbolToCstr(applySym));

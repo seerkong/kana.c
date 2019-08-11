@@ -210,7 +210,7 @@ TEST Table_DelByKey(void) {
     KxHashTable_PushKv(table, "efg", value2);
 
     KxHashTable_DelByKey(table, "abc");
-    ASSERT_EQ_FMT(KX_HASH_TABLE_NULL, KxHashTable_AtKey(table, "abc"), "%x");
+    ASSERT_EQ_FMT(KX_HASH_TABLE_UNDEF, KxHashTable_AtKey(table, "abc"), "%x");
     ASSERT_EQ_FMT(value2, KxHashTable_ValAtIndex(table, 0), "%s");
     PASS();
 }
@@ -225,7 +225,7 @@ TEST Table_DelByIndex(void) {
     KxHashTable_PushKv(table, "efg", value2);
 
     KxHashTable_DelByIndex(table, 0);
-    ASSERT_EQ_FMT(KX_HASH_TABLE_NULL, KxHashTable_AtKey(table, "abc"), "%x");
+    ASSERT_EQ_FMT(KX_HASH_TABLE_UNDEF, KxHashTable_AtKey(table, "abc"), "%x");
     ASSERT_EQ_FMT(value2, KxHashTable_ValAtIndex(table, 0), "%s");
     PASS();
 }

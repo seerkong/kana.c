@@ -56,8 +56,8 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_KEYWORD_NIL:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_NIL");
             break;
-        case KON_TOKEN_KEYWORD_NULL:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_NULL");
+        case KON_TOKEN_KEYWORD_UNDEF:
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_UNDEF");
             break;
         case KON_TOKEN_KEYWORD_UKN:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_UKN");
@@ -604,10 +604,10 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 tokenizer->TokenKind = KON_TOKEN_KEYWORD_NIL;
                 break;
             }
-            else if (nextChars[1] == 'n' && nextChars[2] == 'u') {
-                UpdateTokenContent(tokenizer, "#null;");
+            else if (nextChars[1] == 'u' && nextChars[2] == 'n') {
+                UpdateTokenContent(tokenizer, "#undef;");
                 ForwardToken(tokenizer, 6);
-                tokenizer->TokenKind = KON_TOKEN_KEYWORD_NULL;
+                tokenizer->TokenKind = KON_TOKEN_KEYWORD_UNDEF;
                 break;
             }
             else if (nextChars[1] == 'u' && nextChars[2] == 'k') {

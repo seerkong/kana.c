@@ -24,8 +24,8 @@ typedef enum
     KON_TOKEN_CELL_END,     // >
 
     KON_TOKEN_KEYWORD_NIL,  //  #nil;   list end
-    KON_TOKEN_KEYWORD_NULL,  //  #null;  container placeholder
-    KON_TOKEN_KEYWORD_UKN,  //  #ukn; unknown
+    KON_TOKEN_KEYWORD_UNDEF,  //  #undef;
+    KON_TOKEN_KEYWORD_UKN,  //  #ukn; unknown, container placeholder
     KON_TOKEN_KEYWORD_TRUE,  //  #t;
     KON_TOKEN_KEYWORD_FALSE,  //  #f;
     KON_TOKEN_KEYWORD_EITHER,  //  either #either,t,0.4;

@@ -36,57 +36,57 @@ typedef int kon_int32_t;
 // tagging system
 //   bits end in     1:  fixnum
 //                  00:  pointer
-//                 010:  string cursor (optional)
-//                0110:  immediate symbol (optional)
-//            00001110:  immediate flonum (optional)
-//            00011110:  char
-//            00101110:  reader label (optional)
-//            00111110:  unique immediate (NULL, TRUE, FALSE)
+//                 010:  immediate symbol
+//                0110:  reserved as 8bit tag flag
+//                1110:  unique label (NIL,NULL,TRUE,FALSE, etc.)
+//            00010110:  char
+//            00100110:  type label (optional)
+//            00110110:  extended label (optional)
 
 
 #define KON_FIXNUM_BITS 1
 #define KON_POINTER_BITS 2
-#define KON_STRING_CURSOR_BITS 3
-#define KON_IMMEDIATE_BITS 4
+#define KON_IMDT_SYMBOL_BITS 3
+#define KON_UNIQUE_LABEL_BITS 4
 #define KON_EXTENDED_BITS 8
 
 #define KON_FIXNUM_MASK ((1<<KON_FIXNUM_BITS)-1)
 #define KON_POINTER_MASK ((1<<KON_POINTER_BITS)-1)
-#define KON_STRING_CURSOR_MASK ((1<<KON_STRING_CURSOR_BITS)-1)
-#define KON_IMMEDIATE_MASK ((1<<KON_IMMEDIATE_BITS)-1)
+#define KON_IMDT_SYMBOL_MASK ((1<<KON_IMDT_SYMBOL_BITS)-1)
+#define KON_UNIQUE_LABEL_MASK ((1<<KON_UNIQUE_LABEL_BITS)-1)
 #define KON_EXTENDED_MASK ((1<<KON_EXTENDED_BITS)-1)
 
 #define KON_POINTER_TAG 0
 #define KON_FIXNUM_TAG 1
-#define KON_STRING_CURSOR_TAG 2
-#define KON_ISYMBOL_TAG 6
-#define KON_IFLONUM_TAG 14
-#define KON_CHAR_TAG 30
-#define KON_READER_LABEL_TAG 46
-#define KON_EXTENDED_TAG 62
+#define KON_IMDT_SYMBOL_TAG 2
+#define KON_UNIQUE_LABEL_TAG 14
 
-// 00111110前面的高位字节作为n
-// 2: 1000111110
-// 比如3： 1100111110
-// 8: 100000111110
-#define KON_MAKE_IMMEDIATE(n)  ((KN) ((n<<KON_EXTENDED_BITS) \
-                                          + KON_EXTENDED_TAG))
+#define KON_CHAR_TAG 22
+#define KON_TYPE_LABEL_TAG 38
+#define KON_EXTENDED_TAG 54
 
-// 62 0x3e unknown, container empty placeholder
-// like objective c [NSNull null]
-#define KON_UKN  KON_MAKE_IMMEDIATE(0)
-// 318 0x13e
-#define KON_TRUE   KON_MAKE_IMMEDIATE(1)
-// 574 0x23e
-#define KON_FALSE  KON_MAKE_IMMEDIATE(2)
-// 830 0x33e, undefined, no value here a kind of exception
+// 010前面的高位字节作为n
+// 2: 10010
+// 比如3： 11010
+// 8: 1000010
+#define KON_MAKE_UNIQUE_LABEL(n)  ((KN) ((n<<KON_UNIQUE_LABEL_BITS) \
+                                          + KON_UNIQUE_LABEL_TAG))
+
+// undefined, no value here a kind of exception
 // like javascript undefined
-#define KON_NULL   KON_MAKE_IMMEDIATE(3)
-// 1086 0x43e ref end of a data structure like list, tree, graph ...
+#define KON_UNDEF  KON_MAKE_UNIQUE_LABEL(0) // 14 0x0e
+
+// ref end of a data structure like list, tree, graph ...
 // representes a no value struct/class instance pointer
 // KON_IS_LIST(KON_NIL) == KON_TRUE
-#define KON_NIL   KON_MAKE_IMMEDIATE(4)
-#define KON_EOF    KON_MAKE_IMMEDIATE(5) /* 1342 0x53e */
+#define KON_NIL   KON_MAKE_UNIQUE_LABEL(1)  // 30 0x1e
+
+// unknown, container empty placeholder
+// like objective c [NSNull null]
+#define  KON_UKN  KON_MAKE_UNIQUE_LABEL(2)  // 46 0x2e
+#define KON_TRUE   KON_MAKE_UNIQUE_LABEL(3) // 62 0x3e
+#define KON_FALSE  KON_MAKE_UNIQUE_LABEL(4) // 78 0x4e
+#define KON_EOF    KON_MAKE_UNIQUE_LABEL(5) // 94 0x5e
 
 // tagging system end
 ////
@@ -102,7 +102,7 @@ typedef enum {
     KON_T_UNIQUE_IMMDT,   // 00111110
     KON_T_BOOLEAN,    // a sub type of unique immediate
     KON_T_UKN,
-    KON_T_NULL,
+    KON_T_UNDEF,
     KON_T_NIL,
 
     // determined by tagging system and ((KonBase*)x)->Tag
@@ -474,12 +474,12 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 #define KON_IS_TRUE(x)    ((x) != KON_FALSE)
 #define KON_IS_FALSE(x)      ((x) == KON_FALSE)
 #define KON_IS_UKN(x)    ((x) == KON_UKN)
-#define KON_IS_NULL(x)    ((x) == KON_NULL)
+#define KON_IS_UNDEF(x)    ((x) == KON_UNDEF)
 #define KON_IS_NIL(x)    ((x) == KON_NIL || (KON_CHECK_TAG(x, KON_T_QUOTE) && KON_QUOTE_TYPE(x) == KON_QUOTE_LIST && ((KonQuote*)x)->Inner == KON_NIL))
 #define KON_IS_POINTER(x) (((kon_uint_t)(size_t)(x) & KON_POINTER_MASK) == KON_POINTER_TAG)
 #define KON_IS_FIXNUM(x)  (((kon_uint_t)(x) & KON_FIXNUM_MASK) == KON_FIXNUM_TAG)
 
-#define KON_IS_IMMEDIATE_SYMBOL(x) (((kon_uint_t)(x) & KON_IMMEDIATE_MASK) == KON_ISYMBOL_TAG)
+#define KON_IS_IMDT_SYMBOL(x) (((kon_uint_t)(x) & KON_IMDT_SYMBOL_BITS) == KON_IMDT_SYMBOL_TAG)
 #define KON_IS_CHAR(x)    (((kon_uint_t)(x) & KON_EXTENDED_MASK) == KON_CHAR_TAG)
 #define KON_IS_BOOLEAN(x) (((x) == KON_TRUE) || ((x) == KON_FALSE))
 
@@ -530,7 +530,7 @@ static inline KonType kon_type(KN obj) {
   if (KON_IS_FIXNUM(obj) || KON_IS_FLONUM(obj))  return KON_T_NUMBER;
   if (obj == KON_TRUE || obj == KON_FALSE) return KON_T_BOOLEAN;
   if (obj == KON_UKN)  return KON_T_UKN;
-  if (obj == KON_NULL)  return KON_T_NULL;
+  if (obj == KON_UNDEF)  return KON_T_UNDEF;
   if (obj == KON_NIL)  return KON_T_NIL;
   return (((KonBase*)(obj))->Tag);
 }

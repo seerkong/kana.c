@@ -21,9 +21,10 @@ typedef struct _KxHashTableValEntry* KxHashTableIter;
 typedef volatile union _Kon* XN;
 
 #define KX_HASH_TABLE_REHASH_THRESHOLD 0.25
-#define KX_HASH_TABLE_UKN 0x3e     // 62 00111110
-#define KX_HASH_TABLE_NULL 0x33e    // 830 11000111110
-#define KX_HASH_TABLE_NIL 0x43e    // 1086 10000111110
+
+#define KX_HASH_TABLE_UNDEF 0x0e
+#define KX_HASH_TABLE_NIL 0x1e
+#define KX_HASH_TABLE_UKN 0x2e
 
 struct _KxHashTable {
     uint32_t HashSize;  // hash vector size 2**n

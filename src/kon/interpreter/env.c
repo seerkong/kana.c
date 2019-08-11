@@ -36,7 +36,7 @@ KN KON_EnvDefine(KonState* kstate, KonEnv* env, const char* key, KN value)
 KN KON_EnvLookup(KonState* kstate, KonEnv* env, const char* key)
 {
     KN value = KxHashTable_AtKey(CAST_Kon(Env, env)->Bindings, key);
-    if (value && value != KON_NULL) {
+    if (value && value != KON_UNDEF) {
         return value;
     }
     else if (CAST_Kon(Env, env)->Parent == KON_NIL) {
@@ -72,7 +72,7 @@ KN KON_EnvDispatcherDefine(KonState* kstate, KonEnv* env, const char* key, KN va
 KN KON_EnvDispatcherLookup(KonState* kstate, KonEnv* env, const char* key)
 {
     KN value = KxHashTable_AtKey(CAST_Kon(Env, env)->MsgDispatchers, key);
-    if (value && value != KON_NULL) {
+    if (value && value != KON_UNDEF) {
         return value;
     }
     else if (CAST_Kon(Env, env)->Parent == KON_NIL) {

@@ -185,8 +185,8 @@ KN KON_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char
     else if (source == KON_FALSE) {
         return KON_MakeString(kstate, "#f;");
     }
-    else if (source == KON_NULL) {
-        return KON_MakeString(kstate, "#null;");
+    else if (source == KON_UNDEF) {
+        return KON_MakeString(kstate, "#undef;");
     }
     else if (KON_IS_CONTINUATION(source)) {
         return KON_MakeString(kstate, "<continuation>");
@@ -749,13 +749,13 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
     if (newLine) {
         KxStringBuffer_AppendCstr(result->String, "<");
         
-        if (name != KON_NULL) {
+        if (name != KON_UNDEF) {
             KN nameToKonStr = KON_ToFormatString(kstate, name, true, depth, padding);
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(nameToKonStr));
         }
         KxStringBuffer_AppendCstr(result->String, "\n");
 
-        if (innerTable != KON_NULL) {
+        if (innerTable != KON_UNDEF) {
             AddLeftPadding(result->String, depth, padding);
             KxStringBuffer_AppendCstr(result->String, padding);
 
@@ -765,7 +765,7 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
             KxStringBuffer_AppendCstr(result->String, "\n");
         }
         
-        if (innerVector != KON_NULL) {
+        if (innerVector != KON_UNDEF) {
             AddLeftPadding(result->String, depth, padding);
             KxStringBuffer_AppendCstr(result->String, padding);
 
@@ -774,7 +774,7 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
             KxStringBuffer_AppendCstr(result->String, "\n");
         }
         
-        if (innerList != KON_NULL) {
+        if (innerList != KON_UNDEF) {
             AddLeftPadding(result->String, depth, padding);
             KxStringBuffer_AppendCstr(result->String, padding);
 
@@ -790,26 +790,26 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
     else {
         KxStringBuffer_AppendCstr(result->String, "<");
 
-        if (name != KON_NULL) {
+        if (name != KON_UNDEF) {
             KN nameToKonStr = KON_ToFormatString(kstate, name, true, depth, padding);
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(nameToKonStr));
         }
 
         
-        if (innerTable != KON_NULL) {
+        if (innerTable != KON_UNDEF) {
             KxStringBuffer_AppendCstr(result->String, " ");
             KN innerTableToKonStr = KON_ToFormatString(kstate, innerTable, false, depth + 1, padding);
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(innerTableToKonStr));
         }
 
         
-        if (innerVector != KON_NULL) {
+        if (innerVector != KON_UNDEF) {
             KxStringBuffer_AppendCstr(result->String, " ");
             KN innerVectorToKonStr = KON_ToFormatString(kstate, innerVector, false, depth + 1, padding);
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(innerVectorToKonStr));
         }
 
-        if (innerList != KON_NULL) {
+        if (innerList != KON_UNDEF) {
             KxStringBuffer_AppendCstr(result->String, " ");
             KN innerListToKonStr = KON_ToFormatString(kstate, innerList, false, depth + 1, padding);
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(innerListToKonStr));
@@ -832,14 +832,14 @@ KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef
 KN MakeMsgDispatcher(KonState* kstate)
 {
     KonMsgDispatcher* result = KON_ALLOC_TYPE_TAG(kstate, KonMsgDispatcher, KON_T_MSG_DISPATCHER);
-    result->Name = KON_NULL;
-    result->OnApplyArgs = KON_NULL;
-    result->OnSelectPath = KON_NULL;
-    result->OnMethodCall = KON_NULL;
-    result->OnVisitVector = KON_NULL;
-    result->OnVisitTable = KON_NULL;
-    result->OnVisitCell = KON_NULL;
-    result->Config = KON_NULL;
+    result->Name = KON_UNDEF;
+    result->OnApplyArgs = KON_UNDEF;
+    result->OnSelectPath = KON_UNDEF;
+    result->OnMethodCall = KON_UNDEF;
+    result->OnVisitVector = KON_UNDEF;
+    result->OnVisitTable = KON_UNDEF;
+    result->OnVisitCell = KON_UNDEF;
+    result->Config = KON_UNDEF;
     return result;
 }
 

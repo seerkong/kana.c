@@ -177,7 +177,7 @@ uint32_t KxHashTable_KeyVerifyCode(char* key, int keyLen, uint32_t hashCode)
 KxHashTableKeyEntry* KxHashTable_GetKeyEntry(KxHashTable* self, char* key)
 {
     if (key == NULL) {
-        return KX_HASH_TABLE_NULL;
+        return KX_HASH_TABLE_UNDEF;
     }
     uint32_t keyLen = strlen(key);
     uint32_t hashCode = KxHashTable_KeyHashCode(key, keyLen);
@@ -187,7 +187,7 @@ KxHashTableKeyEntry* KxHashTable_GetKeyEntry(KxHashTable* self, char* key)
     KxHashTableKeyEntry* bucket = self->Buckets[hashIndex];
 
     if (bucket == KX_HASH_TABLE_NIL) {
-        return KX_HASH_TABLE_NULL;
+        return KX_HASH_TABLE_UNDEF;
     }
     else {
         KxHashTableKeyEntry* iter = bucket;
@@ -202,7 +202,7 @@ KxHashTableKeyEntry* KxHashTable_GetKeyEntry(KxHashTable* self, char* key)
             iter = next;
         }
         if (iter == KX_HASH_TABLE_NIL) {
-            return KX_HASH_TABLE_NULL;
+            return KX_HASH_TABLE_UNDEF;
         }
         else {
             return iter;
@@ -213,7 +213,7 @@ KxHashTableKeyEntry* KxHashTable_GetKeyEntry(KxHashTable* self, char* key)
 bool KxHashTable_HasKey(KxHashTable* self, char* key)
 {
     KxHashTableKeyEntry* keyEntry = KxHashTable_GetKeyEntry(self, key);
-    if (keyEntry == KX_HASH_TABLE_NULL) {
+    if (keyEntry == KX_HASH_TABLE_UNDEF) {
         return false;
     }
     else {
@@ -224,7 +224,7 @@ bool KxHashTable_HasKey(KxHashTable* self, char* key)
 KxHashTableValEntry* KxHashTable_ValEntryAtKey(KxHashTable* self, char* key)
 {
     KxHashTableKeyEntry* keyEntry = KxHashTable_GetKeyEntry(self, key);
-    if (keyEntry == KX_HASH_TABLE_NULL) {
+    if (keyEntry == KX_HASH_TABLE_UNDEF) {
         return NULL;
     }
     else {
@@ -235,14 +235,14 @@ KxHashTableValEntry* KxHashTable_ValEntryAtKey(KxHashTable* self, char* key)
 XN KxHashTable_AtKey(KxHashTable* self, char* key)
 {
     if (key == NULL) {
-        return KX_HASH_TABLE_NULL;
+        return KX_HASH_TABLE_UNDEF;
     }
 
     KxHashTableValEntry* valEntry = KxHashTable_ValEntryAtKey(self, key);
     
-    // return KX_HASH_TABLE_NULL;
+    // return KX_HASH_TABLE_UNDEF;
     if (valEntry == NULL) {
-        return KX_HASH_TABLE_NULL;
+        return KX_HASH_TABLE_UNDEF;
     }
 
     return valEntry->Val;
@@ -292,7 +292,7 @@ XN KxHashTable_ValAtIndex(KxHashTable* self, int index)
 {
     KxHashTableValEntry* valEntry = KxHashTable_ValEntryAtIndex(self, index);
     if (valEntry == NULL) {
-        return KX_HASH_TABLE_NULL;
+        return KX_HASH_TABLE_UNDEF;
     }
     return valEntry->Val;    
 }
@@ -427,7 +427,7 @@ KxHashTableKeyEntry* KxHashTable_AddOrUpdateKeyEntry(KxHashTable* self, char* ke
     
     // find or create key entry
     KxHashTableKeyEntry* keyEntry = KxHashTable_GetKeyEntry(self, key);
-    if (keyEntry != KX_HASH_TABLE_NULL) {
+    if (keyEntry != KX_HASH_TABLE_UNDEF) {
         keyEntry->ValEntry = valEntry;
         return keyEntry;
     }
@@ -527,7 +527,7 @@ int KxHashTable_PutKv(KxHashTable* self, char* key, XN value)
     uint32_t hashIndex = KxHashTable_KeyHashIndex(self, hashCode);
 
     KxHashTableKeyEntry* keyEntry = KxHashTable_GetKeyEntry(self, key);
-    if (keyEntry != KX_HASH_TABLE_NULL) {
+    if (keyEntry != KX_HASH_TABLE_UNDEF) {
         // update val
         keyEntry->ValEntry->Val = value;
         KxHashTable_UpdateEntryKeyCstr(keyEntry->ValEntry, key);
@@ -616,7 +616,7 @@ void KxHashTable_DelValEntry(KxHashTable* self, KxHashTableValEntry* valEntry)
 {
     if (valEntry->Key != NULL) {
         KxHashTableKeyEntry* keyEntry = KxHashTable_GetKeyEntry(self, valEntry->Key);
-        if (keyEntry != KX_HASH_TABLE_NULL) {
+        if (keyEntry != KX_HASH_TABLE_UNDEF) {
             // remove old key
             KxHashTable_DelKeyEntry(self, keyEntry);
         }
@@ -639,13 +639,13 @@ void KxHashTable_DelValEntry(KxHashTable* self, KxHashTableValEntry* valEntry)
 int KxHashTable_DelByKey(KxHashTable* self, char* key)
 {
     if (key == NULL) {
-        return KX_HASH_TABLE_NULL;
+        return KX_HASH_TABLE_UNDEF;
     }
 
     KxHashTableValEntry* valEntry = KxHashTable_ValEntryAtKey(self, key);
  
     if (valEntry == NULL) {
-        return KX_HASH_TABLE_NULL;
+        return KX_HASH_TABLE_UNDEF;
     }
 
     KxHashTable_DelValEntry(self, valEntry);
@@ -705,7 +705,7 @@ const char* KxHashTable_IterGetKey(KxHashTable* self, KxHashTableIter iter)
 XN KxHashTable_IterGetVal(KxHashTable* self, KxHashTableIter iter)
 {
     if (iter == KX_HASH_TABLE_NIL) {
-        return KX_HASH_TABLE_NULL;
+        return KX_HASH_TABLE_UNDEF;
     }
     KxHashTableValEntry* valEntry = (KxHashTableValEntry*)iter;
     return valEntry->Val;

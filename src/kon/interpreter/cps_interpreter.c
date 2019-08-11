@@ -24,7 +24,8 @@ bool IsSelfEvaluated(KN source)
         || source == KON_TRUE
         || source == KON_FALSE
         || source == KON_NIL
-        || source == KON_NULL
+        || source == KON_UKN
+        || source == KON_UNDEF
     ) {
         return true;
     }
@@ -551,7 +552,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             else {
                 KON_DEBUG("error! unhandled prefix marcro %s", prefix);
                 bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-                bounce->Run.Value = KON_NULL;
+                bounce->Run.Value = KON_UKN;
                 bounce->Run.Cont = cont;
             }
         }
@@ -574,7 +575,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
         // TODO asert should be a SYM_IDENTIFIER
         // env lookup this val
         KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(expression));
-        assert(val != KON_NULL);
+        assert(val != KON_UNDEF);
         bounce = KON_RunContinuation(kstate, cont, val);
     }
     else {
@@ -589,7 +590,7 @@ KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonCont
     if (sentences == KON_NIL) {
         // TODO throw error
         // should not go here
-        return KON_NULL;
+        return KON_UNDEF;
     }
     else {
         KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_BLOCK);
@@ -651,7 +652,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             else if (KON_IS_VARIABLE(subj) || KON_IS_WORD(subj)) {
                 // lookup subject in env
                 KN val = KON_EnvLookup(kstate, env, KON_SymbolToCstr(subj));
-                assert(val != KON_NULL);
+                assert(val != KON_UNDEF);
                 bounce = KON_RunContinuation(kstate, cont, val);
             }
             // TODO quasiquote unquote, etc.
