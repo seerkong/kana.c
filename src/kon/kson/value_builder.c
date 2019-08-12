@@ -1,4 +1,5 @@
 #include "value_builder.h"
+#include "tbox/tbox.h"
 
 const char* BuilderTypeToCStr(KonBuilderType type)
 {
@@ -38,7 +39,7 @@ const char* BuilderTypeToCStr(KonBuilderType type)
 
 KonBuilder* CreateVectorBuilder()
 {
-    KonBuilder* builder = (KonBuilder*)malloc(sizeof(KonBuilder));
+    KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
     if (builder == NULL) {
         return NULL;
     }
@@ -56,13 +57,13 @@ KN MakeVectorByBuilder(KonState* kstate, KonBuilder* builder)
 {
     KonVector* value = KON_ALLOC_TYPE_TAG(kstate, KonVector, KON_T_VECTOR);
     value->Vector = builder->Vector;
-    free(builder);
+    tb_free(builder);
     return value;
 }
 
 KonBuilder* CreateListBuilder()
 {
-    KonBuilder* builder = (KonBuilder*)malloc(sizeof(KonBuilder));
+    KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
     if (builder == NULL) {
         return NULL;
     }
@@ -94,7 +95,7 @@ KN MakeListByBuilder(KonState* kstate, KonBuilder* builder)
 
 KonBuilder* CreateTableBuilder()
 {
-    KonBuilder* builder = (KonBuilder*)malloc(sizeof(KonBuilder));
+    KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
     if (builder == NULL) {
         return NULL;
     }
@@ -109,20 +110,20 @@ void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
     
     KxHashTable_PutKv(builder->Table, key, pair->TablePair.Value);
     KON_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
-    free(pair);
+    tb_free(pair);
 }
 
 KN MakeTableByBuilder(KonState* kstate, KonBuilder* builder)
 {
     KonTable* value = KON_ALLOC_TYPE_TAG(kstate, KonTable, KON_T_TABLE);
     value->Table = builder->Table;
-    free(builder);
+    tb_free(builder);
     return value;
 }
 
 KonBuilder* CreateTablePairBuilder()
 {
-    KonBuilder* builder = (KonBuilder*)malloc(sizeof(KonBuilder));
+    KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
     if (builder == NULL) {
         return NULL;
     }
@@ -146,7 +147,7 @@ void TablePairSetValue(KonBuilder* builder, KN value)
 
 void TablePairDestroy(KonBuilder* builder)
 {
-    free(builder);
+    tb_free(builder);
 }
 
 KonBuilder* MakeTablePairBuilder(KonBuilder* builder, KN value)
@@ -157,7 +158,7 @@ KonBuilder* MakeTablePairBuilder(KonBuilder* builder, KN value)
 
 KonBuilder* CreateCellBuilder()
 {
-    KonBuilder* builder = (KonBuilder*)malloc(sizeof(KonBuilder));
+    KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
     if (builder == NULL) {
         return NULL;
     }
@@ -197,13 +198,13 @@ KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder)
     value->Vector = builder->Cell.Vector;
     value->Table = builder->Cell.Table;
     value->List = builder->Cell.List;
-    free(builder);
+    tb_free(builder);
     return value;
 }
 
 KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind)
 {
-    KonBuilder* builder = (KonBuilder*)malloc(sizeof(KonBuilder));
+    KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
     if (builder == NULL) {
         return NULL;
     }
@@ -316,14 +317,14 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
         }
         result = tmp;
     }
-    free(builder);
+    tb_free(builder);
     return result;
 }
 
 // builder stack
 BuilderStack* BuilderStackInit()
 {
-    BuilderStack* stack = (BuilderStack*)malloc(sizeof(BuilderStack));
+    BuilderStack* stack = (BuilderStack*)tb_malloc(sizeof(BuilderStack));
     if (stack == NULL) {
         return NULL;
     }
@@ -338,17 +339,17 @@ void BuilderStackDestroy(BuilderStack* stack)
     BuilderStackNode* top = stack->Top;
     while (top) {
         BuilderStackNode* oldTop = top;
-        free(oldTop);
+        tb_free(oldTop);
         top = top->Next;
     }
-    free(stack);
+    tb_free(stack);
 }
 
 void BuilderStackPush(BuilderStack* stack, KonBuilder* item)
 {
     assert(stack);
     BuilderStackNode* oldTop = stack->Top;
-    BuilderStackNode* newTop = (BuilderStackNode*)malloc(sizeof(BuilderStackNode));
+    BuilderStackNode* newTop = (BuilderStackNode*)tb_malloc(sizeof(BuilderStackNode));
     assert(newTop);
     newTop->Data = item;
     newTop->Next = oldTop;
@@ -367,7 +368,7 @@ KonBuilder* BuilderStackPop(BuilderStack* stack)
     stack->Top = next;
     stack->Length = stack->Length - 1;
 
-    free(top);
+    tb_free(top);
     return data;
 }
 

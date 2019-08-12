@@ -7,7 +7,8 @@ target("kon")
     set_symbols("debug")
     add_defines("DEBUG", "__debug__")
 
-
+    add_deps("tbox")
+    
     -- add defines
     add_defines("__kon_prefix__=\"kon\"")
 

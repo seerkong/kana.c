@@ -14,13 +14,14 @@
 
 #include "murmurhash.h"
 #include "kx_hashtable.h"
+#include "tbox/tbox.h"
 
 #define KX_HASH_INDEX_SEED 31
 #define KX_HASH_VERIFY_SEED 25
 
 KxHashTable* KxHashTable_Init(uint32_t powerOfTwo)
 {
-    KxHashTable* self = (KxHashTable*)calloc(1, sizeof(KxHashTable));
+    KxHashTable* self = (KxHashTable*)tb_nalloc0(1, sizeof(KxHashTable));
     if (self == NULL) {
         return NULL;
     }
@@ -34,9 +35,9 @@ KxHashTable* KxHashTable_Init(uint32_t powerOfTwo)
     self->ValListHead = KX_HASH_TABLE_NIL;
     self->ValListTail = KX_HASH_TABLE_NIL;
 
-    KxHashTableKeyEntry** buckets = (KxHashTableKeyEntry**)calloc(hashSize, sizeof(void*));
+    KxHashTableKeyEntry** buckets = (KxHashTableKeyEntry**)tb_nalloc0(hashSize, sizeof(void*));
     if (buckets == NULL) {
-        free(self);
+        tb_free(self);
         return NULL;
     }
 
@@ -54,7 +55,7 @@ int KxHashTable_Destroy(KxHashTable* self)
         return -1;
     }
     KxHashTable_Clear(self);
-    free(self);
+    tb_free(self);
     return 1;
 }
 
@@ -68,10 +69,10 @@ void KxHashTable_ClearBucketKeys(KxHashTable* self, KxHashTableKeyEntry* bucket)
     while (iter != KX_HASH_TABLE_NIL) {
         KxHashTableKeyEntry* next = iter->Next;
         if (iter->ValEntry != KX_HASH_TABLE_NIL) {
-            free(iter->ValEntry->Key);
+            tb_free(iter->ValEntry->Key);
             iter->ValEntry->Key = NULL;
         }
-        free(iter);
+        tb_free(iter);
         iter = next;
     }
 }
@@ -111,7 +112,7 @@ void KxHashTable_DelKeyEntry(KxHashTable* self, KxHashTableKeyEntry* keyEntry) {
         keyEntry->Prev->Next = keyEntry->Next;
     }
 
-    free(keyEntry);
+    tb_free(keyEntry);
 
     KxHashTable_CheckRehash(self);
 }
@@ -124,9 +125,9 @@ void KxHashTable_ClearValues(KxHashTable* self)
     while (iter != KX_HASH_TABLE_NIL) {
         KxHashTableValEntry* next = iter->Next;
         if (iter->Key != NULL) {
-            free(iter->Key);
+            tb_free(iter->Key);
         }
-        free(iter);
+        tb_free(iter);
         iter = next;
     }
 }
@@ -164,12 +165,12 @@ uint32_t KxHashTable_KeyVerifyCode(char* key, int keyLen, uint32_t hashCode)
 {
     // key + keylen(0x) + hashcode(0x)
     int verifyStrLen = keyLen +  8 + 8  + 1;
-    char* tmp = (char*)calloc(verifyStrLen, sizeof(char));
+    char* tmp = (char*)tb_nalloc0(verifyStrLen, sizeof(char));
     tmp[verifyStrLen] = '\0';
     snprintf(tmp, verifyStrLen, "%s%x%x", key, keyLen, hashCode);
     uint32_t verifyCode = MurmurHash32(tmp, verifyStrLen - 1, KX_HASH_VERIFY_SEED);
 
-    free(tmp);
+    tb_free(tmp);
     return verifyCode;
 }
 
@@ -322,7 +323,7 @@ KxHashTableKeyEntry* KxHashTable_CreateKeyEntry(KxHashTable* self, char* key)
     if (key == NULL) {
         return NULL;
     }
-    KxHashTableKeyEntry* entry = (KxHashTableKeyEntry*)calloc(1, sizeof(KxHashTableKeyEntry));
+    KxHashTableKeyEntry* entry = (KxHashTableKeyEntry*)tb_nalloc0(1, sizeof(KxHashTableKeyEntry));
     if (entry == NULL) {
         return NULL;
     }
@@ -344,7 +345,7 @@ KxHashTableKeyEntry* KxHashTable_CreateKeyEntry(KxHashTable* self, char* key)
 
 KxHashTableValEntry* KxHashTable_CreateValEntry(KxHashTable* self, XN value)
 {
-    KxHashTableValEntry* entry = (KxHashTableValEntry*)calloc(1, sizeof(KxHashTableValEntry));
+    KxHashTableValEntry* entry = (KxHashTableValEntry*)tb_nalloc0(1, sizeof(KxHashTableValEntry));
     if (entry == NULL) {
         return NULL;
     }
@@ -399,10 +400,10 @@ void KxHashTable_UpdateEntryKeyCstr(KxHashTableValEntry* valEntry, char* key)
 {
     // set entry key
     if (valEntry->Key != NULL) {
-        free(valEntry->Key);
+        tb_free(valEntry->Key);
     }
     int strLen = strlen(key);
-    char* copiedKey = (char*)calloc((strLen + 1), sizeof(char));
+    char* copiedKey = (char*)tb_nalloc0((strLen + 1), sizeof(char));
     if (copiedKey == NULL) {
         return;
     }
@@ -620,7 +621,7 @@ void KxHashTable_DelValEntry(KxHashTable* self, KxHashTableValEntry* valEntry)
             // remove old key
             KxHashTable_DelKeyEntry(self, keyEntry);
         }
-        free(valEntry->Key);
+        tb_free(valEntry->Key);
     }
 
     if (valEntry->Prev != KX_HASH_TABLE_NIL) {
@@ -632,7 +633,7 @@ void KxHashTable_DelValEntry(KxHashTable* self, KxHashTableValEntry* valEntry)
     }
     self->ItemNum -= 1;
 
-    free(valEntry);
+    tb_free(valEntry);
 }
 
 // del by key
@@ -892,7 +893,7 @@ void KxHashTable_Rehash(KxHashTable* self, int newPowerOfTwo)
     uint32_t newHashSize = 2 << newPowerOfTwo;
     uint32_t newHashMask = newHashSize - 1;
     
-    KxHashTableKeyEntry** buckets = (KxHashTableKeyEntry**)calloc(newHashSize, sizeof(KxHashTableKeyEntry));
+    KxHashTableKeyEntry** buckets = (KxHashTableKeyEntry**)tb_nalloc0(newHashSize, sizeof(KxHashTableKeyEntry));
     if (buckets == NULL) {
         return;
     }

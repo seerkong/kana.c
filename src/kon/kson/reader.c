@@ -7,7 +7,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value);
 KonReader* KSON_ReaderInit(KonState* kstate)
 {
     // init reader
-    KonReader* reader = (KonReader*)malloc(sizeof(KonReader));
+    KonReader* reader = (KonReader*)tb_malloc(sizeof(KonReader));
     KON_DEBUG("malloc reader %x", reader);
 
     reader->Kstate = kstate;

@@ -38,6 +38,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include "tbox/tbox.h"
 
 #if defined(_MSC_VER)
 #pragma warning(pop)
@@ -401,7 +402,7 @@ void *utf8dup(const void *src) {
   // figure out how many bytes (including the terminator) we need to copy first
   size_t bytes = utf8size(src);
 
-  n = (char *)malloc(bytes);
+  n = (char *)tb_malloc(bytes);
 
   if (utf8_null == n) {
     // out of memory so we bail
@@ -611,7 +612,7 @@ void *utf8ndup(const void *src, size_t n) {
   // to be used later in the copy byte by byte.
   n = bytes;
 
-  c = (char *)malloc(bytes + 1);
+  c = (char *)tb_malloc(bytes + 1);
   if (utf8_null == c) {
     // out of memory so we bail
     return utf8_null;

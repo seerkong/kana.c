@@ -162,7 +162,7 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
 KonTokenizer* KSON_TokenizerInit(KonState* kstate)
 {
     // init
-    KonTokenizer* tokenizer = (KonTokenizer*)malloc(sizeof(KonTokenizer));
+    KonTokenizer* tokenizer = (KonTokenizer*)tb_malloc(sizeof(KonTokenizer));
 
     // init string
     tokenizer->Content = KxStringBuffer_New();

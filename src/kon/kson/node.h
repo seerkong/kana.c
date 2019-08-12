@@ -2,7 +2,7 @@
 #define KON_KSON_NODE_H
 
 #include <stdio.h>
-#include <tbox/tbox.h>
+#include "tbox/tbox.h"
 #include "../prefix/config.h"
 #include "../string/kx_stringbuffer.h"
 #include "../container/hashtable/kx_hashtable.h"
@@ -403,9 +403,8 @@ struct KonState {
     KonContinuation* CurrCont;
     
     tb_allocator_ref_t LargeAllocator;
-    tb_allocator_ref_t DefaultAllocator;
-    tb_allocator_ref_t SmallAllocator;
-    
+    tb_allocator_ref_t Allocator;   // default allocator
+
     unsigned int LastMsgDispatcherId;
 };
 
@@ -467,10 +466,6 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 //   return res;
 // }
 
-
-// TODO change to self managed gc,malloc,free
-#define KON_GC_MALLOC malloc
-#define KON_GC_FREE free
 
 ////
 // predicates

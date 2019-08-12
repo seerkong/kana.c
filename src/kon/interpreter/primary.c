@@ -162,7 +162,7 @@ KN KON_PrimaryWriteln(KonState* kstate, KN args)
 KN KON_PrimaryStringify(KonState* kstate, KN args)
 {
     KN item = KON_CAR(args);
-    KN formated = KON_ToFormatString(&kstate, item, false, 0, "  ");
+    KN formated = KON_ToFormatString(kstate, item, false, 0, "  ");
 
     return formated;
 }

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../kon/kon.h"
+#include "kon/kon.h"
 #include "commander.h"
 
 

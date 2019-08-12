@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <assert.h>
 #include "../greatest.h"
-#include "../../src/kon/kon.h"
-#include <tbox/tbox.h>
+// #include "../../src/kon/kon.h"
+#include "kon/kon.h"
 
 KonState* kstate;
 SUITE(suite);
@@ -14,7 +14,7 @@ SUITE(suite);
 TEST Reader_Cell(void) {
     char* filePathOrigin = "~/lang/konscript/kon-c/samples/kon/cell.kon";
     
-    KonReader* reader = KSON_ReaderInit(&kstate);
+    KonReader* reader = KSON_ReaderInit(kstate);
     if (!reader) {
         KON_DEBUG("KON_EvalFile init failed");
         exit(1);
@@ -37,7 +37,6 @@ TEST Reader_Cell(void) {
             
             KON_DEBUG("eval sentences success");
             KN formated = KON_ToFormatString(kstate, result, true, 0, "  ");
-            //  KN formated = KON_ToFormatString(&kstate, root, false, 0, " ");
             KON_DEBUG("%s", KON_StringToCstr(formated));
         }
         
@@ -65,14 +64,12 @@ int main(int argc, char const* argv[])
 {
     GREATEST_MAIN_BEGIN();
     greatest_set_verbosity(1);
-    if (!tb_init(tb_null, tb_null)) {
-        return NULL;
-    }
+
     kstate = KON_Init();
     RUN_SUITE(suite);
 
     KON_Finish(kstate);
-    tb_exit();
+
     GREATEST_MAIN_END();
 
     return 0;

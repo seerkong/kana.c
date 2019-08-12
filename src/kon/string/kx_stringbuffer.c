@@ -5,6 +5,7 @@
 #include <stdarg.h>
 
 #include "kx_stringbuffer.h"
+#include "tbox/tbox.h"
 
 #define DEFAULT_CAPACITY    16
 #define FIRST_STEP_LENGTH    128
@@ -40,7 +41,7 @@ static int32_t KxStringBuffer_Expand(KxStringBuffer* self, int32_t min)
         stepLen = FIRST_STEP_LENGTH;
     }
     newBuffSize = self->BuffSize + (min / stepLen + 1) * stepLen;
-    newBuf = realloc(self->BuffStart, newBuffSize);
+    newBuf = tb_ralloc(self->BuffStart, newBuffSize);
     if (newBuf != NULL) {
         self->BuffStart = newBuf;
         memset(self->BuffStart + self->HeadOffset + self->BuffSize, 0, newBuffSize - self->BuffSize);
@@ -56,16 +57,16 @@ KxStringBuffer* KxStringBuffer_New()
 {
     KxStringBuffer* self = NULL;
  
-    self = calloc(1, sizeof(KxStringBuffer));
+    self = tb_nalloc0(1, sizeof(KxStringBuffer));
     if (self != NULL) {
-        self->BuffStart = calloc(DEFAULT_CAPACITY, sizeof(char));
+        self->BuffStart = tb_nalloc0(DEFAULT_CAPACITY, sizeof(char));
         if (self->BuffStart != NULL) {
             self->Length = 0;
             self->HeadOffset = INIT_LEFT_RESERVE;
             self->BuffSize = DEFAULT_CAPACITY;
         }
         else {
-            free(self);
+            tb_free(self);
             self = NULL;
         }
     }
@@ -76,9 +77,9 @@ void KxStringBuffer_Destroy(KxStringBuffer* self)
 {
     if (self) {
         if (self->BuffStart) {
-            free(self->BuffStart);
+            tb_free(self->BuffStart);
         }
-        free(self);
+        tb_free(self);
     }
 }
 
@@ -225,7 +226,7 @@ int32_t KxStringBuffer_NPrependCstr(KxStringBuffer* self, const char *str, int32
         }
     }
 
-    newBuf = calloc(newBuffSize, sizeof(char));
+    newBuf = tb_nalloc0(newBuffSize, sizeof(char));
 
     if (newBuf != NULL) {
         utf8ncat(newBuf, str, n);

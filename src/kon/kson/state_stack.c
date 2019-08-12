@@ -1,8 +1,9 @@
 #include "state_stack.h"
+#include "tbox/tbox.h"
 
 StateStack* StateStackInit()
 {
-    StateStack* stack = (StateStack*)malloc(sizeof(StateStack));
+    StateStack* stack = (StateStack*)tb_malloc(sizeof(StateStack));
     if (stack == NULL) {
         return NULL;
     }
@@ -17,17 +18,17 @@ void StateStackDestroy(StateStack* stack)
     StateStackNode* top = stack->Top;
     while (top) {
         StateStackNode* oldTop = top;
-        free(oldTop);
+        tb_free(oldTop);
         top = top->Next;
     }
-    free(stack);
+    tb_free(stack);
 }
 
 void StateStackPush(StateStack* stack, KonReaderState item)
 {
     assert(stack);
     StateStackNode* oldTop = stack->Top;
-    StateStackNode* newTop = (StateStackNode*)malloc(sizeof(StateStackNode));
+    StateStackNode* newTop = (StateStackNode*)tb_malloc(sizeof(StateStackNode));
     assert(newTop);
     newTop->Data = item;
     newTop->Next = oldTop;
@@ -46,7 +47,7 @@ KonReaderState StateStackPop(StateStack* stack)
     stack->Top = next;
     stack->Length = stack->Length - 1;
 
-    free(top);
+    tb_free(top);
     return data;
 }
 

@@ -13,10 +13,11 @@
 #include <ctype.h>
 
 #include "kx_vector.h"
+#include "tbox/tbox.h"
 
 KxVector* KxVector_Init()
 {
-    KxVector* self = (KxVector*)calloc(1, sizeof(KxVector));
+    KxVector* self = (KxVector*)tb_nalloc0(1, sizeof(KxVector));
     if (self == NULL) {
         return NULL;
     }
@@ -30,7 +31,7 @@ KxVector* KxVector_Init()
 // alloc pool, default value set to KX_VECTOR_UNDEF
 XN* KxVector_AllocPoolWithCapacity(int32_t capacity)
 {
-    XN* poolStart = (XN*)calloc(capacity, sizeof(XN));
+    XN* poolStart = (XN*)tb_nalloc0(capacity, sizeof(XN));
     if (poolStart == NULL) {
         return NULL;
     }
@@ -44,7 +45,7 @@ KxVector* KxVector_InitWithCapacity(int32_t initCapacity)
     KxVector* self = KxVector_Init();
     XN* poolStart = KxVector_AllocPoolWithCapacity(initCapacity);
     if (poolStart == NULL) {
-        free(self);
+        tb_free(self);
         return NULL;
     }
     self->BuffStart = poolStart;
@@ -71,9 +72,9 @@ int32_t KxVector_Destroy(KxVector* self)
         return -1;
     }
     if (self->BuffStart != NULL) {
-        free(self->BuffStart);
+        tb_free(self->BuffStart);
     }
-    free(self);
+    tb_free(self);
     return 1;
 }
 
@@ -115,7 +116,7 @@ void KxVector_Grow(KxVector* self)
     int32_t poolSize = (int32_t)(self->BuffSize * KX_VECTOR_RESIZE_RATIO);
     XN* poolStart = KxVector_AllocPoolWithCapacity(poolSize);
     if (poolStart == NULL) {
-        free(self);
+        tb_free(self);
         return;
     }
 
@@ -140,7 +141,7 @@ int32_t KxVector_Push(KxVector* self, XN value)
         // first item
         XN* poolStart = KxVector_AllocPoolWithCapacity(KX_VECTOR_DEFAULT_CAPACITY);
         if (poolStart == NULL) {
-            free(self);
+            tb_free(self);
             return -1;
         }
         self->BuffStart = poolStart;
@@ -171,7 +172,7 @@ int32_t KxVector_Unshift(KxVector* self, XN value)
         // first item
         XN* poolStart = KxVector_AllocPoolWithCapacity(KX_VECTOR_DEFAULT_CAPACITY);
         if (poolStart == NULL) {
-            free(self);
+            tb_free(self);
             return -1;
         }
         self->BuffStart = poolStart;
@@ -203,7 +204,7 @@ int32_t KxVector_Unshift(KxVector* self, XN value)
         poolStart = KxVector_AllocPoolWithCapacity(poolSize);
     }
     if (poolStart == NULL) {
-        free(self);
+        tb_free(self);
         return -1;
     }
     // set first to value

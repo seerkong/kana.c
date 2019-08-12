@@ -24,7 +24,7 @@ KxStringBuffer* KON_ReadFileContent(const char* filePathOrigin)
         printf("file path exceeded");
         exit(1);
     }
-    char* replaceHomePath = (char*)calloc(PATH_MAX, sizeof(char));
+    char* replaceHomePath = (char*)tb_nalloc0(PATH_MAX, sizeof(char));
     // check if has user home prefix
     if (filePathOrigin != NULL
         && originPathStrLen > 2
@@ -50,10 +50,10 @@ KxStringBuffer* KON_ReadFileContent(const char* filePathOrigin)
     }
     // printf("replaceHomePath %s\n", replaceHomePath);
     
-    char* absoluteFilePath = (char*)calloc(PATH_MAX, sizeof(char));
+    char* absoluteFilePath = (char*)tb_nalloc0(PATH_MAX, sizeof(char));
     char *realpathRes = realpath(replaceHomePath, absoluteFilePath);
     
-    free(replaceHomePath);
+    tb_free(replaceHomePath);
     if (realpathRes == NULL) {
         printf("abs file path exceeded");
         exit(3);
@@ -63,7 +63,7 @@ KxStringBuffer* KON_ReadFileContent(const char* filePathOrigin)
 
 
     FILE* fp = fopen(absoluteFilePath, "r");
-    free(absoluteFilePath);
+    tb_free(absoluteFilePath);
     // open readonly file path
     if (fp == NULL) {
         printf("The file <%s> can not be opened.\n", absoluteFilePath);
@@ -113,7 +113,10 @@ const char* KON_HumanFormatTime()
 
 KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
 {
-    KN res = (KN) KON_GC_MALLOC(size);
+    KN res = (KN)tb_allocator_malloc0(kstate->Allocator, size);
+
+    // TODO add to heap ptr store
+
     if (res && ! KON_IS_EXCEPTION(res)) {
         ((KonBase*)res)->Tag = tag;
         // set dispatcher id
@@ -128,6 +131,7 @@ KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
         }
         
     }
+
     return res;
 }
 

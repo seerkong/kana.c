@@ -282,7 +282,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
 
 KonContinuation* AllocContinuationWithType(KonState* kstate, KonContinuationType type)
 {
-    KonContinuation* cont = (KonContinuation*)malloc(sizeof(KonContinuation));
+    KonContinuation* cont = (KonContinuation*)tb_allocator_malloc0(kstate->Allocator, sizeof(KonContinuation));
     assert(cont);
     cont->Base.Tag = KON_T_CONTINUATION;
     cont->Type = type;
@@ -291,7 +291,7 @@ KonContinuation* AllocContinuationWithType(KonState* kstate, KonContinuationType
 
 KonTrampoline* AllocBounceWithType(KonState* kstate, KonBounceType type)
 {
-    KonTrampoline* bounce = (KonTrampoline*)malloc(sizeof(KonTrampoline));
+    KonTrampoline* bounce = (KonTrampoline*)tb_allocator_malloc0(kstate->Allocator, sizeof(KonTrampoline));
     assert(bounce);
     bounce->Type = type;
     return bounce;
@@ -616,8 +616,7 @@ KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonCont
 KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
 {
     // TODO add step count when debug
-    KN formated = KON_ToFormatString(&kstate, sentences, true, 0, "  ");
-    //  KN formated = KON_ToFormatString(&kstate, root, false, 0, " ");
+    KN formated = KON_ToFormatString(kstate, sentences, true, 0, "  ");
     KON_DEBUG("%s", KON_StringToCstr(formated));
     
     KonContinuation* firstCont = AllocContinuationWithType(kstate, KON_CONT_RETURN);
@@ -634,7 +633,6 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             KonTrampoline* oldBounce = bounce;
             KN value = bounce->Run.Value;
             KonContinuation* cont = bounce->Cont;
-            free(oldBounce);
             bounce = KON_RunContinuation(kstate, cont, value);
         }
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_BLOCK) {
