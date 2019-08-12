@@ -1,16 +1,14 @@
-[
-  [let t
-    [blk
-      [return % 42]
-    ]
+[let t
+  [blk
+    [return % 42]
   ]
-  [t %]
-
-  [if #t;
-    [t %]
-  else
-    55
-  ]
-
-  777
 ]
+[t %]
+
+[if #t;
+  [t %]
+else
+  55
+]
+
+777

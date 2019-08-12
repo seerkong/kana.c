@@ -6,9 +6,11 @@
 
 #include "kx_stringbuffer.h"
 
-#define DEFAULT_CAPACITY    32
+#define DEFAULT_CAPACITY    16
 #define FIRST_STEP_LENGTH    128
 #define STEP_LENGTH    512
+// reserve some chars at the beginning for prepend
+#define INIT_LEFT_RESERVE   2
  
 #define EXPAND_BUFFER(self, n) \
     if (KxStringBuffer_Expand(self, (n))) { \
@@ -59,7 +61,7 @@ KxStringBuffer* KxStringBuffer_New()
         self->BuffStart = calloc(DEFAULT_CAPACITY, sizeof(char));
         if (self->BuffStart != NULL) {
             self->Length = 0;
-            self->HeadOffset = 0;
+            self->HeadOffset = INIT_LEFT_RESERVE;
             self->BuffSize = DEFAULT_CAPACITY;
         }
         else {
@@ -194,6 +196,18 @@ int32_t KxStringBuffer_NPrependCstr(KxStringBuffer* self, const char *str, int32
     if (self == NULL) {
         return -1;
     }
+
+    // if have slots at head
+    if (self->HeadOffset >= n) {
+        char* startPtr = self->BuffStart + self->HeadOffset - n;
+        for (int i = 0; i < n; i++) {
+            *(startPtr + i) = str[i];
+        }
+        
+        self->HeadOffset -= n;
+        self->Length += n;
+        return n;
+    }
  
     char* newBuf = NULL;
     int32_t newBuffSize = self->BuffSize;
@@ -212,10 +226,12 @@ int32_t KxStringBuffer_NPrependCstr(KxStringBuffer* self, const char *str, int32
     }
 
     newBuf = calloc(newBuffSize, sizeof(char));
+
     if (newBuf != NULL) {
         utf8ncat(newBuf, str, n);
         utf8ncat(newBuf, (self->BuffStart + self->HeadOffset), self->Length);
         self->BuffStart = newBuf;
+        self->HeadOffset = 0;
         self->BuffSize = newBuffSize;
         self->Length += n;
         return n;

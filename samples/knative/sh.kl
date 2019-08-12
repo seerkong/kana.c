@@ -1,4 +1,2 @@
-[
-  [sh ls -al]
-  [sh "ps" "-h"]
-]
+[sh ls -al]
+[sh "ps" "-h"]

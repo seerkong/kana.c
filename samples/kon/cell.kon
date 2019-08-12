@@ -6,14 +6,14 @@
     $[1 2 @.b]
     $[1 2 $.b]
     $[1 2 @~.c]
-    ``$(:a 1 @%.{$(:b 2)}) `` should use php-like array
+    ``$(:a 1 @%.[$(:b 2)]) `` should use php-like array
     
 
     @[1 2 $~.b]
     @[1 2 @.b]
     @[1 2 $.b]
     @[1 2 @~.c]
-    `@(:a 1 $%(:b 2))
+    `@(:a 1 $%.(:b 2))
 
     [define x -50]
     [writeln % x]

@@ -26,6 +26,9 @@ KonReader* KSON_ReaderInit(KonState* kstate)
 bool KSON_ReaderFromFile(KonReader* reader, const char* sourceFilePath)
 {
     KxStringBuffer* sb = KON_ReadFileContent(sourceFilePath);
+    // prepend '[' at head, append ']' at tail
+    KxStringBuffer_NPrependCstr(sb, "[\n", 1);
+    KxStringBuffer_AppendCstr(sb, "\n]");
     bool res = KSON_ReaderFromCstr(reader, KxStringBuffer_Cstr(sb));
     KxStringBuffer_Clear(sb);
     return res;
