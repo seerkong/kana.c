@@ -13,17 +13,17 @@ KonTrampoline* KON_EvalPrefixBreak(KonState* kstate, KN expression, KN env, KonC
     KonTrampoline* bounce;
     if (KON_IS_CONTINUATION(loopCont)) {
         // loop's continuation, just receive 1 argument;
-        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
         bounce->Run.Value = KON_FALSE;
         // goto this continuation directly. skip next exprs
-        bounce->Run.Cont = loopCont;
+        bounce->Cont = loopCont;
         return bounce;
     }
     else {
         // TODO error occurred, throw exception?
-        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
         bounce->Run.Value = KON_FALSE;
-        bounce->Run.Cont = cont;
+        bounce->Cont = cont;
         return bounce;
     }
 }

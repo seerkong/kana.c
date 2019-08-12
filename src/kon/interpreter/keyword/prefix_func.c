@@ -76,8 +76,8 @@ KonTrampoline* KON_EvalPrefixFunc(KonState* kstate, KN expression, KN env, KonCo
         KON_EnvDefine(kstate, env, varNameCstr, proc);
     }
 
-    KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+    KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
     bounce->Run.Value = proc;
-    bounce->Run.Cont = cont;
+    bounce->Cont = cont;
     return bounce;
 }

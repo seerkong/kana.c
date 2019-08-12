@@ -49,10 +49,10 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             // call-cc, subject is a continuation
             if (KON_IS_CONTINUATION(subj)) {
                 // call-cc's continuation, just receive 1 argument;
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = KON_CADR(argList);
                 // goto this continuation directly. skip next exprs
-                bounce->Run.Cont = subj;
+                bounce->Cont = subj;
                 return bounce;
             }
 
@@ -66,18 +66,18 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             if (subjProc->Type == KON_NATIVE_FUNC) {
                 KonNativeFuncRef funcRef = subjProc->NativeFuncRef;
                 KN applyResult = (*funcRef)(kstate, argList);
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = applyResult;
-                bounce->Run.Cont = cont;
+                bounce->Cont = cont;
             }
             else if (subjProc->Type == KON_NATIVE_OBJ_METHOD) {
                 // treat as plain procedure when apply arg list
                 // the first item in arg list is the object
                 KonNativeFuncRef funcRef = subjProc->NativeFuncRef;
                 KN applyResult = (*funcRef)(kstate, argList);
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = applyResult;
-                bounce->Run.Cont = cont;
+                bounce->Cont = cont;
             }
             else if (subjProc->Type == KON_COMPOSITE_LAMBDA) {
                 bounce = KON_ApplyCompositeLambda(kstate, subjProc, argList, env, cont);
@@ -113,18 +113,18 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             if (pipeProc->Type == KON_NATIVE_FUNC) {
                 KonNativeFuncRef funcRef = pipeProc->NativeFuncRef;
                 KN applyResult = (*funcRef)(kstate, argList);
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = applyResult;
-                bounce->Run.Cont = cont;
+                bounce->Cont = cont;
             }
             else if (pipeProc->Type == KON_NATIVE_OBJ_METHOD) {
                 // treat as plain procedure when apply arg list
                 // the first item in arg list is the object
                 KonNativeFuncRef funcRef = pipeProc->NativeFuncRef;
                 KN applyResult = (*funcRef)(kstate, argList);
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = applyResult;
-                bounce->Run.Cont = cont;
+                bounce->Cont = cont;
             }
             else if (pipeProc->Type == KON_COMPOSITE_LAMBDA) {
                 bounce = KON_ApplyCompositeLambda(kstate, pipeProc, argList, env, cont);
@@ -146,9 +146,9 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
         KonAttrSlot* slot = (KonAttrSlot*)subj;
         KN slotValue = KxHashTable_AtKey(slot->Folder, KON_UNBOX_SYMBOL(firstObj));
         KON_DEBUG("get slotValue %s", KON_UNBOX_SYMBOL(firstObj));
-        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
         bounce->Run.Value = slotValue;
-        bounce->Run.Cont = cont;
+        bounce->Cont = cont;
     }
 
     // send msg like .add 1 2;
@@ -174,9 +174,9 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
         if (procedure->Type == KON_NATIVE_FUNC) {
             KonNativeFuncRef funcRef = procedure->NativeFuncRef;
             KN applyResult = (*funcRef)(kstate, dispatchArgList);
-            bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+            bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
             bounce->Run.Value = applyResult;
-            bounce->Run.Cont = cont;
+            bounce->Cont = cont;
         }
         else if (procedure->Type == KON_COMPOSITE_LAMBDA) {
             bounce = KON_ApplyCompositeLambda(kstate, procedure, dispatchArgList, env, cont);
@@ -280,7 +280,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
     return result;
 }
 
-KonContinuation* AllocContinuationWithType(KonContinuationType type)
+KonContinuation* AllocContinuationWithType(KonState* kstate, KonContinuationType type)
 {
     KonContinuation* cont = (KonContinuation*)malloc(sizeof(KonContinuation));
     assert(cont);
@@ -289,7 +289,7 @@ KonContinuation* AllocContinuationWithType(KonContinuationType type)
     return cont;
 }
 
-KonTrampoline* AllocBounceWithType(KonBounceType type)
+KonTrampoline* AllocBounceWithType(KonState* kstate, KonBounceType type)
 {
     KonTrampoline* bounce = (KonTrampoline*)malloc(sizeof(KonTrampoline));
     assert(bounce);
@@ -301,9 +301,12 @@ KonTrampoline* AllocBounceWithType(KonBounceType type)
 // the bounce continuation should be cont->Cont
 KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingInvoked, KN val)
 {
+    // update current continuation for gc
+    kstate->CurrEnv = contBeingInvoked->Env;
+
     // all sentences finished, return last value
     if (kon_continuation_type(contBeingInvoked) == KON_CONT_RETURN) {
-        KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_LAND);
+        KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_LAND);
         bounce->Land.Value = val;
         return bounce;
     }
@@ -318,8 +321,8 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
         KN restSentences = contBeingInvoked->RestJobs;
         if (restSentences == KON_NIL) {
             // block sentences all finished
-            KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-            bounce->Run.Cont = contBeingInvoked->Cont;
+            KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+            bounce->Cont = contBeingInvoked->Cont;
             bounce->Run.Value = lastSentenceVal;
             return bounce;
         }
@@ -335,8 +338,8 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
         if (restWords == KON_NIL) {
             // no other words besids subj, is a sentence like {"abc"}
             // finish this sentence. use subj as return val
-            KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-            bounce->Run.Cont = contBeingInvoked->Cont;
+            KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+            bounce->Cont = contBeingInvoked->Cont;
             bounce->Run.Value = subj;
             return bounce;
         }
@@ -349,23 +352,23 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
             
             if (clauses == KON_NIL) {
                 // no clauses like {{a}}
-                KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-                bounce->Run.Cont = contBeingInvoked->Cont;
+                KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+                bounce->Cont = contBeingInvoked->Cont;
                 bounce->Run.Value = subj;
                 return bounce;
             }
 
             // eval the first clause
-            KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_LIST);
+            KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_CLAUSE_LIST);
             k->Cont = contBeingInvoked->Cont;
             k->Env = contBeingInvoked->Env;
-            k->RestJobs = KON_CDR(clauses);
-            
-            KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_CLAUSE_LIST);
-            bounce->SubjBounce.Subj = subj;
-            bounce->SubjBounce.Cont = k;
-            bounce->SubjBounce.Env = contBeingInvoked->Env;
-            bounce->SubjBounce.Value = KON_CAR(clauses);
+            k->EvalClauseList.Subj = subj;
+            k->EvalClauseList.RestClauses = KON_CDR(clauses);
+
+            KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_CLAUSE_LIST);
+            bounce->Cont = k;
+            bounce->Bounce.Value = KON_CAR(clauses);
+            bounce->Bounce.Env = contBeingInvoked->Env;
             return bounce;
         }
         
@@ -374,27 +377,29 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
         // last clause eval finshed, eval next clause
         // last clause eval result is the subj of the next clause
         KN subj = val;
-        KN restClauseList = contBeingInvoked->RestJobs;
+        // KN restClauseList = contBeingInvoked->RestJobs;
+        KN restClauseList = contBeingInvoked->EvalClauseList.RestClauses;
         if (restClauseList == KON_NIL) {
             // no other clauses, is a sentence like {writeln % "abc"}
             // finish this sentence. use last clause eval result as return val
-            KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-            bounce->Run.Cont = contBeingInvoked->Cont;
+            KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+            bounce->Cont = contBeingInvoked->Cont;
             bounce->Run.Value = subj;
             return bounce;
         }
         else {
             // eval the next clause
-            KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_LIST);
+            KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_CLAUSE_LIST);
             k->Cont = contBeingInvoked->Cont;
             k->Env = contBeingInvoked->Env;
-            k->RestJobs = KON_CDR(restClauseList);
+            k->EvalClauseList.Subj = subj;
+            k->EvalClauseList.RestClauses = KON_CDR(restClauseList);
+
+            KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_CLAUSE_LIST);
+            bounce->Cont = k;
+            bounce->Bounce.Value = KON_CAR(restClauseList);
+            bounce->Bounce.Env = contBeingInvoked->Env;
             
-            KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_CLAUSE_LIST);
-            bounce->SubjBounce.Subj = subj;
-            bounce->SubjBounce.Cont = k;
-            bounce->SubjBounce.Env = contBeingInvoked->Env;
-            bounce->SubjBounce.Value = KON_CAR(restClauseList);
             return bounce;
         }
     }
@@ -416,16 +421,15 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
         }
         else {
             // eval the next clause
-            KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_ARGS);
+            KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_CLAUSE_ARGS);
             k->Cont = contBeingInvoked->Cont;
             k->Env = contBeingInvoked->Env;
             k->EvalClauseArgs.Subj = subj;
             k->EvalClauseArgs.RestArgList = KON_CDR(restArgList);
             k->EvalClauseArgs.EvaledArgList = evaledArgList;
             
-            KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_ARG_LIST);
-//            bounce->SubjBounce.Subj = subj;
-            bounce->Bounce.Cont = k;
+            KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_ARG_LIST);
+            bounce->Cont = k;
             bounce->Bounce.Env = contBeingInvoked->Env;
             bounce->Bounce.Value = KON_CAR(restArgList);
             return bounce;
@@ -551,22 +555,22 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             }
             else {
                 KON_DEBUG("error! unhandled prefix marcro %s", prefix);
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+                bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = KON_UKN;
-                bounce->Run.Cont = cont;
+                bounce->Cont = cont;
             }
         }
         // TODO quasiquote unquote, etc.
         else {
-            bounce = AllocBounceWithType(KON_TRAMPOLINE_SUBJ);
+            bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_SUBJ);
             
-            KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SUBJ);
+            KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_SUBJ);
             k->Cont = cont;
             k->Env = env;
             k->RestJobs = KON_CDR(words);
             
             bounce->Bounce.Value = first;  // get subj word
-            bounce->Bounce.Cont = k;
+            bounce->Cont = k;
             bounce->Bounce.Env = env;
         }
     }
@@ -593,15 +597,15 @@ KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonCont
         return KON_UNDEF;
     }
     else {
-        KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_BLOCK);
+        KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_BLOCK);
         
-        KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_SENTENCE_LIST);
+        KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_SENTENCE_LIST);
         k->Cont = cont;
         k->Env = env;
         k->RestJobs = KON_CDR(sentences);
         
         bounce->Bounce.Value = KON_CAR(sentences);
-        bounce->Bounce.Cont = k;
+        bounce->Cont = k;
         bounce->Bounce.Env = env;
         return bounce;
     }
@@ -616,23 +620,26 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
     //  KN formated = KON_ToFormatString(&kstate, root, false, 0, " ");
     KON_DEBUG("%s", KON_StringToCstr(formated));
     
-    KonContinuation* firstCont = AllocContinuationWithType(KON_CONT_RETURN);
+    KonContinuation* firstCont = AllocContinuationWithType(kstate, KON_CONT_RETURN);
     firstCont->Env = rootEnv;
     // set root level return
     KON_EnvDefine(kstate, rootEnv, "return", firstCont);
     KonTrampoline* bounce = KON_EvalSentences(kstate, sentences, rootEnv, firstCont);
 
     while (kon_bounce_type(bounce) != KON_TRAMPOLINE_LAND) {
+        // update current cont for gc
+        kstate->CurrCont = bounce->Cont;
+
         if (kon_bounce_type(bounce) == KON_TRAMPOLINE_RUN) {
             KonTrampoline* oldBounce = bounce;
             KN value = bounce->Run.Value;
-            KonContinuation* cont = bounce->Run.Cont;
+            KonContinuation* cont = bounce->Cont;
             free(oldBounce);
             bounce = KON_RunContinuation(kstate, cont, value);
         }
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_BLOCK) {
             KonTrampoline* oldBounce = bounce;
-            KonContinuation* cont = bounce->Bounce.Cont;
+            KonContinuation* cont = bounce->Cont;
             KN env = bounce->Bounce.Env;
             KN sentence = bounce->Bounce.Value;
 
@@ -640,7 +647,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
         }
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_SUBJ) {
             KonTrampoline* oldBounce = bounce;
-            KonContinuation* cont = bounce->Bounce.Cont;
+            KonContinuation* cont = bounce->Cont;
             KN env = bounce->Bounce.Env;
             KN subj = bounce->Bounce.Value;
             if (KON_IsPairList(subj)) {
@@ -664,25 +671,28 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_CLAUSE_LIST) {
             
             KonTrampoline* oldBounce = bounce;
-            KonContinuation* cont = bounce->SubjBounce.Cont;
-            KN env = bounce->SubjBounce.Env;
-            KN clauseArgList = bounce->SubjBounce.Value;
-            KN subj = bounce->SubjBounce.Subj;
+            KonContinuation* cont = bounce->Cont;
+            
+            KN subj = cont->EvalClauseList.Subj;
+            KN env = bounce->Bounce.Env;
+            KN clauseArgList = bounce->Bounce.Value;
+            
+
             KN firstArg = KON_CAR(clauseArgList);
 
             if (KON_IS_SYNTAX_MARKER(firstArg)) {
                 // % . |
                 // this kind bouce value is a clause word list like {% "a" "b"}
 
-                KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_ARGS);
+                KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_CLAUSE_ARGS);
                 k->Cont = cont;
                 k->Env = env;
                 k->EvalClauseArgs.Subj = subj;
                 k->EvalClauseArgs.RestArgList = KON_CDR(clauseArgList);
                 k->EvalClauseArgs.EvaledArgList = KON_NIL;
 
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_ARG_LIST);
-                bounce->Bounce.Cont = k;
+                bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_ARG_LIST);
+                bounce->Cont = k;
                 bounce->Bounce.Env = env;
                 bounce->Bounce.Value = KON_CAR(clauseArgList); // the first arg is % or . or |
 
@@ -690,15 +700,15 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             else if (KON_IS_SYMBOL(firstArg)) {
                 // a clause like {{kon /list}}
                 // should dispatch this msg to the object's visitor protocol
-                KonContinuation* k = AllocContinuationWithType(KON_CONT_EVAL_CLAUSE_ARGS);
+                KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_CLAUSE_ARGS);
                 k->Cont = cont;
                 k->Env = env;
                 k->EvalClauseArgs.Subj = subj;
                 k->EvalClauseArgs.RestArgList = KON_CDR(clauseArgList);
                 k->EvalClauseArgs.EvaledArgList = KON_NIL;
                 
-                bounce = AllocBounceWithType(KON_TRAMPOLINE_ARG_LIST);
-                bounce->Bounce.Cont = k;
+                bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_ARG_LIST);
+                bounce->Cont = k;
                 bounce->Bounce.Env = env;
                 bounce->Bounce.Value = KON_CAR(clauseArgList); // the first arg is /abc
             }
@@ -712,7 +722,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_ARG_LIST) {
             // eval each argment
             KonTrampoline* oldBounce = bounce;
-            KonContinuation* cont = bounce->Bounce.Cont;
+            KonContinuation* cont = bounce->Cont;
             KN env = bounce->Bounce.Env;
             KN arg = bounce->Bounce.Value;
             if (KON_IsPairList(arg)) {

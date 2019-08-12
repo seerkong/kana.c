@@ -32,6 +32,9 @@ typedef enum {
 
 struct _KonTrampoline {
     KonBounceType Type;
+    // cont is empty when is a land trampoline
+    KonContinuation* Cont;
+
     union {
         struct {
             KN Value;
@@ -39,21 +42,12 @@ struct _KonTrampoline {
 
         struct {
             KN Value;
-            KonContinuation* Cont;
         } Run;
 
         struct {
             KN Value;
-            KonContinuation* Cont;
             KN Env;
         } Bounce;
-
-        struct {
-            KN Subj;
-            KN Value;
-            KonContinuation* Cont;
-            KN Env;
-        } SubjBounce;
     };
 };
 

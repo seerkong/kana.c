@@ -52,8 +52,8 @@ KN AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* con
         bounce = KON_EvalSentences(kstate, falseClause, env, contBeingInvoked->Cont);
     }
     else {
-        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-        bounce->Run.Cont = contBeingInvoked->Cont;
+        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+        bounce->Cont = contBeingInvoked->Cont;
         bounce->Run.Value = KON_FALSE;
     }
 
@@ -73,7 +73,7 @@ KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KN env, KonCont
     KON_DEBUG("trueClause %s", KON_StringToCstr(KON_ToFormatString(kstate, trueClause, true, 0, "  ")));
     KON_DEBUG("falseClause %s", KON_StringToCstr(KON_ToFormatString(kstate, falseClause, true, 0, "  ")));
 
-    KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = cont->Env;
 

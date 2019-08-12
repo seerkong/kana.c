@@ -32,7 +32,7 @@ KonTrampoline* KON_EvalPrefixEval(KonState* kstate, KN expression, KN env, KonCo
         evalEnv = KON_CADR(expression);
     }
 
-    KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = evalEnv;
 

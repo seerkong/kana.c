@@ -10,18 +10,18 @@ KonTrampoline* ApplyProcArguments(KonState* kstate, KonProcedure* proc, KN argLi
     if (proc->Type == KON_NATIVE_FUNC) {
         KonNativeFuncRef funcRef = proc->NativeFuncRef;
         KN applyResult = (*funcRef)(kstate, argList);
-        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
         bounce->Run.Value = applyResult;
-        bounce->Run.Cont = cont;
+        bounce->Cont = cont;
     }
     else if (proc->Type == KON_NATIVE_OBJ_METHOD) {
         // treat as plain procedure when apply arg list
         // the first item in arg list is the object
         KonNativeFuncRef funcRef = proc->NativeFuncRef;
         KN applyResult = (*funcRef)(kstate, argList);
-        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
         bounce->Run.Value = applyResult;
-        bounce->Run.Cont = cont;
+        bounce->Cont = cont;
     }
     else if (proc->Type == KON_COMPOSITE_LAMBDA) {
         bounce = KON_ApplyCompositeLambda(kstate, proc, argList, env, cont);
@@ -75,7 +75,7 @@ KN AfterApplySymExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* co
     KN applyArgsExpr = KxHashTable_AtKey(memo, "ApplyArgsExpr");
 
     KonTrampoline* bounce;
-    KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = contBeingInvoked->Cont;
     k->Env = env;
 
@@ -108,7 +108,7 @@ KonTrampoline* KON_EvalPrefixApply(KonState* kstate, KN expression, KN env, KonC
     //     applyEnv = KON_CADDR(expression);
     // }
 
-    KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = env;
 

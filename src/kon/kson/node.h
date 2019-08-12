@@ -2,6 +2,7 @@
 #define KON_KSON_NODE_H
 
 #include <stdio.h>
+#include <tbox/tbox.h>
 #include "../prefix/config.h"
 #include "../string/kx_stringbuffer.h"
 #include "../container/hashtable/kx_hashtable.h"
@@ -368,6 +369,7 @@ struct _KonContinuation {
     KonBase Base;
     KonContinuationType Type;
     KN Env;
+    // a Return continuation's Cont is empty
     KonContinuation* Cont;
     union {
         // most continuations use this store rest jobs to do
@@ -381,6 +383,11 @@ struct _KonContinuation {
         } EvalClauseArgs;
 
         struct {
+            KN Subj;
+            KN RestClauses;
+        } EvalClauseList;
+
+        struct {
             KonContFuncRef Callback;
             // used for native marcros, save more custom info
             KxHashTable* MemoTable;
@@ -392,6 +399,13 @@ struct _KonContinuation {
 struct KonState {
     KonBase Base;
     KonEnv* RootEnv;
+    KonEnv* CurrEnv;
+    KonContinuation* CurrCont;
+    
+    tb_allocator_ref_t LargeAllocator;
+    tb_allocator_ref_t DefaultAllocator;
+    tb_allocator_ref_t SmallAllocator;
+    
     unsigned int LastMsgDispatcherId;
 };
 

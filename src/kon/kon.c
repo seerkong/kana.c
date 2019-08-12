@@ -6,6 +6,7 @@
 #include "kson/reader.h"
 #include "utils/number_utils.h"
 #include "interpreter/cps_interpreter.h"
+#include <tbox/tbox.h>
 
 int ENABLE_DEBUG = 1;
 
@@ -24,12 +25,38 @@ KonState* KON_Init()
     // KON_DEBUG("root env addr %x", env);     
     // kstate->Value.Context.RootEnv = env;
 
+    if (!tb_init(tb_null, tb_null)) {
+        return NULL;
+    }
+
+    
+    kstate->LargeAllocator = tb_large_allocator_init(tb_null, 0);
+    kstate->DefaultAllocator = tb_default_allocator_init(kstate->LargeAllocator);
+    kstate->SmallAllocator = tb_small_allocator_init(tb_null);
+
     return kstate;
 }
 
 
 int KON_Finish(KonState* kstate)
 {
+    // exit allocator
+    if (kstate->DefaultAllocator) {
+        tb_allocator_exit(kstate->DefaultAllocator);
+    }
+    kstate->DefaultAllocator = tb_null;
+
+    if (kstate->LargeAllocator) {
+        tb_allocator_exit(kstate->LargeAllocator);
+    }
+    kstate->LargeAllocator = tb_null;
+
+    if (kstate->SmallAllocator) {
+        tb_allocator_exit(kstate->SmallAllocator);
+    }
+    kstate->SmallAllocator = tb_null;
+    
+    tb_exit();
     return 0;
 }
 

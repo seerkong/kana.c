@@ -26,8 +26,8 @@ KonTrampoline* KON_EvalPrefixBlk(KonState* kstate, KN expression, KN env, KonCon
     proc->Composite.LexicalEnv = env;
     proc->Composite.Body = body;
 
-    KonTrampoline* bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+    KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
     bounce->Run.Value = proc;
-    bounce->Run.Cont = cont;
+    bounce->Cont = cont;
     return bounce;
 }

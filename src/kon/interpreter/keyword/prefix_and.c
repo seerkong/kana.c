@@ -12,21 +12,21 @@ KN AfterAndConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* co
     KonTrampoline* bounce;
     if (KON_IS_FALSE(evaledValue) || evaledValue == KON_NIL) {
         KON_DEBUG("break and");
-        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-        bounce->Run.Cont = contBeingInvoked->Cont;
+        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+        bounce->Cont = contBeingInvoked->Cont;
         bounce->Run.Value = KON_FALSE;
     }
     else if (restConditon == KON_NIL) {
         // all conditions passed, return true
         KON_DEBUG("all and condition return true");
-        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-        bounce->Run.Cont = contBeingInvoked->Cont;
+        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+        bounce->Cont = contBeingInvoked->Cont;
         bounce->Run.Value = KON_TRUE;
     }
     else {
         // next condition
         KN nextExpr = KON_CAR(restConditon);
-        KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+        KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
         k->Cont = contBeingInvoked->Cont;
         k->Env = env;
 
@@ -47,7 +47,7 @@ KonTrampoline* KON_EvalPrefixAnd(KonState* kstate, KN expression, KN env, KonCon
     KON_DEBUG("meet prefix marcro and");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     
-    KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = env;
 

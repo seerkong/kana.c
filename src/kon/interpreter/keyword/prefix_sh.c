@@ -31,9 +31,9 @@ KonTrampoline* KON_EvalPrefixSh(KonState* kstate, KN expression, KN env, KonCont
     system(KxStringBuffer_Cstr(sb));
 
     KonTrampoline* bounce;
-    bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+    bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
     bounce->Run.Value = KON_TRUE;
-    bounce->Run.Cont = cont;
+    bounce->Cont = cont;
 
     return bounce;
 }

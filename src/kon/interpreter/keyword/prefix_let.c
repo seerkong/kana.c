@@ -14,8 +14,8 @@ KN AfterLetValExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
 
     KonTrampoline* bounce;
 
-    bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-    bounce->Run.Cont = contBeingInvoked->Cont;
+    bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+    bounce->Cont = contBeingInvoked->Cont;
     bounce->Run.Value = KON_TRUE;
 
     return bounce;
@@ -35,15 +35,15 @@ KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KN env, KonCon
     KonTrampoline* bounce;
     if ((KN)KON_CDR(expression) == KON_NIL) {
         KON_EnvDefine(kstate, env, varNameCstr, KON_UKN);
-        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
+        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
         bounce->Run.Value = KON_TRUE;
-        bounce->Run.Cont = cont;
+        bounce->Cont = cont;
     }
     else {
         KN initVal = KON_CADR(expression);
         KON_DEBUG("initVal %s", KON_StringToCstr(KON_ToFormatString(kstate, initVal, true, 0, "  ")));
 
-        KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+        KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
         k->Cont = cont;
         k->Env = env;
 

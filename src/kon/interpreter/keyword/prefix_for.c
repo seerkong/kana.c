@@ -12,7 +12,7 @@ KN BeforeForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBe
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KN predictExpr = KxHashTable_AtKey(memo, "PredictExpr");
 
-    KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = contBeingInvoked->Cont;
     k->Env = env;
     k->Native.MemoTable = memo;
@@ -29,7 +29,7 @@ KN AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBei
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KN bodyExprs = KxHashTable_AtKey(memo, "BodyExprs");
 
-    KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = contBeingInvoked->Cont;
     k->Env = env;
     k->Native.MemoTable = memo;
@@ -40,8 +40,8 @@ KN AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBei
         bounce = KON_EvalSentences(kstate, bodyExprs, env, k);
     }
     else {
-        bounce = AllocBounceWithType(KON_TRAMPOLINE_RUN);
-        bounce->Run.Cont = contBeingInvoked->Cont;
+        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+        bounce->Cont = contBeingInvoked->Cont;
         bounce->Run.Value = KON_TRUE;
     }
 
@@ -54,7 +54,7 @@ KN AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBei
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KN afterBodyExpr = KxHashTable_AtKey(memo, "AfterExpr");
 
-    KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = contBeingInvoked->Cont;
     k->Env = env;
     k->Native.MemoTable = memo;
@@ -82,7 +82,7 @@ KonTrampoline* KON_EvalPrefixFor(KonState* kstate, KN expression, KN env, KonCon
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
 
-    KonContinuation* k = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = loopBindEnv;
 
@@ -96,7 +96,7 @@ KonTrampoline* KON_EvalPrefixFor(KonState* kstate, KN expression, KN env, KonCon
     // set break keyword continuation
     KON_EnvDefine(kstate, loopBindEnv, "break", cont);
     // set continue keyword continuation
-    KonContinuation* continueKeywordCont = AllocContinuationWithType(KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* continueKeywordCont = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     continueKeywordCont->Cont = cont;
     continueKeywordCont->Env = loopBindEnv;
     continueKeywordCont->Native.MemoTable = memo;
