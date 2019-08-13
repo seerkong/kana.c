@@ -1,6 +1,6 @@
 #include "kon_cell.h"
-#include "../../container/vector/kx_vector.h"
-#include "../../container/hashtable/kx_hashtable.h"
+#include "../../container/kx_vector.h"
+#include "../../container/kx_hashtable.h"
 
 KN KonCell_Init(KonState* kstate, KN args)
 {

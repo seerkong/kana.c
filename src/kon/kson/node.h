@@ -5,8 +5,8 @@
 #include "tbox/tbox.h"
 #include "../prefix/config.h"
 #include "../string/kx_stringbuffer.h"
-#include "../container/hashtable/kx_hashtable.h"
-#include "../container/vector/kx_vector.h"
+#include "../container/kx_hashtable.h"
+#include "../container/kx_vector.h"
 
 ////
 // type alias start

@@ -6,7 +6,7 @@ extern "C"{
 #endif
 
 #include "../prefix.h"
-#include "../container/hashtable/kx_hashtable.h"
+#include "../container/kx_hashtable.h"
 
 typedef struct _KonTrampoline KonTrampoline;
 

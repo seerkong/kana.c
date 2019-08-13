@@ -1,5 +1,5 @@
 #include "kon_table.h"
-#include "../../container/hashtable/kx_hashtable.h"
+#include "../../container/kx_hashtable.h"
 
 KN KonTable_Init(KonState* kstate, KN args)
 {

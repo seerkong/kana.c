@@ -57,61 +57,6 @@ target_sources(kli PRIVATE
 )
 
 # target
-add_executable(test_string "")
-set_target_properties(test_string PROPERTIES OUTPUT_NAME "test_string")
-set_target_properties(test_string PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
-add_dependencies(test_string kon)
-target_include_directories(test_string PRIVATE
-    /usr/include
-    /usr/local/include
-)
-target_compile_definitions(test_string PRIVATE
-    DEBUG
-)
-set_property(TARGET test_string PROPERTY C_STANDARD 99)
-if(MSVC)
-    target_compile_options(test_string PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
-endif()
-set_property(TARGET test_string PROPERTY CXX_STANDARD 14)
-target_compile_options(test_string PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
-    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
-    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
-    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
-)
-if(MSVC)
-    target_compile_options(test_string PRIVATE $<$<CONFIG:Debug>:-Od>)
-else()
-    target_compile_options(test_string PRIVATE -O0)
-endif()
-target_link_libraries(test_string PRIVATE
-    tbox
-    pthread
-    tbox
-    kon
-)
-target_link_directories(test_string PRIVATE
-    /usr/local/lib
-    /usr/lib
-)
-target_link_options(test_string PRIVATE
-    -L/usr/local/lib
-    -lpthread
-)
-target_sources(test_string PRIVATE
-    test/string/test_string.c
-)
-
-# target
 add_executable(test_eval "")
 set_target_properties(test_eval PROPERTIES OUTPUT_NAME "test_eval")
 set_target_properties(test_eval PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
@@ -222,23 +167,23 @@ target_sources(test_tokenizer PRIVATE
 )
 
 # target
-add_executable(test_table "")
-set_target_properties(test_table PROPERTIES OUTPUT_NAME "test_table")
-set_target_properties(test_table PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
-add_dependencies(test_table kon)
-target_include_directories(test_table PRIVATE
+add_executable(test_list "")
+set_target_properties(test_list PROPERTIES OUTPUT_NAME "test_list")
+set_target_properties(test_list PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
+add_dependencies(test_list kon)
+target_include_directories(test_list PRIVATE
     /usr/include
     /usr/local/include
 )
-target_compile_definitions(test_table PRIVATE
+target_compile_definitions(test_list PRIVATE
     DEBUG
 )
-set_property(TARGET test_table PROPERTY C_STANDARD 99)
+set_property(TARGET test_list PROPERTY C_STANDARD 99)
 if(MSVC)
-    target_compile_options(test_table PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
+    target_compile_options(test_list PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
 endif()
-set_property(TARGET test_table PROPERTY CXX_STANDARD 14)
-target_compile_options(test_table PRIVATE
+set_property(TARGET test_list PROPERTY CXX_STANDARD 14)
+target_compile_options(test_list PRIVATE
     $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
     $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
     $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
@@ -254,27 +199,26 @@ target_compile_options(test_table PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
 )
 if(MSVC)
-    target_compile_options(test_table PRIVATE $<$<CONFIG:Debug>:-Od>)
+    target_compile_options(test_list PRIVATE $<$<CONFIG:Debug>:-Od>)
 else()
-    target_compile_options(test_table PRIVATE -O0)
+    target_compile_options(test_list PRIVATE -O0)
 endif()
-target_link_libraries(test_table PRIVATE
+target_link_libraries(test_list PRIVATE
     tbox
     pthread
     tbox
     kon
 )
-target_link_directories(test_table PRIVATE
+target_link_directories(test_list PRIVATE
     /usr/local/lib
     /usr/lib
 )
-target_link_options(test_table PRIVATE
+target_link_options(test_list PRIVATE
     -L/usr/local/lib
     -lpthread
 )
-target_sources(test_table PRIVATE
-    test/container/test_table.c
-    test/container/test_hashtable.c
+target_sources(test_list PRIVATE
+    test/container/test_list.c
 )
 
 # target
@@ -330,6 +274,61 @@ target_link_options(test_reader PRIVATE
 )
 target_sources(test_reader PRIVATE
     test/kson/test_reader.c
+)
+
+# target
+add_executable(test_string "")
+set_target_properties(test_string PROPERTIES OUTPUT_NAME "test_string")
+set_target_properties(test_string PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
+add_dependencies(test_string kon)
+target_include_directories(test_string PRIVATE
+    /usr/include
+    /usr/local/include
+)
+target_compile_definitions(test_string PRIVATE
+    DEBUG
+)
+set_property(TARGET test_string PROPERTY C_STANDARD 99)
+if(MSVC)
+    target_compile_options(test_string PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
+endif()
+set_property(TARGET test_string PROPERTY CXX_STANDARD 14)
+target_compile_options(test_string PRIVATE
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
+    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
+)
+if(MSVC)
+    target_compile_options(test_string PRIVATE $<$<CONFIG:Debug>:-Od>)
+else()
+    target_compile_options(test_string PRIVATE -O0)
+endif()
+target_link_libraries(test_string PRIVATE
+    tbox
+    pthread
+    tbox
+    kon
+)
+target_link_directories(test_string PRIVATE
+    /usr/local/lib
+    /usr/lib
+)
+target_link_options(test_string PRIVATE
+    -L/usr/local/lib
+    -lpthread
+)
+target_sources(test_string PRIVATE
+    test/string/test_string.c
 )
 
 # target
@@ -607,6 +606,62 @@ target_sources(tbox PRIVATE
 )
 
 # target
+add_executable(test_table "")
+set_target_properties(test_table PROPERTIES OUTPUT_NAME "test_table")
+set_target_properties(test_table PROPERTIES RUNTIME_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
+add_dependencies(test_table kon)
+target_include_directories(test_table PRIVATE
+    /usr/include
+    /usr/local/include
+)
+target_compile_definitions(test_table PRIVATE
+    DEBUG
+)
+set_property(TARGET test_table PROPERTY C_STANDARD 99)
+if(MSVC)
+    target_compile_options(test_table PRIVATE $<$<COMPILE_LANGUAGE:C>:-TP>)
+endif()
+set_property(TARGET test_table PROPERTY CXX_STANDARD 14)
+target_compile_options(test_table PRIVATE
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
+    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=deprecated-declarations>
+    $<$<COMPILE_LANGUAGE:C>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-strict-aliasing>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error=expansion-to-defined>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=expansion-to-defined>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-variable>
+    $<$<COMPILE_LANGUAGE:C>:-Wno-unused-function>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-function>
+)
+if(MSVC)
+    target_compile_options(test_table PRIVATE $<$<CONFIG:Debug>:-Od>)
+else()
+    target_compile_options(test_table PRIVATE -O0)
+endif()
+target_link_libraries(test_table PRIVATE
+    tbox
+    pthread
+    tbox
+    kon
+)
+target_link_directories(test_table PRIVATE
+    /usr/local/lib
+    /usr/lib
+)
+target_link_options(test_table PRIVATE
+    -L/usr/local/lib
+    -lpthread
+)
+target_sources(test_table PRIVATE
+    test/container/test_table.c
+    test/container/test_hashtable.c
+)
+
+# target
 add_library(kon STATIC "")
 set_target_properties(kon PROPERTIES OUTPUT_NAME "kon")
 set_target_properties(kon PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "build/macosx/x86_64/release")
@@ -658,7 +713,6 @@ target_link_options(kon PRIVATE
 target_sources(kon PRIVATE
     src/kon/interpreter/keyword/prefix_eval.c
     src/kon/interpreter/keyword/prefix_callcc.c
-    src/kon/container/vector/kx_vector.c
     src/kon/kon.c
     src/kon/interpreter/keyword/prefix_do.c
     src/kon/kson/node.c
@@ -667,36 +721,38 @@ target_sources(kon PRIVATE
     src/kon/interpreter/mod/kon_table.c
     src/kon/interpreter/keyword/prefix_def_builder.c
     src/kon/interpreter/mod/kon_number.c
-    src/kon/kson/value_builder.c
+    src/kon/container/murmurhash.c
+    src/kon/string/kx_stringview.c
     src/kon/interpreter/keyword/prefix_lambda.c
     src/kon/interpreter/keyword/prefix_continue.c
     src/kon/interpreter/cps_interpreter.c
-    src/kon/interpreter/keyword/prefix_apply.c
+    src/kon/container/kx_vector.c
     src/kon/interpreter/keyword/prefix_or.c
     src/kon/interpreter/keyword/prefix_break.c
     src/kon/interpreter/keyword/prefix_let.c
+    src/kon/interpreter/keyword/prefix_apply.c
     src/kon/interpreter/env.c
-    src/kon/kson/writer.c
-    src/kon/interpreter/primary.c
+    src/kon/container/kx_hashtable.c
+    src/kon/kson/tokenizer.c
     src/kon/interpreter/keyword/prefix_cond.c
     src/kon/kson/state_stack.c
     src/kon/interpreter/keyword/prefix_func.c
     src/kon/interpreter/mod/kon_string.c
-    src/kon/interpreter/mod/kon_vector.c
+    src/kon/container/kx_list.c
     src/kon/interpreter/mod/kon_module.c
     src/kon/interpreter/mod/kon_list.c
-    src/kon/interpreter/keyword/prefix_set.c
+    src/kon/interpreter/mod/kon_vector.c
     src/kon/interpreter/mod/kon_cell.c
-    src/kon/container/hashtable/kx_hashtable.c
+    src/kon/interpreter/keyword/prefix_set.c
     src/kon/interpreter/keyword/prefix_if.c
-    src/kon/kson/reader.c
+    src/kon/interpreter/primary.c
     src/kon/utils/number_utils.c
     src/kon/interpreter/keyword/prefix_def_dispatcher.c
-    src/kon/kson/tokenizer.c
-    src/kon/string/kx_stringview.c
+    src/kon/kson/writer.c
+    src/kon/kson/value_builder.c
     src/kon/interpreter/keyword/prefix_and.c
     src/kon/interpreter/keyword/prefix_sh.c
-    src/kon/container/hashtable/murmurhash.c
+    src/kon/kson/reader.c
     src/kon/interpreter/keyword/prefix_for.c
 )
 

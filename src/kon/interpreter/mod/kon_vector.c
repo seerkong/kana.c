@@ -1,5 +1,5 @@
 #include "kon_vector.h"
-#include "../../container/vector/kx_vector.h"
+#include "../../container/kx_vector.h"
 
 KN KonVector_Init(KonState* kstate, KN args)
 {

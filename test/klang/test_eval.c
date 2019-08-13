@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <assert.h>
 #include "../greatest.h"
-// #include "../../src/kon/kon.h"
 #include "kon/kon.h"
 
 KonState* kstate;

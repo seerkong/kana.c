@@ -14,8 +14,8 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#define KX_VECTOR_DEFAULT_CAPACITY 10
-#define KX_VECTOR_RESIZE_RATIO 1.5
+#define KX_VECTOR_DEFAULT_CAPACITY 16
+#define KX_VECTOR_RESIZE_RATIO 1.618
 
 typedef struct _KxVector KxVector;
 // typedef void* XN;

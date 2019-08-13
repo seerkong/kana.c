@@ -301,8 +301,8 @@ KonTrampoline* AllocBounceWithType(KonState* kstate, KonBounceType type)
 // the bounce continuation should be cont->Cont
 KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingInvoked, KN val)
 {
-    // update current continuation for gc
-    kstate->CurrEnv = contBeingInvoked->Env;
+    // update for gc
+    kstate->CurrCont = contBeingInvoked;
 
     // all sentences finished, return last value
     if (kon_continuation_type(contBeingInvoked) == KON_CONT_RETURN) {
@@ -626,8 +626,6 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
     KonTrampoline* bounce = KON_EvalSentences(kstate, sentences, rootEnv, firstCont);
 
     while (kon_bounce_type(bounce) != KON_TRAMPOLINE_LAND) {
-        // update current cont for gc
-        kstate->CurrCont = bounce->Cont;
 
         if (kon_bounce_type(bounce) == KON_TRAMPOLINE_RUN) {
             KonTrampoline* oldBounce = bounce;

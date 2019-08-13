@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <assert.h>
 #include "../greatest.h"
-// #include "../../src/kon/kon.h"
 #include "kon/kon.h"
+#include "tbox/tbox.h"
 
 KonState* kstate;
 SUITE(suite);
@@ -34,14 +34,15 @@ GREATEST_MAIN_DEFS();
 
 int main(int argc, char const* argv[])
 {
+    if (!tb_init(tb_null, tb_null)) {
+        exit(1);
+    }
     GREATEST_MAIN_BEGIN();
     greatest_set_verbosity(1);
 
-    kstate = KON_Init();
-    ENABLE_DEBUG = 0;
     RUN_SUITE(suite);
 
-    KON_Finish(kstate);
 
     GREATEST_MAIN_END();
+    tb_exit();
 }

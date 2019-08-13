@@ -4,7 +4,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <stdint.h>
-#include "../../src/kon/container/hashtable/kx_hashtable.h"
+#include "../../src/kon/container/kx_hashtable.h"
 #include <assert.h>
 #include "../greatest.h"
 
