@@ -24,21 +24,9 @@ TEST Reader_Cell(void) {
     bool openRes = KSON_ReaderFromFile(reader, filePathOrigin);
     if (openRes) {
         KN root = KSON_Parse(reader);
-        if (KON_IsPairList(root)) {
-
-            KN env = KON_MakeRootEnv(kstate);
-
-            // DefineReservedDispatcher(kstate, env);
-
-            // KN result = KON_ProcessSentences(kstate, root, kstate->Value.Context.RootEnv);
-            result = KON_ProcessSentences(kstate, root, env);
-            
-            
-            KON_DEBUG("eval sentences success");
-            KN formated = KON_ToFormatString(kstate, result, true, 0, "  ");
-            KON_DEBUG("%s", KON_StringToCstr(formated));
-        }
-        
+        KON_DEBUG("eval sentences success");
+        KN formated = KON_ToFormatString(kstate, root, true, 0, "  ");
+        KON_DEBUG("%s", KON_StringToCstr(formated));
     }
     else {
         KON_DEBUG("open stream failed");

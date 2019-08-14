@@ -110,7 +110,7 @@ TEST Table_PushVal_IndexGet(void) {
     KxHashTable* table = KxHashTable_Init(4);
 
     for (int i = 0; i < 5; i++) {
-        KxHashTable_PushVal(table, (XN)i);
+        KxHashTable_PushVal(table, (kx_table_val_t)i);
     }
 
     ASSERT_EQ_FMT(5, KxHashTable_Length(table), "%d");
@@ -130,8 +130,8 @@ TEST Table_PutKv_IndexGet(void) {
     char* value2 = "stdio.h";
     char* value3 = "stdbool.h";
 
-    KxHashTable_PutKv(table, "abc", value1);
-    KxHashTable_PutKv(table, "bcd", value2);
+    KxHashTable_PutKv(table, "abc", (kx_table_val_t)value1);
+    KxHashTable_PutKv(table, "bcd", (kx_table_val_t)value2);
 
     KxHashTable_PushVal(table, value3);
 
@@ -151,9 +151,9 @@ TEST Table_PushKv_IndexGet(void) {
     char* value2 = "stdio.h";
     char* value3 = "stdbool.h";
 
-    KxHashTable_PushKv(table, "abc", value1);
-    KxHashTable_PushKv(table, "bcd", value2);
-    KxHashTable_PushKv(table, "abc", value3);
+    KxHashTable_PushKv(table, "abc", (kx_table_val_t)value1);
+    KxHashTable_PushKv(table, "bcd", (kx_table_val_t)value2);
+    KxHashTable_PushKv(table, "abc", (kx_table_val_t)value3);
 
     KxHashTable_PushVal(table, value3);
 

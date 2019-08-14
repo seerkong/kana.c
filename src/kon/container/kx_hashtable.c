@@ -233,7 +233,7 @@ KxHashTableValEntry* KxHashTable_ValEntryAtKey(KxHashTable* self, char* key)
     }
 }
 // get by key string
-XN KxHashTable_AtKey(KxHashTable* self, char* key)
+kx_table_val_t KxHashTable_AtKey(KxHashTable* self, char* key)
 {
     if (key == NULL) {
         return KX_HASH_TABLE_UNDEF;
@@ -289,7 +289,7 @@ KxHashTableValEntry* KxHashTable_ValEntryAtIndex(KxHashTable* self, int index)
 }
 
 // get by index number
-XN KxHashTable_ValAtIndex(KxHashTable* self, int index)
+kx_table_val_t KxHashTable_ValAtIndex(KxHashTable* self, int index)
 {
     KxHashTableValEntry* valEntry = KxHashTable_ValEntryAtIndex(self, index);
     if (valEntry == NULL) {
@@ -307,12 +307,12 @@ const char* KxHashTable_KeyAtIndex(KxHashTable* self, int index)
     return valEntry->Key;    
 }
 
-XN KxHashTable_FirstVal(KxHashTable* self)
+kx_table_val_t KxHashTable_FirstVal(KxHashTable* self)
 {
     return self->ValListHead->Val;
 }
 
-XN KxHashTable_LastVal(KxHashTable* self)
+kx_table_val_t KxHashTable_LastVal(KxHashTable* self)
 {
     return self->ValListTail->Val;
 }
@@ -343,7 +343,7 @@ KxHashTableKeyEntry* KxHashTable_CreateKeyEntry(KxHashTable* self, char* key)
     return entry;
 }
 
-KxHashTableValEntry* KxHashTable_CreateValEntry(KxHashTable* self, XN value)
+KxHashTableValEntry* KxHashTable_CreateValEntry(KxHashTable* self, kx_table_val_t value)
 {
     KxHashTableValEntry* entry = (KxHashTableValEntry*)tb_nalloc0(1, sizeof(KxHashTableValEntry));
     if (entry == NULL) {
@@ -454,7 +454,7 @@ KxHashTableKeyEntry* KxHashTable_AddOrUpdateKeyEntry(KxHashTable* self, char* ke
     return keyEntry;
 }
 
-int KxHashTable_PushVal(KxHashTable* self, XN value)
+int KxHashTable_PushVal(KxHashTable* self, kx_table_val_t value)
 {
     KxHashTableValEntry* valEntry = KxHashTable_CreateValEntry(self, value);
     if (valEntry == NULL) {
@@ -466,7 +466,7 @@ int KxHashTable_PushVal(KxHashTable* self, XN value)
 }
 
 // push new val to tail
-int KxHashTable_PushKv(KxHashTable* self, char* key, XN value)
+int KxHashTable_PushKv(KxHashTable* self, char* key, kx_table_val_t value)
 {
     if (key == NULL) {
         return -1;
@@ -487,7 +487,7 @@ int KxHashTable_PushKv(KxHashTable* self, char* key, XN value)
 }
 
 // add value to head
-int KxHashTable_UnshiftVal(KxHashTable* self, XN value)
+int KxHashTable_UnshiftVal(KxHashTable* self, kx_table_val_t value)
 {
     KxHashTableValEntry* valEntry = KxHashTable_CreateValEntry(self, value);
     if (valEntry == NULL) {
@@ -498,7 +498,7 @@ int KxHashTable_UnshiftVal(KxHashTable* self, XN value)
     return 1;
 }
 // add key value to head
-int KxHashTable_UnshiftKv(KxHashTable* self, char* key, XN value)
+int KxHashTable_UnshiftKv(KxHashTable* self, char* key, kx_table_val_t value)
 {
     if (key == NULL) {
         return -1;
@@ -517,7 +517,7 @@ int KxHashTable_UnshiftKv(KxHashTable* self, char* key, XN value)
     return 1;
 }
 
-int KxHashTable_PutKv(KxHashTable* self, char* key, XN value)
+int KxHashTable_PutKv(KxHashTable* self, char* key, kx_table_val_t value)
 {
     if (key == NULL) {
         return -1;
@@ -583,7 +583,7 @@ int KxHashTable_SetKeyAtIndex(KxHashTable* self, int index, char* key)
 }
 
 // set value by index, if out of range, do nothing
-int KxHashTable_SetValAtIndex(KxHashTable* self, int index, XN value)
+int KxHashTable_SetValAtIndex(KxHashTable* self, int index, kx_table_val_t value)
 {
     KxHashTableValEntry* valEntry = KxHashTable_ValEntryAtIndex(self, index);
     if (valEntry == NULL) {
@@ -596,7 +596,7 @@ int KxHashTable_SetValAtIndex(KxHashTable* self, int index, XN value)
 
 // set index item value, if out of range, do nothing
 // and update the key's value to this index
-int KxHashTable_SetKvAtIndex(KxHashTable* self, int index, char* key, XN value)
+int KxHashTable_SetKvAtIndex(KxHashTable* self, int index, char* key, kx_table_val_t value)
 {
     KxHashTableValEntry* valEntry = KxHashTable_ValEntryAtIndex(self, index);
     if (valEntry == NULL) {
@@ -703,7 +703,7 @@ const char* KxHashTable_IterGetKey(KxHashTable* self, KxHashTableIter iter)
     return valEntry->Key;
 }
 
-XN KxHashTable_IterGetVal(KxHashTable* self, KxHashTableIter iter)
+kx_table_val_t KxHashTable_IterGetVal(KxHashTable* self, KxHashTableIter iter)
 {
     if (iter == KX_HASH_TABLE_NIL) {
         return KX_HASH_TABLE_UNDEF;
@@ -729,7 +729,7 @@ int KxHashTable_IterSetKey(KxHashTable* self, KxHashTableIter iter, char* key)
     return 1;
 }
 // set iter item value
-int KxHashTable_IterSetVal(KxHashTable* self, KxHashTableIter iter, XN value)
+int KxHashTable_IterSetVal(KxHashTable* self, KxHashTableIter iter, kx_table_val_t value)
 {
     KxHashTableValEntry* valEntry = (KxHashTableValEntry*)iter;
     if (valEntry == NULL || iter == KX_HASH_TABLE_NIL) {
@@ -751,7 +751,7 @@ int KxHashTable_DelByIter(KxHashTable* self, KxHashTableIter iter, char* key)
 }
 
 // insert value before iter
-KxHashTableValEntry* KxHashTable_CreateValEntryBeforeIter(KxHashTable* self, KxHashTableIter iter, XN value)
+KxHashTableValEntry* KxHashTable_CreateValEntryBeforeIter(KxHashTable* self, KxHashTableIter iter, kx_table_val_t value)
 {
     KxHashTableValEntry* valEntry = (KxHashTableValEntry*)iter;
     if (valEntry == NULL || iter == KX_HASH_TABLE_NIL) {
@@ -780,7 +780,7 @@ KxHashTableValEntry* KxHashTable_CreateValEntryBeforeIter(KxHashTable* self, KxH
     return newValEntry;
 }
 
-int KxHashTable_InsertValBeforeIter(KxHashTable* self, KxHashTableIter iter, XN value)
+int KxHashTable_InsertValBeforeIter(KxHashTable* self, KxHashTableIter iter, kx_table_val_t value)
 {
     KxHashTableValEntry* newValEntry = KxHashTable_CreateValEntryBeforeIter(self, iter, value);
     if (newValEntry == NULL) {
@@ -792,7 +792,7 @@ int KxHashTable_InsertValBeforeIter(KxHashTable* self, KxHashTableIter iter, XN 
 }
 
 // insert k v before iter
-int KxHashTable_InsertKvBeforIter(KxHashTable* self, KxHashTableIter iter, char* key, XN value)
+int KxHashTable_InsertKvBeforIter(KxHashTable* self, KxHashTableIter iter, char* key, kx_table_val_t value)
 {
     KxHashTableValEntry* newValEntry = KxHashTable_CreateValEntryBeforeIter(self, iter, value);
     if (newValEntry == NULL) {
@@ -805,7 +805,7 @@ int KxHashTable_InsertKvBeforIter(KxHashTable* self, KxHashTableIter iter, char*
 
 
 
-KxHashTableValEntry* KxHashTable_CreateValEntryAfterIter(KxHashTable* self, KxHashTableIter iter, XN value)
+KxHashTableValEntry* KxHashTable_CreateValEntryAfterIter(KxHashTable* self, KxHashTableIter iter, kx_table_val_t value)
 {
     KxHashTableValEntry* valEntry = (KxHashTableValEntry*)iter;
     if (valEntry == NULL || iter == KX_HASH_TABLE_NIL) {
@@ -835,7 +835,7 @@ KxHashTableValEntry* KxHashTable_CreateValEntryAfterIter(KxHashTable* self, KxHa
 }
 
 // insert value after iter
-int KxHashTable_InsertValAfterIter(KxHashTable* self, KxHashTableIter iter, XN value)
+int KxHashTable_InsertValAfterIter(KxHashTable* self, KxHashTableIter iter, kx_table_val_t value)
 {
     KxHashTableValEntry* newValEntry = KxHashTable_CreateValEntryAfterIter(self, iter, value);
     if (newValEntry == NULL) {
@@ -846,7 +846,7 @@ int KxHashTable_InsertValAfterIter(KxHashTable* self, KxHashTableIter iter, XN v
     }
 }
 // insert k v after iter
-int KxHashTable_InsertKvAfterIter(KxHashTable* self, KxHashTableIter iter, char* key, XN value)
+int KxHashTable_InsertKvAfterIter(KxHashTable* self, KxHashTableIter iter, char* key, kx_table_val_t value)
 {
     KxHashTableValEntry* newValEntry = KxHashTable_CreateValEntryAfterIter(self, iter, value);
     if (newValEntry == NULL) {

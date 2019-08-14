@@ -55,7 +55,7 @@ uint32_t KxList_Length(KxList* self)
 }
 
 // get val by index number
-XN KxList_ValAt(KxList* self, int index)
+kx_list_val_t KxList_ValAt(KxList* self, int index)
 {
     int cursor = 0;
     KxListNode* iter = self->Head;
@@ -74,7 +74,7 @@ XN KxList_ValAt(KxList* self, int index)
     return KX_LIST_UNDEF;
 }
 
-XN KxList_Head(KxList* self)
+kx_list_val_t KxList_Head(KxList* self)
 {
     if (self->Head != KX_LIST_NIL) {
         return self->Head->Val;
@@ -84,10 +84,9 @@ XN KxList_Head(KxList* self)
     }
 }
 
-XN KxList_Tail(KxList* self)
+kx_list_val_t KxList_Tail(KxList* self)
 {
     if (self->Tail != KX_LIST_NIL) {
-        printf("self->Tail->Val %x\n", self->Tail->Val);
         return self->Tail->Val;
     }
     else {
@@ -95,9 +94,8 @@ XN KxList_Tail(KxList* self)
     }
 }
 
-KxListNode* KxList_NewNode(XN value)
+KxListNode* KxList_NewNode(kx_list_val_t value)
 {
-    printf("KxList_NewNode value addr %x\n", value);
     KxListNode* node = (KxListNode*)tb_nalloc0(1, sizeof(KxListNode));
     if (node == NULL) {
         return NULL;
@@ -105,12 +103,11 @@ KxListNode* KxList_NewNode(XN value)
     node->Val = value;
     node->Prev = KX_LIST_NIL;
     node->Next = KX_LIST_NIL;
-    printf("KxList_NewNode node addr %x, val addr %x\n", node, node->Val);
     return node;
 }
 
 // add value to tail
-int KxList_Push(KxList* self, XN value)
+int KxList_Push(KxList* self, kx_list_val_t value)
 {
     KxListNode* node = KxList_NewNode(value);
     if (node == NULL) {
@@ -129,20 +126,23 @@ int KxList_Push(KxList* self, XN value)
     return 1;
 }
 // get tail and remove
-XN KxList_Pop(KxList* self)
+kx_list_val_t KxList_Pop(KxList* self)
 {
     if (self->Tail == KX_LIST_NIL) {
         return KX_LIST_UNDEF;
     }
-    XN tailVal = self->Tail->Val;
+    kx_list_val_t tailVal = self->Tail->Val;
     KxListNode* newTail = self->Tail->Prev;
 
     if (self->Length == 1) {
         self->Head = KX_LIST_NIL;
     }
-    printf("self->Tail addr %x tailVal addr %x\n", self->Tail, tailVal);
+
     tb_free(self->Tail);
-    newTail->Next = KX_LIST_NIL;
+    if (newTail != KX_LIST_NIL) {
+        newTail->Next = KX_LIST_NIL;
+    }
+    
     self->Tail = newTail;
     self->Length -= 1;
     return tailVal;
@@ -156,7 +156,7 @@ int KxList_Append(KxList* self, KxList* other)
     while (iter != KX_LIST_NIL) {
         KxListNode* next = iter->Next;
         
-        XN val = iter->Val;
+        kx_list_val_t val = iter->Val;
         KxList_Push(self, val);
 
         cursor += 1;
@@ -167,7 +167,7 @@ int KxList_Append(KxList* self, KxList* other)
 
 
 // add value to head
-int KxList_Unshift(KxList* self, XN value)
+int KxList_Unshift(KxList* self, kx_list_val_t value)
 {
     KxListNode* node = KxList_NewNode(value);
     if (node == NULL) {
@@ -187,12 +187,12 @@ int KxList_Unshift(KxList* self, XN value)
 }
 
 // get head and remove
-XN KxList_Shift(KxList* self)
+kx_list_val_t KxList_Shift(KxList* self)
 {
     if (self->Head == KX_LIST_NIL) {
         return KX_LIST_UNDEF;
     }
-    XN headVal = self->Head->Val;
+    kx_list_val_t headVal = self->Head->Val;
     KxListNode* newHead = self->Head->Next;
 
     if (self->Length == 1) {
@@ -200,7 +200,10 @@ XN KxList_Shift(KxList* self)
         self->Tail = KX_LIST_NIL;
     }
     tb_free(self->Head);
-    newHead->Prev = KX_LIST_NIL;
+    if (newHead != KX_LIST_NIL) {
+        newHead->Prev = KX_LIST_NIL;
+    }
+    
     self->Head = newHead;
     self->Length -= 1;
     return headVal;
@@ -214,7 +217,7 @@ int KxList_Prepend(KxList* self, KxList* other)
     while (iter != KX_LIST_NIL) {
         KxListNode* next = iter->Next;
         
-        XN val = iter->Val;
+        kx_list_val_t val = iter->Val;
         KxList_Unshift(self, val);
 
         cursor += 1;
@@ -223,8 +226,8 @@ int KxList_Prepend(KxList* self, KxList* other)
     return 1;
 }
 
-
-int KxList_InsertBefore(KxList* self, KxListNode* node, XN value)
+// TODO check if is list head or tail
+int KxList_InsertBefore(KxList* self, KxListNode* node, kx_list_val_t value)
 {
     if (value == KX_LIST_NIL) {
         // TODO throw exception
@@ -234,7 +237,9 @@ int KxList_InsertBefore(KxList* self, KxListNode* node, XN value)
     if (newNode == NULL) {
         return -1;
     }
-    node->Prev->Next = newNode;
+    if (node->Prev != KX_LIST_NIL) {
+        node->Prev->Next = newNode;
+    }
     newNode->Next = node;
     newNode->Prev = node->Prev;
     node->Prev = newNode;
@@ -242,7 +247,8 @@ int KxList_InsertBefore(KxList* self, KxListNode* node, XN value)
     return 1;
 }
 
-int KxList_InsertAfter(KxList* self, KxListNode* node, XN value)
+// TODO check if is list head or tail
+int KxList_InsertAfter(KxList* self, KxListNode* node, kx_list_val_t value)
 {
     if (value == KX_LIST_NIL) {
         // TODO throw exception
@@ -252,7 +258,10 @@ int KxList_InsertAfter(KxList* self, KxListNode* node, XN value)
     if (newNode == NULL) {
         return -1;
     }
-    node->Next->Prev = newNode;
+    if (node->Next != KX_LIST_NIL) {
+        node->Next->Prev = newNode;
+    }
+    
     node->Prev = node;
     newNode->Next = node->Next;
     node->Next = newNode;
@@ -261,7 +270,7 @@ int KxList_InsertAfter(KxList* self, KxListNode* node, XN value)
     return 1;
 }
 
-int KxList_InsertAt(KxList* self, int index, XN value)
+int KxList_InsertAt(KxList* self, int index, kx_list_val_t value)
 {
     KxListNode* newNode = KxList_NewNode(value);
     if (newNode == NULL) {
@@ -346,6 +355,9 @@ KxListNode* KxList_IterTail(KxList* self)
 
 bool KxList_IterHasNext(KxListNode* iter)
 {
+    if (iter == NULL || iter == KX_LIST_NIL) {
+        return false;
+    }
     return (iter->Next == KX_LIST_NIL) ? false : true;
 }
 
@@ -354,7 +366,7 @@ KxListNode* KxList_IterNext(KxListNode* iter)
     return iter->Next;
 }
 
-XN KxList_IterVal(KxListNode* iter)
+kx_list_val_t KxList_IterVal(KxListNode* iter)
 {
     if (iter != KX_LIST_NIL) {
         return iter->Val;

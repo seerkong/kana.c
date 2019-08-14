@@ -183,8 +183,9 @@ tb_bool_t tb_init_(tb_handle_t priv, tb_allocator_ref_t allocator, tb_size_t mod
     // init libm envirnoment
     if (!tb_libm_init_env()) return tb_false;
 
+    // kwx: disable
     // init network envirnoment
-    if (!tb_network_init_env()) return tb_false;
+//    if (!tb_network_init_env()) return tb_false;
 
     // init object envirnoment
 #ifdef TB_CONFIG_MODULE_HAVE_OBJECT
@@ -213,9 +214,10 @@ tb_void_t tb_exit()
     tb_object_exit_env();
 #endif
     
+    // kwx: disable
     // exit network envirnoment
-    tb_network_exit_env();
-     
+//    tb_network_exit_env();
+    
     // exit libm envirnoment
     tb_libm_exit_env();
      

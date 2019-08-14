@@ -7,6 +7,7 @@
 #include "../string/kx_stringbuffer.h"
 #include "../container/kx_hashtable.h"
 #include "../container/kx_vector.h"
+#include "../container/kx_list.h"
 
 ////
 // type alias start
@@ -84,7 +85,7 @@ typedef int kon_int32_t;
 
 // unknown, container empty placeholder
 // like objective c [NSNull null]
-#define  KON_UKN  KON_MAKE_UNIQUE_LABEL(2)  // 46 0x2e
+#define KON_UKN  KON_MAKE_UNIQUE_LABEL(2)  // 46 0x2e
 #define KON_TRUE   KON_MAKE_UNIQUE_LABEL(3) // 62 0x3e
 #define KON_FALSE  KON_MAKE_UNIQUE_LABEL(4) // 78 0x4e
 #define KON_EOF    KON_MAKE_UNIQUE_LABEL(5) // 94 0x5e
@@ -153,6 +154,14 @@ typedef struct KonAttrSlot KonAttrSlot;
 typedef struct KonMsgDispatcher KonMsgDispatcher;
 typedef struct KonProcedure KonProcedure;
 
+// not used
+#define KON_GC_MARK_WHITE '0'
+// allocated between two continuation switch
+#define KON_GC_MARK_GRAY '1'
+// mark in process
+#define KON_GC_MARK_RED '2'
+// can be reached from root
+#define KON_GC_MARK_BLACK '3'
 
 typedef struct KonBase {
     KonType Tag;
@@ -160,9 +169,7 @@ typedef struct KonBase {
     // boxed fixnum
     // for types in KonType enum, the MsgDispatcherId is same as KonType
     unsigned int MsgDispatcherId;
-
-    
-    char IsMarked;
+    char GcMarkColor;
 } KonBase;
 
 typedef volatile union _Kon* KN;
@@ -355,7 +362,6 @@ typedef enum {
     // subject is the first item of a sentence, like the 'abc' in {abc + 2}
     KON_CONT_EVAL_SUBJ,
     KON_CONT_EVAL_CLAUSE_LIST,
-    KON_CONT_EVAL_CLAUSE,
     KON_CONT_EVAL_CLAUSE_ARGS,
 
     // native callback, use a MemoTable to store info
@@ -399,8 +405,27 @@ struct _KonContinuation {
 struct KonState {
     KonBase Base;
     KonEnv* RootEnv;
-    KonEnv* CurrEnv;
+
+    ////
+    // gc root source start
+
     KonContinuation* CurrCont;
+    // temp pointer type KN list allocated between two
+    // continuation switch
+    KxList* WriteBarrierGen;
+    KN CurrCode;
+
+    // gc root source end
+    ////
+
+
+    // a list of KxVector. store heap pointers
+    KxList* HeapPtrSegs;
+    KxVector* SegmentMaxSizeVec;    // buffsize of each ptr segment
+    unsigned long MaxObjCntLimit;    // how many objs can be stored in ptr seg
+
+    // mark task queue. mark the value grey before add to this queue
+    KxList* MarkTaskQueue;
     
     tb_allocator_ref_t LargeAllocator;
     tb_allocator_ref_t Allocator;   // default allocator

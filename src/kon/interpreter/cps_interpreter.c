@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "cps_interpreter.h"
 #include "keyword/prefix.h"
+#include "../gc.h"
 
 bool IsSelfEvaluated(KN source)
 {
@@ -286,6 +287,9 @@ KonContinuation* AllocContinuationWithType(KonState* kstate, KonContinuationType
     assert(cont);
     cont->Base.Tag = KON_T_CONTINUATION;
     cont->Type = type;
+
+    // add to heap ptr store
+    KON_RecordNewKonNode(kstate, cont);
     return cont;
 }
 
@@ -302,7 +306,7 @@ KonTrampoline* AllocBounceWithType(KonState* kstate, KonBounceType type)
 KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingInvoked, KN val)
 {
     // update for gc
-    kstate->CurrCont = contBeingInvoked;
+    KON_SwitchContinuation(kstate, contBeingInvoked);
 
     // all sentences finished, return last value
     if (kon_continuation_type(contBeingInvoked) == KON_CONT_RETURN) {
@@ -624,6 +628,10 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
     // set root level return
     KON_EnvDefine(kstate, rootEnv, "return", firstCont);
     KonTrampoline* bounce = KON_EvalSentences(kstate, sentences, rootEnv, firstCont);
+    
+    // update current code
+    kstate->CurrCode = sentences;
+    KON_SwitchContinuation(kstate, firstCont);
 
     while (kon_bounce_type(bounce) != KON_TRAMPOLINE_LAND) {
 
@@ -769,6 +777,8 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             }
         }
     }
+    // no other continuations
+    KON_SwitchContinuation(kstate, NULL);
     return bounce->Land.Value;
 }
 

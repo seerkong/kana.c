@@ -188,8 +188,8 @@ SUITE(suite) {
 
     RUN_TEST(Native_CallCC);
 
-    RUN_TEST(Native_For);
-    RUN_TEST(Native_ForLoopList);
+    // RUN_TEST(Native_For);
+    // RUN_TEST(Native_ForLoopList);
     RUN_TEST(Native_Pipe);
 
     RUN_TEST(Native_ReturnFromRoot);

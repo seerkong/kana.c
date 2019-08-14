@@ -33,6 +33,8 @@ KonState* KON_Init()
         return NULL;
     }
 
+    KON_InitGc(kstate);
+
     return kstate;
 }
 
@@ -49,6 +51,9 @@ int KON_Finish(KonState* kstate)
         tb_allocator_exit(kstate->LargeAllocator);
     }
     kstate->LargeAllocator = tb_null;
+
+
+    KON_DestroyGc(kstate);
 
     tb_exit();
     free(kstate);
@@ -68,30 +73,38 @@ KN KON_EvalFile(KonState* kstate, char* filePath)
     KN result = KON_UNDEF;
 
     bool openRes = KSON_ReaderFromFile(reader, filePath);
+    KON_DEBUG("---eval file %s\n", filePath);
+    
     if (openRes) {
         KN root = KSON_Parse(reader);
+        KON_ShowGcStatics(kstate);
+        KSON_ReaderCloseStream(reader);
+        // 释放读取器 
+        KSON_ReaderExit(reader);
         if (KON_IsPairList(root)) {
 
-            KN env = KON_MakeRootEnv(kstate);
+            KN rootEnv = KON_MakeRootEnv(kstate);
 
             // DefineReservedDispatcher(kstate, env);
 
             // KN result = KON_ProcessSentences(kstate, root, kstate->Value.Context.RootEnv);
-            result = KON_ProcessSentences(kstate, root, env);
+            KN processEnv = KON_MakeChildEnv(kstate, rootEnv);
+            result = KON_ProcessSentences(kstate, root, processEnv);
             
             
             KON_DEBUG("eval sentences success");
             KN formated = KON_ToFormatString(kstate, result, true, 0, "  ");
             KON_DEBUG("%s", KON_StringToCstr(formated));
+
+            KON_ShowGcStatics(kstate);
+            KON_DEBUG("---------\n");
         }
         
     }
     else {
         KON_DEBUG("open stream failed");
     }
-    KSON_ReaderCloseStream(reader);
-    // 释放读取器 
-    KSON_ReaderExit(reader);
+    
 
     return result;
 }

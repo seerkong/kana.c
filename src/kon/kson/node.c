@@ -115,7 +115,8 @@ KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
 {
     KN res = (KN)tb_allocator_malloc0(kstate->Allocator, size);
 
-    // TODO add to heap ptr store
+    // add to heap ptr store
+    KON_RecordNewKonNode(kstate, res);
 
     if (res && ! KON_IS_EXCEPTION(res)) {
         ((KonBase*)res)->Tag = tag;
