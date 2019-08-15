@@ -24,8 +24,8 @@ target("kon")
     add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
   
     -- add the common source files
-    add_files("*.c")
     add_files("utils/**.c")
+    add_files("*.c")
     add_files("string/**.c")
     add_files("container/**.c") 
     add_files("kson/**.c")

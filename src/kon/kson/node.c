@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <stdint.h>
+#include "../utils/realpath.h"
 
 
 KxStringBuffer* KON_ReadFileContent(const char* filePathOrigin)
@@ -48,18 +49,18 @@ KxStringBuffer* KON_ReadFileContent(const char* filePathOrigin)
     else {
         strncpy(replaceHomePath, filePathOrigin, originPathStrLen);
     }
-    // printf("replaceHomePath %s\n", replaceHomePath);
+    printf("replaceHomePath %s\n", replaceHomePath);
     
-    char* absoluteFilePath = (char*)tb_nalloc0(PATH_MAX, sizeof(char));
-    char *realpathRes = realpath(replaceHomePath, absoluteFilePath);
+    char* absoluteFilePath = (char*)tb_nalloc0(1024, sizeof(char));
+    char *realpathRes = realpath_safe(replaceHomePath, absoluteFilePath, 1024);
     
     tb_free(replaceHomePath);
     if (realpathRes == NULL) {
-        printf("abs file path exceeded");
+        printf("abs file path exceeded\n");
         exit(3);
     }
 
-    // printf("absoluteFilePath %s\n", absoluteFilePath);
+    // printf("absoluteFilePath %s, %x\n", absoluteFilePath, realpathRes);
 
 
     FILE* fp = fopen(absoluteFilePath, "r");
