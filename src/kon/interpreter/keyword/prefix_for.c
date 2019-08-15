@@ -9,7 +9,7 @@ KN AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBei
 KN BeforeForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
+    KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN predictExpr = KxHashTable_AtKey(memo, "PredictExpr");
 
     KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
@@ -26,7 +26,7 @@ KN BeforeForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBe
 KN AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
+    KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN bodyExprs = KxHashTable_AtKey(memo, "BodyExprs");
 
     KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
@@ -51,7 +51,7 @@ KN AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBei
 KN AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
+    KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN afterBodyExpr = KxHashTable_AtKey(memo, "AfterExpr");
 
     KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
@@ -99,7 +99,7 @@ KonTrampoline* KON_EvalPrefixFor(KonState* kstate, KN expression, KN env, KonCon
     KonContinuation* continueKeywordCont = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     continueKeywordCont->Cont = cont;
     continueKeywordCont->Env = loopBindEnv;
-    continueKeywordCont->Native.MemoTable = memo;
+    continueKeywordCont->Native.MemoTable = KxHashTable_ShadowClone(memo);
     continueKeywordCont->Native.Callback = AfterForBodyEvaled;
     KON_EnvDefine(kstate, loopBindEnv, "continue", continueKeywordCont);
 

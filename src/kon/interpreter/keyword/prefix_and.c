@@ -30,9 +30,9 @@ KN AfterAndConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* co
         k->Cont = contBeingInvoked->Cont;
         k->Env = env;
 
-        KxHashTable* memo = KxHashTable_Init(4);
-        KxHashTable_PutKv(memo, "RestCondition", KON_CDR(restConditon));
-        k->Native.MemoTable = memo;
+        KxHashTable* newMemo = KxHashTable_Init(4);
+        KxHashTable_PutKv(newMemo, "RestCondition", KON_CDR(restConditon));
+        k->Native.MemoTable = newMemo;
         k->Native.Callback = AfterAndConditionEvaled;
 
         bounce = KON_EvalExpression(kstate, nextExpr, env, k);

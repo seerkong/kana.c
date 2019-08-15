@@ -146,7 +146,7 @@ int KxHashTable_InsertValAfterIter(KxHashTable* self, KxHashTableIter iter, kx_t
 // insert k v after iter
 int KxHashTable_InsertKvAfterIter(KxHashTable* self, KxHashTableIter iter, char* key, kx_table_val_t value);
 
-
+KxHashTable* KxHashTable_ShadowClone(KxHashTable* source);
 
 ////
 // internal

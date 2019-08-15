@@ -10,9 +10,8 @@
 // #define FIRST_HEAP_PTR_SEG_SIZE 1024 * 8
 
 // 7 ~= 22052
-// #define MAX_SEGMENT_CNT 7
-// #define MAX_SEGMENT_CNT 3
-#define MAX_SEGMENT_CNT 1
+#define MAX_SEGMENT_CNT 7
+// #define MAX_SEGMENT_CNT 2
 
 KxList* KON_CreateHeapPtrSegList(KonState* kstate)
 {
@@ -497,7 +496,11 @@ void KON_DestroyNode(KonState* kstate, KonBase* node)
             break;
         }
         case KON_T_SYMBOL: {
-            tb_free(CAST_Kon(Symbol, node)->Data);
+            KonSymbol* sym = CAST_Kon(Symbol, node);
+            if (sym->Data != NULL) {
+                tb_free(sym->Data);
+                sym->Data = NULL;
+            }
             break;
         }
         case KON_T_SYNTAX_MARKER: {
@@ -507,15 +510,27 @@ void KON_DestroyNode(KonState* kstate, KonBase* node)
             break;
         }
         case KON_T_STRING: {
-            KxStringBuffer_Destroy(CAST_Kon(String, node)->String);
+            KonString* str = CAST_Kon(String, node);
+            if (str->String != NULL) {
+                KxStringBuffer_Destroy(str->String);
+                str->String = NULL;
+            }
             break;
         }
         case KON_T_VECTOR: {
-            KxVector_Destroy(CAST_Kon(Vector, node)->Vector);
+            KonVector* vector = CAST_Kon(Vector, node);
+            if (vector->Vector != NULL) {
+                KxVector_Destroy(vector->Vector);
+                vector->Vector = NULL;
+            }
             break;
         }
         case KON_T_TABLE: {
-            KxHashTable_Destroy(CAST_Kon(Table, node)->Table);
+            KonTable* table = CAST_Kon(Table, node);
+            if (table->Table != NULL) {
+                KxHashTable_Destroy(table->Table);
+                table->Table = NULL;
+            }
             break;
         }
         case KON_T_CELL: {
@@ -537,30 +552,45 @@ void KON_DestroyNode(KonState* kstate, KonBase* node)
             
             KonEnv* env = CAST_Kon(Env, node);
             // don't clear root gc
-            if (env->Parent != KON_NIL) {
-                KxHashTable_Destroy(CAST_Kon(Env, node)->Bindings);
-                KxHashTable_Destroy(CAST_Kon(Env, node)->MsgDispatchers);
+            if (env->Parent == KON_NIL) {
+                break;
+                
+            }
+            if (env->Bindings != NULL) {
+                KxHashTable_Destroy(env->Bindings);
+                env->Bindings = NULL;
+            }
+            if (env->MsgDispatchers != NULL) {
+                KxHashTable_Destroy(env->MsgDispatchers);
+                env->MsgDispatchers = NULL;
             }
             
             break;
         }
         case KON_T_ATTR_SLOT: {
             KonAttrSlot* slot = (KonAttrSlot*)node;
-            if (slot->IsDir) {
+            if (slot->IsDir && slot->Folder != NULL) {
                 KxHashTable_Destroy(slot->Folder);
+                slot->Folder = NULL;
             }
             break;
         }
         case KON_T_MSG_DISPATCHER: {
             KonMsgDispatcher* dispatcher = (KonMsgDispatcher*)node;
-            tb_free(dispatcher->Name);
+            if (dispatcher->Name != NULL) {
+                tb_free(dispatcher->Name);
+                dispatcher->Name = NULL;
+            }
             break;
         }
         case KON_T_CONTINUATION: {
             KonContinuation* cont = (KonContinuation*)node;
-            if (cont->Type == KON_CONT_NATIVE_CALLBACK) {
+            if (cont->Type == KON_CONT_NATIVE_CALLBACK && cont->Native.MemoTable) {
                 KxHashTable* table = cont->Native.MemoTable;
+                KON_DEBUG("destroy memo table, table addr %x keys:", table);
+                KxHashTable_PrintKeys(table);
                 KxHashTable_Destroy(table);
+                cont->Native.MemoTable = NULL;
             }
 
             break;
@@ -578,4 +608,5 @@ void KON_DestroyNode(KonState* kstate, KonBase* node)
         }
     }
     tb_free(node);
+    node = NULL;
 }

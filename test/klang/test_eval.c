@@ -188,8 +188,8 @@ SUITE(suite) {
 
     RUN_TEST(Native_CallCC);
 
-    // RUN_TEST(Native_For);
-    // RUN_TEST(Native_ForLoopList);
+    RUN_TEST(Native_For);
+    RUN_TEST(Native_ForLoopList);
     RUN_TEST(Native_Pipe);
 
     RUN_TEST(Native_ReturnFromRoot);
@@ -217,6 +217,7 @@ int main(int argc, char const* argv[])
     greatest_set_verbosity(1);
 
     kstate = KON_Init();
+    // ENABLE_DEBUG = 1;
     ENABLE_DEBUG = 0;
     RUN_SUITE(suite);
 

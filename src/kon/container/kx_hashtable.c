@@ -957,3 +957,36 @@ void KxHashTable_CheckRehash(KxHashTable* self) {
     }
 
 }
+
+KxHashTable* KxHashTable_ShadowClone(KxHashTable* source)
+{
+    if (source == NULL) {
+        return NULL;
+    }
+    KxHashTable* copy = KxHashTable_Init(source->PowerOfTwo);
+    KxHashTableValEntry* iter = source->ValListHead;
+    while (iter != KX_HASH_TABLE_NIL) {
+        KxHashTableValEntry* next = iter->Next;
+        if (iter->Key != NULL) {
+            KxHashTable_PushKv(copy, iter->Key, iter->Val);
+        }
+        else {
+            KxHashTable_PushVal(copy, iter->Val);
+        }
+        iter = next;
+    }
+    return copy;
+}
+
+// for debug
+void KxHashTable_PrintKeys(KxHashTable* self)
+{
+    KxHashTableValEntry* iter = self->ValListHead;
+    while (iter != KX_HASH_TABLE_NIL) {
+        KxHashTableValEntry* next = iter->Next;
+        if (iter->Key != NULL) {
+            printf("key: %s\n", iter->Key);
+        }
+        iter = next;
+    }
+}

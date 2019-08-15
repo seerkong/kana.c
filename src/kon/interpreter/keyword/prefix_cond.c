@@ -18,7 +18,7 @@ bool IsElseTag(KN predicate)
 KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
+    KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN restPairs = KxHashTable_AtKey(memo, "RestPairs");
     KN ifTrueAction = KxHashTable_AtKey(memo, "IfTrue");
 

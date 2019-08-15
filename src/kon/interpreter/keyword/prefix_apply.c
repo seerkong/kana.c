@@ -71,7 +71,7 @@ KN AfterApplyArgsExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* c
 KN AfterApplySymExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
+    KxHashTable* memo =  KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN applyArgsExpr = KxHashTable_AtKey(memo, "ApplyArgsExpr");
 
     KonTrampoline* bounce;
