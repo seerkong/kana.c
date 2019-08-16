@@ -54,7 +54,7 @@ xmake
 kli -f -q <file_path>
 eg: 
 ```
-xmake run kli -f ~/lang/konscript/kon-c/samples/knative/do.kl
+xmake run kli -f -q ~/lang/konscript/kon-c/samples/knative/do.kl
 ```
 remove `-q` option to show more debug info
 
@@ -104,6 +104,53 @@ Lines preceded by the backquote '`' are ignored by Kon.
 ```
 `bala bala
 [+ % 1 2]
+```
+
+## Boolean
+true : ` #t; `
+false: ` #f; `
+
+## nil
+the end of a data structure like list, tree, graph ...
+```
+#nil;
+```
+
+## unknown
+container empty placeholder. just like the `[NSNull null]` in objective c
+```
+#ukn;
+```
+
+## undefined
+just like the `undefined` in javascript
+```
+#undef;
+```
+
+## char
+```
+#c,A;
+#c,b;
+```
+
+
+## Number
+
+### Number compare
+
+Because '<' and '>' is used as vector start and vector end, the larger than function uses '>>' instead, the smaller than function uses '<<' instead.
+
+```
+[>> % 5 3] ` #t;
+[<< % 5 3] ` #f;
+[>= % 5 5] ` #t;
+[<= % 2 4] ` #t;
+```
+
+## string
+```
+"hello world"
 ```
 
 ## Vector
