@@ -90,13 +90,9 @@ bool IsContainerEndToken(int event)
 // $e. $[]e. $()e. ${}e.
 bool IsWrapperToken(int event)
 {
-    if (event == KON_TOKEN_QUOTE_VECTOR
-        || event == KON_TOKEN_QUOTE_LIST
-        || event == KON_TOKEN_QUOTE_TABLE
+    if (event == KON_TOKEN_QUOTE_LIST
         || event == KON_TOKEN_QUOTE_CELL
-        || event == KON_TOKEN_QUASI_VECTOR
         || event == KON_TOKEN_QUASI_LIST
-        || event == KON_TOKEN_QUASI_TABLE
         || event == KON_TOKEN_QUASI_CELL
         || event == KON_TOKEN_EXPAND_REPLACE
         || event == KON_TOKEN_EXPAND_KV
@@ -491,9 +487,7 @@ KN KSON_Parse(KonReader* reader)
             }
             else {
                 // wrapper types
-                if (event == KON_TOKEN_QUOTE_VECTOR
-                    || event == KON_TOKEN_QUOTE_LIST
-                    || event == KON_TOKEN_QUOTE_TABLE
+                if (event == KON_TOKEN_QUOTE_LIST
                     || event == KON_TOKEN_QUOTE_CELL
                 ) {
 //                    StateStackSetTopValue(
@@ -508,9 +502,7 @@ KN KSON_Parse(KonReader* reader)
                     reader->WordAsIdentifier = true;
     
                 }
-                else if (event == KON_TOKEN_QUASI_VECTOR
-                    || event == KON_TOKEN_QUASI_LIST
-                    || event == KON_TOKEN_QUASI_TABLE
+                else if (event == KON_TOKEN_QUASI_LIST
                     || event == KON_TOKEN_QUASI_CELL
                 ) {
 //                    StateStackSetTopValue(

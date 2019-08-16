@@ -367,10 +367,6 @@ if(MSVC)
 else()
     target_compile_options(tbox PRIVATE -O0)
 endif()
-target_link_libraries(tbox PRIVATE
-    pthread
-    pthread
-)
 target_link_directories(tbox PRIVATE
     /usr/local/lib
     /usr/lib
@@ -719,10 +715,10 @@ target_sources(kon PRIVATE
     src/kon/string/kx_stringbuffer.c
     src/kon/interpreter/keyword/prefix_blk.c
     src/kon/interpreter/mod/kon_table.c
-    src/kon/interpreter/keyword/prefix_def_builder.c
+    src/kon/kson/writer.c
     src/kon/interpreter/mod/kon_number.c
     src/kon/container/murmurhash.c
-    src/kon/kson/value_builder.c
+    src/kon/utils/number_utils.c
     src/kon/interpreter/keyword/prefix_lambda.c
     src/kon/interpreter/keyword/prefix_continue.c
     src/kon/interpreter/cps_interpreter.c
@@ -730,30 +726,31 @@ target_sources(kon PRIVATE
     src/kon/interpreter/keyword/prefix_or.c
     src/kon/interpreter/keyword/prefix_break.c
     src/kon/interpreter/keyword/prefix_set.c
-    src/kon/interpreter/keyword/prefix_let.c
     src/kon/interpreter/mod/kon_string.c
+    src/kon/interpreter/keyword/prefix_let.c
+    src/kon/interpreter/mod/kon_list.c
     src/kon/interpreter/env.c
     src/kon/container/kx_hashtable.c
-    src/kon/interpreter/primary.c
+    src/kon/kson/tokenizer.c
     src/kon/interpreter/keyword/prefix_cond.c
     src/kon/kson/state_stack.c
     src/kon/interpreter/keyword/prefix_func.c
-    src/kon/interpreter/mod/kon_list.c
-    src/kon/container/kx_list.c
     src/kon/interpreter/mod/kon_module.c
+    src/kon/container/kx_list.c
+    src/kon/utils/realpath.c
     src/kon/interpreter/mod/kon_vector.c
     src/kon/interpreter/keyword/prefix_apply.c
     src/kon/interpreter/mod/kon_cell.c
     src/kon/gc.c
     src/kon/interpreter/keyword/prefix_if.c
     src/kon/kson/reader.c
-    src/kon/kson/tokenizer.c
+    src/kon/interpreter/primary.c
     src/kon/interpreter/keyword/prefix_def_dispatcher.c
-    src/kon/utils/number_utils.c
     src/kon/string/kx_stringview.c
+    src/kon/kson/value_builder.c
     src/kon/interpreter/keyword/prefix_and.c
     src/kon/interpreter/keyword/prefix_sh.c
-    src/kon/kson/writer.c
+    src/kon/interpreter/keyword/prefix_def_builder.c
     src/kon/interpreter/keyword/prefix_for.c
 )
 

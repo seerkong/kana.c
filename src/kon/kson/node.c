@@ -49,7 +49,7 @@ KxStringBuffer* KON_ReadFileContent(const char* filePathOrigin)
     else {
         strncpy(replaceHomePath, filePathOrigin, originPathStrLen);
     }
-    printf("replaceHomePath %s\n", replaceHomePath);
+    // printf("replaceHomePath %s\n", replaceHomePath);
     
     char* absoluteFilePath = (char*)tb_nalloc0(1024, sizeof(char));
     char *realpathRes = realpath_safe(replaceHomePath, absoluteFilePath, 1024);
@@ -503,7 +503,7 @@ KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, cha
     int vecLen = KxVector_Length(items);
     
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "{\n");
+        KxStringBuffer_AppendCstr(result->String, "<\n");
 
         
         for (int i = 0; i < vecLen; i++) {
@@ -517,10 +517,10 @@ KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, cha
         }
 
         AddLeftPadding(result->String, depth, padding);
-        KxStringBuffer_AppendCstr(result->String, "}");
+        KxStringBuffer_AppendCstr(result->String, ">");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "{");
+        KxStringBuffer_AppendCstr(result->String, "< ");
         
         for (int i = 0; i < vecLen; i++) {
             KN item = KxVector_AtIndex(items, i);
@@ -528,13 +528,13 @@ KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, cha
             KN itemToKonStr = KON_ToFormatString(kstate, item, false, depth + 1, padding);
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
 
-            if (i != vecLen - 1) {
-                KxStringBuffer_AppendCstr(result->String, " ");
-            }
+            // if (i != vecLen - 1) {
+            KxStringBuffer_AppendCstr(result->String, " ");
+            // }
             
         }
 
-        KxStringBuffer_AppendCstr(result->String, "}");
+        KxStringBuffer_AppendCstr(result->String, ">");
     }
 
     return result;
@@ -599,9 +599,9 @@ KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, c
                 
                 KN itemToKonStr = KON_ToFormatString(kstate, item, false, depth + 1, padding);
                 KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
-                if (next != KON_NIL) {
-                    KxStringBuffer_AppendCstr(result->String, " ");
-                }
+                // if (next != KON_NIL) {
+                KxStringBuffer_AppendCstr(result->String, " ");
+                // }
                 iter = next;
             }
         }
@@ -728,7 +728,7 @@ KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char
 
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
             
-            if (next != NULL) {
+            if (next != KON_NIL) {
                 KxStringBuffer_AppendCstr(result->String, " ");
             }
 
@@ -753,7 +753,7 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
     KonPair* innerList = CAST_Kon(Cell, source)->List;
     
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "<");
+        KxStringBuffer_AppendCstr(result->String, "{");
         
         if (name != KON_UNDEF) {
             KN nameToKonStr = KON_ToFormatString(kstate, name, true, depth, padding);
@@ -791,10 +791,10 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
         
 
         AddLeftPadding(result->String, depth, padding);
-        KxStringBuffer_AppendCstr(result->String, ">");
+        KxStringBuffer_AppendCstr(result->String, "}");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "<");
+        KxStringBuffer_AppendCstr(result->String, "{");
 
         if (name != KON_UNDEF) {
             KN nameToKonStr = KON_ToFormatString(kstate, name, true, depth, padding);
@@ -821,7 +821,7 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(innerListToKonStr));
         }
 
-        KxStringBuffer_AppendCstr(result->String, ">");
+        KxStringBuffer_AppendCstr(result->String, "}");
     }
 
     return result;

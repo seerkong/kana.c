@@ -16,12 +16,12 @@ typedef enum
     
     KON_TOKEN_LIST_START,   // [
     KON_TOKEN_LIST_END,     // ]
-    KON_TOKEN_VECTOR_START,  // {
-    KON_TOKEN_VECTOR_END,    // }
+    KON_TOKEN_VECTOR_START,  // <
+    KON_TOKEN_VECTOR_END,    // >
     KON_TOKEN_TABLE_START,    // (
     KON_TOKEN_TABLE_END,      // )
-    KON_TOKEN_CELL_START,   // <
-    KON_TOKEN_CELL_END,     // >
+    KON_TOKEN_CELL_START,   // {
+    KON_TOKEN_CELL_END,     // }
 
     KON_TOKEN_KEYWORD_NIL,  //  #nil;   list end
     KON_TOKEN_KEYWORD_UNDEF,  //  #undef;
@@ -48,15 +48,11 @@ typedef enum
     KON_TOKEN_MSG_SIGNAL,     // .length
     KON_TOKEN_PROC_PIPE,         // |abc TODO change to a sym type
 
-    KON_TOKEN_QUOTE_VECTOR, // ${}
     KON_TOKEN_QUOTE_LIST,   // $[]
-    KON_TOKEN_QUOTE_TABLE,  // $()
-    KON_TOKEN_QUOTE_CELL,   // $<>
+    KON_TOKEN_QUOTE_CELL,   // ${}
 
-    KON_TOKEN_QUASI_VECTOR, // @{}
     KON_TOKEN_QUASI_LIST,   // @[]
-    KON_TOKEN_QUASI_TABLE,  // @()
-    KON_TOKEN_QUASI_CELL,   // @<>
+    KON_TOKEN_QUASI_CELL,   // @{}
 
     KON_TOKEN_EXPAND_REPLACE,   // $.abc
     KON_TOKEN_EXPAND_KV,        // $%.abc

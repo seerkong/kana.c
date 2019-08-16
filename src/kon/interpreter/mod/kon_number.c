@@ -454,16 +454,16 @@ KonAttrSlot* KonNumber_Export(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryMod)
     );
 
-    KON_EnvDefine(kstate, env, "lt",
+    KON_EnvDefine(kstate, env, "<<",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryLowerThan)
     );
-    KON_EnvDefine(kstate, env, "lte",
+    KON_EnvDefine(kstate, env, "<=",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryLowerOrEqual)
     );
-    KON_EnvDefine(kstate, env, "gt",
+    KON_EnvDefine(kstate, env, ">>",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryGreaterThan)
     );
-    KON_EnvDefine(kstate, env, "gte",
+    KON_EnvDefine(kstate, env, ">=",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryGreaterOrEqual)
     );
 

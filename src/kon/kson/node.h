@@ -194,12 +194,8 @@ struct KonSymbol {
 };
 
 typedef enum {
-    KON_QUOTE_IDENTIFER,    // @abc
-    KON_QUOTE_SYMBOL,       // @'zhang san'
-    KON_QUOTE_VECTOR,        // @{1 2 3}
-    KON_QUOTE_LIST,         // @[1 2 3]
-    KON_QUOTE_TABLE,        // @(:a 1 :b 2)
-    KON_QUOTE_CELL          // @<ojb (:a 1 :b 2)>
+    KON_QUOTE_LIST,         // $[1 2 3]
+    KON_QUOTE_CELL          // ${ojb (:a 1 :b 2)}
 } KonQuoteType;
 
 struct KonQuote {
@@ -210,10 +206,8 @@ struct KonQuote {
 
 
 typedef enum {
-    KON_QUASI_VECTOR,        // $[1 2 3]
-    KON_QUASI_LIST,         // ${1 2 3}
-    KON_QUASI_TABLE,        // $(:a 1 :b 2)
-    KON_QUASI_CELL          // $<ojb (:a 1 :b 2)>
+    KON_QUASI_LIST,         // @{1 2 3}
+    KON_QUASI_CELL          // @<ojb (:a 1 :b 2)>
 } KonQuasiquoteType;
 
 struct KonQuasiquote {
@@ -221,9 +215,6 @@ struct KonQuasiquote {
     KN Inner;
     KonQuasiquoteType Type;
 };
-
-
-
 
 typedef enum {
     KON_EXPAND_REPLACE,          // $.abc
@@ -239,8 +230,8 @@ struct KonExpand {
 
 typedef enum {
     KON_UNQUOTE_REPLACE,          // @.abc
-    KON_UNQUOTE_SEQ,        // @~.{[1 2 3]}
-    KON_UNQUOTE_KV        // @%.{$(:a $var :b 2)}
+    KON_UNQUOTE_SEQ,        // @~.[(1 2 3)]
+    KON_UNQUOTE_KV        // @%.[$(:a $var :b 2)]
 } KonUnquoteType;
 
 struct KonUnquote {

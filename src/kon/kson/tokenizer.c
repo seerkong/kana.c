@@ -104,26 +104,14 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_SYM_STRING:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_STRING");
             break;
-        case KON_TOKEN_QUOTE_VECTOR:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_VECTOR");
-            break;
         case KON_TOKEN_QUOTE_LIST:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_LIST");
-            break;
-        case KON_TOKEN_QUOTE_TABLE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_TABLE");
             break;
         case KON_TOKEN_QUOTE_CELL:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_CELL");
             break;
-        case KON_TOKEN_QUASI_VECTOR:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_VECTOR");
-            break;
         case KON_TOKEN_QUASI_LIST:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_LIST");
-            break;
-        case KON_TOKEN_QUASI_TABLE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_TABLE");
             break;
         case KON_TOKEN_QUASI_CELL:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_CELL");
@@ -307,7 +295,7 @@ bool IsSpace(char ch)
 
 bool IsStopWord(char ch)
 {
-    char dest[16] = ":%.|![](){}<>;";
+    char dest[16] = ":%.|![](){};";
     if (strchr(dest, ch) > 0) {
         return true;
     }
@@ -513,16 +501,31 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             tokenizer->TokenKind = KON_TOKEN_TABLE_END;
             break;
         }
-        else if (pc[0] == '{') {
-            UpdateTokenContent(tokenizer, "{");
-            ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
+        else if (pc[0] == '<') {
+            const char* nextChars = PeekChars(tokenizer, 2);
+            printf("***next chars %s is space %d is stop word %d\n", nextChars, IsSpace(nextChars[0]), IsStopWord(nextChars[0]));
+            if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
+                UpdateTokenContent(tokenizer, "<");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
+            }
+            else {
+                ParseIdentifier(tokenizer);
+                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+            }
             break;
         }
-        else if (pc[0] == '}') {
-            UpdateTokenContent(tokenizer, "}");
-            ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_VECTOR_END;
+        else if (pc[0] == '>') {
+            const char* nextChars = PeekChars(tokenizer, 2);
+            if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
+                UpdateTokenContent(tokenizer, ">");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_VECTOR_END;
+            }
+            else {
+                ParseIdentifier(tokenizer);
+                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+            }
             break;
         }
         else if (pc[0] == '[') {
@@ -537,14 +540,14 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             tokenizer->TokenKind = KON_TOKEN_LIST_END;
             break;
         }
-        else if (pc[0] == '<') {
-            UpdateTokenContent(tokenizer, "<");
+        else if (pc[0] == '{') {
+            UpdateTokenContent(tokenizer, "{");
             ForwardToken(tokenizer, 1);
             tokenizer->TokenKind = KON_TOKEN_CELL_START;
             break;
         }
-        else if (pc[0] == '>') {
-            UpdateTokenContent(tokenizer, ">");
+        else if (pc[0] == '}') {
+            UpdateTokenContent(tokenizer, "}");
             ForwardToken(tokenizer, 1);
             tokenizer->TokenKind = KON_TOKEN_CELL_END;
             break;
@@ -597,6 +600,8 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (nextChars == NULL) {
                 break;
             }
+
+            
             // TODO other immediate atom builders
             if (nextChars[1] == 'n' && nextChars[2] == 'i') {
                 UpdateTokenContent(tokenizer, "#nil;");
@@ -685,16 +690,6 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             else if (nextChars[1] == '{') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_VECTOR;
-            }
-            else if (nextChars[1] == '(') {
-                UpdateTokenContent(tokenizer, "$");
-                ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_TABLE;
-            }
-            else if (nextChars[1] == '<') {
-                UpdateTokenContent(tokenizer, "$");
-                ForwardToken(tokenizer, 1);
                 tokenizer->TokenKind = KON_TOKEN_QUOTE_CELL;
             }
             else if (nextChars[1] == '[') {
@@ -736,16 +731,6 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 tokenizer->TokenKind = KON_TOKEN_UNQUOTE_SEQ;
             }
             else if (nextChars[1] == '{') {
-                UpdateTokenContent(tokenizer, "@");
-                ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUASI_VECTOR;
-            }
-            else if (nextChars[1] == '(') {
-                UpdateTokenContent(tokenizer, "@");
-                ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUASI_TABLE;
-            }
-            else if (nextChars[1] == '<') {
                 UpdateTokenContent(tokenizer, "@");
                 ForwardToken(tokenizer, 1);
                 tokenizer->TokenKind = KON_TOKEN_QUASI_CELL;

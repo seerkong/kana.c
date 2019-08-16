@@ -229,24 +229,12 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
         KonQuote* tmp = KON_ALLOC_TYPE_TAG(kstate, KonQuote, KON_T_QUOTE);
         tmp->Inner = inner;
         switch (tokenKind) {
-            case KON_TOKEN_SYM_IDENTIFIER: {
-                tmp->Type = KON_QUOTE_IDENTIFER;
-                break;
-            }
             case KON_TOKEN_SYM_STRING: {
-                tmp->Type = KON_QUOTE_SYMBOL;
-                break;
-            }
-            case KON_TOKEN_QUOTE_VECTOR: {
-                tmp->Type = KON_QUOTE_VECTOR;
+                tmp->Type = KON_SYM_STRING;
                 break;
             }
             case KON_TOKEN_QUOTE_LIST: {
                 tmp->Type = KON_QUOTE_LIST;
-                break;
-            }
-            case KON_TOKEN_QUOTE_TABLE: {
-                tmp->Type = KON_QUOTE_TABLE;
                 break;
             }
             case KON_TOKEN_QUOTE_CELL: {
@@ -260,16 +248,8 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
         KonQuasiquote* tmp = KON_ALLOC_TYPE_TAG(kstate, KonQuasiquote, KON_T_QUASIQUOTE);
         tmp->Inner = inner;
         switch (tokenKind) {
-            case KON_TOKEN_QUASI_VECTOR: {
-                tmp->Type = KON_QUASI_VECTOR;
-                break;
-            }
             case KON_TOKEN_QUASI_LIST: {
                 tmp->Type = KON_QUASI_LIST;
-                break;
-            }
-            case KON_TOKEN_QUASI_TABLE: {
-                tmp->Type = KON_QUASI_TABLE;
                 break;
             }
             case KON_TOKEN_QUASI_CELL: {
