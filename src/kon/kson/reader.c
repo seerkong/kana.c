@@ -134,6 +134,7 @@ bool IsSyntaxToken(int event)
     if (event == KON_TOKEN_APPLY
         || event == KON_TOKEN_PROC_PIPE
         || event == KON_TOKEN_MSG_SIGNAL
+        || event == KON_TOKEN_GET_SLOT
         || event == KON_TOKEN_CLAUSE_END
     ) {
         return true;
@@ -163,6 +164,10 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
         }
         case KON_TOKEN_MSG_SIGNAL: {
             value->Type = KON_SYNTAX_MARKER_MSG_SIGNAL;
+            break;
+        }
+        case KON_TOKEN_GET_SLOT: {
+            value->Type = KON_SYNTAX_MARKER_GET_SLOT;
             break;
         }
         default: {
@@ -200,9 +205,7 @@ KN MakeSymbol(KonReader* reader, KonTokenKind event)
     else if (event == KON_TOKEN_SYM_STRING) {
         value->Type = KON_SYM_STRING;
     }
-    else if (event == KON_TOKEN_QUERY_PATH) {
-        value->Type = KON_QUERY_PATH;
-    }
+
 
     
     value->Data = utf8dup(KxStringBuffer_Cstr(reader->Tokenizer->Content));
@@ -604,8 +607,6 @@ KN KSON_Parse(KonReader* reader)
             || event == KON_TOKEN_SYM_VARIABLE
             || event == KON_TOKEN_SYM_IDENTIFIER
             || event == KON_TOKEN_SYM_STRING
-            || event == KON_TOKEN_QUERY_PATH
-            || event == KON_TOKEN_MSG_SIGNAL
         ) {
             KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);

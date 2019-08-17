@@ -13,10 +13,6 @@ bool IsSelfEvaluated(KN source)
         || KON_IS_FLONUM(source)
         || KON_IS_STRING(source)
         || KON_IS_SYNTAX_MARKER(source)
-        // /abc
-        || KON_IS_QUERY_PATH(source)
-        // .append
-        // || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_MSG_SIGNAL)
         // $abc
         || (KON_IS_IDENTIFIER(source))
         // $'abc'
@@ -175,19 +171,17 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
                 bounce = KON_ApplyCompositeLambda(kstate, procedure, dispatchArgList, env, cont);
             }
         }
+        else if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_GET_SLOT) {
+            KN signalSym = KON_CADR(argList);
+            // argList = KON_CDDR(argList);
+            KonAttrSlot* slot = (KonAttrSlot*)subj;
+            KN slotValue = KxHashTable_AtKey(slot->Folder, KON_UNBOX_SYMBOL(signalSym));
+            KON_DEBUG("get slotValue %s", KON_UNBOX_SYMBOL(signalSym));
+            bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+            bounce->Run.Value = slotValue;
+            bounce->Cont = cont;
+        }
     }
-
-
-    //  get attr value like /abc
-    else if (KON_IS_ATTR_SLOT(subj) && KON_IS_QUERY_PATH(firstObj)) {
-        KonAttrSlot* slot = (KonAttrSlot*)subj;
-        KN slotValue = KxHashTable_AtKey(slot->Folder, KON_UNBOX_SYMBOL(firstObj));
-        KON_DEBUG("get slotValue %s", KON_UNBOX_SYMBOL(firstObj));
-        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
-        bounce->Run.Value = slotValue;
-        bounce->Cont = cont;
-    }
-
     // send msg like [123 $+ 5]
     else if (KON_IS_SYMBOL(firstObj) && ((KonSymbol*)firstObj)->Type == KON_SYM_IDENTIFIER) {
         KN signalSym = firstObj;
@@ -246,23 +240,29 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
 
     KonPair* iter = sentenceRestWords;
     
-    int state = 1; // 1 need verb, 2 need objects
+    int state = 1; // 1 need verb, 2 need objects, 3 need only 1 object
     do {
         KN item = KON_CAR(iter);
         
         if (state == 1) {
             if (KON_IS_SYNTAX_MARKER(item)
-                && CAST_Kon(SyntaxMarker, item)->Type != KON_SYNTAX_MARKER_CLAUSE_END
+                && (
+                    CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_APPLY
+                    || CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_MSG_SIGNAL
+                    || CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_PROC_PIPE
+                )
             ) {
-                // meet %
+                // meet % /
                 KxVector_Push(clauseVec, item);
                 state = 2;
             }
-            // meet slot like /abc
-            else if (KON_IS_QUERY_PATH(item)) {
-                KxVector* slotClause = KxVector_Init();
-                KxVector_Push(slotClause, item);
-                KxVector_Push(clauseListVec, slotClause);
+            // meet slot like /abc only need one object
+            else if (KON_IS_SYNTAX_MARKER(item)
+                && CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_GET_SLOT) {
+                // KxVector* slotClause = KxVector_Init();
+                KxVector_Push(clauseVec, item);
+                // KxVector_Push(clauseListVec, slotClause);
+                state = 3;
             }
             else if (KON_IS_VECTOR(item)
                 || KON_IsPairList(item)
@@ -280,6 +280,13 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
                 KxVector_Push(clauseVec, item);
                 state = 2;
             }
+        }
+        else if (state == 3) {
+            KxVector_Push(clauseVec, item);
+            KxVector_Push(clauseListVec, clauseVec);
+            // reset state
+            clauseVec = KxVector_Init();
+            state = 1;
         }
         else {
             // meet ;
@@ -727,36 +734,30 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
                 // % . |
                 // this kind bouce value is a clause word list like {% "a" "b"}
                 KN evaledArgList = KON_CONS(kstate, firstArg, KON_NIL);
-                KN restArgList;
-                KN firstToEval;
+                KN restArgList = KON_CDDR(clauseArgList);
+                KN firstToEval = KON_CADR(clauseArgList);
                 // syntax sugar.
                 // 1 the first word symbol arg after . marker, don't need to eval
                 //   eg: "zhangsan" . length
-                // 2 TODO the first word symbol arg after / maker, don't need eval
-                restArgList = KON_CDDR(clauseArgList);
-                    firstToEval = KON_CADR(clauseArgList);
-                if (CAST_Kon(SyntaxMarker, firstArg)->Type == KON_SYNTAX_MARKER_MSG_SIGNAL && KON_IS_WORD(firstToEval)) {
-                    // restArgList = KON_CDDR(clauseArgList);
-                    // firstToEval = KON_CADR(clauseArgList);
+                // 2 the first word symbol arg after / maker, don't need eval
+
+                if ((CAST_Kon(SyntaxMarker, firstArg)->Type == KON_SYNTAX_MARKER_MSG_SIGNAL
+                        || CAST_Kon(SyntaxMarker, firstArg)->Type == KON_SYNTAX_MARKER_GET_SLOT
+                    )
+                    && KON_IS_WORD(firstToEval)
+                ) {
                     ((KonSymbol*)firstToEval)->Type = KON_SYM_IDENTIFIER;
-                }
-                else {
-                    // restArgList = KON_CDDR(clauseArgList);
-                    // firstToEval = KON_CADR(clauseArgList);
                 }
                 KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_CLAUSE_ARGS);
                 k->Cont = cont;
                 k->Env = env;
                 k->EvalClauseArgs.Subj = subj;
-                // k->EvalClauseArgs.RestArgList = KON_CDR(clauseArgList);
-                // k->EvalClauseArgs.EvaledArgList = KON_NIL;
                 k->EvalClauseArgs.RestArgList = restArgList;
                 k->EvalClauseArgs.EvaledArgList = evaledArgList;
 
                 bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_ARG_LIST);
                 bounce->Cont = k;
                 bounce->Bounce.Env = env;
-                // bounce->Bounce.Value = KON_CAR(clauseArgList); // the first arg is % or . or |
                 bounce->Bounce.Value = firstToEval; // the first arg is % or . or |
 
             }

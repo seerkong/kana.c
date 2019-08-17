@@ -176,9 +176,6 @@ typedef enum {
     KON_SYM_VARIABLE,    // @abc
     KON_SYM_IDENTIFIER, // $abc
     KON_SYM_STRING, // $''
-
-    KON_QUERY_PATH, // /tag /. /.. /~
-    // KON_MSG_SIGNAL, // .add 5 2
 } KonSymbolType;
 
 struct KonSymbol {
@@ -238,6 +235,7 @@ struct KonUnquote {
 typedef enum {
     KON_SYNTAX_MARKER_APPLY,        // %
     KON_SYNTAX_MARKER_MSG_SIGNAL,   // .
+    KON_SYNTAX_MARKER_GET_SLOT,        // / /. /.. /ABC /~
     KON_SYNTAX_MARKER_PROC_PIPE,         // |
     KON_SYNTAX_MARKER_CLAUSE_END    // ;
 } KonSyntaxMarkerType;
@@ -523,7 +521,6 @@ KON_API unsigned int KON_NodeDispacherId(KonState* kstate, KN obj);
 #define KON_IS_WORD(x)      (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_WORD)
 #define KON_IS_PREFIX_MARCRO(x) (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_PREFIX_WORD)
 #define KON_IS_SYNTAX_MARKER(x) (KON_CHECK_TAG(x, KON_T_SYNTAX_MARKER))
-#define KON_IS_QUERY_PATH(x) (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_QUERY_PATH)
 
 #define KON_IS_ATTR_SLOT(x) (KON_CHECK_TAG(x, KON_T_ATTR_SLOT))
 
