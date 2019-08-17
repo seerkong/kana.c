@@ -577,10 +577,6 @@ void KON_DestroyNode(KonState* kstate, KonBase* node)
         }
         case KON_T_MSG_DISPATCHER: {
             KonMsgDispatcher* dispatcher = (KonMsgDispatcher*)node;
-            if (dispatcher->Name != NULL) {
-                tb_free(dispatcher->Name);
-                dispatcher->Name = NULL;
-            }
             break;
         }
         case KON_T_CONTINUATION: {

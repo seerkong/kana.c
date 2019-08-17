@@ -16,7 +16,7 @@ bool IsSelfEvaluated(KN source)
         // /abc
         || KON_IS_QUERY_PATH(source)
         // .append
-        || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_MSG_SIGNAL)
+        // || (KON_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KON_MSG_SIGNAL)
         // $abc
         || (KON_IS_IDENTIFIER(source))
         // $'abc'
@@ -139,6 +139,42 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
                 bounce = KON_ApplyCompositeLambda(kstate, pipeProc, argList, env, cont);
             }
         }
+
+        // send msg like . add 1 2;
+        else if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_MSG_SIGNAL) {
+            KN signalSym = KON_CADR(argList);
+            argList = KON_CDDR(argList);
+
+            printf("message signal %s\n", KON_UNBOX_SYMBOL(signalSym));
+            // get dispatcher and eval OnMethodCall
+            // this dispatcherId is unboxed
+            unsigned int dispatcherId = KON_NodeDispacherId(kstate, subj);
+            KonMsgDispatcher* dispatcher = KON_GetMsgDispatcher(kstate, dispatcherId);
+
+            KonProcedure* procedure = dispatcher->OnMethodCall;
+            printf("on method call procedure addr %x\n", procedure);
+
+            // dispatcher functions should receive 3 arg
+            // 1st is the object
+            // 2nd is the message symbol
+            // 3rd is the argument list
+            KN dispatchArgList = KON_NIL;
+            dispatchArgList = KON_CONS(kstate, argList, dispatchArgList);
+            dispatchArgList = KON_CONS(kstate, signalSym, dispatchArgList);
+            dispatchArgList = KON_CONS(kstate, subj, dispatchArgList);
+
+            // call method
+            if (procedure->Type == KON_NATIVE_FUNC) {
+                KonNativeFuncRef funcRef = procedure->NativeFuncRef;
+                KN applyResult = (*funcRef)(kstate, dispatchArgList);
+                bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+                bounce->Run.Value = applyResult;
+                bounce->Cont = cont;
+            }
+            else if (procedure->Type == KON_COMPOSITE_LAMBDA) {
+                bounce = KON_ApplyCompositeLambda(kstate, procedure, dispatchArgList, env, cont);
+            }
+        }
     }
 
 
@@ -152,23 +188,27 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
         bounce->Cont = cont;
     }
 
-    // send msg like .add 1 2;
-    else if (KON_IS_SYMBOL(firstObj) && ((KonSymbol*)firstObj)->Type == KON_MSG_SIGNAL) {
+    // send msg like [123 $+ 5]
+    else if (KON_IS_SYMBOL(firstObj) && ((KonSymbol*)firstObj)->Type == KON_SYM_IDENTIFIER) {
+        KN signalSym = firstObj;
+        argList = KON_CDR(argList);
+
+        printf("message signal %s\n", KON_UNBOX_SYMBOL(signalSym));
         // get dispatcher and eval OnMethodCall
         // this dispatcherId is unboxed
-        KN dispatcherId = ((KonBase*)subj)->MsgDispatcherId;
-        char dispatcherIdStr[64] = { '\0' };
-        itoa(dispatcherId, dispatcherIdStr, 10);
-        KonMsgDispatcher* dispatcher = KON_EnvDispatcherLookup(kstate, env, dispatcherIdStr);
+        unsigned int dispatcherId = KON_NodeDispacherId(kstate, subj);
+        KonMsgDispatcher* dispatcher = KON_GetMsgDispatcher(kstate, dispatcherId);
 
         KonProcedure* procedure = dispatcher->OnMethodCall;
+        printf("on method call procedure addr %x\n", procedure);
+
         // dispatcher functions should receive 3 arg
         // 1st is the object
         // 2nd is the message symbol
         // 3rd is the argument list
         KN dispatchArgList = KON_NIL;
-        dispatchArgList = KON_CONS(kstate, KON_CDR(argList), dispatchArgList);
-        dispatchArgList = KON_CONS(kstate, firstObj, dispatchArgList);
+        dispatchArgList = KON_CONS(kstate, argList, dispatchArgList);
+        dispatchArgList = KON_CONS(kstate, signalSym, dispatchArgList);
         dispatchArgList = KON_CONS(kstate, subj, dispatchArgList);
 
         // call method
@@ -180,14 +220,6 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             bounce->Cont = cont;
         }
         else if (procedure->Type == KON_COMPOSITE_LAMBDA) {
-            bounce = KON_ApplyCompositeLambda(kstate, procedure, dispatchArgList, env, cont);
-        }
-        else if (procedure->Type == KON_COMPOSITE_FUNC) {
-            bounce = KON_ApplyCompositeFunc(kstate, procedure, dispatchArgList, env, cont);
-        }
-        else if (procedure->Type == KON_COMPOSITE_OBJ_METHOD) {
-            // treat as plain procedure when apply arg list
-            // the first item in arg list is the object
             bounce = KON_ApplyCompositeLambda(kstate, procedure, dispatchArgList, env, cont);
         }
 
@@ -235,7 +267,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
             else if (KON_IS_VECTOR(item)
                 || KON_IsPairList(item)
                 || KON_IS_CELL(item)
-                || KON_IS_SYMBOL(item)
+                // || KON_IS_SYMBOL(item)
                 || KON_IS_QUOTE(item)
                 || KON_IS_QUASIQUOTE(item)
                 || KON_IS_UNQUOTE(item)
@@ -244,7 +276,9 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
             }
             
             else {
-                // TODO throw exception
+                // [5 $+ 2]
+                KxVector_Push(clauseVec, item);
+                state = 2;
             }
         }
         else {
@@ -479,6 +513,7 @@ bool KON_IsPrefixMarcro(KN word) {
         || strcmp(prefix, "local") == 0
         || strcmp(prefix, "or") == 0
         || strcmp(prefix, "set") == 0
+        || strcmp(prefix, "set-dispatcher") == 0
         || strcmp(prefix, "sh") == 0
     ) {
         return true;
@@ -550,6 +585,9 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             }
             else if (strcmp(prefix, "def-dispatcher") == 0) {
                 bounce = KON_EvalPrefixDefDispatcher(kstate, KON_CDR(words), env, cont);
+            }
+            else if (strcmp(prefix, "set-dispatcher") == 0) {
+                bounce = KON_EvalPrefixSetDispatcher(kstate, KON_CDR(words), env, cont);
             }
             else if (strcmp(prefix, "def-builder") == 0) {
                 bounce = KON_EvalPrefixDefBuilder(kstate, KON_CDR(words), env, cont);
@@ -685,20 +723,41 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             KN firstArg = KON_CAR(clauseArgList);
 
             if (KON_IS_SYNTAX_MARKER(firstArg)) {
+                // don't need to eval syntax marker
                 // % . |
                 // this kind bouce value is a clause word list like {% "a" "b"}
-
+                KN evaledArgList = KON_CONS(kstate, firstArg, KON_NIL);
+                KN restArgList;
+                KN firstToEval;
+                // syntax sugar.
+                // 1 the first word symbol arg after . marker, don't need to eval
+                //   eg: "zhangsan" . length
+                // 2 TODO the first word symbol arg after / maker, don't need eval
+                restArgList = KON_CDDR(clauseArgList);
+                    firstToEval = KON_CADR(clauseArgList);
+                if (CAST_Kon(SyntaxMarker, firstArg)->Type == KON_SYNTAX_MARKER_MSG_SIGNAL && KON_IS_WORD(firstToEval)) {
+                    // restArgList = KON_CDDR(clauseArgList);
+                    // firstToEval = KON_CADR(clauseArgList);
+                    ((KonSymbol*)firstToEval)->Type = KON_SYM_IDENTIFIER;
+                }
+                else {
+                    // restArgList = KON_CDDR(clauseArgList);
+                    // firstToEval = KON_CADR(clauseArgList);
+                }
                 KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_CLAUSE_ARGS);
                 k->Cont = cont;
                 k->Env = env;
                 k->EvalClauseArgs.Subj = subj;
-                k->EvalClauseArgs.RestArgList = KON_CDR(clauseArgList);
-                k->EvalClauseArgs.EvaledArgList = KON_NIL;
+                // k->EvalClauseArgs.RestArgList = KON_CDR(clauseArgList);
+                // k->EvalClauseArgs.EvaledArgList = KON_NIL;
+                k->EvalClauseArgs.RestArgList = restArgList;
+                k->EvalClauseArgs.EvaledArgList = evaledArgList;
 
                 bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_ARG_LIST);
                 bounce->Cont = k;
                 bounce->Bounce.Env = env;
-                bounce->Bounce.Value = KON_CAR(clauseArgList); // the first arg is % or . or |
+                // bounce->Bounce.Value = KON_CAR(clauseArgList); // the first arg is % or . or |
+                bounce->Bounce.Value = firstToEval; // the first arg is % or . or |
 
             }
             else if (KON_IS_SYMBOL(firstArg)) {
@@ -716,11 +775,6 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
                 bounce->Bounce.Env = env;
                 bounce->Bounce.Value = KON_CAR(clauseArgList); // the first arg is /abc
             }
-            else if (KON_IS_SYMBOL(clauseArgList)) {
-                // a clause like {length} in sentence {{"abc" length}}
-                // should dispatch this msg to the object's visitor protocol
-            }
-
         }
 
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_ARG_LIST) {

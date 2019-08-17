@@ -45,8 +45,8 @@ typedef enum
     // TODO change select path(/abc), exec msg(.length), pipe proc(|abc)
     // to wrapper type
     KON_TOKEN_QUERY_PATH, // /tag /. /.. /~
-    KON_TOKEN_MSG_SIGNAL,     // .length
-    KON_TOKEN_PROC_PIPE,         // |abc TODO change to a sym type
+    KON_TOKEN_MSG_SIGNAL,     // . length
+    KON_TOKEN_PROC_PIPE,         // | abc
 
     KON_TOKEN_QUOTE_LIST,   // $[]
     KON_TOKEN_QUOTE_CELL,   // ${}

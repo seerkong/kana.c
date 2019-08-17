@@ -67,10 +67,6 @@ typedef int kon_int32_t;
 #define KON_TYPE_LABEL_TAG 38
 #define KON_EXTENDED_TAG 54
 
-// 010前面的高位字节作为n
-// 2: 10010
-// 比如3： 11010
-// 8: 1000010
 #define KON_MAKE_UNIQUE_LABEL(n)  ((KN) ((n<<KON_UNIQUE_LABEL_BITS) \
                                           + KON_UNIQUE_LABEL_TAG))
 
@@ -134,7 +130,7 @@ typedef enum {
     // KON_T_TRAMPOLINE,
     KON_T_PROCEDURE,
     KON_T_CPOINTER,
-    KON_T_EXCEPTION
+    KON_T_EXCEPTION,
 } KonType;
 
 typedef struct KonState KonState;
@@ -160,14 +156,13 @@ typedef struct KonProcedure KonProcedure;
 #define KON_GC_MARK_GRAY '1'
 // mark in process
 #define KON_GC_MARK_RED '2'
-// can be reached from root
+// can be reached from root, liveness: true
 #define KON_GC_MARK_BLACK '3'
 
 typedef struct KonBase {
     KonType Tag;
     
-    // boxed fixnum
-    // for types in KonType enum, the MsgDispatcherId is same as KonType
+    // unboxed fixnum
     unsigned int MsgDispatcherId;
     char GcMarkColor;
 } KonBase;
@@ -183,8 +178,7 @@ typedef enum {
     KON_SYM_STRING, // $''
 
     KON_QUERY_PATH, // /tag /. /.. /~
-    KON_MSG_SIGNAL, // .add 5 2
-    KON_PROC_PIPE,  // |abc
+    // KON_MSG_SIGNAL, // .add 5 2
 } KonSymbolType;
 
 struct KonSymbol {
@@ -243,6 +237,7 @@ struct KonUnquote {
 
 typedef enum {
     KON_SYNTAX_MARKER_APPLY,        // %
+    KON_SYNTAX_MARKER_MSG_SIGNAL,   // .
     KON_SYNTAX_MARKER_PROC_PIPE,         // |
     KON_SYNTAX_MARKER_CLAUSE_END    // ;
 } KonSyntaxMarkerType;
@@ -291,14 +286,12 @@ struct KonAttrSlot {
 
 struct KonMsgDispatcher {
     KonBase Base;
-    KN Config;
-    char* Name;
     KonProcedure* OnApplyArgs;  // % p1 p2;
     KonProcedure* OnSelectPath;  // /abc /efg
     KonProcedure* OnMethodCall; // . push 1 2;
-    KonProcedure* OnVisitVector;  // []
+    KonProcedure* OnVisitVector;  // <>
     KonProcedure* OnVisitTable; // ()
-    KonProcedure* OnVisitCell;  // <>
+    KonProcedure* OnVisitCell;  // {}
 };
 
 typedef enum {
@@ -421,7 +414,9 @@ struct KonState {
     tb_allocator_ref_t LargeAllocator;
     tb_allocator_ref_t Allocator;   // default allocator
 
-    unsigned int LastMsgDispatcherId;
+    // how dispatch a message
+    KxVector* MsgDispatchers;
+    unsigned int NextMsgDispatcherId;
 };
 
 typedef struct KonFlonum {
@@ -469,6 +464,8 @@ union _Kon {
 ////
 
 KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
+KON_API unsigned int KON_NodeDispacherId(KonState* kstate, KN obj);
+
 #define KON_ALLOC_TYPE_TAG(kstate,t,tag)  ((t *)KON_AllocTagged(kstate, sizeof(t), tag))
 #define KON_FREE(kstate, ptr) KON_GC_FREE(ptr)
 
@@ -491,7 +488,6 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 
 // #define KonDef(t)          struct Kon##t *
 #define CAST_Kon(t, v)          ((struct Kon##t *)v)
-#define KON_TYPE(x)      kon_type((KN)(x))
 #define KON_PTR_TYPE(x)     (((KonBase*)(x))->Tag)
 
 
@@ -548,17 +544,6 @@ KON_API KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
 #define KON_IS_CONTINUATION(x)        (KON_CHECK_TAG(x, KON_T_CONTINUATION))
 #define KON_IS_CPOINTER(x)   (KON_CHECK_TAG(x, KON_T_CPOINTER))
 #define KON_IS_EXCEPTION(x)  (KON_CHECK_TAG(x, KON_T_EXCEPTION))
-
-
-/// either immediate (NUM,BOOL,NIL) or a fwd
-static inline KonType kon_type(KN obj) {
-  if (KON_IS_FIXNUM(obj) || KON_IS_FLONUM(obj))  return KON_T_NUMBER;
-  if (obj == KON_TRUE || obj == KON_FALSE) return KON_T_BOOLEAN;
-  if (obj == KON_UKN)  return KON_T_UKN;
-  if (obj == KON_UNDEF)  return KON_T_UNDEF;
-  if (obj == KON_NIL)  return KON_T_NIL;
-  return (((KonBase*)(obj))->Tag);
-}
 
 // predicates end
 ////
@@ -689,8 +674,11 @@ KN KON_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 
 
 KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef);
-
-KN MakeMsgDispatcher(KonState* kstate);
+KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KN env);
+KonMsgDispatcher* MakeMsgDispatcher(KonState* kstate);
+int KON_SetMsgDispatcher(KonState* kstate, unsigned int dispatcherId, KonMsgDispatcher* dispatcher);
+unsigned int KON_SetNextMsgDispatcher(KonState* kstate, KonMsgDispatcher* dispatcher);
+KonMsgDispatcher* KON_GetMsgDispatcher(KonState* kstate, unsigned int dispatcherId);
 
 KN MakeAttrSlotLeaf(KonState* kstate, KN value, char* mod);
 KN MakeAttrSlotFolder(KonState* kstate, char* mod);

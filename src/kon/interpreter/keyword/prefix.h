@@ -20,6 +20,7 @@
 
 #include "prefix_def_builder.h"
 #include "prefix_def_dispatcher.h"
+#include "prefix_set_dispatcher.h"
 #include "prefix_sh.h"
 
 #endif

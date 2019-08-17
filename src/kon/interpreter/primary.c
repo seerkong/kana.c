@@ -360,6 +360,32 @@ KN KON_PrimaryIsException(KonState* kstate, KN args)
 }
 
 
+
+KN KON_PrimaryGetDispatcherId(KonState* kstate, KN args)
+{
+    KN obj = KON_CAR(args);
+    return KON_MAKE_FIXNUM(KON_NodeDispacherId(kstate, obj));
+}
+
+// init internal types dispatcher id
+KN KON_PrimaryExportDispacherId(KonState* kstate, KonEnv* env)
+{
+    KON_EnvDefine(kstate, env, "BooleanDispacher", KON_MAKE_FIXNUM(KON_T_BOOLEAN));
+    KON_EnvDefine(kstate, env, "UnknownDispacher", KON_MAKE_FIXNUM(KON_T_UKN));
+    KON_EnvDefine(kstate, env, "UndefinedDispacher", KON_MAKE_FIXNUM(KON_T_UNDEF));
+    KON_EnvDefine(kstate, env, "SymbolDispacher", KON_MAKE_FIXNUM(KON_T_SYMBOL));
+    KON_EnvDefine(kstate, env, "CharDispacher", KON_MAKE_FIXNUM(KON_T_CHAR));
+    KON_EnvDefine(kstate, env, "NumberDispacher", KON_MAKE_FIXNUM(KON_T_NUMBER));
+    KON_EnvDefine(kstate, env, "StringDispacher", KON_MAKE_FIXNUM(KON_T_STRING));
+    KON_EnvDefine(kstate, env, "ListDispacher", KON_MAKE_FIXNUM(KON_T_PAIRLIST));
+    KON_EnvDefine(kstate, env, "VectorDispacher", KON_MAKE_FIXNUM(KON_T_VECTOR));
+    KON_EnvDefine(kstate, env, "TableDispacher", KON_MAKE_FIXNUM(KON_T_TABLE));
+    KON_EnvDefine(kstate, env, "CellDispacher", KON_MAKE_FIXNUM(KON_T_CELL));
+    KON_EnvDefine(kstate, env, "AttrSlotDispacher", KON_MAKE_FIXNUM(KON_T_ATTR_SLOT));
+
+}
+
+
 KN KON_PrimaryOpExport(KonState* kstate, KonEnv* env)
 {
     
@@ -492,4 +518,12 @@ KN KON_PrimaryOpExport(KonState* kstate, KonEnv* env)
     KON_EnvDefine(kstate, env, "is-exception",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsException)
     );
+
+    KON_EnvDefine(kstate, env, "get-dispatcher-id",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryGetDispatcherId)
+    );
+
+    KON_EnvDefine(kstate, env, "get-env", env);
+
+    KON_PrimaryExportDispacherId(kstate, env);
 }

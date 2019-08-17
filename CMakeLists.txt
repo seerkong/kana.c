@@ -367,6 +367,10 @@ if(MSVC)
 else()
     target_compile_options(tbox PRIVATE -O0)
 endif()
+target_link_libraries(tbox PRIVATE
+    pthread
+    pthread
+)
 target_link_directories(tbox PRIVATE
     /usr/local/lib
     /usr/lib
@@ -723,23 +727,24 @@ target_sources(kon PRIVATE
     src/kon/interpreter/keyword/prefix_continue.c
     src/kon/interpreter/cps_interpreter.c
     src/kon/container/kx_vector.c
+    src/kon/interpreter/keyword/prefix_set_dispatcher.c
     src/kon/interpreter/keyword/prefix_or.c
     src/kon/interpreter/keyword/prefix_break.c
-    src/kon/interpreter/keyword/prefix_set.c
     src/kon/interpreter/mod/kon_string.c
-    src/kon/interpreter/keyword/prefix_let.c
     src/kon/interpreter/mod/kon_list.c
+    src/kon/interpreter/keyword/prefix_let.c
+    src/kon/interpreter/mod/kon_module.c
     src/kon/interpreter/env.c
     src/kon/container/kx_hashtable.c
     src/kon/kson/tokenizer.c
     src/kon/interpreter/keyword/prefix_cond.c
     src/kon/kson/state_stack.c
     src/kon/interpreter/keyword/prefix_func.c
-    src/kon/interpreter/mod/kon_module.c
+    src/kon/interpreter/mod/kon_vector.c
     src/kon/container/kx_list.c
     src/kon/utils/realpath.c
-    src/kon/interpreter/mod/kon_vector.c
     src/kon/interpreter/keyword/prefix_apply.c
+    src/kon/interpreter/keyword/prefix_set.c
     src/kon/interpreter/mod/kon_cell.c
     src/kon/gc.c
     src/kon/interpreter/keyword/prefix_if.c

@@ -123,18 +123,50 @@ KN KON_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
         ((KonBase*)res)->Tag = tag;
         // set dispatcher id
         if (tag == KON_T_FIXNUM || tag == KON_T_FLONUM || tag == KON_T_BIGNUM) {
-            ((KonBase*)res)->MsgDispatcherId = KON_MAKE_FIXNUM(KON_T_NUMBER);
+            ((KonBase*)res)->MsgDispatcherId = KON_T_NUMBER;
         }
         else if (tag == KON_T_NIL || tag == KON_T_PAIR) {
-            ((KonBase*)res)->MsgDispatcherId = KON_MAKE_FIXNUM(KON_T_PAIRLIST);
+            ((KonBase*)res)->MsgDispatcherId = KON_T_PAIRLIST;
         }
         else {
-            ((KonBase*)res)->MsgDispatcherId = KON_MAKE_FIXNUM(tag);
+            ((KonBase*)res)->MsgDispatcherId = tag;
         }
         
     }
 
     return res;
+}
+
+unsigned int KON_NodeDispacherId(KonState* kstate, KN obj)
+{
+    if (KON_IS_BOOLEAN(obj)) {
+        return KON_T_BOOLEAN;
+    }
+    else if (obj == KON_UKN) {
+        return KON_T_UKN;
+    }
+    else if (obj == KON_UNDEF) {
+        return KON_T_UNDEF;
+    }
+    else if (obj == KON_NIL) {
+        return KON_T_PAIRLIST;
+    }
+    else if (KON_IS_FIXNUM(obj)) {
+        return KON_T_NUMBER;
+    }
+    else if (KON_IS_IMDT_SYMBOL(obj)) {
+        return KON_T_SYMBOL;
+    }
+    else if (KON_IS_CHAR(obj)) {
+        return KON_T_CHAR;
+    }
+    else if (KON_IS_POINTER(obj)) {
+        return ((KonBase*)obj)->MsgDispatcherId;
+    }
+    else {
+        // not handled
+        return 0;
+    }
 }
 
 
@@ -356,11 +388,10 @@ KN KON_SymbolStringify(KonState* kstate, KN source)
             KxStringBuffer_AppendCstr(result->String, data);
             break;
         }
-        case KON_MSG_SIGNAL: {
-            KxStringBuffer_AppendCstr(result->String, ".");
-            KxStringBuffer_AppendCstr(result->String, data);
-            break;
-        }
+        // case KON_MSG_SIGNAL: {
+        //     KxStringBuffer_AppendCstr(result->String, data);
+        //     break;
+        // }
     }
     return result;
 }
@@ -380,6 +411,10 @@ KN KON_SyntaxMarkerStringify(KonState* kstate, KN source)
     switch (type) {
         case KON_SYNTAX_MARKER_APPLY: {
             KxStringBuffer_AppendCstr(result->String, "%");
+            break;
+        }
+        case KON_SYNTAX_MARKER_MSG_SIGNAL: {
+            KxStringBuffer_AppendCstr(result->String, ".");
             break;
         }
         case KON_SYNTAX_MARKER_PROC_PIPE: {
@@ -835,18 +870,52 @@ KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef
     return result;
 }
 
-KN MakeMsgDispatcher(KonState* kstate)
+KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KN env)
+{
+    KonProcedure* proc = KON_ALLOC_TYPE_TAG(kstate, KonProcedure, KON_T_PROCEDURE);
+    proc->Type = KON_COMPOSITE_LAMBDA;
+    proc->Composite.LexicalEnv = env;
+    proc->Composite.ArgList = KON_CADR(procAst);
+    proc->Composite.Body = KON_CDDR(procAst);
+    return proc;
+}
+
+
+KonMsgDispatcher* MakeMsgDispatcher(KonState* kstate)
 {
     KonMsgDispatcher* result = KON_ALLOC_TYPE_TAG(kstate, KonMsgDispatcher, KON_T_MSG_DISPATCHER);
-    result->Name = KON_UNDEF;
     result->OnApplyArgs = KON_UNDEF;
     result->OnSelectPath = KON_UNDEF;
     result->OnMethodCall = KON_UNDEF;
     result->OnVisitVector = KON_UNDEF;
     result->OnVisitTable = KON_UNDEF;
     result->OnVisitCell = KON_UNDEF;
-    result->Config = KON_UNDEF;
     return result;
+}
+
+int KON_SetMsgDispatcher(KonState* kstate, unsigned int dispatcherId, KonMsgDispatcher* dispatcher)
+{
+    KxVector_SetIndex(kstate->MsgDispatchers, dispatcherId, dispatcher);
+    return 1;
+}
+
+unsigned int KON_SetNextMsgDispatcher(KonState* kstate, KonMsgDispatcher* dispatcher)
+{
+    int dispacherId = kstate->NextMsgDispatcherId;
+    KON_SetMsgDispatcher(kstate, dispacherId, dispatcher);
+    kstate->NextMsgDispatcherId += 1;
+    return dispacherId;
+}
+
+KonMsgDispatcher* KON_GetMsgDispatcher(KonState* kstate, unsigned int dispatcherId)
+{
+    KN dispatcher = KxVector_AtIndex(kstate->MsgDispatchers, dispatcherId);
+    if (dispatcher == KON_UKN || dispatcher == NULL) {
+        return NULL;
+    }
+    else {
+        return (KonMsgDispatcher*)dispatcher;
+    }
 }
 
 KN MakeAttrSlotLeaf(KonState* kstate, KN value, char* mod)

@@ -18,7 +18,7 @@ KonState* KON_Init()
     }
     kstate->Base.Tag = KON_T_STATE;
 
-    kstate->LastMsgDispatcherId = 1000;
+    kstate->NextMsgDispatcherId = 100;
 
     // init root env
     // KN env = KON_MakeRootEnv(kstate);
@@ -34,6 +34,8 @@ KonState* KON_Init()
     }
 
     KON_InitGc(kstate);
+
+    kstate->MsgDispatchers = KxVector_InitWithSize(200);
 
     return kstate;
 }

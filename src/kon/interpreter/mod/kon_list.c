@@ -15,7 +15,7 @@ KN KonList_Length(KonState* kstate, KN args)
     return KON_PairListLength(kstate, self);
 }
 
-KN KonList_Append(KonState* kstate, KN args)
+KN KonList_Push(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
     // auto unbox QUOTE_LIST
@@ -37,7 +37,7 @@ KN KonList_Append(KonState* kstate, KN args)
             node->Next = KON_NIL;
             node->Prev = iter;
             
-            CAST_Kon(Pair, iter)->Next = node;
+            iter->Next = node;
 
             break;
         }
@@ -47,7 +47,7 @@ KN KonList_Append(KonState* kstate, KN args)
     return self;
 }
 
-KN KonList_Prepend(KonState* kstate, KN args)
+KN KonList_Unshift(KonState* kstate, KN args)
 {
     KN self = KON_CAR(args);
     // auto unbox QUOTE_LIST
@@ -184,12 +184,12 @@ KonAttrSlot* KonList_Export(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Init)
     );
 
-    KON_EnvDefine(kstate, env, "list-append",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Append)
+    KON_EnvDefine(kstate, env, "list-push",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Push)
     );
 
-    KON_EnvDefine(kstate, env, "list-prepend",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Prepend)
+    KON_EnvDefine(kstate, env, "list-unshift",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Unshift)
     );
 
     KON_EnvDefine(kstate, env, "cons",

@@ -133,6 +133,7 @@ bool IsSyntaxToken(int event)
 {
     if (event == KON_TOKEN_APPLY
         || event == KON_TOKEN_PROC_PIPE
+        || event == KON_TOKEN_MSG_SIGNAL
         || event == KON_TOKEN_CLAUSE_END
     ) {
         return true;
@@ -158,6 +159,10 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
         }
         case KON_TOKEN_PROC_PIPE: {
             value->Type = KON_SYNTAX_MARKER_PROC_PIPE;
+            break;
+        }
+        case KON_TOKEN_MSG_SIGNAL: {
+            value->Type = KON_SYNTAX_MARKER_MSG_SIGNAL;
             break;
         }
         default: {
@@ -198,9 +203,7 @@ KN MakeSymbol(KonReader* reader, KonTokenKind event)
     else if (event == KON_TOKEN_QUERY_PATH) {
         value->Type = KON_QUERY_PATH;
     }
-    else if (event == KON_TOKEN_MSG_SIGNAL) {
-        value->Type = KON_MSG_SIGNAL;
-    }
+
     
     value->Data = utf8dup(KxStringBuffer_Cstr(reader->Tokenizer->Content));
 
