@@ -1,12 +1,12 @@
 [let t
   [blk
-    [return % 42]
+    [return % 42 ]
   ]
 ]
-[t %]
+[t % ]
 
 [if #t;
-  [t %]
+  [t % ]
 else
   55
 ]

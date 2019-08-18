@@ -295,7 +295,7 @@ bool IsSpace(char ch)
 
 bool IsStopWord(char ch)
 {
-    char dest[16] = ":%.|![](){};";
+    char dest[16] = ":%./|![](){};";
     if (strchr(dest, ch) > 0) {
         return true;
     }
@@ -382,7 +382,7 @@ void ParseRawString(KonTokenizer* tokenizer)
     tokenizer->ColEnd = tokenizer->CurrCol;
 }
 
-// single line comment like // xxx or ` xxx
+// single line comment like `` xxx
 void ParseSingleLineComment(KonTokenizer* tokenizer)
 {
     tokenizer->RowStart = tokenizer->CurrRow;
@@ -503,7 +503,6 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
         }
         else if (pc[0] == '<') {
             const char* nextChars = PeekChars(tokenizer, 2);
-            printf("***next chars %s is space %d is stop word %d\n", nextChars, IsSpace(nextChars[0]), IsStopWord(nextChars[0]));
             if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
                 UpdateTokenContent(tokenizer, "<");
                 ForwardToken(tokenizer, 1);
@@ -763,9 +762,21 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             break;
         }
         else if (pc[0] == '`') {
-            ParseSingleLineComment(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_COMMENT_SINGLE_LINE;
-            break;
+            const char* nextChars = PeekChars(tokenizer, 3);
+            if (nextChars == NULL) {
+                break;
+            }
+            // `` single line comment
+            if (nextChars[1] == '`') {
+                ParseSingleLineComment(tokenizer);
+                tokenizer->TokenKind = KON_TOKEN_COMMENT_SINGLE_LINE;
+                break;
+            }
+            else {
+                // skip
+                ForwardToken(tokenizer, 1);
+                break;
+            }
         }
         else if (pc[0] == '/') {
             const char* nextChars = PeekChars(tokenizer, 3);

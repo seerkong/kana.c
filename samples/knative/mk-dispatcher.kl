@@ -1,34 +1,34 @@
 [set-dispatcher NumberDispacher
   (
   :on-apply-args
-    [lambda [$args]
-      [displayln % "on-apply-args"]
+    [lambda [$args ]
+      [displayln % "on-apply-args" ]
     ]
   :on-select-path
-    [lambda [$args]
-      [displayln % "on-select-path"]
+    [lambda [$args ]
+      [displayln % "on-select-path" ]
     ]
   :on-method-call
-    [lambda [$subj $msg $method-args]
-      [writeln % "on-method-call " msg]
-      [displayln % "method arg list" method-args]
+    [lambda [$subj $msg $method-args ]
+      [writeln % "on-method-call " msg ]
+      [displayln % "method arg list" method-args ]
       [cond
-        [[eq % $+ msg]
-          [apply $+ [list-unshift % method-args subj]]
+        [[eq % $+ msg ]
+          [apply $+ [list-unshift % method-args subj ] ]
         ]
       ]
     ]
   :on-visit-vector
-    [lambda [$args]
-      [displayln % "on-visit-vector"]
+    [lambda [$args ]
+      [displayln % "on-visit-vector" ]
     ]
   :on-visit-table
-    [lambda [$args]
-      [displayln % "on-visit-table"]
+    [lambda [$args ]
+      [displayln % "on-visit-table" ]
     ]
   :on-visit-cell
-    [lambda [$args]
-      [displayln % "on-visit-cell"]
+    [lambda [$args ]
+      [displayln % "on-visit-cell" ]
     ]
 
   )
@@ -36,8 +36,8 @@
 
 
 
-[writeln % [get-dispatcher-id % 5] ]
+[writeln % [get-dispatcher-id % 5 ] ]
 
-`[5 .+ 2]
-[5 $+ 2]
+``[5 .+ 2 ]
+[5 $+ 2 ]
 

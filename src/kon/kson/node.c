@@ -559,7 +559,7 @@ KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, cha
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
 
             // if (i != vecLen - 1) {
-            KxStringBuffer_AppendCstr(result->String, " ");
+                KxStringBuffer_AppendCstr(result->String, " ");
             // }
             
         }
@@ -630,7 +630,7 @@ KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, c
                 KN itemToKonStr = KON_ToFormatString(kstate, item, false, depth + 1, padding);
                 KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
                 // if (next != KON_NIL) {
-                KxStringBuffer_AppendCstr(result->String, " ");
+                    KxStringBuffer_AppendCstr(result->String, " ");
                 // }
                 iter = next;
             }
@@ -758,9 +758,9 @@ KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char
 
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
             
-            if (next != KON_NIL) {
+            // if (next != KON_NIL) {
                 KxStringBuffer_AppendCstr(result->String, " ");
-            }
+            // }
 
             iter = next;
         }
@@ -851,7 +851,7 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(innerListToKonStr));
         }
 
-        KxStringBuffer_AppendCstr(result->String, "}");
+        KxStringBuffer_AppendCstr(result->String, " }");
     }
 
     return result;
@@ -867,6 +867,9 @@ KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef
 
 KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KN env)
 {
+    if (procAst == KON_NIL || procAst == KON_UNDEF|| procAst == KON_UKN) {
+        return NULL;
+    }
     KonProcedure* proc = KON_ALLOC_TYPE_TAG(kstate, KonProcedure, KON_T_PROCEDURE);
     proc->Type = KON_COMPOSITE_LAMBDA;
     proc->Composite.LexicalEnv = env;

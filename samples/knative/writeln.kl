@@ -1,4 +1,4 @@
-`[writeln % "Hello World!"]
-`[displayln % "Hello World!"]
-[displayln % {ag (:a 1) < 1 2 3 > []}]
-`[displayln % < < 1 2 3 > < "asss" > >]
+``[writeln % "Hello World!" ]
+``[displayln % "Hello World!" ]
+[displayln % {ag (:a 1) < 1 2 3 > [] } ]
+``[displayln % < < 1 2 3 > < "asss" > > ]

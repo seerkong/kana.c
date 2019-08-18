@@ -1,10 +1,10 @@
 [let t
   [blk
-    [set a 1]
-    [+ % a b c]
+    [set a 1 ]
+    [+ % a b c ]
   ]
 ]
-[let a 5]
-[let b 6]
-[let c 7]
-[t %]
+[let a 5 ]
+[let b 6 ]
+[let c 7 ]
+[t % ]

@@ -1,5 +1,5 @@
 [if #t;
-  [return % 42]
+  [return % 42 ]
 else
   55
 ]

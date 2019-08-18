@@ -1,5 +1,5 @@
 [do
-  [let a 5]
-  [writeln % "a value in do block: " a]
+  [let a 5 ]
+  [writeln % "a value in do block: " a ]
 ]
-[writeln % "a value outside of do block: " a]
+[writeln % "a value outside of do block: " a ]
