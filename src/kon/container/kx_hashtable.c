@@ -694,6 +694,22 @@ KxHashTableIter KxHashTable_IterNext(KxHashTable* self, KxHashTableIter iter)
     return (KxHashTableIter)(valEntry->Next);
 }
 
+bool KxHashTable_IterHasPrev(KxHashTable* self, KxHashTableIter iter)
+{
+    KxHashTableValEntry* valEntry = (KxHashTableValEntry*)iter;
+    return (iter->Prev == KX_HASH_TABLE_NIL) ? false : true;
+}
+
+KxHashTableIter KxHashTable_IterPrev(KxHashTable* self, KxHashTableIter iter)
+{
+    if (iter == KX_HASH_TABLE_NIL) {
+        return (KxHashTableIter)KX_HASH_TABLE_NIL;
+    }
+    KxHashTableValEntry* valEntry = (KxHashTableValEntry*)iter;
+
+    return (KxHashTableIter)(valEntry->Prev);
+}
+
 const char* KxHashTable_IterGetKey(KxHashTable* self, KxHashTableIter iter)
 {
     if (iter == KX_HASH_TABLE_NIL) {

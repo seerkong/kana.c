@@ -89,6 +89,7 @@ target("test_table")
 
     -- add the source files
     add_files("container/test_hashtable.c")
+    add_files("container/test_hashtable_iter.c")
     add_files("container/test_table.c")
 
 

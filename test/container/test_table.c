@@ -9,6 +9,8 @@
 
 extern SUITE(test_hashtable);
 
+extern SUITE(test_hashtable_iter);
+
 
 GREATEST_MAIN_DEFS();
 
@@ -21,6 +23,7 @@ int main(int argc, char const* argv[])
     greatest_set_verbosity(1);
     
     RUN_SUITE(test_hashtable);
+    RUN_SUITE(test_hashtable_iter);
 
     GREATEST_MAIN_END();
     tb_exit();

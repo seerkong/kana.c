@@ -122,6 +122,11 @@ bool KxHashTable_IterHasNext(KxHashTable* self, KxHashTableIter iter);
 
 KxHashTableIter KxHashTable_IterNext(KxHashTable* self, KxHashTableIter iter);
 
+bool KxHashTable_IterHasPrev(KxHashTable* self, KxHashTableIter iter);
+
+KxHashTableIter KxHashTable_IterPrev(KxHashTable* self, KxHashTableIter iter);
+
+
 const char* KxHashTable_IterGetKey(KxHashTable* self, KxHashTableIter iter);
 
 kx_table_val_t KxHashTable_IterGetVal(KxHashTable* self, KxHashTableIter iter);
