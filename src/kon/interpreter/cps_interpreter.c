@@ -730,24 +730,26 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             KN firstArg = KON_CAR(clauseArgList);
 
             if (KON_IS_SYNTAX_MARKER(firstArg)) {
-                // don't need to eval syntax marker
-                // % . |
-                // this kind bouce value is a clause word list like {% "a" "b"}
-                KN evaledArgList = KON_CONS(kstate, firstArg, KON_NIL);
-                KN restArgList = KON_CDDR(clauseArgList);
-                KN firstToEval = KON_CADR(clauseArgList);
+                KN evaledArgList;
+                KN restArgList;
+                KN firstToEval;
+                
                 // syntax sugar.
                 // 1 the first word symbol arg after . marker, don't need to eval
                 //   eg: "zhangsan" . length
                 // 2 the first word symbol arg after / maker, don't need eval
-
                 if ((CAST_Kon(SyntaxMarker, firstArg)->Type == KON_SYNTAX_MARKER_MSG_SIGNAL
                         || CAST_Kon(SyntaxMarker, firstArg)->Type == KON_SYNTAX_MARKER_GET_SLOT
                     )
-                    && KON_IS_WORD(firstToEval)
+                    && KON_IS_WORD(KON_CADR(clauseArgList))
                 ) {
-                    ((KonSymbol*)firstToEval)->Type = KON_SYM_IDENTIFIER;
+                    KN firstAfterMarker = KON_CADR(clauseArgList);
+                    ((KonSymbol*)firstAfterMarker)->Type = KON_SYM_IDENTIFIER;
                 }
+                evaledArgList = KON_NIL;
+                firstToEval = firstArg;
+                restArgList = KON_CDR(clauseArgList);
+                
                 KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_CLAUSE_ARGS);
                 k->Cont = cont;
                 k->Env = env;
