@@ -86,8 +86,8 @@ bool IsContainerEndToken(int event)
 
 // @[] @() @<> @{}
 // $[] $() $<> ${}
-// $. $[]. $(). ${}.
-// $e. $[]e. $()e. ${}e.
+// $.abc $%.abc $~.abc
+// @.abc @.[5 .+ $.a] @%.abc  @~.abc
 bool IsWrapperToken(int event)
 {
     if (event == KON_TOKEN_QUOTE_LIST
@@ -324,6 +324,9 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
     }
     else if (builderType == KON_BUILDER_LIST) {
         ListBuilderAddItem(topBuilder, value);
+    }
+    else if (builderType == KON_BUILDER_TABLE) {
+        TableBuilderAddValue(topBuilder, value);
     }
     else if (builderType == KON_BUILDER_TABLE_PAIR) {
         if (currentState == KON_READER_PARSE_TABLE_KEY) {
@@ -604,7 +607,17 @@ KN KSON_Parse(KonReader* reader)
             // TODO
         }
         else if (IsContainerEndToken(event)) {
-            ExitTopBuilder(reader);
+            // an exceptional case: treat a '>' as a symbol
+            // if not in a vector builder
+            if (event == KON_TOKEN_VECTOR_END
+                && topBuilder->Type != KON_BUILDER_VECTOR) {
+                KN symbol = MakeSymbol(reader, KON_TOKEN_SYM_WORD);
+                AddValueToTopBuilder(reader, symbol);
+            }
+            else {
+                ExitTopBuilder(reader);
+            }
+            
             continue;
         }
         

@@ -298,7 +298,7 @@ bool IsSpace(char ch)
 
 bool IsStopWord(char ch)
 {
-    char dest[16] = ":%./|![](){};";
+    char dest[16] = ":%./|!#$@<>[](){};";
     if (strchr(dest, ch) > 0) {
         return true;
     }
@@ -505,16 +505,16 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             break;
         }
         else if (pc[0] == '<') {
-            const char* nextChars = PeekChars(tokenizer, 2);
-            if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
-                UpdateTokenContent(tokenizer, "<");
-                ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
-            }
-            else {
+            // const char* nextChars = PeekChars(tokenizer, 2);
+            // if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
+            //     UpdateTokenContent(tokenizer, "<");
+            //     ForwardToken(tokenizer, 1);
+            //     tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
+            // }
+            // else {
                 ParseIdentifier(tokenizer);
                 tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
-            }
+            // }
             break;
         }
         else if (pc[0] == '>') {
@@ -602,7 +602,12 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (nextChars == NULL) {
                 break;
             }
-
+            if (nextChars[1] == '<') {
+                UpdateTokenContent(tokenizer, "#<");
+                ForwardToken(tokenizer, 2);
+                tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
+                break;
+            }
             
             // TODO other immediate atom builders
             if (nextChars[1] == 'n' && nextChars[2] == 'i') {

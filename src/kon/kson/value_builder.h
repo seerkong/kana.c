@@ -71,6 +71,7 @@ KN MakeListByBuilder(KonState* kstate, KonBuilder* builder);
 KonBuilder* CreateTableBuilder();
 // add pair and destroy pair
 void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair);
+void TableBuilderAddValue(KonBuilder* builder, KN value);
 KN MakeTableByBuilder(KonState* kstate, KonBuilder* builder);
 
 KonBuilder* CreateTablePairBuilder();

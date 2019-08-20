@@ -543,7 +543,7 @@ KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, cha
     int vecLen = KxVector_Length(items);
     
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "<\n");
+        KxStringBuffer_AppendCstr(result->String, "#<\n");
 
         
         for (int i = 0; i < vecLen; i++) {
@@ -560,7 +560,7 @@ KN KON_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, cha
         KxStringBuffer_AppendCstr(result->String, ">");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "< ");
+        KxStringBuffer_AppendCstr(result->String, "#< ");
         
         for (int i = 0; i < vecLen; i++) {
             KN item = KxVector_AtIndex(items, i);
@@ -739,11 +739,12 @@ KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char
             KN itemValue = (KN)KxHashTable_IterGetVal(hashTable, iter);
 
             KN itemToKonStr = KON_ToFormatString(kstate, itemValue, true, depth + 1, padding);
-
-            AddLeftPadding(result->String, depth, padding);
-            KxStringBuffer_AppendCstr(result->String, ":'");
-            KxStringBuffer_AppendCstr(result->String, itemKey);
-            KxStringBuffer_AppendCstr(result->String, "'\n");
+            if (itemKey != NULL) {
+                AddLeftPadding(result->String, depth, padding);
+                KxStringBuffer_AppendCstr(result->String, ":'");
+                KxStringBuffer_AppendCstr(result->String, itemKey);
+                KxStringBuffer_AppendCstr(result->String, "'\n");
+            }
 
             AddLeftPadding(result->String, depth, padding);
             KxStringBuffer_AppendCstr(result->String, padding);
@@ -766,9 +767,11 @@ KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char
 
             KN itemToKonStr = KON_ToFormatString(kstate, itemValue, false, depth + 1, padding);
 
-            KxStringBuffer_AppendCstr(result->String, ":'");
-            KxStringBuffer_AppendCstr(result->String, itemKey);
-            KxStringBuffer_AppendCstr(result->String, "' ");
+            if (itemKey != NULL) {
+                KxStringBuffer_AppendCstr(result->String, ":'");
+                KxStringBuffer_AppendCstr(result->String, itemKey);
+                KxStringBuffer_AppendCstr(result->String, "' ");
+            }
 
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
             

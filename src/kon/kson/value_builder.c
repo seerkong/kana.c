@@ -108,9 +108,14 @@ void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
 {
     char* key = KxStringBuffer_Cstr(pair->TablePair.Key);
     
-    KxHashTable_PutKv(builder->Table, key, pair->TablePair.Value);
+    KxHashTable_PushKv(builder->Table, key, pair->TablePair.Value);
     KON_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
+}
+
+void TableBuilderAddValue(KonBuilder* builder, KN value)
+{
+    KxHashTable_PushVal(builder->Table, value);
 }
 
 KN MakeTableByBuilder(KonState* kstate, KonBuilder* builder)
