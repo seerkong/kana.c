@@ -14,20 +14,32 @@ typedef enum
     KON_READER_PARSE_LIST,
     // s3 parse table, need ':' or table end
     KON_READER_PARSE_TABLE,
-    // s4 parse table key, need identifier, symbol('') or $abc
-    KON_READER_PARSE_TABLE_KEY,
+    // s4 parse table or map key, need identifier, symbol('') or $abc
+    KON_READER_PARSE_TABLE_PAIR_KEY,
     // s5 parse table value or next kv pair
-    KON_READER_PARSE_TABLE_VAL_OR_NEXT,
-    // s6 parse cell, need tag, identifier, symbol('') or $abc, or [, <, (
-    KON_READER_PARSE_CELL_TAG,
+    KON_READER_PARSE_TABLE_PAIR_VAL,
+    // s6 parse cell, need core, eg: symbol, number str, wrapper, expr
+    // or map key :a 1 :b
+    // or param, block
+    KON_READER_PARSE_CELL_CORE,
+    // need map key :a 1 :b
+    // or param, block
+    // or next
+    KON_READER_PARSE_CELL_MAP,
+    KON_READER_PARSE_MAP_PAIR_KEY,
+
+    // s10 parse cell map value or next kv pair
+    KON_READER_PARSE_MAP_PAIR_VAL_OR_NEXT,
+
     // s7 parse cell inner array, table, or list
     KON_READER_PARSE_CELL_INNER_CONTAINER,
-    // // s8 parse cell table
-    // KON_READER_PARSE_CELL_INNER_TABLE,
-    // // s9 parse cell arr
-    // KON_READER_PARSE_CELL_INNER_VECTOR,
-    // // s10 parse cell list
-    // KON_READER_PARSE_CELL_INNER_LIST,
+
+    // s8 parse param table, inner state:KON_READER_PARSE_TABLE_PAIR_KEY KON_READER_PARSE_TABLE_PAIR_VAL
+    KON_READER_PARSE_PARAM,
+    // s9 parse block list
+    KON_READER_PARSE_BLOCK,
+
+
 
     // s11 parse tpl expand need identifier $.abc
     KON_READER_PARSE_EXPAND_REPLACE,

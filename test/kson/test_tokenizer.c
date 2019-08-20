@@ -12,7 +12,7 @@ SUITE(suite);
 
 TEST Tokenize_Cell(void) {
         
-    char* filePathOrigin = "~/lang/konscript/kon-c/samples/kon/cell.kon";
+    char* filePathOrigin = "~/lang/konscript/kon-c/examples/kon/cell.kon";
     KxStringBuffer* sb = KON_ReadFileContent(filePathOrigin);
     printf("%s\n", KxStringBuffer_Cstr(sb));
     KxStringBuffer_Clear(sb);

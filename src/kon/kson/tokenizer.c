@@ -13,6 +13,9 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_LIST_START:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LIST_START");
             break;
+        case KON_TOKEN_BLOCK_START:
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_BLOCK_START");
+            break;
         case KON_TOKEN_LIST_END:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LIST_END");
             break;
@@ -24,6 +27,9 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
             break;
         case KON_TOKEN_TABLE_START:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_START");
+            break;
+        case KON_TOKEN_PARAM_START:
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_PARAM_START");
             break;
         case KON_TOKEN_TABLE_END:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_END");
@@ -495,7 +501,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
         else if (pc[0] == '(') {
             UpdateTokenContent(tokenizer, "(");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_TABLE_START;
+            tokenizer->TokenKind = KON_TOKEN_PARAM_START;
             break;
         }
         else if (pc[0] == ')') {
@@ -608,9 +614,19 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
                 break;
             }
+            else if (nextChars[1] == '[') {
+                UpdateTokenContent(tokenizer, "#[");
+                ForwardToken(tokenizer, 2);
+                tokenizer->TokenKind = KON_TOKEN_BLOCK_START;
+            }
+            else if (nextChars[1] == '(') {
+                UpdateTokenContent(tokenizer, "#(");
+                ForwardToken(tokenizer, 2);
+                tokenizer->TokenKind = KON_TOKEN_TABLE_START;
+            }
             
             // TODO other immediate atom builders
-            if (nextChars[1] == 'n' && nextChars[2] == 'i') {
+            else if (nextChars[1] == 'n' && nextChars[2] == 'i') {
                 UpdateTokenContent(tokenizer, "#nil;");
                 ForwardToken(tokenizer, 5);
                 tokenizer->TokenKind = KON_TOKEN_KEYWORD_NIL;

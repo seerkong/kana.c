@@ -1,0 +1,18 @@
+{kon
+  ``:a
+  ``:b =1
+  ``:c
+  ``5
+  ``#(:a 1 :b "zxc")
+  ``#<>
+  (:a 1 :b "zxc")
+  #[
+    ``{5 $a $[]  }
+    ``$(:a 1 @%.[$(:b 2)]) `` should use php-like array
+    `` :xx = b save to map
+    `` () save to table
+    `` #[] save to list
+    `` others,  string number quote... all save to core
+    {sh "ps" "-h"}
+  ]
+}

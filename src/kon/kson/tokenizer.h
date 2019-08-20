@@ -15,10 +15,12 @@ typedef enum
     KON_TOKEN_COMMENT_SINGLE_LINE, // `
     
     KON_TOKEN_LIST_START,   // [
+    KON_TOKEN_BLOCK_START,   // #[
     KON_TOKEN_LIST_END,     // ]
     KON_TOKEN_VECTOR_START,  // <
     KON_TOKEN_VECTOR_END,    // >
-    KON_TOKEN_TABLE_START,    // (
+    KON_TOKEN_TABLE_START,    // #(
+    KON_TOKEN_PARAM_START,    // (
     KON_TOKEN_TABLE_END,      // )
     KON_TOKEN_CELL_START,   // {
     KON_TOKEN_CELL_END,     // }

@@ -13,8 +13,8 @@ const char* BuilderTypeToCStr(KonBuilderType type)
         case KON_BUILDER_TABLE: {
             return "KON_BUILDER_TABLE";
         }
-        case KON_BUILDER_TABLE_PAIR: {
-            return "KON_BUILDER_TABLE_PAIR";
+        case KON_BUILDER_KV_PAIR: {
+            return "KON_BUILDER_KV_PAIR";
         }
         case KON_BUILDER_CELL: {
             return "KON_BUILDER_CELL";
@@ -93,6 +93,77 @@ KN MakeListByBuilder(KonState* kstate, KonBuilder* builder)
     return pair;
 }
 
+
+KonBuilder* CreateBlockBuilder()
+{
+    KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
+    if (builder == NULL) {
+        return NULL;
+    }
+    builder->Type = KON_BUILDER_BLOCK;
+    builder->Block = KxVector_Init();
+    return builder;
+}
+
+void BlockBuilderAddItem(KonBuilder* builder, KN item)
+{
+    KxVector_Push(builder->Block, item);
+}
+
+KN MakeBlockByBuilder(KonState* kstate, KonBuilder* builder)
+{
+    KN pair = KON_NIL;
+    
+    KonVector* list = builder->Block;
+
+    // reverse add
+    int len = KxVector_Length(list);
+    for (int i = len - 1; i >= 0; i--) {
+        KN item = KxVector_AtIndex(list, i);
+        pair = KON_CONS(kstate, item, pair);
+    }
+    if (len > 0) {
+        // change first element tag to BLOCK
+        ((KonBase*)pair)->Tag = KON_T_BLOCK;
+    }
+
+    return pair;
+}
+
+KonBuilder* CreateParamBuilder()
+{
+    KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
+    if (builder == NULL) {
+        return NULL;
+    }
+    builder->Type = KON_BUILDER_PARAM;
+    builder->Param = KxHashTable_Init(10);;
+    return builder;
+}
+
+void ParamBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
+{
+    char* key = KxStringBuffer_Cstr(pair->KvPair.Key);
+    
+    KxHashTable_PushKv(builder->Param, key, pair->KvPair.Value);
+    KON_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
+    tb_free(pair);
+}
+
+void ParamBuilderAddValue(KonBuilder* builder, KN value)
+{
+    KxHashTable_PushVal(builder->Param, value);
+}
+
+KN MakeParamByBuilder(KonState* kstate, KonBuilder* builder)
+{
+    KonParam* value = KON_ALLOC_TYPE_TAG(kstate, KonTable, KON_T_PARAM);
+    value->Table = builder->Param;
+    tb_free(builder);
+    return value;
+}
+
+
 KonBuilder* CreateTableBuilder()
 {
     KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
@@ -106,9 +177,9 @@ KonBuilder* CreateTableBuilder()
 
 void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
 {
-    char* key = KxStringBuffer_Cstr(pair->TablePair.Key);
+    char* key = KxStringBuffer_Cstr(pair->KvPair.Key);
     
-    KxHashTable_PushKv(builder->Table, key, pair->TablePair.Value);
+    KxHashTable_PushKv(builder->Table, key, pair->KvPair.Value);
     KON_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
 }
@@ -126,38 +197,39 @@ KN MakeTableByBuilder(KonState* kstate, KonBuilder* builder)
     return value;
 }
 
-KonBuilder* CreateTablePairBuilder()
+
+KonBuilder* CreateKvPairBuilder()
 {
     KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
     if (builder == NULL) {
         return NULL;
     }
-    builder->Type = KON_BUILDER_TABLE_PAIR;
-    builder->TablePair.Key = KxStringBuffer_New();
-    builder->TablePair.Value = KON_UNDEF;
+    builder->Type = KON_BUILDER_KV_PAIR;
+    builder->KvPair.Key = KxStringBuffer_New();
+    builder->KvPair.Value = KON_UNDEF;
     return builder;
 }
 
-void TablePairSetKey(KonBuilder* builder, char* key)
+void KvPairSetKey(KonBuilder* builder, char* key)
 {
     assert(key);
-    KxStringBuffer_AppendCstr(builder->TablePair.Key, key);
+    KxStringBuffer_AppendCstr(builder->KvPair.Key, key);
 }
 
-void TablePairSetValue(KonBuilder* builder, KN value)
+void KvPairSetValue(KonBuilder* builder, KN value)
 {
     assert(value);
-    builder->TablePair.Value = value;
+    builder->KvPair.Value = value;
 }
 
-void TablePairDestroy(KonBuilder* builder)
+void KvPairDestroy(KonBuilder* builder)
 {
     tb_free(builder);
 }
 
-KonBuilder* MakeTablePairBuilder(KonBuilder* builder, KN value)
+KonBuilder* MakeKvPairBuilder(KonBuilder* builder, KN value)
 {
-    builder->TablePair.Value = value;
+    builder->KvPair.Value = value;
     return builder;
 }
 
@@ -172,12 +244,13 @@ KonBuilder* CreateCellBuilder()
     builder->Cell.Vector = KON_UNDEF;
     builder->Cell.Table = KON_UNDEF;
     builder->Cell.List = KON_UNDEF;
+    builder->Cell.Map = KxHashTable_Init(10);;
     return builder;
 }
 
-void CellBuilderSetName(KonBuilder* builder, KN name)
+void CellBuilderSetCore(KonBuilder* builder, KN name)
 {
-    KON_DEBUG("CellBuilderSetName");
+    KON_DEBUG("CellBuilderSetCore");
     builder->Cell.Core = name;
 }
 
@@ -194,6 +267,15 @@ void CellBuilderSetList(KonBuilder* builder, KN list)
 void CellBuilderSetTable(KonBuilder* builder, KN table)
 {
     builder->Cell.Table = table;
+}
+
+void CellBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
+{
+    char* key = KxStringBuffer_Cstr(pair->KvPair.Key);
+    
+    KxHashTable_PushKv(builder->Cell.Map, key, pair->KvPair.Value);
+    KON_DEBUG("CellBuilderAddPair before free pair builder key %s", key);
+    tb_free(pair);
 }
 
 KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder)

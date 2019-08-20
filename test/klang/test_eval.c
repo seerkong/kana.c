@@ -11,176 +11,176 @@ KonState* kstate;
 SUITE(suite);
 
 TEST Native_And(void) {
-    // char* path = "../../../../samples/knative/and.kl";
-    char* path = "~/lang/konscript/kon-c/samples/knative/and.kl";
+    // char* path = "../../../../examples/knative/and.kl";
+    char* path = "~/lang/konscript/kon-c/examples/knative/and.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Blk(void) {
-    char* path = "../../../../samples/knative/blk.kl";
+    char* path = "../../../../examples/knative/blk.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Cond(void) {
-    char* path = "../../../../samples/knative/cond.kl";
+    char* path = "../../../../examples/knative/cond.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Do(void) {
-    char* path = "../../../../samples/knative/do.kl";
+    char* path = "../../../../examples/knative/do.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Func(void) {
-    char* path = "../../../../samples/knative/func.kl";
+    char* path = "../../../../examples/knative/func.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_If(void) {
-    char* path = "../../../../samples/knative/if.kl";
+    char* path = "../../../../examples/knative/if.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Lambda(void) {
-    char* path = "../../../../samples/knative/lambda.kl";
+    char* path = "../../../../examples/knative/lambda.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Letset(void) {
-    char* path = "../../../../samples/knative/letset.kl";
+    char* path = "../../../../examples/knative/letset.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Math(void) {
-    char* path = "../../../../samples/knative/math.kl";
+    char* path = "../../../../examples/knative/math.kl";
     KN result = KON_EvalFile(kstate, path);
     ASSERT_EQ(KON_FALSE, result);
     PASS();
 }
 
 TEST Native_Or(void) {
-    char* path = "../../../../samples/knative/or.kl";
+    char* path = "../../../../examples/knative/or.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Writeln(void) {
-    char* path = "../../../../samples/knative/writeln.kl";
+    char* path = "../../../../examples/knative/writeln.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_CallCC(void) {
-    char* path = "../../../../samples/knative/callcc.kl";
+    char* path = "../../../../examples/knative/callcc.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_For(void) {
-    char* path = "../../../../samples/knative/for.kl";
+    char* path = "../../../../examples/knative/for.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_ForLoopList(void) {
-    char* path = "../../../../samples/knative/for-loop-list.kl";
+    char* path = "../../../../examples/knative/for-loop-list.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Pipe(void) {
-    char* path = "../../../../samples/knative/pipe.kl";
+    char* path = "../../../../examples/knative/pipe.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Accessor(void) {
-    char* path = "~/lang/konscript/kon-c/samples/knative/accessor.kl";
+    char* path = "~/lang/konscript/kon-c/examples/knative/accessor.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_MkDispatcher(void) {
-//    char* path = "../../../../samples/knative/mk-dispatcher.kl";
-    char* path = "~/lang/konscript/kon-c/samples/knative/mk-dispatcher.kl";
+//    char* path = "../../../../examples/knative/mk-dispatcher.kl";
+    char* path = "~/lang/konscript/kon-c/examples/knative/mk-dispatcher.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_ProtoObj(void) {
-//    char* path = "../../../../samples/knative/proto-obj.kl";
-    char* path = "~/lang/konscript/kon-c/samples/knative/proto-obj.kl";
+//    char* path = "../../../../examples/knative/proto-obj.kl";
+    char* path = "~/lang/konscript/kon-c/examples/knative/proto-obj.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_Shell(void) {
-    char* path = "../../../../samples/knative/sh.kl";
+    char* path = "../../../../examples/knative/sh.kl";
     KON_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_ReturnFromRoot(void) {
-    char* path = "../../../../samples/knative/return-from-root.kl";
+    char* path = "../../../../examples/knative/return-from-root.kl";
     KN result = KON_EvalFile(kstate, path);
     ASSERT_EQ_FMT(KON_MAKE_FIXNUM(42), result, "%d");
     PASS();
 }
 
 TEST Native_ReturnFromLambda(void) {
-    char* path = "../../../../samples/knative/return-from-lambda.kl";
+    char* path = "../../../../examples/knative/return-from-lambda.kl";
     KN result = KON_EvalFile(kstate, path);
     ASSERT_EQ_FMT(KON_MAKE_FIXNUM(48), result, "%d");
     PASS();
 }
 
 TEST Native_ReturnFromFunc(void) {
-    char* path = "../../../../samples/knative/return-from-func.kl";
+    char* path = "../../../../examples/knative/return-from-func.kl";
     KN result = KON_EvalFile(kstate, path);
     ASSERT_EQ_FMT(KON_MAKE_FIXNUM(48), result, "%d");
     PASS();
 }
 
 TEST Native_ReturnFromBlk(void) {
-    char* path = "../../../../samples/knative/return-from-blk.kl";
+    char* path = "../../../../examples/knative/return-from-blk.kl";
     KN result = KON_EvalFile(kstate, path);
     ASSERT_EQ_FMT(KON_MAKE_FIXNUM(42), result, "%d");
     PASS();
 }
 
 TEST Native_Quote(void) {
-    char* path = "../../../../samples/knative/symbol.kl";
+    char* path = "../../../../examples/knative/symbol.kl";
     KN result = KON_EvalFile(kstate, path);
     // ASSERT_EQ_FMT(KON_MAKE_FIXNUM(42), result, "%d");
     PASS();
 }
 
 TEST Native_Eval(void) {
-    char* path = "../../../../samples/knative/eval.kl";
+    char* path = "../../../../examples/knative/eval.kl";
     KN result = KON_EvalFile(kstate, path);
     ASSERT_EQ_FMT(KON_MAKE_FIXNUM(4), result, "%d");
     PASS();
 }
 
 TEST Native_Apply(void) {
-    char* path = "../../../../samples/knative/apply.kl";
+    char* path = "../../../../examples/knative/apply.kl";
     KN result = KON_EvalFile(kstate, path);
     ASSERT_EQ_FMT(KON_MAKE_FIXNUM(30), result, "%d");
     PASS();
 }
 
 SUITE(suite) {
-    // RUN_TEST(Native_Math);
+    RUN_TEST(Native_Math);
     
-    // RUN_TEST(Native_Writeln);
+    RUN_TEST(Native_Writeln);
 
     // RUN_TEST(Native_And);
     // RUN_TEST(Native_Or);
@@ -219,7 +219,7 @@ SUITE(suite) {
 
     // RUN_TEST(Native_MkDispatcher);
 
-    RUN_TEST(Native_ProtoObj);
+    // RUN_TEST(Native_ProtoObj);
 }
 
 GREATEST_MAIN_DEFS();

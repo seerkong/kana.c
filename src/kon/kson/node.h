@@ -119,6 +119,8 @@ typedef enum {
     KON_T_VECTOR,
     KON_T_TABLE,
     KON_T_CELL,
+    KON_T_PARAM,
+    KON_T_BLOCK,
     KON_T_QUOTE,
     KON_T_QUASIQUOTE,
     KON_T_EXPAND,
@@ -141,6 +143,8 @@ typedef struct KonTable KonTable;
 typedef struct KonVector KonVector;
 typedef struct KonPair KonPair;
 typedef struct KonCell KonCell;
+typedef struct KonParam KonParam;
+typedef struct KonBlock KonBlock;
 typedef struct KonQuote KonQuote;
 typedef struct KonQuasiquote KonQuasiquote;
 typedef struct KonExpand KonExpand;
@@ -249,6 +253,13 @@ struct KonSyntaxMarker {
 };
 
 struct KonPair {
+    KonBase Base;
+    KN Prev;
+    KN Body;
+    KN Next;
+};
+
+struct KonBlock {
     KonBase Base;
     KN Prev;
     KN Body;
@@ -452,6 +463,11 @@ struct KonTable {
     KxHashTable* Table;
 };
 
+struct KonParam {
+    KonBase Base;
+    KxHashTable* Table;
+};
+
 union _Kon {
     KonBase KonBase;
     KonState KonState;
@@ -542,8 +558,10 @@ KON_API unsigned int KON_NodeDispacherId(KonState* kstate, KN obj);
 #define KON_IS_ACCESSOR(x) (KON_CHECK_TAG(x, KON_T_ACCESSOR))
 
 #define KON_IS_PAIR(x)       (KON_CHECK_TAG(x, KON_T_PAIR))
+#define KON_IS_BLOCK(x)       (KON_CHECK_TAG(x, KON_T_BLOCK))
 #define KON_IS_VECTOR(x)     (KON_CHECK_TAG(x, KON_T_VECTOR))
 #define KON_IS_TABLE(x)     (KON_CHECK_TAG(x, KON_T_TABLE))
+#define KON_IS_PARAM(x)     (KON_CHECK_TAG(x, KON_T_PARAM))
 #define KON_IS_CELL(x)     (KON_CHECK_TAG(x, KON_T_CELL))
 
 #define KON_IS_QUOTE(x)    (KON_CHECK_TAG(x, KON_T_QUOTE))
@@ -666,13 +684,22 @@ KON_API const char* KON_SymbolToCstr(KN sym);
 KON_API KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail);
 KON_API KN KON_PairList2(KonState* kstate, KN a, KN b);
 KON_API KN KON_PairList3(KonState* kstate, KN a, KN b, KN c);
+
 KON_API bool KON_IsPairList(KN source);
+KON_API bool KON_IsBlock(KN source);
+
 KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 KN KON_PairListRevert(KonState* kstate, KN source);
 KN KON_PairListLength(KonState* kstate, KN source);
 
 // table
 KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+
+// block
+KN KON_BlockStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+// param table
+KN KON_ParamStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+
 
 // cell
 KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
