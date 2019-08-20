@@ -206,67 +206,206 @@ KN KonTable_DelByIndex(KonState* kstate, KN args)
     return self;
 }
 
-KonAttrSlot* KonTable_Export(KonState* kstate, KonEnv* env)
+
+KN KonTable_IterHead(KonState* kstate, KN args)
 {
-    KON_EnvDefine(kstate, env, "table-init",
+    KN self = KON_CAR(args);
+    KxHashTable* table = KON_UNBOX_TABLE(self);
+    
+    KxHashTableIter iter = KxHashTable_IterHead(table);
+    return KON_MakeCpointer(kstate, iter);
+}
+
+KN KonTable_IterTail(KonState* kstate, KN args)
+{
+    KN self = KON_CAR(args);
+    KxHashTable* table = KON_UNBOX_TABLE(self);
+    
+    KxHashTableIter iter = KxHashTable_IterTail(table);
+    return KON_MakeCpointer(kstate, iter);
+}
+
+KN KonTable_IterPrev(KonState* kstate, KN args)
+{
+    KN self = KON_CAR(args);
+    KN iter = KON_CADR(args);
+    KxHashTable* table = KON_UNBOX_TABLE(self);
+    
+    KxHashTableIter prev = KxHashTable_IterPrev(table, KON_UNBOX_CPOINTER(iter));
+    if ((KN)prev != KON_NIL) {
+        return (KN)KON_MakeCpointer(kstate, prev);
+    }
+    else {
+        return KON_NIL;
+    }
+}
+
+KN KonTable_IterNext(KonState* kstate, KN args)
+{
+    KN self = KON_CAR(args);
+    KN iter = KON_CADR(args);
+    
+    KxHashTable* table = KON_UNBOX_TABLE(self);
+    
+    KxHashTableIter next = KxHashTable_IterNext(table, KON_UNBOX_CPOINTER(iter));
+    if ((KN)next != KON_NIL) {
+        return (KN)KON_MakeCpointer(kstate, next);
+    }
+    else {
+        return KON_NIL;
+    }
+}
+
+KN KonTable_IterGetKey(KonState* kstate, KN args)
+{
+    KN self = KON_CAR(args);
+    KN iter = KON_CADR(args);
+    KxHashTable* table = KON_UNBOX_TABLE(self);
+    
+    const char* key = KxHashTable_IterGetKey(table, KON_UNBOX_CPOINTER(iter));
+    KonString* value = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
+    value->String = KxStringBuffer_New();
+    KxStringBuffer_AppendCstr(value->String, key);
+    return value;
+}
+
+KN KonTable_IterGetVal(KonState* kstate, KN args)
+{
+    KN self = KON_CAR(args);
+    KN iter = KON_CADR(args);
+    KxHashTable* table = KON_UNBOX_TABLE(self);
+    
+    return KxHashTable_IterGetVal(table, KON_UNBOX_CPOINTER(iter));
+}
+
+KonAccessor* KonTable_Export(KonState* kstate, KonEnv* env)
+{
+    KonAccessor* slot = (KonAccessor*)KON_MakeDirAccessor(kstate, "dr", NULL);
+    KxHashTable_PutKv(slot->Dir,
+        "init",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_Init)
     );
-
-    KON_EnvDefine(kstate, env, "table-length",
+    KxHashTable_PutKv(slot->Dir,
+        "length",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_Length)
     );
-    KON_EnvDefine(kstate, env, "table-clear",
+    KxHashTable_PutKv(slot->Dir,
+        "clear",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_Clear)
     );
-    KON_EnvDefine(kstate, env, "table-has-key",
+    KxHashTable_PutKv(slot->Dir,
+        "has-key",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_HasKey)
     );
-    KON_EnvDefine(kstate, env, "table-at-key",
+    KxHashTable_PutKv(slot->Dir,
+        "at-key",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_AtKey)
     );
-    KON_EnvDefine(kstate, env, "table-at-index",
+    KxHashTable_PutKv(slot->Dir,
+        "at-index",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_ValAtIndex)
     );
-    KON_EnvDefine(kstate, env, "table-get-index-key",
+    KxHashTable_PutKv(slot->Dir,
+        "get-index-key",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_KeyAtIndex)
     );
-    KON_EnvDefine(kstate, env, "table-first-val",
+    KxHashTable_PutKv(slot->Dir,
+        "first-val",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_FirstVal)
     );
-    KON_EnvDefine(kstate, env, "table-last-val",
+    KxHashTable_PutKv(slot->Dir,
+        "last-val",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_LastVal)
     );
-    KON_EnvDefine(kstate, env, "table-push-val",
+    KxHashTable_PutKv(slot->Dir,
+        "push-val",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_PushVal)
     );
-    KON_EnvDefine(kstate, env, "table-push-kv",
+    KxHashTable_PutKv(slot->Dir,
+        "push-kv",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_PushKv)
     );
-    KON_EnvDefine(kstate, env, "table-unshift-val",
+    KxHashTable_PutKv(slot->Dir,
+        "unshift-val",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_UnshiftVal)
     );
-    KON_EnvDefine(kstate, env, "table-unshift-kv",
+    KxHashTable_PutKv(slot->Dir,
+        "unshift-kv",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_UnshiftKv)
     );
-    KON_EnvDefine(kstate, env, "table-put-kv",
+    KxHashTable_PutKv(slot->Dir,
+        "put-kv",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_PutKv)
     );
-    KON_EnvDefine(kstate, env, "table-set-index-key",
+    KxHashTable_PutKv(slot->Dir,
+        "set-index-key",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_SetIndexKey)
     );
-    KON_EnvDefine(kstate, env, "table-set-index-val",
+    KxHashTable_PutKv(slot->Dir,
+        "set-index-val",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_SetIndexVal)
     );
-    KON_EnvDefine(kstate, env, "table-set-index-kv",
+    KxHashTable_PutKv(slot->Dir,
+        "set-index-kv",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_SetIndexKv)
     );
-    KON_EnvDefine(kstate, env, "table-del-key",
+    KxHashTable_PutKv(slot->Dir,
+        "del-key",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_DelByKey)
     );
-    KON_EnvDefine(kstate, env, "table-del-index",
+    KxHashTable_PutKv(slot->Dir,
+        "del-index",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_DelByIndex)
     );
-
-    KonAttrSlot* slot = (KonAttrSlot*)MakeAttrSlotFolder(kstate, "");
+    
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "iter-head",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterHead),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "iter-tail",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterTail),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "iter-prev",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterPrev),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "iter-next",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterNext),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "iter-key",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterGetKey),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "iter-val",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterGetVal),
+        "r",
+        NULL
+    );
+    
     return slot;
 }

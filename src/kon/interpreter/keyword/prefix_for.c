@@ -3,10 +3,10 @@
 #include "prefix_if.h"
 #include "../cps_interpreter.h"
 
-KN AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
-KN AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
+KonTrampoline* AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
+KonTrampoline* AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
 
-KN BeforeForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
+KonTrampoline* BeforeForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
@@ -23,7 +23,7 @@ KN BeforeForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBe
     return bounce;
 }
 
-KN AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
+KonTrampoline* AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
@@ -48,7 +48,7 @@ KN AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBei
     return bounce;
 }
 
-KN AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
+KonTrampoline* AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);

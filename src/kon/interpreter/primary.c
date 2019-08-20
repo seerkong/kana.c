@@ -282,7 +282,7 @@ KN KON_PrimaryIsWord(KonState* kstate, KN args)
 KN KON_PrimaryIsAttrSlot(KonState* kstate, KN args)
 {
     KN item = KON_CAR(args);
-    return (KON_IS_ATTR_SLOT(item)) ? KON_TRUE : KON_FALSE;
+    return (KON_IS_ACCESSOR(item)) ? KON_TRUE : KON_FALSE;
 }
 
 KN KON_PrimaryIsPair(KonState* kstate, KN args)
@@ -353,12 +353,96 @@ KN KON_PrimaryIsException(KonState* kstate, KN args)
     return (KON_IS_EXCEPTION(item)) ? KON_TRUE : KON_FALSE;
 }
 
+KN KON_PrimaryToVariable(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    char* symCstr = NULL;
+    if (KON_IS_SYMBOL(item)) {
+        symCstr = KON_UNBOX_SYMBOL(item);
+    }
+    else if (KON_IS_STRING(item)) {
+        symCstr = KxStringBuffer_Cstr(KON_UNBOX_STRING(item));
+    }
+    else {
+        return KON_UKN;
+    }
+    KonSymbol* value = KON_ALLOC_TYPE_TAG(kstate, KonSymbol, KON_T_SYMBOL);
+    value->Type = KON_SYM_VARIABLE;
+    value->Data = utf8dup(symCstr);
+    return value;
+}
 
+KN KON_PrimaryToIdentifier(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    char* symCstr = NULL;
+    if (KON_IS_SYMBOL(item)) {
+        symCstr = KON_UNBOX_SYMBOL(item);
+    }
+    else if (KON_IS_STRING(item)) {
+        symCstr = KxStringBuffer_Cstr(KON_UNBOX_STRING(item));
+    }
+    else {
+        return KON_UKN;
+    }
+    KonSymbol* value = KON_ALLOC_TYPE_TAG(kstate, KonSymbol, KON_T_SYMBOL);
+    value->Type = KON_SYM_IDENTIFIER;
+    value->Data = utf8dup(symCstr);
+    return value;
+}
+
+KN KON_PrimaryToSymString(KonState* kstate, KN args)
+{
+    KN item = KON_CAR(args);
+    char* symCstr = NULL;
+    if (KON_IS_SYMBOL(item)) {
+        symCstr = KON_UNBOX_SYMBOL(item);
+    }
+    else if (KON_IS_STRING(item)) {
+        symCstr = KxStringBuffer_Cstr(KON_UNBOX_STRING(item));
+    }
+    else {
+        return KON_UKN;
+    }
+    KonSymbol* value = KON_ALLOC_TYPE_TAG(kstate, KonSymbol, KON_T_SYMBOL);
+    value->Type = KON_SYM_STRING;
+    value->Data = utf8dup(symCstr);
+    return value;
+}
+
+KN KON_PrimaryUnboxQuote(KonState* kstate, KN args)
+{
+    KN obj = KON_CAR(args);
+    if (KON_IS_QUOTE(obj)) {
+        return ((KonQuote*)obj)->Inner;
+    }
+    else if (KON_IS_QUASIQUOTE(obj)) {
+        return ((KonQuasiquote*)obj)->Inner;
+    }
+    else if (KON_IS_EXPAND(obj)) {
+        return ((KonExpand*)obj)->Inner;
+    }
+    else if (KON_IS_UNQUOTE(obj)) {
+        return ((KonUnquote*)obj)->Inner;
+    }
+    return obj;
+}
 
 KN KON_PrimaryGetDispatcherId(KonState* kstate, KN args)
 {
     KN obj = KON_CAR(args);
     return KON_MAKE_FIXNUM(KON_NodeDispacherId(kstate, obj));
+}
+
+KN KON_PrimarySetDispatcherId(KonState* kstate, KN args)
+{
+    KN obj = KON_CAR(args);
+    KN boxedId = KON_CADR(args);
+    unsigned int dispatcherId = KON_UNBOX_FIXNUM(boxedId);
+    if (KON_IS_POINTER(obj)) {
+        ((KonBase*)obj)->MsgDispatcherId = dispatcherId;
+    }
+    return KON_TRUE;
 }
 
 // init internal types dispatcher id
@@ -375,7 +459,7 @@ KN KON_PrimaryExportDispacherId(KonState* kstate, KonEnv* env)
     KON_EnvDefine(kstate, env, "VectorDispacher", KON_MAKE_FIXNUM(KON_T_VECTOR));
     KON_EnvDefine(kstate, env, "TableDispacher", KON_MAKE_FIXNUM(KON_T_TABLE));
     KON_EnvDefine(kstate, env, "CellDispacher", KON_MAKE_FIXNUM(KON_T_CELL));
-    KON_EnvDefine(kstate, env, "AttrSlotDispacher", KON_MAKE_FIXNUM(KON_T_ATTR_SLOT));
+    KON_EnvDefine(kstate, env, "AttrSlotDispacher", KON_MAKE_FIXNUM(KON_T_ACCESSOR));
 
 }
 
@@ -509,9 +593,28 @@ KN KON_PrimaryOpExport(KonState* kstate, KonEnv* env)
     KON_EnvDefine(kstate, env, "is-exception",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsException)
     );
+    KON_EnvDefine(kstate, env, "unbox-quote",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryUnboxQuote)
+    );
 
     KON_EnvDefine(kstate, env, "get-dispatcher-id",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryGetDispatcherId)
+    );
+
+    KON_EnvDefine(kstate, env, "set-dispatcher-id",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimarySetDispatcherId)
+    );
+
+    KON_EnvDefine(kstate, env, "to-variable",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryToVariable)
+    );
+
+    KON_EnvDefine(kstate, env, "to-identifier",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryToIdentifier)
+    );
+
+    KON_EnvDefine(kstate, env, "to-sym-string",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryToSymString)
     );
 
     KON_EnvDefine(kstate, env, "get-env", env);

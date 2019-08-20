@@ -657,6 +657,7 @@ target_link_options(test_table PRIVATE
     -lpthread
 )
 target_sources(test_table PRIVATE
+    test/container/test_hashtable_iter.c
     test/container/test_table.c
     test/container/test_hashtable.c
 )
@@ -726,11 +727,12 @@ target_sources(kon PRIVATE
     src/kon/interpreter/keyword/prefix_lambda.c
     src/kon/interpreter/keyword/prefix_continue.c
     src/kon/interpreter/cps_interpreter.c
-    src/kon/container/kx_vector.c
     src/kon/interpreter/keyword/prefix_set_dispatcher.c
+    src/kon/container/kx_vector.c
+    src/kon/interpreter/mod/kon_string.c
     src/kon/interpreter/keyword/prefix_or.c
     src/kon/interpreter/keyword/prefix_break.c
-    src/kon/interpreter/mod/kon_string.c
+    src/kon/interpreter/mod/kon_accessor.c
     src/kon/interpreter/mod/kon_list.c
     src/kon/interpreter/keyword/prefix_let.c
     src/kon/interpreter/mod/kon_module.c

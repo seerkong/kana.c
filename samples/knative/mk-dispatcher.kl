@@ -39,5 +39,4 @@
 [writeln % [get-dispatcher-id % 5 ] ]
 
 ``[5 .+ 2 ]
-[5 $+ 2 ]
 

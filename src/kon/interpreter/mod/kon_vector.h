@@ -17,6 +17,6 @@
 
 #include "../../kson/node.h"
 
-KonAttrSlot* KonVector_Export(KonState* kstate, KonEnv* env);
+KonAccessor* KonVector_Export(KonState* kstate, KonEnv* env);
 
 #endif

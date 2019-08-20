@@ -9,38 +9,17 @@ KN AfterBuilderDispatcherIdEvaled(KonState* kstate, KN evaledValue, KonContinuat
     KN env = contBeingInvoked->Env;
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KonCell* sourceCode = (KonCell*)KxHashTable_AtKey(memo, "BuilderSourceCode");
-
-    KN className = ((KonCell*)sourceCode)->Core;
+    KN className = (KonCell*)KxHashTable_AtKey(memo, "BuilderName");
     const char* classNameCstr = KON_UNBOX_SYMBOL(className);
     KON_DEBUG("dispatcherId %d classNameCstr %s", dispatcherId, classNameCstr);
-
-    KonAttrSlot* objectBuilder = (KonAttrSlot*)MakeAttrSlotFolder(kstate, "");
-    
-    // set object instance dispatcher id
-    ((KonBase*)objectBuilder)->MsgDispatcherId = dispatcherId;
-    
-    // if have a __proto config
-    KxHashTable* configTable = ((KonCell*)sourceCode)->Table->Table;
-    
-    KxHashTableIter iter = KxHashTable_IterHead(configTable);
-    while (iter != KX_HASH_TABLE_NIL) {
-        KxHashTableIter next = KxHashTable_IterNext(configTable, iter);
-        const char* key = KxHashTable_IterGetKey(configTable, iter);
-        KN val = (KN)KxHashTable_IterGetVal(configTable, iter);
-        
-        KxHashTable_PutKv(objectBuilder->Folder,
-            key,
-            val
-        );
-
-        iter = next;
-    }
+    ((KonBase*)sourceCode)->MsgDispatcherId = dispatcherId;
 
     KonTrampoline* bounce;
 
-    KON_EnvDefine(kstate, env, classNameCstr, objectBuilder);
+    KON_EnvDefine(kstate, env, classNameCstr, sourceCode);
     bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
-    bounce->Run.Value = objectBuilder;
+
+    bounce->Run.Value = sourceCode;
     bounce->Cont = contBeingInvoked->Cont;
 
     return bounce;
@@ -51,10 +30,10 @@ KonTrampoline* KON_EvalPrefixDefBuilder(KonState* kstate, KN expression, KN env,
 {
     KON_DEBUG("meet prefix marcro def builder");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    
-    KN dispatcherIdExpr = KON_CAR(expression);
+    KN builderName = KON_CAR(expression);
+    KN dispatcherIdExpr = KON_CADR(expression);
 
-    KN config = KON_CADR(expression);
+    KN config = KON_CADDR(expression);
 
 
     KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
@@ -63,6 +42,7 @@ KonTrampoline* KON_EvalPrefixDefBuilder(KonState* kstate, KN expression, KN env,
 
     KxHashTable* memo = KxHashTable_Init(2);
     KxHashTable_PutKv(memo, "BuilderSourceCode", config);
+    KxHashTable_PutKv(memo, "BuilderName", builderName);
     k->Native.MemoTable = memo;
     k->Native.Callback = AfterBuilderDispatcherIdEvaled;
     

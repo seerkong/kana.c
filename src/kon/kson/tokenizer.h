@@ -42,11 +42,7 @@ typedef enum
     KON_TOKEN_SYM_IDENTIFIER,  // $abc
     KON_TOKEN_SYM_STRING, // $''
 
-    // TODO change select path(/abc), exec msg(.length), pipe proc(|abc)
-    // to wrapper type
-    KON_TOKEN_GET_SLOT, // /tag /. /.. /~
-    KON_TOKEN_MSG_SIGNAL,     // . length
-    KON_TOKEN_PROC_PIPE,         // | abc
+
 
     KON_TOKEN_QUOTE_LIST,   // $[]
     KON_TOKEN_QUOTE_CELL,   // ${}
@@ -67,6 +63,12 @@ typedef enum
     KON_TOKEN_APPLY,        // %
     KON_TOKEN_REST,     // ... like scheme . eg [func [a ... b]]
     KON_TOKEN_CLAUSE_END,   // ;
+    KON_TOKEN_EQUAL,   // [a = 2]
+    // TODO change select path(/abc), exec msg(.length), pipe proc(|abc)
+    // to wrapper type
+    KON_TOKEN_GET_SLOT, // /tag /. /.. /~
+    KON_TOKEN_MSG_SIGNAL,     // . length
+    KON_TOKEN_PROC_PIPE,         // | abc
 
 } KonTokenKind;
 

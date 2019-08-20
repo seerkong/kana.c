@@ -2,6 +2,10 @@
 #include "stdlib.h"
 #include "prefix_if.h"
 #include "../cps_interpreter.h"
+#include "prefix_func.h"
+#include "prefix_lambda.h"
+#include "prefix_blk.h"
+extern KN UnBoxAccessorValue(KN konValue);
 
 KonTrampoline* ApplyProcArguments(KonState* kstate, KonProcedure* proc, KN argList, KN env, KonContinuation* cont)
 {
@@ -40,7 +44,7 @@ KonTrampoline* ApplyProcArguments(KonState* kstate, KonProcedure* proc, KN argLi
     return bounce;
 }
 
-KN AfterApplyArgsExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
+KonTrampoline* AfterApplyArgsExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
     KN cont = contBeingInvoked->Cont;
@@ -51,8 +55,11 @@ KN AfterApplyArgsExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* c
 
     KN proc = KON_UNDEF;
     // lookup procedure in env
-    if (KON_IS_IDENTIFIER(applySym) || KON_IS_VARIABLE(applySym) || KON_IS_WORD(applySym)) {
+    if (KON_IS_IDENTIFIER(applySym) || KON_IS_REFERENCE(applySym)) {
         proc = KON_EnvLookup(kstate, env, KON_SymbolToCstr(applySym));
+    }
+    else if (KON_IS_ACCESSOR(applySym)) {
+        proc = UnBoxAccessorValue(applySym);
     }
 
     // evaledValue is a data
@@ -64,11 +71,10 @@ KN AfterApplyArgsExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* c
     
 
     KonTrampoline* bounce = ApplyProcArguments(kstate, proc, evaledValue, env, cont);
-
     return bounce;
 }
 
-KN AfterApplySymExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
+KonTrampoline* AfterApplySymExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     KN env = contBeingInvoked->Env;
     KxHashTable* memo =  KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);

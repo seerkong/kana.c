@@ -436,7 +436,7 @@ KN KON_PrimaryGreaterOrEqual(KonState* kstate, KN args)
 }
 
 
-KonAttrSlot* KonNumber_Export(KonState* kstate, KonEnv* env)
+KonAccessor* KonNumber_Export(KonState* kstate, KonEnv* env)
 {
     KON_EnvDefine(kstate, env, "+",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryPlus)
@@ -467,7 +467,7 @@ KonAttrSlot* KonNumber_Export(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryGreaterOrEqual)
     );
 
-    KonAttrSlot* slot = (KonAttrSlot*)MakeAttrSlotFolder(kstate, "");
+    KonAccessor* slot = (KonAccessor*)KON_MakeDirAccessor(kstate, "dr", NULL);
 
     return slot;
 }

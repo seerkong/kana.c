@@ -31,7 +31,7 @@ KN KonString_AppendStr(KonState* kstate, KN args)
     return self;
 }
 
-KonAttrSlot* KonString_Export(KonState* kstate, KonEnv* env)
+KonAccessor* KonString_Export(KonState* kstate, KonEnv* env)
 {
     KON_EnvDefine(kstate, env, "str-init",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonString_Init)
@@ -49,6 +49,6 @@ KonAttrSlot* KonString_Export(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonString_AppendStr)
     );
 
-    KonAttrSlot* slot = (KonAttrSlot*)MakeAttrSlotFolder(kstate, "");
+    KonAccessor* slot = (KonAccessor*)KON_MakeDirAccessor(kstate, "dr", NULL);
     return slot;
 }

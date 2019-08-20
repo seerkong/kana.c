@@ -115,58 +115,138 @@ KN KonCell_ClearList(KonState* kstate, KN args)
     return self;
 }
 
-KonAttrSlot* KonCell_Export(KonState* kstate, KonEnv* env)
+KonAccessor* KonCell_Export(KonState* kstate, KonEnv* env)
 {
-    KON_EnvDefine(kstate, env, "cell-init",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_Init)
+    KonAccessor* slot = (KonAccessor*)KON_MakeDirAccessor(kstate, "dr", NULL);
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "init",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_Init),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "set-core",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetCore),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "get-core",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetCore),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "del-core",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelCore),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "set-vector",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetVector),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "get-vector",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetVector),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "del-vector",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelVector),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "clear-vector",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_ClearVector),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "set-table",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetTable),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "get-table",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetTable),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "del-table",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelTable),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "clear-table",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_ClearTable),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "set-list",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetList),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "get-list",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetList),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "del-list",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelList),
+        "r",
+        NULL
+    );
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "clear-list",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_ClearList),
+        "r",
+        NULL
     );
 
-    KON_EnvDefine(kstate, env, "cell-set-core",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetCore)
-    );
-    KON_EnvDefine(kstate, env, "cell-get-core",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetCore)
-    );
-    KON_EnvDefine(kstate, env, "cell-del-core",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelCore)
-    );
-    KON_EnvDefine(kstate, env, "cell-set-vector",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetVector)
-    );
-    KON_EnvDefine(kstate, env, "cell-get-vector",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetVector)
-    );
-    KON_EnvDefine(kstate, env, "cell-del-vector",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelVector)
-    );
-    KON_EnvDefine(kstate, env, "cell-clear-vector",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_ClearVector)
-    );
-    KON_EnvDefine(kstate, env, "cell-set-table",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetTable)
-    );
-    KON_EnvDefine(kstate, env, "cell-get-table",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetTable)
-    );
-    KON_EnvDefine(kstate, env, "cell-del-table",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelTable)
-    );
-    KON_EnvDefine(kstate, env, "cell-clear-table",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_ClearTable)
-    );
-    KON_EnvDefine(kstate, env, "cell-set-list",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetList)
-    );
-    KON_EnvDefine(kstate, env, "cell-get-list",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetList)
-    );
-    KON_EnvDefine(kstate, env, "cell-del-list",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelList)
-    );
-    KON_EnvDefine(kstate, env, "cell-clear-list",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_ClearList)
-    );
 
-    KonAttrSlot* slot = (KonAttrSlot*)MakeAttrSlotFolder(kstate, "");
     return slot;
 }

@@ -40,6 +40,9 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_APPLY:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_APPLY");
             break;
+        case KON_TOKEN_EQUAL:
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EQUAL");
+            break;
         case KON_TOKEN_MSG_SIGNAL:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_MSG_SIGNAL");
             break;
@@ -610,7 +613,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             }
             else if (nextChars[1] == 'u' && nextChars[2] == 'n') {
                 UpdateTokenContent(tokenizer, "#undef;");
-                ForwardToken(tokenizer, 6);
+                ForwardToken(tokenizer, 7);
                 tokenizer->TokenKind = KON_TOKEN_KEYWORD_UNDEF;
                 break;
             }
@@ -642,6 +645,11 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             UpdateTokenContent(tokenizer, "%");
             ForwardToken(tokenizer, 1);
             tokenizer->TokenKind = KON_TOKEN_APPLY;
+        }
+        else if (pc[0] == '=') {
+            UpdateTokenContent(tokenizer, "=");
+            ForwardToken(tokenizer, 1);
+            tokenizer->TokenKind = KON_TOKEN_EQUAL;
         }
         else if (pc[0] == '.') {
             UpdateTokenContent(tokenizer, ".");

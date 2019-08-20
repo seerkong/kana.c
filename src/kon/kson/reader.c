@@ -132,6 +132,7 @@ bool IsLiteralToken(int event)
 bool IsSyntaxToken(int event)
 {
     if (event == KON_TOKEN_APPLY
+        || event == KON_TOKEN_EQUAL
         || event == KON_TOKEN_PROC_PIPE
         || event == KON_TOKEN_MSG_SIGNAL
         || event == KON_TOKEN_GET_SLOT
@@ -152,6 +153,10 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
     switch (tokenKind) {
         case KON_TOKEN_APPLY: {
             value->Type = KON_SYNTAX_MARKER_APPLY;
+            break;
+        }
+        case KON_TOKEN_EQUAL: {
+            value->Type = KON_SYNTAX_MARKER_EQUAL;
             break;
         }
         case KON_TOKEN_CLAUSE_END: {

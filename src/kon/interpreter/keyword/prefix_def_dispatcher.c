@@ -14,6 +14,7 @@ KonTrampoline* KON_EvalPrefixDefDispatcher(KonState* kstate, KN expression, KN e
 
     KxHashTable* configTable = ((KonTable*)config)->Table;
     
+    KN onSymbol = KxHashTable_AtKey(configTable, "on-symbol");  // [obj key1 = 2]
     KN onApplyArgs = KxHashTable_AtKey(configTable, "on-apply-args");  // % p1 p2;
     KN onSelectPath = KxHashTable_AtKey(configTable, "on-select-path");  // /abc /efg
     KN onMethodCall = KxHashTable_AtKey(configTable, "on-method-call"); // .push 1 2;
@@ -21,7 +22,7 @@ KonTrampoline* KON_EvalPrefixDefDispatcher(KonState* kstate, KN expression, KN e
     KN onVisitTable = KxHashTable_AtKey(configTable, "on-visit-table"); // ()
     KN onVisitCell = KxHashTable_AtKey(configTable, "on-visit-cell");  // {}
 
-
+    dispatcher->OnSymbol = MakeDispatchProc(kstate, onSymbol, env);
     dispatcher->OnApplyArgs = MakeDispatchProc(kstate, onApplyArgs, env);
     dispatcher->OnSelectPath = MakeDispatchProc(kstate, onSelectPath, env);
     dispatcher->OnMethodCall = MakeDispatchProc(kstate, onMethodCall, env);

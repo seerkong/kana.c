@@ -124,7 +124,7 @@ typedef enum {
     KON_T_EXPAND,
     KON_T_UNQUOTE,
     KON_T_ENV,
-    KON_T_ATTR_SLOT,
+    KON_T_ACCESSOR,
     KON_T_MSG_DISPATCHER,
     KON_T_CONTINUATION,
     // KON_T_TRAMPOLINE,
@@ -146,9 +146,10 @@ typedef struct KonQuasiquote KonQuasiquote;
 typedef struct KonExpand KonExpand;
 typedef struct KonUnquote KonUnquote;
 typedef struct KonEnv KonEnv;
-typedef struct KonAttrSlot KonAttrSlot;
+typedef struct KonAccessor KonAccessor;
 typedef struct KonMsgDispatcher KonMsgDispatcher;
 typedef struct KonProcedure KonProcedure;
+typedef struct KonCpointer KonCpointer;
 
 // not used
 #define KON_GC_MARK_WHITE '0'
@@ -234,6 +235,7 @@ struct KonUnquote {
 
 typedef enum {
     KON_SYNTAX_MARKER_APPLY,        // %
+    KON_SYNTAX_MARKER_EQUAL,        // =
     KON_SYNTAX_MARKER_MSG_SIGNAL,   // .
     KON_SYNTAX_MARKER_GET_SLOT,        // / /. /.. /ABC /~
     KON_SYNTAX_MARKER_PROC_PIPE,         // |
@@ -270,20 +272,29 @@ struct KonEnv {
     KxHashTable* MsgDispatchers;
 };
 
-struct KonAttrSlot {
+// an accessor is a value wrapper
+// like file folders and files
+// if IsDir is true, data is stored in Dir, 
+// if IsDir is false, means it is a leaf node, is a property
+struct KonAccessor {
     KonBase Base;
-    bool IsDir;
+    bool IsDir; // d
+    bool OpenToRef;    // r. only used in dir mod
     bool OpenToChildren;
     bool OpenToSibling;
-    bool CanWrite;
-    bool IsProc;    // func, blk, lambda
-    bool IsMethod;  // func(self, p2, p3)
+    bool CanWrite;  // w
+    // bool CanExec;    // x func, blk, lambda
+    // bool IsMethod;  // m func(self, p2, p3)
+    KxHashTable* Dir;   // key: cstr, value: KonAccessor*
+
     KN Value;
-    KxHashTable* Folder;
+    KonProcedure* Setter;
+    // KonProcedure* Getter;
 };
 
 struct KonMsgDispatcher {
     KonBase Base;
+    KonProcedure* OnSymbol;   // [obj key1 = 5]
     KonProcedure* OnApplyArgs;  // % p1 p2;
     KonProcedure* OnSelectPath;  // /abc /efg
     KonProcedure* OnMethodCall; // . push 1 2;
@@ -330,7 +341,10 @@ struct KonProcedure {
     };
 };
 
-
+struct KonCpointer {
+    KonBase Base;
+    void* Pointer;
+};
 
 typedef struct _KonContinuation KonContinuation;
 
@@ -451,10 +465,11 @@ union _Kon {
     KonQuote KonQuote;
     KonQuasiquote KonQuasiquote;
     KonExpand KonExpand;
-    KonUnquote KonUnquote;
+    KonMsgDispatcher KonMsgDispatcher;
     KonEnv KonEnv;
-    KonAttrSlot KonAttrSlot;
+    KonAccessor KonAccessor;
     KonProcedure KonProcedure;
+    KonCpointer KonCpointer;
     KonContinuation KonContinuation;
 };
 
@@ -519,10 +534,12 @@ KON_API unsigned int KON_NodeDispacherId(KonState* kstate, KN obj);
 #define KON_IS_VARIABLE(x)      (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_VARIABLE)
 #define KON_IS_IDENTIFIER(x)      (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_IDENTIFIER)
 #define KON_IS_WORD(x)      (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_WORD)
+// is a variable like @abc or a word like abc
+#define KON_IS_REFERENCE(x)      (KON_CHECK_TAG(x, KON_T_SYMBOL) && (((KonSymbol*)x)->Type == KON_SYM_WORD || ((KonSymbol*)x)->Type == KON_SYM_VARIABLE))
 #define KON_IS_PREFIX_MARCRO(x) (KON_CHECK_TAG(x, KON_T_SYMBOL) && ((KonSymbol*)x)->Type == KON_SYM_PREFIX_WORD)
 #define KON_IS_SYNTAX_MARKER(x) (KON_CHECK_TAG(x, KON_T_SYNTAX_MARKER))
 
-#define KON_IS_ATTR_SLOT(x) (KON_CHECK_TAG(x, KON_T_ATTR_SLOT))
+#define KON_IS_ACCESSOR(x) (KON_CHECK_TAG(x, KON_T_ACCESSOR))
 
 #define KON_IS_PAIR(x)       (KON_CHECK_TAG(x, KON_T_PAIR))
 #define KON_IS_VECTOR(x)     (KON_CHECK_TAG(x, KON_T_VECTOR))
@@ -587,6 +604,8 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 
 #define KON_UNBOX_QUOTE(x) (((KonQuote*)x)->Inner)
 #define KON_QUOTE_TYPE(x) (((KonQuote*)x)->Type)
+
+#define KON_UNBOX_CPOINTER(x) (((KonCpointer*)x)->Pointer)
 
 // list
 #define KON_CONS(kstate, a, b) KON_Cons(kstate, NULL, 2, a, b)
@@ -657,6 +676,8 @@ KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char
 
 // cell
 KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+// attribute accessor
+KN KON_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
 KN KON_SyntaxMarkerStringify(KonState* kstate, KN source);
 
@@ -677,8 +698,13 @@ int KON_SetMsgDispatcher(KonState* kstate, unsigned int dispatcherId, KonMsgDisp
 unsigned int KON_SetNextMsgDispatcher(KonState* kstate, KonMsgDispatcher* dispatcher);
 KonMsgDispatcher* KON_GetMsgDispatcher(KonState* kstate, unsigned int dispatcherId);
 
-KN MakeAttrSlotLeaf(KonState* kstate, KN value, char* mod);
-KN MakeAttrSlotFolder(KonState* kstate, char* mod);
+KonCpointer* KON_MakeCpointer(KonState* kstate, void* pointer);
+
+KonAccessor* KON_InitAccessorWithMod(KonState* kstate, char* mod);
+KN KON_MakePropertyAccessor(KonState* kstate, KN value, char* mod, KonProcedure* setter);
+KN KON_MakeDirAccessor(KonState* kstate, char* mod, KonProcedure* setter);
+bool KON_DirAccessorPutKeyProperty(KonState* kstate, KN dir, char* key, KN property);
+bool KON_DirAccessorPutKeyValue(KonState* kstate, KN dir, char* key, KN value, char* mod, KonProcedure* setter);
 
 // data structure apis end
 

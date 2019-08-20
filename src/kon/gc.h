@@ -1,7 +1,8 @@
 #ifndef KON_GC_H
 #define KON_GC_H 1
 
-#define KON_DISABLE_GC 0
+// #define KON_DISABLE_GC 0
+#define KON_DISABLE_GC 1
 
 #ifdef __cplusplus
 extern "C" {

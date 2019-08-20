@@ -3,6 +3,6 @@
 
 #include "../../kson/node.h"
 
-KonAttrSlot* KonString_Export(KonState* kstate, KonEnv* env);
+KonAccessor* KonString_Export(KonState* kstate, KonEnv* env);
 
 #endif

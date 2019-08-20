@@ -98,7 +98,7 @@ KN KonVector_SetIndex(KonState* kstate, KN args)
     return self;
 }
 
-KonAttrSlot* KonVector_Export(KonState* kstate, KonEnv* env)
+KonAccessor* KonVector_Export(KonState* kstate, KonEnv* env)
 {
     KON_EnvDefine(kstate, env, "vector-init",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonVector_Init)
@@ -134,6 +134,6 @@ KonAttrSlot* KonVector_Export(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonVector_SetIndex)
     );
 
-    KonAttrSlot* slot = (KonAttrSlot*)MakeAttrSlotFolder(kstate, "");
+    KonAccessor* slot = (KonAccessor*)KON_MakeDirAccessor(kstate, "dr", NULL);
     return slot;
 }

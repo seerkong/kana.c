@@ -178,19 +178,9 @@ KN KonList_Cddddr(KonState* kstate, KN args)
 
 
 
-KonAttrSlot* KonList_Export(KonState* kstate, KonEnv* env)
+KonAccessor* KonList_Export(KonState* kstate, KonEnv* env)
 {
-    KON_EnvDefine(kstate, env, "list-init",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Init)
-    );
 
-    KON_EnvDefine(kstate, env, "list-push",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Push)
-    );
-
-    KON_EnvDefine(kstate, env, "list-unshift",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Unshift)
-    );
 
     KON_EnvDefine(kstate, env, "cons",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Cons)
@@ -244,30 +234,43 @@ KonAttrSlot* KonList_Export(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Cddddr)
     );
 
-    KonAttrSlot* slot = (KonAttrSlot*)MakeAttrSlotFolder(kstate, "");
+    KonAccessor* slot = (KonAccessor*)KON_MakeDirAccessor(kstate, "", NULL);
 
-    KxHashTable_PutKv(slot->Folder,
-        "new",
-        MakeAttrSlotLeaf(kstate,
-            MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Init),
-            "p"
-        )
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "init",
+        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Init),
+        "r",
+        NULL
     );
 
-
-    KonAttrSlot* methods = (KonAttrSlot*)MakeAttrSlotFolder(kstate, "");
-    
-    KxHashTable_PutKv(slot->Folder,
-        "methods",
-        methods
-    );
-
-    KxHashTable_PutKv(methods->Folder,
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
         "length",
-        MakeAttrSlotLeaf(kstate,
-            MakeNativeProcedure(kstate, KON_NATIVE_OBJ_METHOD, KonList_Length),
-            "pm"
-        )
+        MakeNativeProcedure(kstate, KON_NATIVE_OBJ_METHOD, KonList_Length),
+        "r",
+        NULL
     );
+
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "push",
+        MakeNativeProcedure(kstate, KON_NATIVE_OBJ_METHOD, KonList_Push),
+        "r",
+        NULL
+    );
+
+    KON_DirAccessorPutKeyValue(
+        kstate,
+        slot,
+        "unshift",
+        MakeNativeProcedure(kstate, KON_NATIVE_OBJ_METHOD, KonList_Unshift),
+        "r",
+        NULL
+    );
+
     return slot;
 }

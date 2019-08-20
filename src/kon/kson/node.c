@@ -227,10 +227,16 @@ KN KON_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char
         return KON_MakeString(kstate, "#undef;");
     }
     else if (KON_IS_CONTINUATION(source)) {
-        return KON_MakeString(kstate, "<continuation>");
+        return KON_MakeString(kstate, "#{continuation}");
     }
     else if (KON_IS_PROCEDURE(source)) {
-        return KON_MakeString(kstate, "<procedure>");
+        return KON_MakeString(kstate, "#{procedure}");
+    }
+    else if (KON_IS_CPOINTER(source)) {
+        return KON_MakeString(kstate, "#{cpointer}");
+    }
+    else if (KON_IS_ACCESSOR(source)) {
+        return KON_AccessorStringify(kstate, source, newLine, depth, padding);
     }
     // TODO other data types
     else {
@@ -402,6 +408,10 @@ KN KON_SyntaxMarkerStringify(KonState* kstate, KN source)
     switch (type) {
         case KON_SYNTAX_MARKER_APPLY: {
             KxStringBuffer_AppendCstr(result->String, "%");
+            break;
+        }
+        case KON_SYNTAX_MARKER_EQUAL: {
+            KxStringBuffer_AppendCstr(result->String, "=");
             break;
         }
         case KON_SYNTAX_MARKER_MSG_SIGNAL: {
@@ -593,6 +603,10 @@ KN KON_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, c
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     result->String = KxStringBuffer_New();
 
+    if (source == KON_NIL) {
+        KxStringBuffer_AppendCstr(result->String, "#nil;");
+        return result;
+    }
     
     if (newLine) {
         KxStringBuffer_AppendCstr(result->String, "[\n");
@@ -857,6 +871,80 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
     return result;
 }
 
+KN KON_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
+{
+    KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
+    result->String = KxStringBuffer_New();
+
+    KonAccessor* accessor = CAST_Kon(Accessor, source);
+    if (!accessor->IsDir) {
+        KN value = accessor->Value;
+        // get accessor inner value
+        while (KON_IS_ACCESSOR(value)
+            && !CAST_Kon(Accessor, value)->IsDir
+        ) {
+            value = CAST_Kon(Accessor, value)->Value;
+        }
+        return KON_ToFormatString(kstate, value, true, depth, padding);
+    }
+    KxHashTable* hashTable = accessor->Dir;
+    KxHashTableIter iter = KxHashTable_IterHead(hashTable);
+
+    if (newLine) {
+        KxStringBuffer_AppendCstr(result->String, "#accesor.(\n");
+
+        while (iter != KON_NIL) {
+            KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
+            const char* itemKey = KxHashTable_IterGetKey(hashTable, iter);
+            KN itemValue = (KN)KxHashTable_IterGetVal(hashTable, iter);
+
+            KN itemToKonStr = KON_ToFormatString(kstate, itemValue, true, depth + 1, padding);
+
+            AddLeftPadding(result->String, depth, padding);
+            KxStringBuffer_AppendCstr(result->String, ":'");
+            KxStringBuffer_AppendCstr(result->String, itemKey);
+            KxStringBuffer_AppendCstr(result->String, "'\n");
+
+            AddLeftPadding(result->String, depth, padding);
+            KxStringBuffer_AppendCstr(result->String, padding);
+            KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
+            KxStringBuffer_AppendCstr(result->String, "\n");
+
+            iter = next;
+        }
+
+        AddLeftPadding(result->String, depth, padding);
+        KxStringBuffer_AppendCstr(result->String, ")");
+    }
+    else {
+        KxStringBuffer_AppendCstr(result->String, "#accesor.(");
+
+        while (iter != KON_NIL) {
+            KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
+            const char* itemKey = KxHashTable_IterGetKey(hashTable, iter);
+            KN itemValue = (KN)KxHashTable_IterGetVal(hashTable, iter);
+
+            KN itemToKonStr = KON_ToFormatString(kstate, itemValue, false, depth + 1, padding);
+
+            KxStringBuffer_AppendCstr(result->String, ":'");
+            KxStringBuffer_AppendCstr(result->String, itemKey);
+            KxStringBuffer_AppendCstr(result->String, "' ");
+
+            KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
+            
+            // if (next != KON_NIL) {
+                KxStringBuffer_AppendCstr(result->String, " ");
+            // }
+
+            iter = next;
+        }
+        KxStringBuffer_AppendCstr(result->String, ")");
+    }
+
+    return result;
+}
+
+
 KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef)
 {
     KonProcedure* result = KON_ALLOC_TYPE_TAG(kstate, KonProcedure, KON_T_PROCEDURE);
@@ -882,6 +970,7 @@ KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KN env)
 KonMsgDispatcher* MakeMsgDispatcher(KonState* kstate)
 {
     KonMsgDispatcher* result = KON_ALLOC_TYPE_TAG(kstate, KonMsgDispatcher, KON_T_MSG_DISPATCHER);
+    result->OnSymbol = KON_UNDEF;
     result->OnApplyArgs = KON_UNDEF;
     result->OnSelectPath = KON_UNDEF;
     result->OnMethodCall = KON_UNDEF;
@@ -916,42 +1005,98 @@ KonMsgDispatcher* KON_GetMsgDispatcher(KonState* kstate, unsigned int dispatcher
     }
 }
 
-KN MakeAttrSlotLeaf(KonState* kstate, KN value, char* mod)
+KonCpointer* KON_MakeCpointer(KonState* kstate, void* pointer)
 {
-    KonAttrSlot* result = KON_ALLOC_TYPE_TAG(kstate, KonAttrSlot, KON_T_ATTR_SLOT);
+    KonCpointer* result = KON_ALLOC_TYPE_TAG(kstate, KonCpointer, KON_T_CPOINTER);
+    result->Pointer = pointer;
+    return result;
+}
+
+KonAccessor* KON_InitAccessorWithMod(KonState* kstate, char* mod)
+{
+    KonAccessor* result = KON_ALLOC_TYPE_TAG(kstate, KonAccessor, KON_T_ACCESSOR);
     result->IsDir = false;
-    result->OpenToChildren = true;
-    result->OpenToSibling = true;
-    result->CanWrite = true;
-    result->IsProc = false;
-    result->IsMethod = false;
-    result->Value = value;
-    result->Folder = KON_NIL;
+    result->OpenToRef = false;
+    result->OpenToChildren = false;
+    result->OpenToSibling = false;
+    result->CanWrite = false;
+    // result->CanExec = false;
+    // result->IsMethod = false;
+    result->Value = KON_UNDEF;
+    result->Dir = NULL;
+    result->Setter = NULL;
     // set mod
     if (mod != NULL) {
-        if (strchr(mod, 'p')) {
-            result->IsProc = true;
+        if (strchr(mod, 'd')) {
+            result->IsDir = true;
+        }
+        if (strchr(mod, 'r')) {
+            result->OpenToRef = true;
+        }
+        if (strchr(mod, 'w')) {
+            result->CanWrite = true;
+        }
+        else if (strchr(mod, 'x')) {
+            // result->CanExec = true;
         }
         else if (strchr(mod, 'm')) {
-            result->IsMethod = true;
+            // result->IsMethod = true;
         }
     }
     return result;
 }
 
-KN MakeAttrSlotFolder(KonState* kstate, char* mod)
+KN KON_MakePropertyAccessor(KonState* kstate, KN value, char* mod, KonProcedure* setter)
 {
-    KonAttrSlot* result = KON_ALLOC_TYPE_TAG(kstate, KonAttrSlot, KON_T_ATTR_SLOT);
-    result->IsDir = true;
-    result->OpenToChildren = true;
-    result->OpenToSibling = true;
-    result->CanWrite = true;
-    result->IsProc = false;
-    result->IsMethod = false;
-    result->Value = KON_NIL;
-    result->Folder = KxHashTable_Init(4);
+    KonAccessor* result = KON_InitAccessorWithMod(kstate, mod);
+    result->IsDir = false;
+    result->Value = value;
+    if (setter != NULL) {
+        result->Setter = setter;
+    }
     return result;
 }
+
+KN KON_MakeDirAccessor(KonState* kstate, char* mod, KonProcedure* setter)
+{
+    KonAccessor* result = KON_InitAccessorWithMod(kstate, mod);
+    result->IsDir = true;
+    result->Value = KON_NIL;
+    result->Dir = KxHashTable_Init(4);
+    if (setter != NULL) {
+        result->Setter = setter;
+    }
+    return result;
+}
+
+bool KON_DirAccessorPutKeyProperty(KonState* kstate, KN dir, char* key, KN property)
+{
+    if (!(KON_IS_ACCESSOR(dir) && CAST_Kon(Accessor, dir)->IsDir == true)
+        || !KON_IS_ACCESSOR(property)) {
+        return false;
+    }
+
+    KxHashTable_PutKv(
+        CAST_Kon(Accessor, dir)->Dir,
+        key,
+        property
+    );
+    return true;
+}
+
+bool KON_DirAccessorPutKeyValue(KonState* kstate, KN dir, char* key, KN value, char* mod, KonProcedure* setter)
+{
+    return KON_DirAccessorPutKeyProperty(kstate, dir,
+        key,
+        KON_MakePropertyAccessor(kstate,
+            value,
+            mod,
+            setter
+        )
+    );
+}
+
+
 
 KN KON_VectorToKonPairList(KonState* kstate, KxVector* vector)
 {

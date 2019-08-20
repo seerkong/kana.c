@@ -33,14 +33,14 @@ void KON_InitGc(KonState* kstate)
 
     for (int i = 0; i < MAX_SEGMENT_CNT; i++) {
         maxObjCnt += nextSize;
-        KON_DEBUG("seg vec index %d, size %d\n", i, nextSize);
+        // KON_DEBUG("seg vec index %d, size %d\n", i, nextSize);
         KxVector_SetIndex(kstate->SegmentMaxSizeVec, i, KX_VEC_BOX_UINT(nextSize));
         
         // align to n *4
         int notAligned = nextSize * 1.618;
         nextSize = notAligned + 4 - (notAligned % 4);
     }
-    KON_DEBUG("MaxObjCntLimit %d\n", maxObjCnt);
+    // KON_DEBUG("MaxObjCntLimit %d\n", maxObjCnt);
     kstate->MaxObjCntLimit = maxObjCnt;
 }
 
@@ -409,10 +409,10 @@ void KON_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             KxList_Push(markTaskQueue, env->Parent);
             break;
         }
-        case KON_T_ATTR_SLOT: {
-            KonAttrSlot* slot = (KonAttrSlot*)node;
+        case KON_T_ACCESSOR: {
+            KonAccessor* slot = (KonAccessor*)node;
             if (slot->IsDir) {
-                KxList_Push(markTaskQueue, slot->Folder);
+                KxList_Push(markTaskQueue, slot->Dir);
             }
             else {
                 KxList_Push(markTaskQueue, slot->Value);
@@ -567,11 +567,11 @@ void KON_DestroyNode(KonState* kstate, KonBase* node)
             
             break;
         }
-        case KON_T_ATTR_SLOT: {
-            KonAttrSlot* slot = (KonAttrSlot*)node;
-            if (slot->IsDir && slot->Folder != NULL) {
-                KxHashTable_Destroy(slot->Folder);
-                slot->Folder = NULL;
+        case KON_T_ACCESSOR: {
+            KonAccessor* slot = (KonAccessor*)node;
+            if (slot->IsDir && slot->Dir != NULL) {
+                KxHashTable_Destroy(slot->Dir);
+                slot->Dir = NULL;
             }
             break;
         }

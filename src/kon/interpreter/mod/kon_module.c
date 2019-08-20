@@ -4,41 +4,61 @@
 #include "kon_vector.h"
 #include "kon_table.h"
 #include "kon_cell.h"
+#include "kon_accessor.h"
 
 #include "kon_module.h"
 
 KN KonModule_Export(KonState* kstate, KonEnv* env)
 {
-    KonAttrSlot* module = (KonAttrSlot*)MakeAttrSlotFolder(kstate, "");
+    KonAccessor* module = (KonAccessor*)KON_MakeDirAccessor(kstate, "drw", NULL);
     
-    KxHashTable_PutKv(module->Folder,
+    KON_DirAccessorPutKeyProperty(
+        kstate,
+        module,
         "number",
         KonNumber_Export(kstate, env)
     );
 
-    KxHashTable_PutKv(module->Folder,
+    KON_DirAccessorPutKeyProperty(
+        kstate,
+        module,
         "string",
         KonString_Export(kstate, env)
     );
 
-    KxHashTable_PutKv(module->Folder,
+    KON_DirAccessorPutKeyProperty(
+        kstate,
+        module,
         "list",
         KonList_Export(kstate, env)
     );
 
-    KxHashTable_PutKv(module->Folder,
+    KON_DirAccessorPutKeyProperty(
+        kstate,
+        module,
         "vector",
         KonVector_Export(kstate, env)
     );
 
-    KxHashTable_PutKv(module->Folder,
+    KON_DirAccessorPutKeyProperty(
+        kstate,
+        module,
         "table",
         KonTable_Export(kstate, env)
     );
 
-    KxHashTable_PutKv(module->Folder,
+    KON_DirAccessorPutKeyProperty(
+        kstate,
+        module,
         "cell",
         KonCell_Export(kstate, env)
+    );
+
+    KON_DirAccessorPutKeyProperty(
+        kstate,
+        module,
+        "accessor",
+        KonAccessor_Export(kstate, env)
     );
 
     return (KN)module;
