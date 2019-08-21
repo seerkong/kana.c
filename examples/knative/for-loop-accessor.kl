@@ -1,12 +1,12 @@
-[let folder [kon/accessor/init-dir % ]]
+{let folder [kon/accessor/init-dir % ]}
 [kon/accessor/put-key-val % folder "alice" 1 ]
 [kon/accessor/put-key-val % folder "bob" 2 ]
 [kon/accessor/put-key-val % folder "cindy" 3 ]
 
 [for
-  [let iter [kon/accessor/iter-head % folder ] ]
+  {let iter [kon/accessor/iter-head % folder ]}
   [neq % iter #nil; ]
-  [set iter [kon/accessor/iter-next % folder iter ] ]
+  {set iter [kon/accessor/iter-next % folder iter ]}
   [do
     [writeln %
       "key: "

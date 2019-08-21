@@ -648,6 +648,18 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 
 #define KON_LIST1(kstate,a)        KON_CONS((kstate), (a), KON_NIL)
 
+// cell core
+#define KON_DCR(x)         (KON_FIELD(x, KonCell, Core))
+// cell next
+#define KON_DNR(x)         (KON_FIELD(x, KonCell, Next))
+// cell prev
+#define KON_DPR(x)         (KON_FIELD(x, KonCell, Prev))
+// cell list
+#define KON_DLR(x)         (KON_FIELD(x, KonCell, List))
+// cell table
+#define KON_DTR(x)         (KON_FIELD(x, KonCell, Table))
+
+#define KON_DCNR(x)      (KON_DCR(KON_DNR(x)))
 
 // data structure util end
 ////

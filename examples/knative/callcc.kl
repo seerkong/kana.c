@@ -3,12 +3,12 @@
 `` As shown by the following example, call-cc can be used to emulate the functionality of the 
 `` return statement known from C-style languages, which is missing from Scheme:
 
-[let f
+{let f
   [func [$return ]
     [return % 2 ]
     3
   ]
-]
+}
 
 `` writes 3
 ``[displayln %
@@ -18,11 +18,11 @@
 `` writes 2
 [displayln % [call-cc f ] ]
 
-[let g
+{let g
   [func [$return ]
     3
   ]
-]
+}
 
 `` writes 3
 [displayln % [call-cc g ] ]

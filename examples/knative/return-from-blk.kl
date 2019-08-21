@@ -1,8 +1,8 @@
-[let t
+{let t
   [blk
     [return % 42 ]
   ]
-]
+}
 [t % ]
 
 [if #t;

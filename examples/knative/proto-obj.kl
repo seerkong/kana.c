@@ -1,10 +1,10 @@
 
-[let ProtoObjDispatcher
+{let ProtoObjDispatcher
   [def-dispatcher
     (
     )
   ]
-]
+}
 
 [lambda make-proto-obj-setter [$obj $key]
   [lambda [$accessor $new-val ]
@@ -23,13 +23,13 @@
   [if [kon/accessor/has-key % obj key ]
     [kon/accessor/at-key % obj key ]
   else
-    [let proto-obj [kon/accessor/at-key % obj "__proto" ] ]
+    {let proto-obj [kon/accessor/at-key % obj "__proto" ]}
 
     [if [neq % #undef; proto-obj ]
-      [set proto-obj  [kon/accessor/unbox % proto-obj ] ]
+      {set proto-obj  [kon/accessor/unbox % proto-obj ]}
     ]
     [if [neq % #nil; proto-obj ]
-      [set proto-obj  [kon/accessor/unbox % proto-obj ] ]
+      {set proto-obj  [kon/accessor/unbox % proto-obj ]}
       [proto-obj_lookup-key % proto-obj key]
     else
       #undef;
@@ -41,7 +41,7 @@
   (
   :on-symbol
     [lambda [$this $sym]
-      [let find-res [proto-obj_lookup-key % this sym ] ]
+      {let find-res [proto-obj_lookup-key % this sym ]}
       [if [neq % find-res #undef;]
         
         [kon/accessor/init-prop %
@@ -61,11 +61,11 @@
   :on-method-call
     [lambda [$self $msg $args ]
       [lambda eval-method [$method]
-        [let this self]
+        {let this self}
         [apply method args]
       ]
 
-      [let find-res [proto-obj_lookup-key % self msg ] ]
+      {let find-res [proto-obj_lookup-key % self msg ]}
 
       `` check if is a procedure
       [if [and
@@ -81,18 +81,18 @@
 ]
 
 
-[let ProtoObjBuilderDispatcher
+{let ProtoObjBuilderDispatcher
   [def-dispatcher
     (
     :on-method-call
       [lambda [$subj $msg $method-args ]
         [lambda clone-proto-obj []
-          [set subj [unbox-quote % subj]]
+          {set subj [unbox-quote % subj]}
           `` create a new attr slot
-          [let new-instance [kon/accessor/init-dir % ] ]
+          {let new-instance [kon/accessor/init-dir % ]}
           `` set proto attr
-          [let proto-name [kon/cell/get-core % subj ] ]
-          [let obj-init-table [kon/cell/get-table % subj ] ]
+          {let proto-name [kon/cell/get-core % subj ]}
+          {let obj-init-table [kon/cell/get-table % subj ]}
           `` object structure layout version
           [kon/accessor/put-key-val % new-instance "__scheme" $ProtoClass ]
 
@@ -102,18 +102,18 @@
             [kon/accessor/put-key-val % new-instance "__proto" [eval [to-variable % proto-name] ] ]
           ]
           [for
-            [let iter [kon/table/iter-head % obj-init-table ] ]
+            {let iter [kon/table/iter-head % obj-init-table ]}
             [neq % iter #nil; ]
-            [set iter [kon/table/iter-next % obj-init-table iter ] ]
+            {set iter [kon/table/iter-next % obj-init-table iter ]}
             [do
-              [let init-key [kon/table/iter-key % obj-init-table iter ] ]
-              [let init-val [kon/table/iter-val % obj-init-table iter ] ]
+              {let init-key [kon/table/iter-key % obj-init-table iter ]}
+              {let init-val [kon/table/iter-val % obj-init-table iter ]}
               ``[writeln % "init key: " init-key  " val: " init-val ]
 
 
               `` if init val is a list, eval it before put it to accessor
               [if [is-list % init-val]
-                [set init-val [eval init-val]]
+                {set init-val [eval init-val]}
               ]
               
               [kon/accessor/put-key-val %
@@ -140,7 +140,7 @@
       ]
     )
   ]
-]
+}
 
 [def-builder
   ProtoObj
@@ -153,7 +153,7 @@
   }
 ]
 
-[let my-obj [ProtoObj .clone] ]
+{let my-obj [ProtoObj .clone]}
 my-obj
 [my-obj __scheme ]
 [my-obj default-attr1 = 8 ]
@@ -194,7 +194,7 @@ my-obj
   }
 ]
 
-[let p [Person .clone ] ]
+{let p [Person .clone ]}
 `` overwrite my-new-key
 [p my-new-key = "my new key value 3"]
 `` show object structure
@@ -207,7 +207,7 @@ my-obj
 [p .print]
 
 `` 
-``[let p2 [Person .clone]]
+``{let p2 [Person .clone]}
 ``[p2 .print]
 
 

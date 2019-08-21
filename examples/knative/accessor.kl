@@ -1,17 +1,17 @@
-[let list-new-alias [kon/list/init ] ]
-[let my-list [list-new-alias % 1 2 3 ] ]
+{let list-new-alias [kon/list/init ]}
+{let my-list [list-new-alias % 1 2 3 ]}
 [kon/list/length % my-list ] `` should be 3
 
 
-[let folder [kon/accessor/init-dir % ]]
+{let folder [kon/accessor/init-dir % ]}
 [kon/accessor/put-key-val % folder "alice" 1 ]
 [kon/accessor/put-key-val % folder "bob" 2 ]
 [kon/accessor/put-key-val % folder "cindy" 3 ]
 
 [for
-  [let iter [kon/accessor/iter-head % folder ] ]
+  {let iter [kon/accessor/iter-head % folder ]}
   [neq % iter #nil; ]
-  [set iter [kon/accessor/iter-next % folder iter ] ]
+  {set iter [kon/accessor/iter-next % folder iter ]}
   [do
     [writeln %
       "key: "
@@ -23,8 +23,8 @@
 ]
 
 
-[let a 1]
-[let b [kon/accessor/init-prop % a ] ]
+{let a 1}
+{let b [kon/accessor/init-prop % a ]}
 [b = 2]
 [writeln % "after =, a " a ", b " b ]
 

@@ -548,8 +548,22 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
     if (IsSelfEvaluated(expression)) {
         bounce = KON_RunContinuation(kstate, cont, expression);
     }
+    else if (KON_IS_CELL(expression)) {
+        // passed a sentence like {writeln "abc" "efg"}
+        KonCell* cell = CAST_Kon(Cell, expression);
+        KN first = cell->Core;
+        if (KON_IsPrefixMarcro(first)) {
+            const char* prefix = KON_UNBOX_SYMBOL(first);
+            if (strcmp(prefix, "let") == 0) {
+                bounce = KON_EvalPrefixLet(kstate, cell->Next, env, cont);
+            }
+            else if (strcmp(prefix, "set") == 0) {
+                bounce = KON_EvalPrefixSet(kstate, cell->Next, env, cont);
+            }
+        }
+    }
     else if (KON_IsPairList(expression)) {
-        // passed a sentence like {writeln % "abc" "efg"}
+        // passed a sentence like [writeln % "abc" "efg"]
         KN words = expression;
         KN first = KON_CAR(words);
         if (KON_IsPrefixMarcro(first)) {
@@ -559,12 +573,6 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             }
             else if (strcmp(prefix, "if") == 0) {
                 bounce = KON_EvalPrefixIf(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "let") == 0) {
-                bounce = KON_EvalPrefixLet(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "set") == 0) {
-                bounce = KON_EvalPrefixSet(kstate, KON_CDR(words), env, cont);
             }
             else if (strcmp(prefix, "lambda") == 0) {
                 bounce = KON_EvalPrefixLambda(kstate, KON_CDR(words), env, cont);
@@ -723,6 +731,12 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
                 assert(val != KON_UNDEF);
                 bounce = KON_RunContinuation(kstate, cont, val);
             }
+            else if (KON_IS_CELL(subj)) {
+                // TODO !!! verify cell inner content(tag, list, vector, table )
+                // whether have Quasiquote, Expand, Unquote, KON_SYM_VARIABLE node
+                KN subjExpr = subj;
+                bounce = KON_EvalExpression(kstate, subjExpr, env, cont);
+            }
             // TODO quasiquote unquote, etc.
             
             else if (IsSelfEvaluated(subj)) {
@@ -820,7 +834,8 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             else if (KON_IS_CELL(arg)) {
                 // TODO !!! verify cell inner content(tag, list, vector, table )
                 // whether have Quasiquote, Expand, Unquote, KON_SYM_VARIABLE node
-                bounce = KON_RunContinuation(kstate, cont, arg);
+                KN argExpr = arg;
+                bounce = KON_EvalExpression(kstate, argExpr, env, cont);
             }
             else if (KON_IS_QUOTE(arg)) {
                 // treat as pure data, don't eval

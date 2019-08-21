@@ -1,9 +1,9 @@
-[let c $[a b c ] ]
+{let c $[a b c ]}
 
 [for
-  [let iter c ]
+  {let iter c}
   [neq % iter #nil; ]
-  [set iter [cdr % iter ] ]
+  {set iter [cdr % iter ]}
   [do
     [writeln % [car % iter ] ]
   ]

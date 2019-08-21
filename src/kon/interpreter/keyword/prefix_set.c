@@ -25,17 +25,14 @@ KonTrampoline* KON_EvalPrefixSet(KonState* kstate, KN expression, KN env, KonCon
 {
     KON_DEBUG("meet prefix marcro set");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN varName = KON_CAR(expression);
+    KN varName = KON_DCR(expression);
     
-
     const char* varNameCstr = KON_UNBOX_SYMBOL(varName);
 
     KON_DEBUG("varName %s", varNameCstr);
     
-    
-
     KonTrampoline* bounce;
-    if ((KN)KON_CDR(expression) == KON_NIL) {
+    if ((KN)KON_DNR(expression) == KON_NIL) {
         KON_EnvLookupSet(kstate, env, varNameCstr, KON_UKN);
 
         bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
@@ -43,7 +40,7 @@ KonTrampoline* KON_EvalPrefixSet(KonState* kstate, KN expression, KN env, KonCon
         bounce->Cont = cont;
     }
     else {
-        KN initVal = KON_CADR(expression);
+        KN initVal = KON_DCNR(expression);
         KON_DEBUG("initVal %s", KON_StringToCstr(KON_ToFormatString(kstate, initVal, true, 0, "  ")));
 
 
