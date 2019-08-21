@@ -26,9 +26,9 @@ KonTrampoline* KON_EvalPrefixSetDispatcher(KonState* kstate, KN expression, KN e
     KON_DEBUG("meet prefix marcro def dispatcher");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     
-    KN dispatcherIdExpr = KON_CAR(expression);
+    KN dispatcherIdExpr = KON_DCR(expression);
 
-    KN config = KON_CADR(expression);
+    KN config = KON_DCNR(expression);
 
     KonMsgDispatcher* dispatcher = MakeMsgDispatcher(kstate);
 

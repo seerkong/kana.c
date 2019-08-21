@@ -104,15 +104,12 @@ KonTrampoline* KON_EvalPrefixApply(KonState* kstate, KN expression, KN env, KonC
     KON_DEBUG("meet prefix marcro apply");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     
-    KN applySymExpr = KON_CAR(expression);
-    KN applyArgsExpr = KON_CADR(expression);
+    KN applySymExpr = KON_DCNR(expression);
+    KN applyArgsExpr = KON_DCNNR(expression);
 
     KON_DEBUG("applySymExpr %s", KON_StringToCstr(KON_ToFormatString(kstate, applySymExpr, true, 0, "  ")));
     KON_DEBUG("applyArgsExpr %s", KON_StringToCstr(KON_ToFormatString(kstate, applyArgsExpr, true, 0, "  ")));
-    // KN applyEnv = env;
-    // if (KON_CDDR(expression) != KON_NIL) {
-    //     applyEnv = KON_CADDR(expression);
-    // }
+
 
     KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
@@ -120,7 +117,6 @@ KonTrampoline* KON_EvalPrefixApply(KonState* kstate, KN expression, KN env, KonC
 
     KxHashTable* memo = KxHashTable_Init(4);
     KxHashTable_PutKv(memo, "ApplyArgsExpr", applyArgsExpr);
-    // KxHashTable_PutKv(memo, "ApplyEnvExpr", applyEnv);
 
     k->Native.MemoTable = memo;
     k->Native.Callback = AfterApplySymExprEvaled;

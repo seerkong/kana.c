@@ -64,10 +64,12 @@ KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KN env, KonCont
 {
     KON_DEBUG("meet prefix marcro if");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN condition = KON_CAR(expression);
-    KN parsed = SplitIfClauses(kstate, KON_CDR(expression));
-    KN trueClause = KON_CAR(parsed);
-    KN falseClause = KON_CADR(parsed);
+    KN condition = KON_DCR(expression);
+    KN trueClause = KON_DLR(expression);
+    KN falseClause = KON_NIL;
+    if (KON_DNR(expression) != KON_NIL) {
+        falseClause = KON_DLNR(expression);
+    }
 
     KON_DEBUG("condition %s", KON_StringToCstr(KON_ToFormatString(kstate, condition, true, 0, "  ")));
     // KON_DEBUG("trueClause %s", KON_StringToCstr(KON_ToFormatString(kstate, trueClause, true, 0, "  ")));

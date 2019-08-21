@@ -7,10 +7,11 @@ KonTrampoline* KON_EvalPrefixSh(KonState* kstate, KN expression, KN env, KonCont
 {
     KON_DEBUG("meet prefix marcro sh");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    
+    KN arguments = KON_CellCoresToList(kstate, expression);
+
     KxStringBuffer* sb = KxStringBuffer_New();
 
-    KN iter = expression;
+    KN iter = arguments;
     while (iter != KON_NIL) {
         KN next = KON_CDR(iter);
         KN item = KON_CAR(iter);

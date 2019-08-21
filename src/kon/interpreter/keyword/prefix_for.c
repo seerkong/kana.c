@@ -2,6 +2,7 @@
 #include "stdlib.h"
 #include "prefix_if.h"
 #include "../cps_interpreter.h"
+#include "../../container/kx_hashtable.h"
 
 KonTrampoline* AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
 KonTrampoline* AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
@@ -71,16 +72,13 @@ KonTrampoline* KON_EvalPrefixFor(KonState* kstate, KN expression, KN env, KonCon
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
 
     KonEnv* loopBindEnv = KON_MakeChildEnv(kstate, env);
+    KN paramTable = KON_DTR(expression);
+    KxHashTable* paramTableInner = KON_UNBOX_TABLE(paramTable);
 
-    KN initExpr = KON_CAR(expression);
-    KN predictExpr = KON_CADR(expression);
-    KN afterExpr = KON_CADDR(expression);
-    KN bodyExprs = KON_CDDDR(expression);
-
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN initExpr = KxHashTable_ValAtIndex(paramTableInner, 0);
+    KN predictExpr = KxHashTable_ValAtIndex(paramTableInner, 1);
+    KN afterExpr = KxHashTable_ValAtIndex(paramTableInner, 2);
+    KN bodyExprs = KON_DLR(expression);
 
     KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;

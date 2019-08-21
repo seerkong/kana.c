@@ -47,19 +47,21 @@ KonTrampoline* KON_EvalPrefixLambda(KonState* kstate, KN expression, KN env, Kon
 {
     KON_DEBUG("meet prefix marcro lambda");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN first = KON_CAR(expression);
-    KN param = KON_NIL;
+
+    KN param = KON_DTR(expression);
     KN funcName = KON_UNDEF;
     KN body = KON_NIL;
-    if (KON_IS_WORD(first)) {
-        funcName = first;
-        param = KON_CADR(expression);
-        body = KON_CDDR(expression);
+
+    if (param == KON_UNDEF) {
+        funcName = KON_DCNR(expression);
+        param = KON_DTNR(expression);
+        body = KON_DLNR(expression);
     }
-    else if (KON_IsPairList(first)) {
-        param = first;
-        body = KON_CDR(expression);
+    else {
+        body = KON_DLR(expression);
     }
+
+    param = KON_ParamTableToList(kstate, param);
 
     KON_DEBUG("funcName %s", KON_StringToCstr(KON_ToFormatString(kstate, funcName, true, 0, "  ")));
     KON_DEBUG("param %s", KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")));

@@ -32,9 +32,8 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
         bounce->Run.Value = KON_FALSE;
     }
     else {
-        KN condPair = KON_CAR(restPairs);
-        KN predicate = KON_CAR(condPair);
-        KN action = KON_CDR(condPair);
+        KN predicate = KON_DCR(restPairs);
+        KN action = KON_DLR(restPairs);
 
         if (IsElseTag(predicate)) {
             // do else action
@@ -47,7 +46,7 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
             k->Env = env;
 
             KxHashTable* memo = KxHashTable_Init(4);
-            KxHashTable_PutKv(memo, "RestPairs", KON_CDR(restPairs));
+            KxHashTable_PutKv(memo, "RestPairs", KON_DNR(restPairs));
             KxHashTable_PutKv(memo, "IfTrue", action);
 
             k->Native.MemoTable = memo;
@@ -67,9 +66,8 @@ KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KN env, KonCo
     KON_DEBUG("meet prefix marcro cond");
     // KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
     
-    KN condPair = KON_CAR(expression);
-    KN predicate = KON_CAR(condPair);
-    KN action = KON_CDR(condPair);
+    KN predicate = KON_DCR(expression);
+    KN action = KON_DLR(expression);
 
     KonTrampoline* bounce;
     if (IsElseTag(predicate)) {
@@ -82,7 +80,7 @@ KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KN env, KonCo
         k->Env = env;
 
         KxHashTable* memo = KxHashTable_Init(4);
-        KxHashTable_PutKv(memo, "RestPairs", KON_CDR(expression));
+        KxHashTable_PutKv(memo, "RestPairs", KON_DNR(expression));
         KxHashTable_PutKv(memo, "IfTrue", action);
 
         k->Native.MemoTable = memo;

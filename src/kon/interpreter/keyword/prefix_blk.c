@@ -17,7 +17,7 @@ KonTrampoline* KON_ApplyCompositeBlk(KonState* kstate, KonProcedure* proc, KN ar
 KonTrampoline* KON_EvalPrefixBlk(KonState* kstate, KN expression, KN env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro blk");
-    KN body = expression;
+    KN body = KON_DLR(expression);
 
     KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 

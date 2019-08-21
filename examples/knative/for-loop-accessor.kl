@@ -3,11 +3,13 @@
 [kon/accessor/put-key-val % folder "bob" 2 ]
 [kon/accessor/put-key-val % folder "cindy" 3 ]
 
-[for
-  {let iter [kon/accessor/iter-head % folder ]}
-  [neq % iter #nil; ]
-  {set iter [kon/accessor/iter-next % folder iter ]}
-  [do
+{for
+  (
+    {let iter [kon/accessor/iter-head % folder ]}
+    [neq % iter #nil; ]
+    {set iter [kon/accessor/iter-next % folder iter ]}
+  )
+  #[
     [writeln %
       "key: "
       [kon/accessor/iter-key % folder iter ]
@@ -15,4 +17,4 @@
       [kon/accessor/iter-val % folder iter ]
     ]
   ]
-]
+}

@@ -1,25 +1,33 @@
-[lambda a []
-  [writeln % "condition a" ]
-  5
-]
+{lambda a ()
+  #[
+    [writeln % "condition a" ]
+    5
+  ]
+}
 
-[lambda b []
-  [writeln % "condition b" ]
-  6
-]
+{lambda b ()
+  #[
+    [writeln % "condition b" ]
+    6
+  ]
+}
 
-[lambda c []
-  [writeln % "condition c" ]
-  5
-]
+{lambda c ()
+  #[
+    [writeln % "condition c" ]
+    5
+  ]
+}
 
-[lambda d []
-  [writeln % "condition d" ]
-  8
-]
-[or
+{lambda d ()
+  #[
+    [writeln % "condition d" ]
+    8
+  ]
+}
+{or
   [< % [a % ] 4 ]
   [< % [b % ] 5 ]
   [< % [c % ] 6 ]
   [< % [d % ] 7 ]
-]
+}

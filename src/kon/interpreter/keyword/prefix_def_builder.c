@@ -30,10 +30,10 @@ KonTrampoline* KON_EvalPrefixDefBuilder(KonState* kstate, KN expression, KN env,
 {
     KON_DEBUG("meet prefix marcro def builder");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN builderName = KON_CAR(expression);
-    KN dispatcherIdExpr = KON_CADR(expression);
+    KN builderName = KON_DCR(expression);
+    KN dispatcherIdExpr = KON_DCNR(expression);
 
-    KN config = KON_CADDR(expression);
+    KN config = KON_DCNNR(expression);
 
 
     KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);

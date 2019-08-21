@@ -554,74 +554,69 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
         KN first = cell->Core;
         if (KON_IsPrefixMarcro(first)) {
             const char* prefix = KON_UNBOX_SYMBOL(first);
-            if (strcmp(prefix, "let") == 0) {
-                bounce = KON_EvalPrefixLet(kstate, cell->Next, env, cont);
-            }
-            else if (strcmp(prefix, "set") == 0) {
-                bounce = KON_EvalPrefixSet(kstate, cell->Next, env, cont);
-            }
-        }
-    }
-    else if (KON_IsPairList(expression)) {
-        // passed a sentence like [writeln % "abc" "efg"]
-        KN words = expression;
-        KN first = KON_CAR(words);
-        if (KON_IsPrefixMarcro(first)) {
-            const char* prefix = KON_UNBOX_SYMBOL(first);
             if (strcmp(prefix, "apply") == 0) {
-                bounce = KON_EvalPrefixApply(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "if") == 0) {
-                bounce = KON_EvalPrefixIf(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "lambda") == 0) {
-                bounce = KON_EvalPrefixLambda(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "func") == 0) {
-                bounce = KON_EvalPrefixFunc(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "blk") == 0) {
-                bounce = KON_EvalPrefixBlk(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "do") == 0) {
-                bounce = KON_EvalPrefixDo(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "and") == 0) {
-                bounce = KON_EvalPrefixAnd(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "or") == 0) {
-                bounce = KON_EvalPrefixOr(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "cond") == 0) {
-                bounce = KON_EvalPrefixCond(kstate, KON_CDR(words), env, cont);
-            }
-            else if (strcmp(prefix, "call-cc") == 0) {
-                bounce = KON_EvalPrefixCallcc(kstate, KON_CDR(words), env, cont);
+                bounce = KON_EvalPrefixApply(kstate, cell, env, cont);
             }
             else if (strcmp(prefix, "eval") == 0) {
-                bounce = KON_EvalPrefixEval(kstate, KON_CDR(words), env, cont);
+                bounce = KON_EvalPrefixEval(kstate, cell, env, cont);
+            }
+            else if (strcmp(prefix, "let") == 0) {
+                bounce = KON_EvalPrefixLet(kstate, KON_DNR(cell), env, cont);
+            }
+            else if (strcmp(prefix, "set") == 0) {
+                bounce = KON_EvalPrefixSet(kstate, KON_DNR(cell), env, cont);
+            }
+            else if (strcmp(prefix, "lambda") == 0) {
+                bounce = KON_EvalPrefixLambda(kstate, cell, env, cont);
+            }
+            else if (strcmp(prefix, "func") == 0) {
+                bounce = KON_EvalPrefixFunc(kstate, cell, env, cont);
+            }
+            else if (strcmp(prefix, "blk") == 0) {
+                bounce = KON_EvalPrefixBlk(kstate, cell, env, cont);
+            }
+            else if (strcmp(prefix, "do") == 0) {
+                bounce = KON_EvalPrefixDo(kstate, cell, env, cont);
+            }
+            else if (strcmp(prefix, "cond") == 0) {
+                bounce = KON_EvalPrefixCond(kstate, KON_DNR(cell), env, cont);
+            }
+            else if (strcmp(prefix, "if") == 0) {
+                bounce = KON_EvalPrefixIf(kstate, KON_DNR(cell), env, cont);
             }
             else if (strcmp(prefix, "for") == 0) {
-                bounce = KON_EvalPrefixFor(kstate, KON_CDR(words), env, cont);
+                bounce = KON_EvalPrefixFor(kstate, cell, env, cont);
             }
             else if (strcmp(prefix, "break") == 0) {
-                bounce = KON_EvalPrefixBreak(kstate, KON_CDR(words), env, cont);
+                bounce = KON_EvalPrefixBreak(kstate, KON_DNR(cell), env, cont);
             }
             else if (strcmp(prefix, "continue") == 0) {
-                bounce = KON_EvalPrefixContinue(kstate, KON_CDR(words), env, cont);
+                bounce = KON_EvalPrefixContinue(kstate, KON_DNR(cell), env, cont);
             }
+            else if (strcmp(prefix, "call-cc") == 0) {
+                bounce = KON_EvalPrefixCallcc(kstate, KON_DNR(cell), env, cont);
+            }
+
             else if (strcmp(prefix, "def-dispatcher") == 0) {
-                bounce = KON_EvalPrefixDefDispatcher(kstate, KON_CDR(words), env, cont);
+                bounce = KON_EvalPrefixDefDispatcher(kstate, KON_DNR(cell), env, cont);
             }
             else if (strcmp(prefix, "set-dispatcher") == 0) {
-                bounce = KON_EvalPrefixSetDispatcher(kstate, KON_CDR(words), env, cont);
+                bounce = KON_EvalPrefixSetDispatcher(kstate, KON_DNR(cell), env, cont);
             }
             else if (strcmp(prefix, "def-builder") == 0) {
-                bounce = KON_EvalPrefixDefBuilder(kstate, KON_CDR(words), env, cont);
+                bounce = KON_EvalPrefixDefBuilder(kstate, KON_DNR(cell), env, cont);
+            }
+
+            else if (strcmp(prefix, "and") == 0) {
+                bounce = KON_EvalPrefixAnd(kstate, KON_DNR(cell), env, cont);
+            }
+            else if (strcmp(prefix, "or") == 0) {
+                bounce = KON_EvalPrefixOr(kstate, KON_DNR(cell), env, cont);
             }
             else if (strcmp(prefix, "sh") == 0) {
-                bounce = KON_EvalPrefixSh(kstate, KON_CDR(words), env, cont);
+                bounce = KON_EvalPrefixSh(kstate, KON_DNR(cell), env, cont);
             }
+
             else {
                 KON_DEBUG("error! unhandled prefix marcro %s", prefix);
                 bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
@@ -629,7 +624,18 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
                 bounce->Cont = cont;
             }
         }
-        // TODO quasiquote unquote, etc.
+    }
+    else if (KON_IsPairList(expression)) {
+        // passed a sentence like [writeln % "abc" "efg"]
+        KN words = expression;
+        KN first = KON_CAR(words);
+        // TODO subject is a quasiquote or unquote
+        if (KON_IS_QUASIQUOTE(first)) {
+            KON_DEBUG("error! unhandled subject type");
+            bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+            bounce->Run.Value = KON_UKN;
+            bounce->Cont = cont;
+        }
         else {
             bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_SUBJ);
             

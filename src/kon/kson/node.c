@@ -892,6 +892,21 @@ KN KON_ParamStringify(KonState* kstate, KN source, bool newLine, int depth, char
     return result;
 }
 
+KN KON_ParamTableToList(KonState* kstate, KN source)
+{
+    KxHashTable* hashTable = CAST_Kon(Param, source)->Table;
+    KxHashTableIter iter = KxHashTable_IterHead(hashTable);
+    KN result = KON_NIL;
+    while (iter != KON_NIL) {
+        KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
+        const char* itemKey = KxHashTable_IterGetKey(hashTable, iter);
+        KN itemValue = (KN)KxHashTable_IterGetVal(hashTable, iter);
+        result = KON_CONS(kstate, itemValue, result);
+        iter = next;
+    }
+    return KON_PairListRevert(kstate, result);
+}
+
 KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
@@ -903,7 +918,7 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
     if (newLine) {
         KxStringBuffer_AppendCstr(result->String, "{");
 
-        do {
+        while (iter != KON_NIL) {
             KN name = iter->Core;
             KonVector* innerVector = iter->Vector;
             KonTable* innerTable = iter->Table;
@@ -970,9 +985,10 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
             }
             
             iter = iter->Next;
-        } while (iter != KON_NIL);
+        }
 
-        if (head->Table != KON_UNDEF
+        if (head != KON_NIL
+            || head->Table != KON_UNDEF
             || head->List != KON_UNDEF
             || head->Next != KON_NIL
         ) {
@@ -985,7 +1001,7 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
     else {
         KxStringBuffer_AppendCstr(result->String, "{");
 
-        do {
+        while (iter != KON_NIL) {
             KN name = iter->Core;
             KonVector* innerVector = iter->Vector;
             KonTable* innerTable = iter->Table;
@@ -1040,11 +1056,24 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
             }
 
             iter = iter->Next;
-        } while (iter != KON_NIL);
+        }
         KxStringBuffer_AppendCstr(result->String, "}");
     }
 
     return result;
+}
+
+KN KON_CellCoresToList(KonState* kstate, KN source)
+{
+    KonCell* head = CAST_Kon(Cell, source);
+    KonCell* iter = head;
+    KN result = KON_NIL;
+    while (iter != KON_NIL) {
+        KN core = iter->Core;
+        result = KON_CONS(kstate, core, result);
+        iter = iter->Next;
+    }
+    return KON_PairListRevert(kstate, result);
 }
 
 KN KON_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
@@ -1135,10 +1164,27 @@ KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KN env)
         return NULL;
     }
     KonProcedure* proc = KON_ALLOC_TYPE_TAG(kstate, KonProcedure, KON_T_PROCEDURE);
+    
+    
+    KN param = (KN)KON_DTR(procAst);
+    KN funcName = KON_UNDEF;
+    KN body = KON_NIL;
+    
+    if (param == KON_UNDEF) {
+        funcName = KON_DCNR(procAst);
+        param = (KN)KON_DTNR(procAst);
+        body = (KN)KON_DLNR(procAst);
+    }
+    else {
+        body = (KN)KON_DLR(procAst);
+    }
+    
+    param = KON_ParamTableToList(kstate, param);
+    
     proc->Type = KON_COMPOSITE_LAMBDA;
     proc->Composite.LexicalEnv = env;
-    proc->Composite.ArgList = KON_CADR(procAst);
-    proc->Composite.Body = KON_CDDR(procAst);
+    proc->Composite.ArgList = param;
+    proc->Composite.Body = body;
     return proc;
 }
 

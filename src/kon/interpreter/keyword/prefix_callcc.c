@@ -10,7 +10,7 @@ KonTrampoline* KON_EvalPrefixCallcc(KonState* kstate, KN expression, KN env, Kon
 
     // set current continuation as argument
     KN argList = KON_CONS(kstate, cont, KON_NIL);
-    KN proc = KON_CAR(expression);
+    KN proc = KON_DCR(expression);
     if (KON_IS_REFERENCE(proc)) {
         proc = KON_EnvLookup(kstate, env, KON_SymbolToCstr(proc));
     }

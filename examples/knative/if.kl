@@ -1,7 +1,11 @@
-[if #t;
-  [displayln % "if branch" ]
-  [displayln % "if branch2" ]
+{if [> % 5 7]
+  #[
+    [displayln % "if branch" ]
+    [displayln % "if branch2" ]
+  ]
 else
-  [displayln % "else branch" ]
-  [displayln % "else branch2" ]
-]
+  #[
+    [displayln % "else branch" ]
+    [displayln % "else branch2" ]
+  ]
+}

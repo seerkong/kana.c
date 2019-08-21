@@ -658,8 +658,12 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 #define KON_DLR(x)         (KON_FIELD(x, KonCell, List))
 // cell table
 #define KON_DTR(x)         (KON_FIELD(x, KonCell, Table))
-
+// alias
 #define KON_DCNR(x)      (KON_DCR(KON_DNR(x)))
+#define KON_DTNR(x)      (KON_DTR(KON_DNR(x)))
+#define KON_DLNR(x)      (KON_DLR(KON_DNR(x)))
+#define KON_DCNNR(x)      (KON_DCR(KON_DNR(KON_DNR(x))))
+
 
 // data structure util end
 ////
@@ -713,9 +717,14 @@ KN KON_BlockStringify(KonState* kstate, KN source, bool newLine, int depth, char
 // param table
 KN KON_ParamStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
+KN KON_ParamTableToList(KonState* kstate, KN source);
+
 
 // cell
 KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+// eg: {sh ls -al} => [sh ls -al]
+KN KON_CellCoresToList(KonState* kstate, KN source);
+
 // attribute accessor
 KN KON_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 

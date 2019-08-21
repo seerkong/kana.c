@@ -45,18 +45,19 @@ KonTrampoline* KON_EvalPrefixOr(KonState* kstate, KN expression, KN env, KonCont
 {
     KON_DEBUG("meet prefix marcro or");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    
+    KN arguments = KON_CellCoresToList(kstate, expression);
+
     KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = env;
 
     KxHashTable* memo = KxHashTable_Init(4);
-    KxHashTable_PutKv(memo, "RestCondition", KON_CDR(expression));
+    KxHashTable_PutKv(memo, "RestCondition", KON_CDR(arguments));
     k->Native.MemoTable = memo;
     k->Native.Callback = AfterOrConditionEvaled;
     
     KonTrampoline* bounce;
-    bounce = KON_EvalExpression(kstate, KON_CAR(expression), env, k);
+    bounce = KON_EvalExpression(kstate, KON_CAR(arguments), env, k);
 
     return bounce;
 }

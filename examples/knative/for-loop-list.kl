@@ -1,10 +1,12 @@
 {let c $[a b c ]}
 
-[for
-  {let iter c}
-  [neq % iter #nil; ]
-  {set iter [cdr % iter ]}
-  [do
+{for
+  (
+    {let iter c}
+    [neq % iter #nil; ]
+    {set iter [cdr % iter ]}
+  )
+  #[
     [writeln % [car % iter ] ]
   ]
-]
+}

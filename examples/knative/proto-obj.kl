@@ -1,148 +1,186 @@
 
 {let ProtoObjDispatcher
-  [def-dispatcher
-    (
+  {def-dispatcher
+    #(
     )
+  }
+}
+
+{lambda make-proto-obj-setter (obj key)
+  #[
+    {lambda (accessor new-val)
+      #[
+        ``[writeln % "update in obj key " key " to val : " new-val]
+        [kon/accessor/put-key-val %
+          obj
+          key
+          new-val
+        ]
+      ]
+    }
   ]
 }
 
-[lambda make-proto-obj-setter [$obj $key]
-  [lambda [$accessor $new-val ]
-    ``[writeln % "update in obj key " key " to val : " new-val]
-    [kon/accessor/put-key-val %
-      obj
-      key
-      new-val
-    ]
-  ]
-]
-
 `` if not found, return #undef;
-[lambda proto-obj_lookup-key [$obj $key]
-  
-  [if [kon/accessor/has-key % obj key ]
-    [kon/accessor/at-key % obj key ]
-  else
-    {let proto-obj [kon/accessor/at-key % obj "__proto" ]}
-
-    [if [neq % #undef; proto-obj ]
-      {set proto-obj  [kon/accessor/unbox % proto-obj ]}
-    ]
-    [if [neq % #nil; proto-obj ]
-      {set proto-obj  [kon/accessor/unbox % proto-obj ]}
-      [proto-obj_lookup-key % proto-obj key]
-    else
-      #undef;
-    ]
-  ]
-]
-
-[set-dispatcher ProtoObjDispatcher
-  (
-  :on-symbol
-    [lambda [$this $sym]
-      {let find-res [proto-obj_lookup-key % this sym ]}
-      [if [neq % find-res #undef;]
-        
-        [kon/accessor/init-prop %
-          find-res
-          $r
-          [make-proto-obj-setter % this sym]
-        ]
+{lambda proto-obj_lookup-key (obj key)
+  #[
+    {if [kon/accessor/has-key % obj key ]
+      #[
+        [kon/accessor/at-key % obj key ]
+      ]
       else
-        `` make a new symbol
-        [kon/accessor/init-prop %
-          #ukn;
-          $r
-          [make-proto-obj-setter % this sym]
-        ]
+      #[
+        {let proto-obj [kon/accessor/at-key % obj "__proto" ]}
+
+        {if [neq % #undef; proto-obj ]
+          #[
+            {set proto-obj  [kon/accessor/unbox % proto-obj ]}
+          ]
+        }
+        {if [neq % #nil; proto-obj ]
+          #[
+            {set proto-obj  [kon/accessor/unbox % proto-obj ]}
+            [proto-obj_lookup-key % proto-obj key]
+          ]
+          else
+          #[
+            #undef;
+          ]
+        }
       ]
-    ]
+    }
+  ]
+
+}
+
+{set-dispatcher ProtoObjDispatcher
+  #(
+  :on-symbol
+    {lambda (this sym)
+      #[
+        {let find-res [proto-obj_lookup-key % this sym ]}
+        {if [neq % find-res #undef;]
+          #[
+            [kon/accessor/init-prop %
+              find-res
+              $r
+              [make-proto-obj-setter % this sym]
+            ]
+          ]
+          `` make a new symbol
+          else
+          #[
+            [kon/accessor/init-prop %
+              #ukn;
+              $r
+              [make-proto-obj-setter % this sym]
+            ]
+          ]
+        }
+      ]
+    }
   :on-method-call
-    [lambda [$self $msg $args ]
-      [lambda eval-method [$method]
-        {let this self}
-        [apply method args]
-      ]
+    {lambda (self msg args)
+      #[
+        {lambda eval-method (method)
+          #[
+            {let this self}
+            {apply method args}
+          ]
+        }
 
-      {let find-res [proto-obj_lookup-key % self msg ]}
+        {let find-res [proto-obj_lookup-key % self msg ]}
 
-      `` check if is a procedure
-      [if [and
+        `` check if is a procedure
+        {if
+          {and
             [neq % find-res #undef;]
             [is-procedure % [kon/accessor/unbox % find-res ] ]
+          }
+          #[
+            [eval-method % find-res]
           ]
-        [eval-method % find-res]
-      else
-        [writeln % "method not found"]
+          else
+          #[
+            [writeln % "method not found"]
+          ]
+        }
       ]
-    ]
+    }
   )
-]
+}
 
 
 {let ProtoObjBuilderDispatcher
-  [def-dispatcher
-    (
+  {def-dispatcher
+    #(
     :on-method-call
-      [lambda [$subj $msg $method-args ]
-        [lambda clone-proto-obj []
-          {set subj [unbox-quote % subj]}
-          `` create a new attr slot
-          {let new-instance [kon/accessor/init-dir % ]}
-          `` set proto attr
-          {let proto-name [kon/cell/get-core % subj ]}
-          {let obj-init-table [kon/cell/get-table % subj ]}
-          `` object structure layout version
-          [kon/accessor/put-key-val % new-instance "__scheme" $ProtoClass ]
+      {lambda (subj msg method-args)
+        #[
+          {lambda clone-proto-obj ()
+            #[
+              {set subj [unbox-quote % subj]}
+              `` create a new attr slot
+              {let new-instance [kon/accessor/init-dir % ]}
+              `` set proto attr
+              {let proto-name [kon/cell/get-core % subj ]}
+              {let obj-init-table [kon/cell/get-table % subj ]}
+              `` object structure layout version
+              [kon/accessor/put-key-val % new-instance "__scheme" $ProtoClass ]
 
-          [if [eq % proto-name #ukn; ]
-            [kon/accessor/put-key-val % new-instance "__proto" #nil; ]
-          else
-            [kon/accessor/put-key-val % new-instance "__proto" [eval [to-variable % proto-name] ] ]
-          ]
-          [for
-            {let iter [kon/table/iter-head % obj-init-table ]}
-            [neq % iter #nil; ]
-            {set iter [kon/table/iter-next % obj-init-table iter ]}
-            [do
-              {let init-key [kon/table/iter-key % obj-init-table iter ]}
-              {let init-val [kon/table/iter-val % obj-init-table iter ]}
-              ``[writeln % "init key: " init-key  " val: " init-val ]
+              {if [eq % proto-name #ukn; ]
+                #[
+                  [kon/accessor/put-key-val % new-instance "__proto" #nil; ]
+                ]
+                else
+                #[
+                  [kon/accessor/put-key-val % new-instance "__proto" {eval [to-variable % proto-name] } ]
+                ]
+              }
+              {for
+                (
+                  {let iter [kon/table/iter-head % obj-init-table ]}
+                  [neq % iter #nil; ]
+                  {set iter [kon/table/iter-next % obj-init-table iter ]}
+                )
+                #[
+                  {let init-key [kon/table/iter-key % obj-init-table iter ]}
+                  {let init-val [kon/table/iter-val % obj-init-table iter ]}
+                  ``[writeln % "init key: " init-key  " val: " init-val ]
 
+                  `` evaluate each val
+                  {set init-val {eval init-val}}
+                  
+                  [kon/accessor/put-key-val %
+                    new-instance
+                    init-key
+                    init-val
+                  ]
+                  
+                ]
+              }
 
-              `` if init val is a list, eval it before put it to accessor
-              [if [is-list % init-val]
-                {set init-val [eval init-val]}
-              ]
-              
-              [kon/accessor/put-key-val %
-                new-instance
-                init-key
-                init-val
-              ]
-              
+              [set-dispatcher-id % new-instance ProtoObjDispatcher ]
+              new-instance
             ]
-          ]
+          }
 
-          [set-dispatcher-id % new-instance ProtoObjDispatcher ]
-          new-instance
+          {cond
+            [eq % $clone msg ]
+            #[
+              [clone-proto-obj %]
+            ]
+            else
+            `` TODO handle other class level message
+            #ukn;
+          }
         ]
-
-        [cond
-          [[eq % $clone msg ]
-            [clone-proto-obj %]
-          ]
-        else
-          `` TODO handle other class level message
-          #ukn;
-        ]
-      ]
+      }
     )
-  ]
+  }
 }
 
-[def-builder
+{def-builder
   ProtoObj
   ProtoObjBuilderDispatcher
   ${
@@ -151,7 +189,7 @@
     :default-attr2 "absddd"
     )
   }
-]
+}
 
 {let my-obj [ProtoObj .clone]}
 my-obj
@@ -167,7 +205,7 @@ my-obj
 [my-obj my-new-key = "my new key value 2" ]
 [writeln % [my-obj my-new-key]]
 
-[def-builder
+{def-builder
   Person
   ProtoObjBuilderDispatcher
   ${my-obj `` parent proto name
@@ -176,23 +214,27 @@ my-obj
     :age 0
     :sex #ukn;
     :set-sex
-      [func [$sex]
-        [this sex = sex]
-        ``[writeln % "My name is  " [this name] "."]
-        ``[writeln % "person print this name " [this name]]
-        ``[writeln % "person print method args " arg1 " " arg2]
-      ]
-    :print
-      [func []
-        [writeln %
-          "My name is  " [this name] ", "
-          "I am " [this age] " years old, "
-          "my sex is " [this sex]
+      {func (sex)
+        #[
+          [this sex = sex]
+          ``[writeln % "My name is  " [this name] "."]
+          ``[writeln % "person print this name " [this name]]
+          ``[writeln % "person print method args " arg1 " " arg2]
         ]
-      ]
+      }
+    :print
+      {func ()
+        #[
+          [writeln %
+            "My name is  " [this name] ", "
+            "I am " [this age] " years old, "
+            "my sex is " [this sex]
+          ]
+        ]
+      }
     )
   }
-]
+}
 
 {let p [Person .clone ]}
 `` overwrite my-new-key

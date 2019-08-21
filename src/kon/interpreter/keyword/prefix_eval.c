@@ -26,11 +26,8 @@ KonTrampoline* KON_EvalPrefixEval(KonState* kstate, KN expression, KN env, KonCo
     KON_DEBUG("meet prefix marcro eval");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
 
-    KN expr = KON_CAR(expression);
+    KN expr = KON_DCNR(expression);
     KN evalEnv = env;
-    if (KON_CDR(expression) != KON_NIL) {
-        evalEnv = KON_CADR(expression);
-    }
 
     KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
     k->Cont = cont;

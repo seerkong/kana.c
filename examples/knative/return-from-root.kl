@@ -1,7 +1,11 @@
-[if #t;
-  [return % 42 ]
-else
-  55
-]
+{if #t;
+  #[
+    [return % 42 ]
+  ]
+  else
+  #[
+    55
+  ]
+}
 
 777
