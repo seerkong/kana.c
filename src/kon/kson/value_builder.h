@@ -22,6 +22,14 @@ typedef enum {
 } KonBuilderType;
 
 typedef struct {
+    KN Core;
+    KN Vector; // vector of KN
+    KN Table;
+    KxHashTable* Map;
+    KN List; // vector of KN
+} CellBuilderItem;
+
+typedef struct {
     KonBuilderType Type;
     union {
         KxVector* Vector; // vector of KN
@@ -34,13 +42,7 @@ typedef struct {
             KN Value;
         } KvPair;
 
-        struct {
-            KN Core;
-            KN Vector; // vector of KN
-            KN Table;
-            KxHashTable* Map;
-            KN List; // vector of KN
-        } Cell;
+        KxVector* Cell; // vector of CellBuilderItem*
 
         struct {
             KN Inner;

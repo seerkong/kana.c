@@ -1,18 +1,122 @@
-{kon
-  ``:a
-  ``:b =1
-  ``:c
-  ``5
-  ``#(:a 1 :b "zxc")
-  ``#<>
-  (:a 1 :b "zxc")
+
+{for ([let j 0 ] [< % j 4 ] {set j [+ % j 1 ]})
   #[
-    ``{5 $a $[]  }
-    ``$(:a 1 @%.[$(:b 2)]) `` should use php-like array
-    `` :xx = b save to map
-    `` () save to table
-    `` #[] save to list
-    `` others,  string number quote... all save to core
-    {sh "ps" "-h"}
+    {if [> % j 2 ]
+      #[
+        {break}
+      ]
+    }
+    [writeln % "    j : " j ]
   ]
 }
+
+{func n (x y)
+  #[
+    [* % x y ]
+  ]
+}
+
+
+{cond
+  [< % 5 4 ]
+  #[
+    "condition 1 pass"
+  ]
+  [< % a 4 ]
+  #[
+    [writeln % "condition 2 pass" ]
+  ]
+  [< % 3 4 ]
+  #[
+    [writeln % "condition 3 pass" ]
+    [writeln % "do something more here" ]
+  ]
+  else
+  #[
+    "else branch"
+  ]
+}
+
+
+{kon
+  :a
+  :b =1
+  :c
+  :b = 2
+  (1 :a 2 :b "zxc" :a 3)
+  #[
+    {5 $a $[]  }
+    #(:a 1 @%.[#(:b 2)]) `` should use php-like array
+    >=
+    {sh "ps" "-h" $[123] }
+  ]
+  ass :t :f = 2 (1 df)
+  #[
+    ff
+  ]
+  aass :a :b = 3
+  #[
+    ``1
+  ]
+^kon}
+
+{for ([let j 0 ] [< % j 4 ] {set j [+ % j 1 ]})
+  #[
+    {if [> % j 2 ]
+      #[
+        {break}
+      ]
+    }
+    [writeln % "    j : " j ]
+  ]
+}
+
+{func n (x y)
+  #[
+    [* % x y ]
+  ]
+}
+
+
+{cond
+  [< % 5 4 ]
+  #[
+    "condition 1 pass"
+  ]
+  [< % a 4 ]
+  #[
+    [writeln % "condition 2 pass" ]
+  ]
+  [< % 3 4 ]
+  #[
+    [writeln % "condition 3 pass" ]
+    [writeln % "do something more here" ]
+  ]
+  else
+  #[
+    "else branch"
+  ]
+}
+
+
+{kon
+  :a
+  :b =1
+  :c
+  :b = 2
+  (1 :a 2 :b "zxc" :a 3)
+  #[
+    {5 $a $[]  }
+    #(:a 1 @%.[#(:b 2)]) `` should use php-like array
+    >=
+    {sh "ps" "-h" $[123] }
+  ]
+  ass :t :f = 2 (1 df)
+  #[
+    ff
+  ]
+  aass :a :b = 3
+  #[
+    ``1
+  ]
+^kon}

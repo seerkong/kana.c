@@ -233,60 +233,130 @@ KonBuilder* MakeKvPairBuilder(KonBuilder* builder, KN value)
     return builder;
 }
 
+CellBuilderItem* CreateCellBuilderItem()
+{
+    CellBuilderItem* cellItem = (CellBuilderItem*)tb_malloc(sizeof(CellBuilderItem));
+    
+    cellItem->Core = KON_UNDEF;
+    cellItem->Vector = KON_UNDEF;
+    cellItem->Table = KON_UNDEF;
+    cellItem->List = KON_UNDEF;
+    cellItem->Map = KxHashTable_Init(4);
+    return cellItem;
+}
+
 KonBuilder* CreateCellBuilder()
 {
     KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
     if (builder == NULL) {
         return NULL;
     }
+
     builder->Type = KON_BUILDER_CELL;
-    builder->Cell.Core = KON_UNDEF;
-    builder->Cell.Vector = KON_UNDEF;
-    builder->Cell.Table = KON_UNDEF;
-    builder->Cell.List = KON_UNDEF;
-    builder->Cell.Map = KxHashTable_Init(10);;
+    builder->Cell = KxVector_Init();
+
+    CellBuilderItem* cellItem = CreateCellBuilderItem();
+
+    KxVector_Push(builder->Cell, cellItem);
+
     return builder;
 }
+
+// create new cell section in CellBuilder
+// 1 core is set, meet next core
+// 2 table is set, meet next core or table
+// 3 list is set, meet next core or table or list
 
 void CellBuilderSetCore(KonBuilder* builder, KN name)
 {
     KON_DEBUG("CellBuilderSetCore");
-    builder->Cell.Core = name;
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
+    if (cellItem->Core != KON_UNDEF
+        || cellItem->Table != KON_UNDEF
+        || cellItem->List != KON_UNDEF
+    ) {
+        CellBuilderItem* newCellItem = CreateCellBuilderItem();
+        KxVector_Push(builder->Cell, newCellItem);
+        cellItem = newCellItem;
+    }
+    cellItem->Core = name;
 }
 
 void CellBuilderSetVector(KonBuilder* builder, KN vector)
 {
-    builder->Cell.Vector = vector;
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
+
+    cellItem->Vector = vector;
 }
 
 void CellBuilderSetList(KonBuilder* builder, KN list)
 {
-    builder->Cell.List = list;
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
+    if (cellItem->List != KON_UNDEF) {
+        CellBuilderItem* newCellItem = CreateCellBuilderItem();
+        KxVector_Push(builder->Cell, newCellItem);
+        cellItem = newCellItem;
+    }
+    cellItem->List = list;
 }
 
 void CellBuilderSetTable(KonBuilder* builder, KN table)
 {
-    builder->Cell.Table = table;
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
+    if (cellItem->Table != KON_UNDEF
+        || cellItem->List != KON_UNDEF
+    ) {
+        CellBuilderItem* newCellItem = CreateCellBuilderItem();
+        KxVector_Push(builder->Cell, newCellItem);
+        cellItem = newCellItem;
+    }
+    cellItem->Table = table;
 }
 
 void CellBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
 {
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
+
     char* key = KxStringBuffer_Cstr(pair->KvPair.Key);
     
-    KxHashTable_PushKv(builder->Cell.Map, key, pair->KvPair.Value);
+    KxHashTable_PutKv(cellItem->Map, key, pair->KvPair.Value);
     KON_DEBUG("CellBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
 }
 
-KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder)
+KonCell* CreateNewKonCellNode(KonState* kstate, CellBuilderItem* cellItem)
 {
     KonCell* value = KON_ALLOC_TYPE_TAG(kstate, KonCell, KON_T_CELL);
-    value->Core = builder->Cell.Core;
-    value->Vector = builder->Cell.Vector;
-    value->Table = builder->Cell.Table;
-    value->List = builder->Cell.List;
-    tb_free(builder);
+    value->Core = cellItem->Core;
+    value->Vector = cellItem->Vector;
+    value->Table = cellItem->Table;
+    value->List = cellItem->List;
+    value->Map = cellItem->Map;
+    value->Next = KON_NIL;
+    value->Prev = KON_NIL;
     return value;
+}
+
+KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder)
+{
+    KonVector* cell = builder->Cell;
+
+    KonCell* currentHead = KON_NIL;
+    // reverse add
+    int len = KxVector_Length(cell);
+    for (int i = len - 1; i >= 0; i--) {
+        CellBuilderItem* cellBuilderItem = (CellBuilderItem*)KxVector_AtIndex(cell, i);
+        KonCell* newNode = CreateNewKonCellNode(kstate, cellBuilderItem);
+        newNode->Next = currentHead;
+        if (currentHead != KON_NIL) {
+            currentHead->Prev = newNode;
+        }
+        currentHead = newNode;
+    }
+
+
+    tb_free(builder);
+    return currentHead;
 }
 
 KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind)

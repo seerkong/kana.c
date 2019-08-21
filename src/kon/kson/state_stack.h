@@ -28,8 +28,10 @@ typedef enum
     KON_READER_PARSE_CELL_MAP,
     KON_READER_PARSE_MAP_PAIR_KEY,
 
+    // need a '=' or ':'
+    KON_READER_PARSE_MAP_PAIR_EQ_OR_TAG,
     // s10 parse cell map value or next kv pair
-    KON_READER_PARSE_MAP_PAIR_VAL_OR_NEXT,
+    KON_READER_PARSE_MAP_PAIR_VAL,
 
     // s7 parse cell inner array, table, or list
     KON_READER_PARSE_CELL_INNER_CONTAINER,

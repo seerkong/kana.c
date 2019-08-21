@@ -429,6 +429,11 @@ KxHashTableKeyEntry* KxHashTable_AddOrUpdateKeyEntry(KxHashTable* self, char* ke
     // find or create key entry
     KxHashTableKeyEntry* keyEntry = KxHashTable_GetKeyEntry(self, key);
     if (keyEntry != KX_HASH_TABLE_UNDEF) {
+        // free origin key
+        if (keyEntry->ValEntry->Key != NULL) {
+            tb_free(keyEntry->ValEntry->Key);
+            keyEntry->ValEntry->Key = NULL;
+        }
         keyEntry->ValEntry = valEntry;
         return keyEntry;
     }

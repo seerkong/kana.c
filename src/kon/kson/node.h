@@ -269,6 +269,7 @@ struct KonBlock {
 struct KonCell {
     KonBase Base;
     KN Core;
+    KxHashTable* Map;
     KonVector* Vector;
     KonTable* Table;
     KonPair* List;

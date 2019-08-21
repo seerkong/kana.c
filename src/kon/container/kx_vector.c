@@ -243,6 +243,16 @@ kx_vec_val_t KxVector_Shift(KxVector* self)
     return value;
 }
 
+kx_vec_val_t KxVector_Head(KxVector* self)
+{
+    return KxVector_AtIndex(self, 0);
+}
+
+kx_vec_val_t KxVector_Tail(KxVector* self)
+{
+    return KxVector_AtIndex(self, self->Length - 1);
+}
+
 kx_vec_val_t KxVector_AtIndex(KxVector* self, int32_t index)
 {
     if (index < 0 || index >= self->Length) {

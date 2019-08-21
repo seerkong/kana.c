@@ -362,7 +362,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
 
             StateStackSetTopValue(
                 reader->StateStack,
-                KON_READER_PARSE_MAP_PAIR_VAL_OR_NEXT
+                KON_READER_PARSE_MAP_PAIR_EQ_OR_TAG
             );
         }
         // meet value, end key val pair
@@ -380,7 +380,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
             }
             
         }
-        else if (currentState == KON_READER_PARSE_MAP_PAIR_VAL_OR_NEXT) {
+        else if (currentState == KON_READER_PARSE_MAP_PAIR_VAL || currentState == KON_READER_PARSE_MAP_PAIR_EQ_OR_TAG) {
             KvPairSetValue(topBuilder, value);
             KonBuilder* pairBuilder = BuilderStackPop(reader->BuilderStack);
             KonBuilder* mapBuilder = BuilderStackTop(reader->BuilderStack);
@@ -398,7 +398,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         }
     }
     else if (builderType == KON_BUILDER_CELL) {
-        // TODO if cell next section
+        // create new cell section in CellBuilder
         // 1 core is set, meet next core
         // 2 table is set, meet next core or table
         // 3 list is set, meet next core or table or list
@@ -408,7 +408,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         else if (KON_IS_PARAM(value)) {
             CellBuilderSetTable(topBuilder, value);
         }
-        else if (KON_IsBlock(value)) {
+        else if (value == KON_NIL || KON_IS_BLOCK(value)) {
             CellBuilderSetList(topBuilder, value);
         }
         else {
@@ -506,10 +506,16 @@ KN KSON_Parse(KonReader* reader)
             // 3 update top state
 
             // 如当前是cell类型，修改当前状态后再push到state stack
-            if (IsContainerStartToken(event)
-                && currentState == KON_READER_PARSE_CELL_CORE
+            if (currentState == KON_READER_PARSE_CELL_CORE
             ) {
                 StateStackSetTopValue(reader->StateStack, KON_READER_PARSE_CELL_INNER_CONTAINER);
+            }
+            // {a :b ()} 
+            else if (currentState == KON_READER_PARSE_MAP_PAIR_EQ_OR_TAG
+            ) {
+                AddValueToTopBuilder(reader, KON_UKN);
+                // StateStackPop(reader->StateStack);
+                // StateStackSetTopValue(reader->StateStack, KON_READER_PARSE_CELL_INNER_CONTAINER);
             }
 
             KonBuilder* builder;
@@ -609,10 +615,12 @@ KN KSON_Parse(KonReader* reader)
             else if (currentState == KON_READER_PARSE_TABLE_PAIR_VAL) {
                 // TODO throw exception
             }
-            // {a :b :c} current like the ':' before c
+            // {a :b :c = :d} current like the ':' before c and d
             // set pair value to true, and add to top val
-            else if (currentState == KON_READER_PARSE_MAP_PAIR_VAL_OR_NEXT) {
-                AddValueToTopBuilder(reader, KON_TRUE);
+            else if (currentState == KON_READER_PARSE_MAP_PAIR_EQ_OR_TAG
+                || currentState == KON_READER_PARSE_MAP_PAIR_VAL
+            ) {
+                AddValueToTopBuilder(reader, KON_UKN);
                 StateStackPush(reader->StateStack, KON_READER_PARSE_MAP_PAIR_KEY);
                 KonBuilder* builder = CreateKvPairBuilder();
                 BuilderStackPush(reader->BuilderStack, builder);
@@ -620,6 +628,17 @@ KN KSON_Parse(KonReader* reader)
             // {:a}
             else {
             }
+            continue;
+        }
+
+        // parse cell map key values
+        else if (event == KON_TOKEN_EQUAL
+            && currentState == KON_READER_PARSE_MAP_PAIR_EQ_OR_TAG
+        ) {
+            StateStackSetTopValue(
+                reader->StateStack,
+                KON_READER_PARSE_MAP_PAIR_VAL
+            );
             continue;
         }
 

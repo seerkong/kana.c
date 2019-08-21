@@ -73,6 +73,9 @@ int32_t KxVector_Unshift(KxVector* self, kx_vec_val_t value);
 // get head
 kx_vec_val_t KxVector_Shift(KxVector* self);
 
+kx_vec_val_t KxVector_Head(KxVector* self);
+kx_vec_val_t KxVector_Tail(KxVector* self);
+
 kx_vec_val_t KxVector_AtIndex(KxVector* self, int32_t index);
 
 int32_t KxVector_SetIndex(KxVector* self, int32_t index, kx_vec_val_t value);

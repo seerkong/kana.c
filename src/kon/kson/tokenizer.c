@@ -304,7 +304,7 @@ bool IsSpace(char ch)
 
 bool IsStopWord(char ch)
 {
-    char dest[16] = ":%./|!#$@<>[](){};";
+    char dest[] = ":%./|!#$@<>[](){};";
     if (strchr(dest, ch) > 0) {
         return true;
     }

@@ -11,7 +11,7 @@ KonState* kstate;
 SUITE(suite);
 
 TEST Reader_Cell(void) {
-    char* filePathOrigin = "~/lang/konscript/kon-c/examples/kon/cell.kl";
+    char* filePathOrigin = "~/lang/konscript/kon-c/examples/kon/cell.kon";
     // char* filePathOrigin = "~/lang/konscript/kon-c/examples/knative/math.kl";
     
     KonReader* reader = KSON_ReaderInit(kstate);
