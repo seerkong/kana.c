@@ -367,10 +367,6 @@ if(MSVC)
 else()
     target_compile_options(tbox PRIVATE -O0)
 endif()
-target_link_libraries(tbox PRIVATE
-    pthread
-    pthread
-)
 target_link_directories(tbox PRIVATE
     /usr/local/lib
     /usr/lib

@@ -14,4 +14,6 @@ target("kli")
     add_files("commander.c")
     add_files("main.c")
     
-    
+    after_build(function (target)
+
+    end)

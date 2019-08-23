@@ -2,4 +2,4 @@
 {let b "Tina"}
 {let c}
 {set a "Loki"}
-[writeln % a " " b " " c ]
+[writeln a " " b " " c]

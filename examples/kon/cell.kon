@@ -120,3 +120,8 @@
     ``1
   ]
 ^kon}
+
+
+
+{kn/accessor/put-key-val % new-instance "__proto" #nil; #[] }
+{kon #[] }

@@ -49,6 +49,9 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KON_TOKEN_EQUAL:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EQUAL");
             break;
+        case KON_TOKEN_ASSIGN:
+            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_ASSIGN");
+            break;
         case KON_TOKEN_MSG_SIGNAL:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_MSG_SIGNAL");
             break;
@@ -147,7 +150,8 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
 
         case KON_TOKEN_COMMENT_SINGLE_LINE:
             KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_COMMENT_SINGLE_LINE");
-            break;
+            return;
+            // break;
         default:
             break;
     }
@@ -658,9 +662,20 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             }
         }
         else if (pc[0] == ':') {
-            UpdateTokenContent(tokenizer, ":");
-            ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_TABLE_TAG;
+            const char* nextChars = PeekChars(tokenizer, 3);
+            if (nextChars == NULL) {
+                break;
+            }
+            else if (nextChars[1] == '=') {
+                UpdateTokenContent(tokenizer, ":=");
+                ForwardToken(tokenizer, 2);
+                tokenizer->TokenKind = KON_TOKEN_ASSIGN;
+            }
+            else {
+                UpdateTokenContent(tokenizer, ":");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_TABLE_TAG;
+            }
         }
         else if (pc[0] == '%') {
             UpdateTokenContent(tokenizer, "%");

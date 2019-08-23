@@ -2,11 +2,11 @@
   {blk
     #[
       {set a 1}
-      [+ % a b c ]
+      [+ a b c]
     ]
   }
 }
 {let a 5}
 {let b 6}
 {let c 7}
-[t % ]
+[t]

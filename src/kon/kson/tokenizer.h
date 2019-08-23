@@ -65,7 +65,8 @@ typedef enum
     KON_TOKEN_APPLY,        // %
     KON_TOKEN_REST,     // ... like scheme . eg [func [a ... b]]
     KON_TOKEN_CLAUSE_END,   // ;
-    KON_TOKEN_EQUAL,   // [a = 2]
+    KON_TOKEN_EQUAL,   //  [= 1 2]
+    KON_TOKEN_ASSIGN,   // {a ff := 22}
     // TODO change select path(/abc), exec msg(.length), pipe proc(|abc)
     // to wrapper type
     KON_TOKEN_GET_SLOT, // /tag /. /.. /~

@@ -9,7 +9,7 @@ KN KON_MakeRootEnv(KonState* kstate)
     env->MsgDispatchers = KxHashTable_Init(4);
 
     // kon module
-    KON_EnvDefine(kstate, env, "kon",
+    KON_EnvDefine(kstate, env, "kn",
         KonModule_Export(kstate, env)
     );
 

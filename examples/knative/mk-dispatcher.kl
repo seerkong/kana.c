@@ -3,24 +3,25 @@
   :on-apply-args
     {lambda (args)
       #[
-        [displayln % "on-apply-args" ]
+        [displayln "on-apply-args"]
       ]
     }
   :on-select-path
     {lambda (args)
       #[
-        [displayln % "on-select-path" ]
+        [displayln "on-select-path"]
       ]
     }
   :on-method-call
     {lambda (subj msg method-args)
       #[
-        [writeln % "on-method-call " msg ]
-        [displayln % "method arg list" method-args ]
+        [writeln "on-method-call " msg]
+        [writeln "method arg list " method-args]
         {cond
-          [eq % $+ msg ]
+          [eq $+ msg]
           #[
-            {apply $+ [list-unshift % method-args subj ] }
+            [writeln "composited + arg list " {kn/list/unshift % method-args subj} ]
+            {apply $+ {kn/list/unshift % method-args subj} }
           ]
         }
       ]
@@ -28,19 +29,19 @@
   :on-visit-vector
     {lambda (args)
       #[
-        [displayln % "on-visit-vector" ]
+        [displayln "on-visit-vector"]
       ]
     }
   :on-visit-table
     {lambda (args)
       #[
-        [displayln % "on-visit-table" ]
+        [displayln "on-visit-table"]
       ]
     }
   :on-visit-cell
     {lambda (args)
       #[
-        [displayln % "on-visit-cell" ]
+        [displayln "on-visit-cell"]
       ]
     }
 
@@ -49,7 +50,7 @@
 
 
 
-[writeln % [get-dispatcher-id % 5 ] ]
+[writeln [get-dispatcher-id 5] ]
 
-``[5 .+ 2 ]
+{5 .+ 2 3 4}
 

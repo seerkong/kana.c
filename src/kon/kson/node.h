@@ -240,6 +240,7 @@ struct KonUnquote {
 typedef enum {
     KON_SYNTAX_MARKER_APPLY,        // %
     KON_SYNTAX_MARKER_EQUAL,        // =
+    KON_SYNTAX_MARKER_ASSIGN,        // :=
     KON_SYNTAX_MARKER_MSG_SIGNAL,   // .
     KON_SYNTAX_MARKER_GET_SLOT,        // / /. /.. /ABC /~
     KON_SYNTAX_MARKER_PROC_PIPE,         // |

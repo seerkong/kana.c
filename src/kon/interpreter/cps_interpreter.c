@@ -142,7 +142,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             argList = KON_CDR(argList);
             bounce = ApplyProcedureArguments(kstate, subjProc, argList, env, cont);
         }
-        else if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_EQUAL) {
+        else if (CAST_Kon(SyntaxMarker, firstObj)->Type == KON_SYNTAX_MARKER_ASSIGN) {
             KN assignTo = KON_CADR(argList);
             // subj must be a accessor
             if (KON_IS_ACCESSOR(subj)) {
@@ -262,7 +262,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
             if (KON_IS_SYNTAX_MARKER(item)
                 && (
                     CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_APPLY
-                    || CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_EQUAL
+                    || CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_ASSIGN
                     || CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_MSG_SIGNAL
                     || CAST_Kon(SyntaxMarker, item)->Type == KON_SYNTAX_MARKER_PROC_PIPE
                 )
@@ -618,11 +618,23 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
             }
 
             else {
-                KON_DEBUG("error! unhandled prefix marcro %s", prefix);
+                KON_DEBUG("error! unhandled keyword");
                 bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = KON_UKN;
                 bounce->Cont = cont;
             }
+        }
+        else {
+            bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_SUBJ);
+            KN restJobs = KON_CellCoresToList(kstate, KON_DNR(cell));
+            KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_SUBJ);
+            k->Cont = cont;
+            k->Env = env;
+            k->RestJobs = restJobs;
+            
+            bounce->Bounce.Value = first;  // get subj word
+            bounce->Cont = k;
+            bounce->Bounce.Env = env;
         }
     }
     else if (KON_IsPairList(expression)) {
@@ -639,10 +651,15 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
         else {
             bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_SUBJ);
             
+            // seperate and transform [+ 1 2 3] to subj: +, restJobs: [% 1 2 3]
+            KonSyntaxMarker* applyMarker = KON_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KON_T_SYNTAX_MARKER);
+            applyMarker->Type = KON_SYNTAX_MARKER_APPLY;
+            KN restJobs = KON_CONS(kstate, applyMarker, KON_CDR(words));
+
             KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_EVAL_SUBJ);
             k->Cont = cont;
             k->Env = env;
-            k->RestJobs = KON_CDR(words);
+            k->RestJobs = restJobs;
             
             bounce->Bounce.Value = first;  // get subj word
             bounce->Cont = k;

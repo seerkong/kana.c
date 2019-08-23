@@ -130,11 +130,12 @@ bool IsLiteralToken(int event)
     }
 }
 
-// % . | ;
+// % . | ; = :=
 bool IsSyntaxToken(int event)
 {
     if (event == KON_TOKEN_APPLY
         || event == KON_TOKEN_EQUAL
+        || event == KON_TOKEN_ASSIGN
         || event == KON_TOKEN_PROC_PIPE
         || event == KON_TOKEN_MSG_SIGNAL
         || event == KON_TOKEN_GET_SLOT
@@ -159,6 +160,10 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
         }
         case KON_TOKEN_EQUAL: {
             value->Type = KON_SYNTAX_MARKER_EQUAL;
+            break;
+        }
+        case KON_TOKEN_ASSIGN: {
+            value->Type = KON_SYNTAX_MARKER_ASSIGN;
             break;
         }
         case KON_TOKEN_CLAUSE_END: {
@@ -408,13 +413,16 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         else if (KON_IS_PARAM(value)) {
             CellBuilderSetTable(topBuilder, value);
         }
-        else if (value == KON_NIL || KON_IS_BLOCK(value)) {
+        else if (KON_IS_BLOCK(value)) {
             CellBuilderSetList(topBuilder, value);
+        }
+        // #nil; a core value
+        else if (value == KON_NIL) {
+            CellBuilderSetCore(topBuilder, value);
         }
         else {
             CellBuilderSetCore(topBuilder, value);
         }
-        
     }
     // when in wrapper builders, should exit this builder
     // after set wrapper inner value
@@ -448,6 +456,20 @@ void ExitTopBuilder(KonReader* reader)
     }
     else if (builderType == KON_BUILDER_BLOCK) {
         value = MakeBlockByBuilder(reader->Kstate, topBuilder);
+
+        // a exceptional case, when in a cell, {abc #[]} set #[] to cell list
+        // and {abc #nil;} set #nil; to 2nd cell core
+        KonBuilder* nextTopBuilder = (KonBuilder*)reader->BuilderStack->Top->Next->Data;
+        if (nextTopBuilder->Type == KON_BUILDER_CELL) {
+            // resume last container builder
+            BuilderStackPop(reader->BuilderStack);
+            // resume last state
+            StateStackPop(reader->StateStack);
+            CellBuilderSetList(nextTopBuilder, value);
+
+            return;
+        }
+
     }
     else if (builderType == KON_BUILDER_PARAM) {
         value = MakeParamByBuilder(reader->Kstate, topBuilder);
@@ -475,7 +497,7 @@ void ExitTopBuilder(KonReader* reader)
     // resume last state
     StateStackPop(reader->StateStack);
 
-    AddValueToTopBuilder(reader, value);
+    AddValueToTopBuilder(reader, value);    
 }
 
 void ExitAllStackBuilders()
@@ -645,10 +667,8 @@ KN KSON_Parse(KonReader* reader)
         // don't need to create new builder
         KonBuilder* topBuilder = BuilderStackTop(reader->BuilderStack);
         if (IsSyntaxToken(event)) {
-            // syntax markers like: % . | ; 
-            // top builder should be a list
+            // syntax markers like: % . | ;
             // don't need update state
-            assert(topBuilder && topBuilder->Type == KON_BUILDER_LIST);
             KN marker = MakeSyntaxMarker(reader->Kstate, event);
             AddValueToTopBuilder(reader, marker);
         }
@@ -656,7 +676,6 @@ KN KSON_Parse(KonReader* reader)
             // prefix marcro eg !abc
             // top builder should be a list
             // don't need update state
-            assert(topBuilder && topBuilder->Type == KON_BUILDER_LIST);
             KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);
         }

@@ -420,6 +420,10 @@ KN KON_SyntaxMarkerStringify(KonState* kstate, KN source)
             KxStringBuffer_AppendCstr(result->String, "=");
             break;
         }
+        case KON_SYNTAX_MARKER_ASSIGN: {
+            KxStringBuffer_AppendCstr(result->String, ":=");
+            break;
+        }
         case KON_SYNTAX_MARKER_MSG_SIGNAL: {
             KxStringBuffer_AppendCstr(result->String, ".");
             break;
@@ -975,14 +979,14 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
                 KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(innerVectorToKonStr));
             }
             
-            if (innerList != KON_UNDEF) {
-                KxStringBuffer_AppendCstr(result->String, "\n");
-                AddLeftPadding(result->String, depth, padding);
-                KxStringBuffer_AppendCstr(result->String, padding);
+            // if (innerList != KON_UNDEF) {
+            //     KxStringBuffer_AppendCstr(result->String, "\n");
+            //     AddLeftPadding(result->String, depth, padding);
+            //     KxStringBuffer_AppendCstr(result->String, padding);
 
-                KN innerListToKonStr = KON_BlockStringify(kstate, innerList, true, depth + 1, padding);
-                KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(innerListToKonStr));
-            }
+            //     KN innerListToKonStr = KON_BlockStringify(kstate, innerList, true, depth + 1, padding);
+            //     KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(innerListToKonStr));
+            // }
             
             iter = iter->Next;
         }

@@ -1,12 +1,12 @@
-{let c $[a b c ]}
+{let c $[a b c ] }
 
 {for
   (
     {let iter c}
-    [neq % iter #nil; ]
-    {set iter [cdr % iter ]}
+    [neq iter #nil;]
+    {set iter [cdr iter] }
   )
   #[
-    [writeln % [car % iter ] ]
+    [writeln [car iter] ]
   ]
 }

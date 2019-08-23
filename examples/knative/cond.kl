@@ -1,21 +1,21 @@
 {let a 5}
 
 {cond
-  [< % 5 4 ]
+  [< 5 4]
   #[
     "condition 1 pass"
   ]
-  [< % a 4 ]
+  [< a 4]
   #[
-    [writeln % "condition 2 pass" ]
+    [writeln "condition 2 pass"]
   ]
-  [< % 6 4 ]
+  [< 6 4]
   #[
-    [writeln % "condition 3 pass" ]
-    [writeln % "do something more here" ]
+    [writeln "condition 3 pass"]
+    [writeln "do something more here"]
   ]
   else
   #[
-    [writeln % "else branch"]
+    [writeln "else branch"]
   ]
 }
