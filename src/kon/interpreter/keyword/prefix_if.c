@@ -13,10 +13,10 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
     
     int state = 1; // 1 parse true exprs, 2 parse false exprs
     do {
-        KN item = KON_CAR(iter);
+        KN item = KN_CAR(iter);
         
         if (state == 1) {
-            if (KON_IS_WORD(item) && strcmp(KON_UNBOX_SYMBOL(item), "else") == 0) {
+            if (KN_IS_WORD(item) && strcmp(KN_UNBOX_SYMBOL(item), "else") == 0) {
                 state = 2;
             }
             else {
@@ -28,13 +28,13 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
             KxVector_Push(falseClauseVec, item);
         }
 
-        iter = KON_CDR(iter);
-    } while ((KN)iter != KON_NIL);
+        iter = KN_CDR(iter);
+    } while ((KN)iter != KN_NIL);
     
-    KN trueClause = KON_VectorToKonPairList(kstate, trueClauseVec);
-    KN falseClause = KON_VectorToKonPairList(kstate, falseClauseVec);
+    KN trueClause = KN_VectorToKonPairList(kstate, trueClauseVec);
+    KN falseClause = KN_VectorToKonPairList(kstate, falseClauseVec);
     
-    return KON_PairList2(kstate, trueClause, falseClause);
+    return KN_PairList2(kstate, trueClause, falseClause);
 }
 
 KonTrampoline* AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
@@ -45,37 +45,37 @@ KonTrampoline* AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonConti
     KN falseClause = KxHashTable_AtKey(memo, "FalseClause");
 
     KonTrampoline* bounce;
-    if (KON_IS_TRUE(evaledValue)) {
-        bounce = KON_EvalSentences(kstate, trueClause, env, contBeingInvoked->Cont);
+    if (KN_IS_TRUE(evaledValue)) {
+        bounce = KN_EvalSentences(kstate, trueClause, env, contBeingInvoked->Cont);
     }
-    else if (KON_IS_FALSE(evaledValue) && falseClause != KON_NIL) {
-        bounce = KON_EvalSentences(kstate, falseClause, env, contBeingInvoked->Cont);
+    else if (KN_IS_FALSE(evaledValue) && falseClause != KN_NIL) {
+        bounce = KN_EvalSentences(kstate, falseClause, env, contBeingInvoked->Cont);
     }
     else {
-        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+        bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
         bounce->Cont = contBeingInvoked->Cont;
-        bounce->Run.Value = KON_FALSE;
+        bounce->Run.Value = KN_FALSE;
     }
 
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_EvalPrefixIf(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KON_DEBUG("meet prefix marcro if");
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN condition = KON_DCR(expression);
-    KN trueClause = KON_DLR(expression);
-    KN falseClause = KON_NIL;
-    if (KON_DNR(expression) != KON_NIL) {
-        falseClause = KON_DLNR(expression);
+    KN_DEBUG("meet prefix marcro if");
+    KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN condition = KN_DCR(expression);
+    KN trueClause = KN_DLR(expression);
+    KN falseClause = KN_NIL;
+    if (KN_DNR(expression) != KN_NIL) {
+        falseClause = KN_DLNR(expression);
     }
 
-    KON_DEBUG("condition %s", KON_StringToCstr(KON_ToFormatString(kstate, condition, true, 0, "  ")));
-    // KON_DEBUG("trueClause %s", KON_StringToCstr(KON_ToFormatString(kstate, trueClause, true, 0, "  ")));
-    // KON_DEBUG("falseClause %s", KON_StringToCstr(KON_ToFormatString(kstate, falseClause, true, 0, "  ")));
+    KN_DEBUG("condition %s", KN_StringToCstr(KN_ToFormatString(kstate, condition, true, 0, "  ")));
+    // KN_DEBUG("trueClause %s", KN_StringToCstr(KN_ToFormatString(kstate, trueClause, true, 0, "  ")));
+    // KN_DEBUG("falseClause %s", KN_StringToCstr(KN_ToFormatString(kstate, falseClause, true, 0, "  ")));
 
-    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = env;
 
@@ -86,7 +86,7 @@ KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KonEnv* env, Ko
     k->Native.Callback = AfterIfConditionEvaled;
     
     KonTrampoline* bounce;
-    bounce = KON_EvalExpression(kstate, condition, env, k);
+    bounce = KN_EvalExpression(kstate, condition, env, k);
 
     return bounce;
 }

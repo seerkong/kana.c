@@ -1,5 +1,5 @@
-#ifndef KON_KSON_READER_H
-#define KON_KSON_READER_H
+#ifndef KN_KSON_READER_H
+#define KN_KSON_READER_H
 
 #include <stdbool.h>
 

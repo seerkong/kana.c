@@ -13,7 +13,7 @@ SUITE(suite);
 TEST Tokenize_Cell(void) {
         
     char* filePathOrigin = "~/lang/konscript/kon-c/examples/kon/cell.kon";
-    KxStringBuffer* sb = KON_ReadFileContent(filePathOrigin);
+    KxStringBuffer* sb = KN_ReadFileContent(filePathOrigin);
     printf("%s\n", KxStringBuffer_Cstr(sb));
     KxStringBuffer_Clear(sb);
 
@@ -34,10 +34,10 @@ int main(int argc, char const* argv[])
 {
     GREATEST_MAIN_BEGIN();
     greatest_set_verbosity(1);
-    kstate = KON_Init();
+    kstate = KN_Init();
     RUN_SUITE(suite);
 
-    KON_Finish(kstate);
+    KN_Finish(kstate);
     GREATEST_MAIN_END();
 
     return 0;

@@ -10,41 +10,41 @@ KonTrampoline* AfterSetValExprEvaled(KonState* kstate, KN evaledValue, KonContin
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     char* varName = KxHashTable_AtKey(memo, "VarName");
 
-    KON_EnvLookupSet(kstate, env, varName, evaledValue);
+    KN_EnvLookupSet(kstate, env, varName, evaledValue);
 
     KonTrampoline* bounce;
 
-    bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+    bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
     bounce->Cont = contBeingInvoked->Cont;
-    bounce->Run.Value = KON_TWO;
+    bounce->Run.Value = KN_TWO;
 
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixSet(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_EvalPrefixSet(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KON_DEBUG("meet prefix marcro set");
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN varName = KON_DCR(expression);
+    KN_DEBUG("meet prefix marcro set");
+    KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN varName = KN_DCR(expression);
     
-    const char* varNameCstr = KON_UNBOX_SYMBOL(varName);
+    const char* varNameCstr = KN_UNBOX_SYMBOL(varName);
 
-    KON_DEBUG("varName %s", varNameCstr);
+    KN_DEBUG("varName %s", varNameCstr);
     
     KonTrampoline* bounce;
-    if ((KN)KON_DNR(expression) == KON_NIL) {
-        KON_EnvLookupSet(kstate, env, varNameCstr, KON_UKN);
+    if ((KN)KN_DNR(expression) == KN_NIL) {
+        KN_EnvLookupSet(kstate, env, varNameCstr, KN_UKN);
 
-        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
-        bounce->Run.Value = KON_TRUE;
+        bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
+        bounce->Run.Value = KN_TRUE;
         bounce->Cont = cont;
     }
     else {
-        KN initVal = KON_DCNR(expression);
-        KON_DEBUG("initVal %s", KON_StringToCstr(KON_ToFormatString(kstate, initVal, true, 0, "  ")));
+        KN initVal = KN_DCNR(expression);
+        KN_DEBUG("initVal %s", KN_StringToCstr(KN_ToFormatString(kstate, initVal, true, 0, "  ")));
 
 
-        KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+        KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
         k->Cont = cont;
         k->Env = env;
 
@@ -54,7 +54,7 @@ KonTrampoline* KON_EvalPrefixSet(KonState* kstate, KN expression, KonEnv* env, K
         k->Native.MemoTable = memo;
         k->Native.Callback = AfterSetValExprEvaled;
 
-        bounce = KON_EvalExpression(kstate, initVal, env, k);
+        bounce = KN_EvalExpression(kstate, initVal, env, k);
     }
 
     return bounce;

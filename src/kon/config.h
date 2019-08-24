@@ -1,28 +1,28 @@
-#ifndef KON_CONFIG_H
-#define KON_CONFIG_H
+#ifndef KN_CONFIG_H
+#define KN_CONFIG_H
 
 #ifdef _WIN32
 #ifdef BUILDING_DLL
-#define KON_API    __declspec(dllexport)
+#define KN_API    __declspec(dllexport)
 #else
-#define KON_API    __declspec(dllimport)
+#define KN_API    __declspec(dllimport)
 #endif
 #else
-#define KON_API    extern
+#define KN_API    extern
 #endif
 
-#ifndef KON_64_BIT
+#ifndef KN_64_BIT
 #if defined(__amd64) || defined(__x86_64) || defined(_WIN64) || defined(_Wp64) || defined(__LP64__) || defined(__PPC64__) || defined(__mips64__) || defined(__sparc64__)
-#define KON_64_BIT 1
+#define KN_64_BIT 1
 #else
-#define KON_64_BIT 0
+#define KN_64_BIT 0
 #endif
 #endif
 
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)
-#define KON_BSD 1
+#define KN_BSD 1
 #else
-#define KON_BSD 0
+#define KN_BSD 0
 #if ! defined(_GNU_SOURCE) && ! defined(_WIN32) && ! defined(PLAN9)
 #define _GNU_SOURCE
 #endif

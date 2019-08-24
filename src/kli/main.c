@@ -8,7 +8,7 @@ KonState* kstate;
 
 KonState* InitKonState()
 {
-    kstate = KON_Init();
+    kstate = KN_Init();
     if (kstate == NULL) {
         fprintf(stderr, "initialize konstate failed!\n");
         exit(1);
@@ -19,16 +19,16 @@ KonState* InitKonState()
 
 void ExitFailure(KonState* kstate)
 {
-    KON_Finish(kstate);
+    KN_Finish(kstate);
 }
 
 void ExitSuccess(KonState* kstate)
 {
-    KON_Finish(kstate);
+    KN_Finish(kstate);
 }
 
 static void Repl(command_t *self) {
-    KON_DEBUG("start repl: enabled\n");
+    KN_DEBUG("start repl: enabled\n");
 }
 
 static void DisableLog(command_t* self) {
@@ -36,13 +36,13 @@ static void DisableLog(command_t* self) {
 }
 
 static void EvalFile(command_t *self) {
-    KON_DEBUG("eval file: %s\n", self->arg);
-    KON_EvalFile(kstate, self->arg);
+    KN_DEBUG("eval file: %s\n", self->arg);
+    KN_EvalFile(kstate, self->arg);
 }
 
 static void PrintHelp(command_t *self)
 {
-    KON_DEBUG("? help -h\n");
+    KN_DEBUG("? help -h\n");
 }
 
 int RunMain(int argc, char **argv)
@@ -55,13 +55,13 @@ int RunMain(int argc, char **argv)
     command_option(&cmd, "-h", "--help [arg]", "help info", PrintHelp);
     command_parse(&cmd, argc, argv);
 
-    // KON_DEBUG("additional args:\n");
+    // KN_DEBUG("additional args:\n");
     // for (int i = 0; i < cmd.argc; ++i) {
-    //     KON_DEBUG("  - '%s'\n", cmd.argv[i]);
+    //     KN_DEBUG("  - '%s'\n", cmd.argv[i]);
     // }
 
     command_free(&cmd);
-    return KON_TRUE;
+    return KN_TRUE;
 }
 
 int main(int argc, char const* argv[])

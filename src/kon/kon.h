@@ -1,5 +1,5 @@
-#ifndef KON_H
-#define KON_H
+#ifndef KN_H
+#define KN_H
 
 #ifdef __cplusplus
 extern "C"{
@@ -13,10 +13,10 @@ extern "C"{
 
 // script lifetime start
 
-KON_API KonState* KON_Init();
-KON_API int KON_Finish(KonState* kstate);
+KN_API KonState* KN_Init();
+KN_API int KN_Finish(KonState* kstate);
 
-KON_API KN KON_EvalFile(KonState* kstate, char* filePath);
+KN_API KN KN_EvalFile(KonState* kstate, char* filePath);
 
 // script lifetime end
 

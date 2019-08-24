@@ -1,5 +1,5 @@
-#ifndef KON_INTERPRETER_TYPES_H
-#define KON_INTERPRETER_TYPES_H
+#ifndef KN_INTERPRETER_TYPES_H
+#define KN_INTERPRETER_TYPES_H
 
 #ifdef __cplusplus
 extern "C"{
@@ -15,19 +15,19 @@ typedef enum {
     // Land just returns the value. It should only ever be created
     // at the very beginning of process,
     // and will be the last Trampoline value called.
-    KON_TRAMPOLINE_LAND,
+    KN_TRAMPOLINE_LAND,
     // Run doesn't evaluate the value, it just runs k with it.
     // It's similar to running inline,
     // but bounces to avoid growing the stack.
-    KON_TRAMPOLINE_RUN,
+    KN_TRAMPOLINE_RUN,
     // push a block scope continuation
-    KON_TRAMPOLINE_BLOCK,
+    KN_TRAMPOLINE_BLOCK,
     // push a subj scope continuation
-    KON_TRAMPOLINE_SUBJ,
+    KN_TRAMPOLINE_SUBJ,
     // push a sentence scope continuation
-    KON_TRAMPOLINE_CLAUSE_LIST,
+    KN_TRAMPOLINE_CLAUSE_LIST,
     // push a clause scope continuation
-    KON_TRAMPOLINE_ARG_LIST,
+    KN_TRAMPOLINE_ARG_LIST,
 } KonBounceType;
 
 struct _KonTrampoline {

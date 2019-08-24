@@ -1,5 +1,5 @@
-#ifndef KON_MOD_MODULE_H
-#define KON_MOD_MODULE_H 1
+#ifndef KN_MOD_MODULE_H
+#define KN_MOD_MODULE_H 1
 
 #include "../../kson/node.h"
 

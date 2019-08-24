@@ -1,5 +1,5 @@
-#ifndef KON_KSON_TOKENIZER_H
-#define KON_KSON_TOKENIZER_H
+#ifndef KN_KSON_TOKENIZER_H
+#define KN_KSON_TOKENIZER_H
 
 #include <stdbool.h>
 
@@ -9,69 +9,69 @@
 
 typedef enum
 {
-    KON_TOKEN_NONE = 0,
-    KON_TOKEN_EOF,
-    KON_TOKEN_WHITESPACE,
-    KON_TOKEN_COMMENT_SINGLE_LINE, // `
+    KN_TOKEN_NONE = 0,
+    KN_TOKEN_EOF,
+    KN_TOKEN_WHITESPACE,
+    KN_TOKEN_COMMENT_SINGLE_LINE, // `
     
-    KON_TOKEN_LIST_START,   // [
-    KON_TOKEN_BLOCK_START,   // #[
-    KON_TOKEN_LIST_END,     // ]
-    KON_TOKEN_VECTOR_START,  // <
-    KON_TOKEN_VECTOR_END,    // >
-    KON_TOKEN_TABLE_START,    // #(
-    KON_TOKEN_PARAM_START,    // (
-    KON_TOKEN_TABLE_END,      // )
-    KON_TOKEN_CELL_START,   // {
-    KON_TOKEN_CELL_END,     // }
+    KN_TOKEN_LIST_START,   // [
+    KN_TOKEN_BLOCK_START,   // #[
+    KN_TOKEN_LIST_END,     // ]
+    KN_TOKEN_VECTOR_START,  // <
+    KN_TOKEN_VECTOR_END,    // >
+    KN_TOKEN_TABLE_START,    // #(
+    KN_TOKEN_PARAM_START,    // (
+    KN_TOKEN_TABLE_END,      // )
+    KN_TOKEN_CELL_START,   // {
+    KN_TOKEN_CELL_END,     // }
 
-    KON_TOKEN_KEYWORD_NIL,  //  #nil;   list end
-    KON_TOKEN_KEYWORD_UNDEF,  //  #undef;
-    KON_TOKEN_KEYWORD_UKN,  //  #ukn; unknown, container placeholder
-    KON_TOKEN_KEYWORD_TRUE,  //  #t;
-    KON_TOKEN_KEYWORD_FALSE,  //  #f;
-    KON_TOKEN_KEYWORD_EITHER,  //  either #either,t,0.4;
-    KON_TOKEN_KEYWORD_BOTH,  //  #both,0.4;
+    KN_TOKEN_KEYWORD_NIL,  //  #nil;   list end
+    KN_TOKEN_KEYWORD_UNDEF,  //  #undef;
+    KN_TOKEN_KEYWORD_UKN,  //  #ukn; unknown, container placeholder
+    KN_TOKEN_KEYWORD_TRUE,  //  #t;
+    KN_TOKEN_KEYWORD_FALSE,  //  #f;
+    KN_TOKEN_KEYWORD_EITHER,  //  either #either,t,0.4;
+    KN_TOKEN_KEYWORD_BOTH,  //  #both,0.4;
 
-    KON_TOKEN_LITERAL_NUMBER,
-    KON_TOKEN_LITERAL_STRING,   // "abc"
-    KON_TOKEN_LITERAL_RAW_STRING,       // 'abc'
+    KN_TOKEN_LITERAL_NUMBER,
+    KN_TOKEN_LITERAL_STRING,   // "abc"
+    KN_TOKEN_LITERAL_RAW_STRING,       // 'abc'
 
-    KON_TOKEN_SYM_PREFIX_WORD, // !cond !define
-    KON_TOKEN_SYM_SUFFIX_WORD, // ^await
-    KON_TOKEN_SYM_WORD,   // abC
-    KON_TOKEN_SYM_VARIABLE, // @abc
-    KON_TOKEN_SYM_IDENTIFIER,  // $abc
-    KON_TOKEN_SYM_STRING, // $''
+    KN_TOKEN_SYM_PREFIX_WORD, // !cond !define
+    KN_TOKEN_SYM_SUFFIX_WORD, // ^await
+    KN_TOKEN_SYM_WORD,   // abC
+    KN_TOKEN_SYM_VARIABLE, // @abc
+    KN_TOKEN_SYM_IDENTIFIER,  // $abc
+    KN_TOKEN_SYM_STRING, // $''
 
 
 
-    KON_TOKEN_QUOTE_LIST,   // $[]
-    KON_TOKEN_QUOTE_CELL,   // ${}
+    KN_TOKEN_QUOTE_LIST,   // $[]
+    KN_TOKEN_QUOTE_CELL,   // ${}
 
-    KON_TOKEN_QUASI_LIST,   // @[]
-    KON_TOKEN_QUASI_CELL,   // @{}
+    KN_TOKEN_QUASI_LIST,   // @[]
+    KN_TOKEN_QUASI_CELL,   // @{}
 
-    KON_TOKEN_EXPAND_REPLACE,   // $.abc
-    KON_TOKEN_EXPAND_KV,        // $%.abc
-    KON_TOKEN_EXPAND_SEQ,        // $~.abc
+    KN_TOKEN_EXPAND_REPLACE,   // $.abc
+    KN_TOKEN_EXPAND_KV,        // $%.abc
+    KN_TOKEN_EXPAND_SEQ,        // $~.abc
 
-    KON_TOKEN_UNQUOTE_REPLACE,  // @.abc @.[5 .+ $.a]
-    KON_TOKEN_UNQUOTE_KV,        // @%.abc
-    KON_TOKEN_UNQUOTE_SEQ,        // @~.abc
+    KN_TOKEN_UNQUOTE_REPLACE,  // @.abc @.[5 .+ $.a]
+    KN_TOKEN_UNQUOTE_KV,        // @%.abc
+    KN_TOKEN_UNQUOTE_SEQ,        // @~.abc
 
-    KON_TOKEN_TABLE_TAG,    // :
+    KN_TOKEN_TABLE_TAG,    // :
     
-    KON_TOKEN_APPLY,        // %
-    KON_TOKEN_REST,     // ... like scheme . eg [func [a ... b]]
-    KON_TOKEN_CLAUSE_END,   // ;
-    KON_TOKEN_EQUAL,   //  [= 1 2]
-    KON_TOKEN_ASSIGN,   // {a ff := 22}
+    KN_TOKEN_APPLY,        // %
+    KN_TOKEN_REST,     // ... like scheme . eg [func [a ... b]]
+    KN_TOKEN_CLAUSE_END,   // ;
+    KN_TOKEN_EQUAL,   //  [= 1 2]
+    KN_TOKEN_ASSIGN,   // {a ff := 22}
     // TODO change select path(/abc), exec msg(.length), pipe proc(|abc)
     // to wrapper type
-    KON_TOKEN_GET_SLOT, // /tag /. /.. /~
-    KON_TOKEN_MSG_SIGNAL,     // . length
-    KON_TOKEN_PROC_PIPE,         // | abc
+    KN_TOKEN_GET_SLOT, // /tag /. /.. /~
+    KN_TOKEN_MSG_SIGNAL,     // . length
+    KN_TOKEN_PROC_PIPE,         // | abc
 
 } KonTokenKind;
 

@@ -1,99 +1,99 @@
 #include "env.h"
 #include "mod/kon_module.h"
 
-KonEnv* KON_MakeRootEnv(KonState* kstate)
+KonEnv* KN_MakeRootEnv(KonState* kstate)
 {
-    KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
-    env->Parent = KON_NIL;
+    KonEnv* env = KN_ALLOC_TYPE_TAG(kstate, KonEnv, KN_T_ENV);
+    env->Parent = KN_NIL;
     env->Bindings = KxHashTable_Init(4);
     env->MsgDispatchers = KxHashTable_Init(4);
 
     // kon module
-    KON_EnvDefine(kstate, env, "kn",
+    KN_EnvDefine(kstate, env, "kn",
         KonModule_Export(kstate, env)
     );
 
-    KON_PrimaryOpExport(kstate, env);
+    KN_PrimaryOpExport(kstate, env);
 
     return env;
 }
 
-KonEnv* KON_MakeChildEnv(KonState* kstate, KonEnv* parentEnv)
+KonEnv* KN_MakeChildEnv(KonState* kstate, KonEnv* parentEnv)
 {
-    KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
+    KonEnv* env = KN_ALLOC_TYPE_TAG(kstate, KonEnv, KN_T_ENV);
     env->Parent = parentEnv;
     env->Bindings = KxHashTable_Init(4);
     env->MsgDispatchers = KxHashTable_Init(4);
     return env;
 }
 
-KN KON_EnvDefine(KonState* kstate, KonEnv* env, const char* key, KN value)
+KN KN_EnvDefine(KonState* kstate, KonEnv* env, const char* key, KN value)
 {
     KxHashTable_PutKv(CAST_Kon(Env, env)->Bindings, key, value);
-    return KON_TRUE;
+    return KN_TRUE;
 }
 
-KN KON_EnvLookup(KonState* kstate, KonEnv* env, const char* key)
+KN KN_EnvLookup(KonState* kstate, KonEnv* env, const char* key)
 {
     KN value = KxHashTable_AtKey(CAST_Kon(Env, env)->Bindings, key);
-    if (value && value != KON_UNDEF) {
+    if (value && value != KN_UNDEF) {
         return value;
     }
-    else if ((KN)CAST_Kon(Env, env)->Parent == KON_NIL) {
-        return KON_UKN;
+    else if ((KN)CAST_Kon(Env, env)->Parent == KN_NIL) {
+        return KN_UKN;
     }
     else {
-        return KON_EnvLookup(kstate, CAST_Kon(Env, env)->Parent, key);
+        return KN_EnvLookup(kstate, CAST_Kon(Env, env)->Parent, key);
     }
 }
 
-KN KON_EnvLookupSet(KonState* kstate, KonEnv* env, const char* key, KN value)
+KN KN_EnvLookupSet(KonState* kstate, KonEnv* env, const char* key, KN value)
 {
     KN slot = KxHashTable_AtKey(CAST_Kon(Env, env)->Bindings, key);
     if (slot) {
         KxHashTable_PutKv(CAST_Kon(Env, env)->Bindings, key, value);
-        return KON_TRUE;
+        return KN_TRUE;
     }
-    else if ((KN)CAST_Kon(Env, env)->Parent == KON_NIL) {
-        return KON_FALSE;
+    else if ((KN)CAST_Kon(Env, env)->Parent == KN_NIL) {
+        return KN_FALSE;
     }
     else {
-        return KON_EnvLookupSet(kstate, CAST_Kon(Env, env)->Parent, key, value);
+        return KN_EnvLookupSet(kstate, CAST_Kon(Env, env)->Parent, key, value);
     }
 }
 
 
-KN KON_EnvDispatcherDefine(KonState* kstate, KonEnv* env, const char* key, KN value)
+KN KN_EnvDispatcherDefine(KonState* kstate, KonEnv* env, const char* key, KN value)
 {
     KxHashTable_PutKv(CAST_Kon(Env, env)->MsgDispatchers, key, value);
-    return KON_TRUE;
+    return KN_TRUE;
 }
 
-KN KON_EnvDispatcherLookup(KonState* kstate, KonEnv* env, const char* key)
+KN KN_EnvDispatcherLookup(KonState* kstate, KonEnv* env, const char* key)
 {
     KN value = KxHashTable_AtKey(CAST_Kon(Env, env)->MsgDispatchers, key);
-    if (value && value != KON_UNDEF) {
+    if (value && value != KN_UNDEF) {
         return value;
     }
-    else if ((KN)CAST_Kon(Env, env)->Parent == KON_NIL) {
-        return KON_UKN;
+    else if ((KN)CAST_Kon(Env, env)->Parent == KN_NIL) {
+        return KN_UKN;
     }
     else {
-        return KON_EnvDispatcherLookup(kstate, CAST_Kon(Env, env)->Parent, key);
+        return KN_EnvDispatcherLookup(kstate, CAST_Kon(Env, env)->Parent, key);
     }
 }
 
-KN KON_EnvDispatcherLookupSet(KonState* kstate, KonEnv* env, const char* key, KN value)
+KN KN_EnvDispatcherLookupSet(KonState* kstate, KonEnv* env, const char* key, KN value)
 {
     KN slot = KxHashTable_AtKey(CAST_Kon(Env, env)->MsgDispatchers, key);
     if (slot) {
         KxHashTable_PutKv(CAST_Kon(Env, env)->MsgDispatchers, key, value);
-        return KON_TRUE;
+        return KN_TRUE;
     }
-    else if ((KN)CAST_Kon(Env, env)->Parent == KON_NIL) {
-        return KON_FALSE;
+    else if ((KN)CAST_Kon(Env, env)->Parent == KN_NIL) {
+        return KN_FALSE;
     }
     else {
-        return KON_EnvDispatcherLookupSet(kstate, CAST_Kon(Env, env)->Parent, key, value);
+        return KN_EnvDispatcherLookupSet(kstate, CAST_Kon(Env, env)->Parent, key, value);
     }
 }

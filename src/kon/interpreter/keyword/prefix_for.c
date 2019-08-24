@@ -13,13 +13,13 @@ KonTrampoline* BeforeForPrediction(KonState* kstate, KN evaledValue, KonContinua
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN predictExpr = KxHashTable_AtKey(memo, "PredictExpr");
 
-    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
     k->Cont = contBeingInvoked->Cont;
     k->Env = env;
     k->Native.MemoTable = memo;
     k->Native.Callback = AfterForPrediction;
 
-    KonTrampoline* bounce = KON_EvalExpression(kstate, predictExpr, env, k);
+    KonTrampoline* bounce = KN_EvalExpression(kstate, predictExpr, env, k);
 
     return bounce;
 }
@@ -30,20 +30,20 @@ KonTrampoline* AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuat
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN bodyExprs = KxHashTable_AtKey(memo, "BodyExprs");
 
-    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
     k->Cont = contBeingInvoked->Cont;
     k->Env = env;
     k->Native.MemoTable = memo;
     k->Native.Callback = AfterForBodyEvaled;
 
     KonTrampoline* bounce;
-    if (KON_IS_TRUE(evaledValue)) {
-        bounce = KON_EvalSentences(kstate, bodyExprs, env, k);
+    if (KN_IS_TRUE(evaledValue)) {
+        bounce = KN_EvalSentences(kstate, bodyExprs, env, k);
     }
     else {
-        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+        bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
         bounce->Cont = contBeingInvoked->Cont;
-        bounce->Run.Value = KON_TRUE;
+        bounce->Run.Value = KN_TRUE;
     }
 
     return bounce;
@@ -55,32 +55,32 @@ KonTrampoline* AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuat
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN afterBodyExpr = KxHashTable_AtKey(memo, "AfterExpr");
 
-    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
     k->Cont = contBeingInvoked->Cont;
     k->Env = env;
     k->Native.MemoTable = memo;
     k->Native.Callback = BeforeForPrediction;
 
-    KonTrampoline* bounce = KON_EvalExpression(kstate, afterBodyExpr, env, k);
+    KonTrampoline* bounce = KN_EvalExpression(kstate, afterBodyExpr, env, k);
 
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixFor(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_EvalPrefixFor(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KON_DEBUG("meet prefix marcro for");
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN_DEBUG("meet prefix marcro for");
+    KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
 
-    KonEnv* loopBindEnv = KON_MakeChildEnv(kstate, env);
-    KN paramTable = KON_DTR(expression);
-    KxHashTable* paramTableInner = KON_UNBOX_TABLE(paramTable);
+    KonEnv* loopBindEnv = KN_MakeChildEnv(kstate, env);
+    KN paramTable = KN_DTR(expression);
+    KxHashTable* paramTableInner = KN_UNBOX_TABLE(paramTable);
 
     KN initExpr = KxHashTable_ValAtIndex(paramTableInner, 0);
     KN predictExpr = KxHashTable_ValAtIndex(paramTableInner, 1);
     KN afterExpr = KxHashTable_ValAtIndex(paramTableInner, 2);
-    KN bodyExprs = KON_DLR(expression);
+    KN bodyExprs = KN_DLR(expression);
 
-    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = loopBindEnv;
 
@@ -92,18 +92,18 @@ KonTrampoline* KON_EvalPrefixFor(KonState* kstate, KN expression, KonEnv* env, K
     k->Native.Callback = BeforeForPrediction;
 
     // set break keyword continuation
-    KON_EnvDefine(kstate, loopBindEnv, "break", cont);
+    KN_EnvDefine(kstate, loopBindEnv, "break", cont);
     // set continue keyword continuation
-    KonContinuation* continueKeywordCont = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* continueKeywordCont = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
     continueKeywordCont->Cont = cont;
     continueKeywordCont->Env = loopBindEnv;
     continueKeywordCont->Native.MemoTable = KxHashTable_ShadowClone(memo);
     continueKeywordCont->Native.Callback = AfterForBodyEvaled;
-    KON_EnvDefine(kstate, loopBindEnv, "continue", continueKeywordCont);
+    KN_EnvDefine(kstate, loopBindEnv, "continue", continueKeywordCont);
 
     
     KonTrampoline* bounce;
-    bounce = KON_EvalExpression(kstate, initExpr, loopBindEnv, k);
+    bounce = KN_EvalExpression(kstate, initExpr, loopBindEnv, k);
 
 
     return bounce;

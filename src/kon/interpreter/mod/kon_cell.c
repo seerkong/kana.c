@@ -4,245 +4,245 @@
 
 KN KonCell_Init(KonState* kstate, KN args)
 {
-    KonCell* value = KON_ALLOC_TYPE_TAG(kstate, KonCell, KON_T_CELL);
-    value->Core = KON_UNDEF;
-    value->Vector = KON_UNDEF;
-    value->Table = KON_UNDEF;
-    value->List = KON_UNDEF;
+    KonCell* value = KN_ALLOC_TYPE_TAG(kstate, KonCell, KN_T_CELL);
+    value->Core = KN_UNDEF;
+    value->Vector = KN_UNDEF;
+    value->Table = KN_UNDEF;
+    value->List = KN_UNDEF;
     return (KN)value;
 }
 
 KN KonCell_SetCore(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Core = KON_CADR(args);
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    self->Core = KN_CADR(args);
     return (KN)self;
 }
 
 KN KonCell_GetCore(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
     return (KN)self->Core;
 }
 
 KN KonCell_DelCore(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Core = KON_UNDEF;
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    self->Core = KN_UNDEF;
     return (KN)self;
 }
 
 KN KonCell_SetVector(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Vector = KON_CADR(args);
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    self->Vector = KN_CADR(args);
     return (KN)self;
 }
 
 KN KonCell_GetVector(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
     return (KN)self->Vector;
 }
 
 KN KonCell_DelVector(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Vector = KON_UNDEF;
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    self->Vector = KN_UNDEF;
     return (KN)self;
 }
 
 KN KonCell_ClearVector(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    KxVector* vector = KON_UNBOX_VECTOR(self->Vector);
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    KxVector* vector = KN_UNBOX_VECTOR(self->Vector);
     KxVector_Clear(vector);
     return (KN)self;
 }
 
 KN KonCell_SetTable(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Table = KON_CADR(args);
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    self->Table = KN_CADR(args);
     return self;
 }
 
 KN KonCell_GetTable(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
     return (KN)self->Table;
 }
 
 KN KonCell_DelTable(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->Table = KON_UNDEF;
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    self->Table = KN_UNDEF;
     return (KN)self;
 }
 
 KN KonCell_ClearTable(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    KxHashTable* table = KON_UNBOX_VECTOR(self->Table);
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    KxHashTable* table = KN_UNBOX_VECTOR(self->Table);
     KxHashTable_Clear(table);
     return (KN)self;
 }
 
 KN KonCell_SetList(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->List = KON_CADR(args);
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    self->List = KN_CADR(args);
     return (KN)self;
 }
 
 KN KonCell_GetList(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
     return (KN)self->List;
 }
 
 KN KonCell_DelList(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->List = KON_UNDEF;
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    self->List = KN_UNDEF;
     return (KN)self;
 }
 
 KN KonCell_ClearList(KonState* kstate, KN args)
 {
-    KonCell* self = CAST_Kon(Cell, KON_CAR(args));
-    self->List = KON_NIL;
+    KonCell* self = CAST_Kon(Cell, KN_CAR(args));
+    self->List = KN_NIL;
     return (KN)self;
 }
 
 KonAccessor* KonCell_Export(KonState* kstate, KonEnv* env)
 {
-    KonAccessor* slot = (KonAccessor*)KON_MakeDirAccessor(kstate, "dr", NULL);
-    KON_DirAccessorPutKeyValue(
+    KonAccessor* slot = (KonAccessor*)KN_MakeDirAccessor(kstate, "dr", NULL);
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "init",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_Init),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_Init),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "set-core",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetCore),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_SetCore),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "get-core",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetCore),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_GetCore),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "del-core",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelCore),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DelCore),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "set-vector",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetVector),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_SetVector),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "get-vector",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetVector),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_GetVector),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "del-vector",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelVector),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DelVector),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "clear-vector",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_ClearVector),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_ClearVector),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "set-table",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetTable),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_SetTable),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "get-table",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetTable),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_GetTable),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "del-table",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelTable),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DelTable),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "clear-table",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_ClearTable),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_ClearTable),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "set-list",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_SetList),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_SetList),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "get-list",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_GetList),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_GetList),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "del-list",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_DelList),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DelList),
         "r",
         NULL
     );
-    KON_DirAccessorPutKeyValue(
+    KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
         "clear-list",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonCell_ClearList),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_ClearList),
         "r",
         NULL
     );

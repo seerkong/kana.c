@@ -5,8 +5,8 @@
 
 bool IsElseTag(KN predicate)
 {
-    if (KON_IS_WORD(predicate)
-        && strcmp(KON_UNBOX_SYMBOL(predicate), "else") == 0
+    if (KN_IS_WORD(predicate)
+        && strcmp(KN_UNBOX_SYMBOL(predicate), "else") == 0
     ) {
         return true;
     }
@@ -23,36 +23,36 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
     KN ifTrueAction = KxHashTable_AtKey(memo, "IfTrue");
 
     KonTrampoline* bounce;
-    if (KON_IS_TRUE(evaledValue)) {
-        bounce = KON_EvalSentences(kstate, ifTrueAction, env, contBeingInvoked->Cont);
+    if (KN_IS_TRUE(evaledValue)) {
+        bounce = KN_EvalSentences(kstate, ifTrueAction, env, contBeingInvoked->Cont);
     }
-    else if (restPairs == KON_NIL) {
-        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+    else if (restPairs == KN_NIL) {
+        bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
         bounce->Cont = contBeingInvoked->Cont;
-        bounce->Run.Value = KON_FALSE;
+        bounce->Run.Value = KN_FALSE;
     }
     else {
-        KN predicate = KON_DCR(restPairs);
-        KN action = KON_DLR(restPairs);
+        KN predicate = KN_DCR(restPairs);
+        KN action = KN_DLR(restPairs);
 
         if (IsElseTag(predicate)) {
             // do else action
-            bounce = KON_EvalSentences(kstate, action, env, contBeingInvoked->Cont);
+            bounce = KN_EvalSentences(kstate, action, env, contBeingInvoked->Cont);
         }
         else {
             // next condition
-            KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+            KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
             k->Cont = contBeingInvoked->Cont;
             k->Env = env;
 
             KxHashTable* memo = KxHashTable_Init(4);
-            KxHashTable_PutKv(memo, "RestPairs", KON_DNR(restPairs));
+            KxHashTable_PutKv(memo, "RestPairs", KN_DNR(restPairs));
             KxHashTable_PutKv(memo, "IfTrue", action);
 
             k->Native.MemoTable = memo;
             k->Native.Callback = AfterCondClauseEvaled;
 
-            bounce = KON_EvalExpression(kstate, predicate, env, k);
+            bounce = KN_EvalExpression(kstate, predicate, env, k);
         }
     }
 
@@ -61,32 +61,32 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
 
 
 
-KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_EvalPrefixCond(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KON_DEBUG("meet prefix marcro cond");
-    // KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN_DEBUG("meet prefix marcro cond");
+    // KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
     
-    KN predicate = KON_DCR(expression);
-    KN action = KON_DLR(expression);
+    KN predicate = KN_DCR(expression);
+    KN action = KN_DLR(expression);
 
     KonTrampoline* bounce;
     if (IsElseTag(predicate)) {
         // do else action
-        bounce = KON_EvalSentences(kstate, action, env, cont);
+        bounce = KN_EvalSentences(kstate, action, env, cont);
     }
     else {
-        KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+        KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
         k->Cont = cont;
         k->Env = env;
 
         KxHashTable* memo = KxHashTable_Init(4);
-        KxHashTable_PutKv(memo, "RestPairs", KON_DNR(expression));
+        KxHashTable_PutKv(memo, "RestPairs", KN_DNR(expression));
         KxHashTable_PutKv(memo, "IfTrue", action);
 
         k->Native.MemoTable = memo;
         k->Native.Callback = AfterCondClauseEvaled;
 
-        bounce = KON_EvalExpression(kstate, predicate, env, k);
+        bounce = KN_EvalExpression(kstate, predicate, env, k);
     }
 
     return bounce;

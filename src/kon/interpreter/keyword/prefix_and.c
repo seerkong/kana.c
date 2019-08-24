@@ -10,54 +10,54 @@ KN AfterAndConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* co
     KN restConditon = KxHashTable_AtKey(memo, "RestCondition");
 
     KonTrampoline* bounce;
-    if (KON_IS_FALSE(evaledValue) || evaledValue == KON_NIL) {
-        KON_DEBUG("break and");
-        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+    if (KN_IS_FALSE(evaledValue) || evaledValue == KN_NIL) {
+        KN_DEBUG("break and");
+        bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
         bounce->Cont = contBeingInvoked->Cont;
-        bounce->Run.Value = KON_FALSE;
+        bounce->Run.Value = KN_FALSE;
     }
-    else if (restConditon == KON_NIL) {
+    else if (restConditon == KN_NIL) {
         // all conditions passed, return true
-        KON_DEBUG("all and condition return true");
-        bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+        KN_DEBUG("all and condition return true");
+        bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
         bounce->Cont = contBeingInvoked->Cont;
-        bounce->Run.Value = KON_TRUE;
+        bounce->Run.Value = KN_TRUE;
     }
     else {
         // next condition
-        KN nextExpr = KON_CAR(restConditon);
-        KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+        KN nextExpr = KN_CAR(restConditon);
+        KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
         k->Cont = contBeingInvoked->Cont;
         k->Env = env;
 
         KxHashTable* newMemo = KxHashTable_Init(4);
-        KxHashTable_PutKv(newMemo, "RestCondition", KON_CDR(restConditon));
+        KxHashTable_PutKv(newMemo, "RestCondition", KN_CDR(restConditon));
         k->Native.MemoTable = newMemo;
         k->Native.Callback = AfterAndConditionEvaled;
 
-        bounce = KON_EvalExpression(kstate, nextExpr, env, k);
+        bounce = KN_EvalExpression(kstate, nextExpr, env, k);
         return bounce;
     }
 
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixAnd(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_EvalPrefixAnd(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KON_DEBUG("meet prefix marcro and");
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN arguments = KON_CellCoresToList(kstate, expression);
-    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+    KN_DEBUG("meet prefix marcro and");
+    KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN arguments = KN_CellCoresToList(kstate, expression);
+    KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = env;
 
     KxHashTable* memo = KxHashTable_Init(4);
-    KxHashTable_PutKv(memo, "RestCondition", KON_CDR(arguments));
+    KxHashTable_PutKv(memo, "RestCondition", KN_CDR(arguments));
     k->Native.MemoTable = memo;
     k->Native.Callback = AfterAndConditionEvaled;
     
     KonTrampoline* bounce;
-    bounce = KON_EvalExpression(kstate, KON_CAR(arguments), env, k);
+    bounce = KN_EvalExpression(kstate, KN_CAR(arguments), env, k);
 
     return bounce;
 }

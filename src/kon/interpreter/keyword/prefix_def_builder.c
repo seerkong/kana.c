@@ -5,19 +5,19 @@
 
 KN AfterBuilderDispatcherIdEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    unsigned int dispatcherId = KON_UNBOX_FIXNUM(evaledValue);
+    unsigned int dispatcherId = KN_UNBOX_FIXNUM(evaledValue);
     KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KonCell* sourceCode = (KonCell*)KxHashTable_AtKey(memo, "BuilderSourceCode");
     KN className = (KonCell*)KxHashTable_AtKey(memo, "BuilderName");
-    const char* classNameCstr = KON_UNBOX_SYMBOL(className);
-    KON_DEBUG("dispatcherId %d classNameCstr %s", dispatcherId, classNameCstr);
+    const char* classNameCstr = KN_UNBOX_SYMBOL(className);
+    KN_DEBUG("dispatcherId %d classNameCstr %s", dispatcherId, classNameCstr);
     ((KonBase*)sourceCode)->MsgDispatcherId = dispatcherId;
 
     KonTrampoline* bounce;
 
-    KON_EnvDefine(kstate, env, classNameCstr, sourceCode);
-    bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+    KN_EnvDefine(kstate, env, classNameCstr, sourceCode);
+    bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
 
     bounce->Run.Value = sourceCode;
     bounce->Cont = contBeingInvoked->Cont;
@@ -26,17 +26,17 @@ KN AfterBuilderDispatcherIdEvaled(KonState* kstate, KN evaledValue, KonContinuat
 }
 
 
-KonTrampoline* KON_EvalPrefixDefBuilder(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_EvalPrefixDefBuilder(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KON_DEBUG("meet prefix marcro def builder");
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN builderName = KON_DCR(expression);
-    KN dispatcherIdExpr = KON_DCNR(expression);
+    KN_DEBUG("meet prefix marcro def builder");
+    KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN builderName = KN_DCR(expression);
+    KN dispatcherIdExpr = KN_DCNR(expression);
 
-    KN config = KON_DCNNR(expression);
+    KN config = KN_DCNNR(expression);
 
 
-    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = env;
 
@@ -47,7 +47,7 @@ KonTrampoline* KON_EvalPrefixDefBuilder(KonState* kstate, KN expression, KonEnv*
     k->Native.Callback = AfterBuilderDispatcherIdEvaled;
     
     KonTrampoline* bounce;
-    bounce = KON_EvalExpression(kstate, dispatcherIdExpr, env, k);
+    bounce = KN_EvalExpression(kstate, dispatcherIdExpr, env, k);
 
     return bounce;
 }

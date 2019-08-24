@@ -7,157 +7,157 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
     KxStringBuffer* tokenKind = KxStringBuffer_New();
 
     switch (tokenizer->TokenKind) {
-        case KON_TOKEN_EOF:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EOF");
+        case KN_TOKEN_EOF:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_EOF");
             break;
-        case KON_TOKEN_LIST_START:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LIST_START");
+        case KN_TOKEN_LIST_START:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_LIST_START");
             break;
-        case KON_TOKEN_BLOCK_START:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_BLOCK_START");
+        case KN_TOKEN_BLOCK_START:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_BLOCK_START");
             break;
-        case KON_TOKEN_LIST_END:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LIST_END");
+        case KN_TOKEN_LIST_END:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_LIST_END");
             break;
-        case KON_TOKEN_VECTOR_START:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_VECTOR_START");
+        case KN_TOKEN_VECTOR_START:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_VECTOR_START");
             break;
-        case KON_TOKEN_VECTOR_END:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_VECTOR_END");
+        case KN_TOKEN_VECTOR_END:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_VECTOR_END");
             break;
-        case KON_TOKEN_TABLE_START:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_START");
+        case KN_TOKEN_TABLE_START:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_TABLE_START");
             break;
-        case KON_TOKEN_PARAM_START:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_PARAM_START");
+        case KN_TOKEN_PARAM_START:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_PARAM_START");
             break;
-        case KON_TOKEN_TABLE_END:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_END");
+        case KN_TOKEN_TABLE_END:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_TABLE_END");
             break;
-        case KON_TOKEN_CELL_START:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_CELL_START");
+        case KN_TOKEN_CELL_START:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_CELL_START");
             break;
-        case KON_TOKEN_CELL_END:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_CELL_END");
+        case KN_TOKEN_CELL_END:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_CELL_END");
             break;
-        case KON_TOKEN_TABLE_TAG:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_TABLE_TAG");
+        case KN_TOKEN_TABLE_TAG:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_TABLE_TAG");
             break;
-        case KON_TOKEN_APPLY:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_APPLY");
+        case KN_TOKEN_APPLY:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_APPLY");
             break;
-        case KON_TOKEN_EQUAL:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EQUAL");
+        case KN_TOKEN_EQUAL:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_EQUAL");
             break;
-        case KON_TOKEN_ASSIGN:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_ASSIGN");
+        case KN_TOKEN_ASSIGN:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_ASSIGN");
             break;
-        case KON_TOKEN_MSG_SIGNAL:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_MSG_SIGNAL");
+        case KN_TOKEN_MSG_SIGNAL:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_MSG_SIGNAL");
             break;
-        case KON_TOKEN_PROC_PIPE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_PROC_PIPE");
+        case KN_TOKEN_PROC_PIPE:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_PROC_PIPE");
             break;
         
-        case KON_TOKEN_CLAUSE_END:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_CLAUSE_END");
+        case KN_TOKEN_CLAUSE_END:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_CLAUSE_END");
             break;
-        case KON_TOKEN_WHITESPACE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_WHITESPACE");
+        case KN_TOKEN_WHITESPACE:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_WHITESPACE");
             break;
-        case KON_TOKEN_KEYWORD_NIL:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_NIL");
+        case KN_TOKEN_KEYWORD_NIL:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_KEYWORD_NIL");
             break;
-        case KON_TOKEN_KEYWORD_UNDEF:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_UNDEF");
+        case KN_TOKEN_KEYWORD_UNDEF:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_KEYWORD_UNDEF");
             break;
-        case KON_TOKEN_KEYWORD_UKN:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_UKN");
+        case KN_TOKEN_KEYWORD_UKN:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_KEYWORD_UKN");
             break;
-        case KON_TOKEN_KEYWORD_TRUE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_TRUE");
+        case KN_TOKEN_KEYWORD_TRUE:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_KEYWORD_TRUE");
             break;
-        case KON_TOKEN_KEYWORD_FALSE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_FALSE");
+        case KN_TOKEN_KEYWORD_FALSE:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_KEYWORD_FALSE");
             break;
-        case KON_TOKEN_KEYWORD_EITHER:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_EITHER");
+        case KN_TOKEN_KEYWORD_EITHER:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_KEYWORD_EITHER");
             break;
-        case KON_TOKEN_KEYWORD_BOTH:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_KEYWORD_BOTH");
+        case KN_TOKEN_KEYWORD_BOTH:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_KEYWORD_BOTH");
             break;
-        case KON_TOKEN_LITERAL_NUMBER:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_NUMBER");
+        case KN_TOKEN_LITERAL_NUMBER:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_LITERAL_NUMBER");
             break;
-        case KON_TOKEN_LITERAL_STRING:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_STRING");
+        case KN_TOKEN_LITERAL_STRING:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_LITERAL_STRING");
             break;
-        case KON_TOKEN_SYM_WORD:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_WORD");
+        case KN_TOKEN_SYM_WORD:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_SYM_WORD");
             break;
-        case KON_TOKEN_GET_SLOT:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_GET_SLOT");
+        case KN_TOKEN_GET_SLOT:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_GET_SLOT");
             break;
-        case KON_TOKEN_LITERAL_RAW_STRING:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_LITERAL_RAW_STRING");
+        case KN_TOKEN_LITERAL_RAW_STRING:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_LITERAL_RAW_STRING");
             break;
-        case KON_TOKEN_SYM_VARIABLE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_VARIABLE");
+        case KN_TOKEN_SYM_VARIABLE:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_SYM_VARIABLE");
             break;
-        case KON_TOKEN_SYM_PREFIX_WORD:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_PREFIX_WORD");
+        case KN_TOKEN_SYM_PREFIX_WORD:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_SYM_PREFIX_WORD");
             break;
-        case KON_TOKEN_SYM_SUFFIX_WORD:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_SUFFIX_WORD");
+        case KN_TOKEN_SYM_SUFFIX_WORD:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_SYM_SUFFIX_WORD");
             break;
-        case KON_TOKEN_SYM_IDENTIFIER:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_IDENTIFIER");
+        case KN_TOKEN_SYM_IDENTIFIER:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_SYM_IDENTIFIER");
             break;
-        case KON_TOKEN_SYM_STRING:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_SYM_STRING");
+        case KN_TOKEN_SYM_STRING:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_SYM_STRING");
             break;
-        case KON_TOKEN_QUOTE_LIST:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_LIST");
+        case KN_TOKEN_QUOTE_LIST:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_QUOTE_LIST");
             break;
-        case KON_TOKEN_QUOTE_CELL:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUOTE_CELL");
+        case KN_TOKEN_QUOTE_CELL:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_QUOTE_CELL");
             break;
-        case KON_TOKEN_QUASI_LIST:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_LIST");
+        case KN_TOKEN_QUASI_LIST:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_QUASI_LIST");
             break;
-        case KON_TOKEN_QUASI_CELL:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_QUASI_CELL");
-            break;
-
-        case KON_TOKEN_EXPAND_REPLACE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXPAND_REPLACE");
-            break;
-        case KON_TOKEN_EXPAND_KV:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXPAND_KV");
-            break;
-        case KON_TOKEN_EXPAND_SEQ:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_EXPAND_SEQ");
-            break;
-        case KON_TOKEN_UNQUOTE_REPLACE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_UNQUOTE_REPLACE");
-            break;
-        case KON_TOKEN_UNQUOTE_KV:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_UNQUOTE_KV");
-            break;
-        case KON_TOKEN_UNQUOTE_SEQ:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_UNQUOTE_SEQ");
+        case KN_TOKEN_QUASI_CELL:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_QUASI_CELL");
             break;
 
-        case KON_TOKEN_COMMENT_SINGLE_LINE:
-            KxStringBuffer_AppendCstr(tokenKind, "KON_TOKEN_COMMENT_SINGLE_LINE");
+        case KN_TOKEN_EXPAND_REPLACE:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_EXPAND_REPLACE");
+            break;
+        case KN_TOKEN_EXPAND_KV:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_EXPAND_KV");
+            break;
+        case KN_TOKEN_EXPAND_SEQ:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_EXPAND_SEQ");
+            break;
+        case KN_TOKEN_UNQUOTE_REPLACE:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_UNQUOTE_REPLACE");
+            break;
+        case KN_TOKEN_UNQUOTE_KV:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_UNQUOTE_KV");
+            break;
+        case KN_TOKEN_UNQUOTE_SEQ:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_UNQUOTE_SEQ");
+            break;
+
+        case KN_TOKEN_COMMENT_SINGLE_LINE:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_COMMENT_SINGLE_LINE");
             return;
             // break;
         default:
             break;
     }
     // format
-//    KON_DEBUG("<%s (:row %ld, :col %ld, :row-end %ld, :col-end %ld) [%s]>", KxStringBuffer_Cstr(tokenKind), tokenizer->RowStart, tokenizer->ColStart, tokenizer->RowEnd, tokenizer->ColEnd, KxStringBuffer_Cstr(tokenizer->Content));
-    KON_DEBUG("<%s (:row %d, :col %d) [%s]>", KxStringBuffer_Cstr(tokenKind), tokenizer->RowStart, tokenizer->ColStart, KxStringBuffer_Cstr(tokenizer->Content));
+//    KN_DEBUG("<%s (:row %ld, :col %ld, :row-end %ld, :col-end %ld) [%s]>", KxStringBuffer_Cstr(tokenKind), tokenizer->RowStart, tokenizer->ColStart, tokenizer->RowEnd, tokenizer->ColEnd, KxStringBuffer_Cstr(tokenizer->Content));
+    KN_DEBUG("<%s (:row %d, :col %d) [%s]>", KxStringBuffer_Cstr(tokenKind), tokenizer->RowStart, tokenizer->ColStart, KxStringBuffer_Cstr(tokenizer->Content));
 }
 
 KonTokenizer* KSON_TokenizerInit(KonState* kstate)
@@ -490,8 +490,8 @@ void UpdateTokenContent(KonTokenizer* tokenizer, char* newContent)
 KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
 {
     // reset
-    tokenizer->TokenKind = KON_TOKEN_EOF;
-    while (tokenizer->TokenKind == KON_TOKEN_EOF) {
+    tokenizer->TokenKind = KN_TOKEN_EOF;
+    while (tokenizer->TokenKind == KN_TOKEN_EOF) {
         // peek character
         char* pc = PeekChars(tokenizer, 1);
         if (pc == NULL) {
@@ -505,13 +505,13 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
         else if (pc[0] == '(') {
             UpdateTokenContent(tokenizer, "(");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_PARAM_START;
+            tokenizer->TokenKind = KN_TOKEN_PARAM_START;
             break;
         }
         else if (pc[0] == ')') {
             UpdateTokenContent(tokenizer, ")");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_TABLE_END;
+            tokenizer->TokenKind = KN_TOKEN_TABLE_END;
             break;
         }
         else if (pc[0] == '<') {
@@ -519,13 +519,13 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (nextChars[1] == '=') {
                 UpdateTokenContent(tokenizer, "<=");
                 ForwardToken(tokenizer, 2);
-                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+                tokenizer->TokenKind = KN_TOKEN_SYM_WORD;
             }
             else if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
                 UpdateTokenContent(tokenizer, "<");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
-                //     tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
+                tokenizer->TokenKind = KN_TOKEN_SYM_WORD;
+                //     tokenizer->TokenKind = KN_TOKEN_VECTOR_START;
             }
             break;
         }
@@ -534,37 +534,37 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (nextChars[1] == '=') {
                 UpdateTokenContent(tokenizer, ">=");
                 ForwardToken(tokenizer, 2);
-                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+                tokenizer->TokenKind = KN_TOKEN_SYM_WORD;
             }
             else if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
                 UpdateTokenContent(tokenizer, ">");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_VECTOR_END;
+                tokenizer->TokenKind = KN_TOKEN_VECTOR_END;
             }
             break;
         }
         else if (pc[0] == '[') {
             UpdateTokenContent(tokenizer, "[");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_LIST_START;
+            tokenizer->TokenKind = KN_TOKEN_LIST_START;
             break;
         }
         else if (pc[0] == ']') {
             UpdateTokenContent(tokenizer, "]");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_LIST_END;
+            tokenizer->TokenKind = KN_TOKEN_LIST_END;
             break;
         }
         else if (pc[0] == '{') {
             UpdateTokenContent(tokenizer, "{");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_CELL_START;
+            tokenizer->TokenKind = KN_TOKEN_CELL_START;
             break;
         }
         else if (pc[0] == '}') {
             UpdateTokenContent(tokenizer, "}");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_CELL_END;
+            tokenizer->TokenKind = KN_TOKEN_CELL_END;
             break;
         }
         else if (pc[0] == '-') {
@@ -575,17 +575,17 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (IsSpace(nextChars[1])) {
                 UpdateTokenContent(tokenizer, "-");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+                tokenizer->TokenKind = KN_TOKEN_SYM_WORD;
                 break;
             }
             else if (IsDigit(nextChars[1])) {
                 ParseNumber(tokenizer);
-                tokenizer->TokenKind = KON_TOKEN_LITERAL_NUMBER;
+                tokenizer->TokenKind = KN_TOKEN_LITERAL_NUMBER;
                 break;
             }
             else {
                 ParseIdentifier(tokenizer);
-                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+                tokenizer->TokenKind = KN_TOKEN_SYM_WORD;
             }
         }
         else if (pc[0] == '+') {
@@ -596,18 +596,18 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (IsSpace(nextChars[1])) {
                 UpdateTokenContent(tokenizer, "+");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+                tokenizer->TokenKind = KN_TOKEN_SYM_WORD;
                 break;
             }
             else if (IsDigit(nextChars[1])) {
                 ParseNumber(tokenizer);
-                tokenizer->TokenKind = KON_TOKEN_LITERAL_NUMBER;
+                tokenizer->TokenKind = KN_TOKEN_LITERAL_NUMBER;
                 break;
             }
         }
         else if (IsDigit(pc[0])) {
             ParseNumber(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_LITERAL_NUMBER;
+            tokenizer->TokenKind = KN_TOKEN_LITERAL_NUMBER;
             break;
         }
         else if (pc[0] == '#') {
@@ -618,49 +618,49 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (nextChars[1] == '<') {
                 UpdateTokenContent(tokenizer, "#<");
                 ForwardToken(tokenizer, 2);
-                tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
+                tokenizer->TokenKind = KN_TOKEN_VECTOR_START;
                 break;
             }
             else if (nextChars[1] == '[') {
                 UpdateTokenContent(tokenizer, "#[");
                 ForwardToken(tokenizer, 2);
-                tokenizer->TokenKind = KON_TOKEN_BLOCK_START;
+                tokenizer->TokenKind = KN_TOKEN_BLOCK_START;
             }
             else if (nextChars[1] == '(') {
                 UpdateTokenContent(tokenizer, "#(");
                 ForwardToken(tokenizer, 2);
-                tokenizer->TokenKind = KON_TOKEN_TABLE_START;
+                tokenizer->TokenKind = KN_TOKEN_TABLE_START;
             }
             
             // TODO other immediate atom builders
             else if (nextChars[1] == 'n' && nextChars[2] == 'i') {
                 UpdateTokenContent(tokenizer, "#nil;");
                 ForwardToken(tokenizer, 5);
-                tokenizer->TokenKind = KON_TOKEN_KEYWORD_NIL;
+                tokenizer->TokenKind = KN_TOKEN_KEYWORD_NIL;
                 break;
             }
             else if (nextChars[1] == 'u' && nextChars[2] == 'n') {
                 UpdateTokenContent(tokenizer, "#undef;");
                 ForwardToken(tokenizer, 7);
-                tokenizer->TokenKind = KON_TOKEN_KEYWORD_UNDEF;
+                tokenizer->TokenKind = KN_TOKEN_KEYWORD_UNDEF;
                 break;
             }
             else if (nextChars[1] == 'u' && nextChars[2] == 'k') {
                 UpdateTokenContent(tokenizer, "#ukn;");
                 ForwardToken(tokenizer, 5);
-                tokenizer->TokenKind = KON_TOKEN_KEYWORD_UKN;
+                tokenizer->TokenKind = KN_TOKEN_KEYWORD_UKN;
                 break;
             }
             else if (nextChars[1] == 't' && nextChars[2] == ';') {
                 UpdateTokenContent(tokenizer, "#t;");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KON_TOKEN_KEYWORD_TRUE;
+                tokenizer->TokenKind = KN_TOKEN_KEYWORD_TRUE;
                 break;
             }
             else if (nextChars[1] == 'f' && nextChars[2] == ';') {
                 UpdateTokenContent(tokenizer, "#f;");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KON_TOKEN_KEYWORD_FALSE;
+                tokenizer->TokenKind = KN_TOKEN_KEYWORD_FALSE;
                 break;
             }
         }
@@ -672,46 +672,46 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             else if (nextChars[1] == '=') {
                 UpdateTokenContent(tokenizer, ":=");
                 ForwardToken(tokenizer, 2);
-                tokenizer->TokenKind = KON_TOKEN_ASSIGN;
+                tokenizer->TokenKind = KN_TOKEN_ASSIGN;
             }
             else {
                 UpdateTokenContent(tokenizer, ":");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_TABLE_TAG;
+                tokenizer->TokenKind = KN_TOKEN_TABLE_TAG;
             }
         }
         else if (pc[0] == '%') {
             UpdateTokenContent(tokenizer, "%");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_APPLY;
+            tokenizer->TokenKind = KN_TOKEN_APPLY;
         }
         else if (pc[0] == '=') {
             UpdateTokenContent(tokenizer, "=");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_EQUAL;
+            tokenizer->TokenKind = KN_TOKEN_EQUAL;
         }
         else if (pc[0] == '.') {
             UpdateTokenContent(tokenizer, ".");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_MSG_SIGNAL;
+            tokenizer->TokenKind = KN_TOKEN_MSG_SIGNAL;
         }
         else if (pc[0] == '|') {
             UpdateTokenContent(tokenizer, "|");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_PROC_PIPE;
+            tokenizer->TokenKind = KN_TOKEN_PROC_PIPE;
         }
         else if (pc[0] == ';') {
             UpdateTokenContent(tokenizer, ";");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_CLAUSE_END;
+            tokenizer->TokenKind = KN_TOKEN_CLAUSE_END;
         }
         else if (pc[0] == '\"') {
             ParseString(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_LITERAL_STRING;
+            tokenizer->TokenKind = KN_TOKEN_LITERAL_STRING;
         }
         else if (pc[0] == '\'') {
             ParseRawString(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_LITERAL_RAW_STRING;
+            tokenizer->TokenKind = KN_TOKEN_LITERAL_RAW_STRING;
         }
         else if (pc[0] == '$') {
             const char* nextChars = PeekChars(tokenizer, 3);
@@ -721,39 +721,39 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             else if (nextChars[1] == '.') {
                 UpdateTokenContent(tokenizer, "$.");
                 ForwardToken(tokenizer, 2);
-                tokenizer->TokenKind = KON_TOKEN_EXPAND_REPLACE;
+                tokenizer->TokenKind = KN_TOKEN_EXPAND_REPLACE;
             }
             else if (nextChars[1] == '%' && nextChars[2] == '.') {
                 UpdateTokenContent(tokenizer, "$%.");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KON_TOKEN_EXPAND_KV;
+                tokenizer->TokenKind = KN_TOKEN_EXPAND_KV;
             }
             else if (nextChars[1] == '~' && nextChars[2] == '.') {
                 UpdateTokenContent(tokenizer, "$~.");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KON_TOKEN_EXPAND_SEQ;
+                tokenizer->TokenKind = KN_TOKEN_EXPAND_SEQ;
             }
             else if (nextChars[1] == '{') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_CELL;
+                tokenizer->TokenKind = KN_TOKEN_QUOTE_CELL;
             }
             else if (nextChars[1] == '[') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUOTE_LIST;
+                tokenizer->TokenKind = KN_TOKEN_QUOTE_LIST;
             }
             else if (nextChars[1] == '\'') {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
                 ParseRawString(tokenizer);
-                tokenizer->TokenKind = KON_TOKEN_SYM_STRING;
+                tokenizer->TokenKind = KN_TOKEN_SYM_STRING;
             }
             else {
                 UpdateTokenContent(tokenizer, "$");
                 ForwardToken(tokenizer, 1);
                 ParseIdentifier(tokenizer);
-                tokenizer->TokenKind = KON_TOKEN_SYM_IDENTIFIER;
+                tokenizer->TokenKind = KN_TOKEN_SYM_IDENTIFIER;
             }
         }
         else if (pc[0] == '@') {
@@ -764,48 +764,48 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             else if (nextChars[1] == '.') {
                 UpdateTokenContent(tokenizer, "@.");
                 ForwardToken(tokenizer, 2);
-                tokenizer->TokenKind = KON_TOKEN_UNQUOTE_REPLACE;
+                tokenizer->TokenKind = KN_TOKEN_UNQUOTE_REPLACE;
             }
             else if (nextChars[1] == '%' && nextChars[2] == '.') {
                 UpdateTokenContent(tokenizer, "@%.");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KON_TOKEN_UNQUOTE_KV;
+                tokenizer->TokenKind = KN_TOKEN_UNQUOTE_KV;
             }
             else if (nextChars[1] == '~' && nextChars[2] == '.') {
                 UpdateTokenContent(tokenizer, "@~.");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KON_TOKEN_UNQUOTE_SEQ;
+                tokenizer->TokenKind = KN_TOKEN_UNQUOTE_SEQ;
             }
             else if (nextChars[1] == '{') {
                 UpdateTokenContent(tokenizer, "@");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUASI_CELL;
+                tokenizer->TokenKind = KN_TOKEN_QUASI_CELL;
             }
             else if (nextChars[1] == '[') {
                 UpdateTokenContent(tokenizer, "@");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_QUASI_LIST;
+                tokenizer->TokenKind = KN_TOKEN_QUASI_LIST;
             }
             else {
                 UpdateTokenContent(tokenizer, "@");
                 ForwardToken(tokenizer, 1);
                 ParseIdentifier(tokenizer);
-                tokenizer->TokenKind = KON_TOKEN_SYM_VARIABLE;
+                tokenizer->TokenKind = KN_TOKEN_SYM_VARIABLE;
             }
         }
         else if (pc[0] == '!') {
             ForwardToken(tokenizer, 1);
             ParseIdentifier(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_SYM_PREFIX_WORD;
+            tokenizer->TokenKind = KN_TOKEN_SYM_PREFIX_WORD;
         }
         else if (pc[0] == '^') {
             ForwardToken(tokenizer, 1);
             ParseIdentifier(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_SYM_SUFFIX_WORD;
+            tokenizer->TokenKind = KN_TOKEN_SYM_SUFFIX_WORD;
         }
         else if (IsIdentiferPrefixChar(pc[0])) {
             ParseIdentifier(tokenizer);
-            tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+            tokenizer->TokenKind = KN_TOKEN_SYM_WORD;
             break;
         }
         else if (pc[0] == '`') {
@@ -816,7 +816,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             // `` single line comment
             if (nextChars[1] == '`') {
                 ParseSingleLineComment(tokenizer);
-                tokenizer->TokenKind = KON_TOKEN_COMMENT_SINGLE_LINE;
+                tokenizer->TokenKind = KN_TOKEN_COMMENT_SINGLE_LINE;
                 break;
             }
             else {
@@ -834,13 +834,13 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 // divide identifier
                 UpdateTokenContent(tokenizer, "/");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+                tokenizer->TokenKind = KN_TOKEN_SYM_WORD;
                 break;
             }
             else {
                 UpdateTokenContent(tokenizer, "/");
                 ForwardToken(tokenizer, 1);
-                tokenizer->TokenKind = KON_TOKEN_GET_SLOT;
+                tokenizer->TokenKind = KN_TOKEN_GET_SLOT;
                 break;
             }
         }
@@ -848,16 +848,16 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             // multiply identifier
             UpdateTokenContent(tokenizer, "*");
             ForwardToken(tokenizer, 1);
-            tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+            tokenizer->TokenKind = KN_TOKEN_SYM_WORD;
             break;
         }
         else {
-            KON_DEBUG("neet non space char %d", pc[0]);
+            KN_DEBUG("neet non space char %d", pc[0]);
             break;
         }
     }
-    if (tokenizer->TokenKind == KON_TOKEN_NONE) {
-        tokenizer->TokenKind = KON_TOKEN_EOF;
+    if (tokenizer->TokenKind == KN_TOKEN_NONE) {
+        tokenizer->TokenKind = KN_TOKEN_EOF;
     }
     return tokenizer->TokenKind;
 }

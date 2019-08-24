@@ -16,21 +16,21 @@ TEST Reader_Cell(void) {
     
     KonReader* reader = KSON_ReaderInit(kstate);
     if (!reader) {
-        KON_DEBUG("KON_EvalFile init failed");
+        KN_DEBUG("KN_EvalFile init failed");
         exit(1);
     }
 
-    KN result = KON_UNDEF;
+    KN result = KN_UNDEF;
 
     bool openRes = KSON_ReaderFromFile(reader, filePathOrigin);
     if (openRes) {
         KN root = KSON_Parse(reader);
-        KON_DEBUG("eval sentences success");
-        KN formated = KON_ToFormatString(kstate, root, true, 0, "  ");
-        KON_DEBUG("%s", KON_StringToCstr(formated));
+        KN_DEBUG("eval sentences success");
+        KN formated = KN_ToFormatString(kstate, root, true, 0, "  ");
+        KN_DEBUG("%s", KN_StringToCstr(formated));
     }
     else {
-        KON_DEBUG("open stream failed");
+        KN_DEBUG("open stream failed");
     }
     KSON_ReaderCloseStream(reader);
     // 释放读取器 
@@ -53,10 +53,10 @@ int main(int argc, char const* argv[])
     GREATEST_MAIN_BEGIN();
     greatest_set_verbosity(1);
 
-    kstate = KON_Init();
+    kstate = KN_Init();
     RUN_SUITE(suite);
 
-    KON_Finish(kstate);
+    KN_Finish(kstate);
 
     GREATEST_MAIN_END();
 

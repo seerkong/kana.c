@@ -4,11 +4,11 @@
 #include "../cps_interpreter.h"
 
 
-KonTrampoline* KON_EvalPrefixDefDispatcher(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_EvalPrefixDefDispatcher(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KON_DEBUG("meet prefix marcro def dispatcher");
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN config = KON_DCR(expression);
+    KN_DEBUG("meet prefix marcro def dispatcher");
+    KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN config = KN_DCR(expression);
 
     KonMsgDispatcher* dispatcher = MakeMsgDispatcher(kstate);
 
@@ -30,12 +30,12 @@ KonTrampoline* KON_EvalPrefixDefDispatcher(KonState* kstate, KN expression, KonE
     dispatcher->OnVisitTable = MakeDispatchProc(kstate, onVisitTable, env);
     dispatcher->OnVisitCell = MakeDispatchProc(kstate, onVisitCell, env);
 
-    unsigned int dispatcherId = KON_SetNextMsgDispatcher(kstate, dispatcher);
+    unsigned int dispatcherId = KN_SetNextMsgDispatcher(kstate, dispatcher);
 
-    KN boxedDispacherId = KON_MAKE_FIXNUM(dispatcherId);
+    KN boxedDispacherId = KN_MAKE_FIXNUM(dispatcherId);
 
     KonTrampoline* bounce;
-    bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+    bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
     bounce->Run.Value = boxedDispacherId;
     bounce->Cont = cont;
 

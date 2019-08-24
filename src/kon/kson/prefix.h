@@ -1,5 +1,5 @@
-#ifndef KON_KSON_PREFIX_H
-#define KON_KSON_PREFIX_H
+#ifndef KN_KSON_PREFIX_H
+#define KN_KSON_PREFIX_H
 
 #include "../prefix.h"
 

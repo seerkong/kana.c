@@ -1,5 +1,5 @@
-#ifndef KON_PREFIX_TYPE_H
-#define KON_PREFIX_TYPE_H
+#ifndef KN_PREFIX_TYPE_H
+#define KN_PREFIX_TYPE_H
 
 #endif
 

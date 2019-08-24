@@ -1,5 +1,5 @@
-#ifndef KON_INTERPRETER_KEYWORD_PREFIX_H
-#define KON_INTERPRETER_KEYWORD_PREFIX_H
+#ifndef KN_INTERPRETER_KEYWORD_PREFIX_H
+#define KN_INTERPRETER_KEYWORD_PREFIX_H
 
 #include "prefix_eval.h"
 #include "prefix_apply.h"

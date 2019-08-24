@@ -5,30 +5,30 @@
 
 KonTrampoline* AfterDispatcherIdEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    unsigned int dispatcherId = KON_UNBOX_FIXNUM(evaledValue);
+    unsigned int dispatcherId = KN_UNBOX_FIXNUM(evaledValue);
     KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KonMsgDispatcher* dispatcher = (KonMsgDispatcher*)KxHashTable_AtKey(memo, "Dispatcher");
 
-    int res = KON_SetMsgDispatcher(kstate, dispatcherId, dispatcher);
+    int res = KN_SetMsgDispatcher(kstate, dispatcherId, dispatcher);
     
     KonTrampoline* bounce;
-    bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
-    bounce->Run.Value = KON_TRUE;
+    bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
+    bounce->Run.Value = KN_TRUE;
     bounce->Cont = contBeingInvoked->Cont;
 
     return bounce;
 }
 
 
-KonTrampoline* KON_EvalPrefixSetDispatcher(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_EvalPrefixSetDispatcher(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KON_DEBUG("meet prefix marcro def dispatcher");
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN_DEBUG("meet prefix marcro def dispatcher");
+    KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
     
-    KN dispatcherIdExpr = KON_DCR(expression);
+    KN dispatcherIdExpr = KN_DCR(expression);
 
-    KN config = KON_DCNR(expression);
+    KN config = KN_DCNR(expression);
 
     KonMsgDispatcher* dispatcher = MakeMsgDispatcher(kstate);
 
@@ -51,7 +51,7 @@ KonTrampoline* KON_EvalPrefixSetDispatcher(KonState* kstate, KN expression, KonE
     dispatcher->OnVisitCell = MakeDispatchProc(kstate, onVisitCell, env);
 
 
-    KonContinuation* k = AllocContinuationWithType(kstate, KON_CONT_NATIVE_CALLBACK);
+    KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
     k->Env = env;
 
@@ -61,7 +61,7 @@ KonTrampoline* KON_EvalPrefixSetDispatcher(KonState* kstate, KN expression, KonE
     k->Native.Callback = AfterDispatcherIdEvaled;
     
     KonTrampoline* bounce;
-    bounce = KON_EvalExpression(kstate, dispatcherIdExpr, env, k);
+    bounce = KN_EvalExpression(kstate, dispatcherIdExpr, env, k);
 
 
     return bounce;

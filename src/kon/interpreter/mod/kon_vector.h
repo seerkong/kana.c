@@ -12,8 +12,8 @@
 //         || strcmp(funcName, "vector-tail")
 //         || strcmp(funcName, "vector-at")
 //         || strcmp(funcName, "vector-del")
-#ifndef KON_MOD_VECTOR_H
-#define KON_MOD_VECTOR_H 1
+#ifndef KN_MOD_VECTOR_H
+#define KN_MOD_VECTOR_H 1
 
 #include "../../kson/node.h"
 

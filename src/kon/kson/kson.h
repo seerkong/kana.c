@@ -1,5 +1,5 @@
-#ifndef KON_KSON_H
-#define KON_KSON_H
+#ifndef KN_KSON_H
+#define KN_KSON_H
 
 #include "prefix.h"
 #include "node.h"

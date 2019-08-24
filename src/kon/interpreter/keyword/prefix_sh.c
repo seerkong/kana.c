@@ -3,37 +3,37 @@
 #include "prefix_if.h"
 #include "../cps_interpreter.h"
 
-KonTrampoline* KON_EvalPrefixSh(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_EvalPrefixSh(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KON_DEBUG("meet prefix marcro sh");
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN arguments = KON_CellCoresToList(kstate, expression);
+    KN_DEBUG("meet prefix marcro sh");
+    KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN arguments = KN_CellCoresToList(kstate, expression);
 
     KxStringBuffer* sb = KxStringBuffer_New();
 
     KN iter = arguments;
-    while (iter != KON_NIL) {
-        KN next = KON_CDR(iter);
-        KN item = KON_CAR(iter);
-        if (KON_IS_SYMBOL(item)) {
-            KxStringBuffer_AppendCstr(sb, KON_UNBOX_SYMBOL(item));
+    while (iter != KN_NIL) {
+        KN next = KN_CDR(iter);
+        KN item = KN_CAR(iter);
+        if (KN_IS_SYMBOL(item)) {
+            KxStringBuffer_AppendCstr(sb, KN_UNBOX_SYMBOL(item));
         }
-        else if (KON_IS_STRING(item)) {
-            KxStringBuffer_AppendCstr(sb, KxStringBuffer_Cstr(KON_UNBOX_STRING(item)));
+        else if (KN_IS_STRING(item)) {
+            KxStringBuffer_AppendCstr(sb, KxStringBuffer_Cstr(KN_UNBOX_STRING(item)));
         }
 
-        if (next != KON_NIL) {
+        if (next != KN_NIL) {
             KxStringBuffer_AppendCstr(sb, " ");
         }
         iter = next;
     }
 
-    KON_DEBUG("exec shell cmd: %s", KxStringBuffer_Cstr(sb));
+    KN_DEBUG("exec shell cmd: %s", KxStringBuffer_Cstr(sb));
     system(KxStringBuffer_Cstr(sb));
 
     KonTrampoline* bounce;
-    bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
-    bounce->Run.Value = KON_TRUE;
+    bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
+    bounce->Run.Value = KN_TRUE;
     bounce->Cont = cont;
 
     return bounce;

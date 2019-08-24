@@ -1,623 +1,623 @@
 #include "primary.h"
 
 // not(kon_false) => true, not(other) => false
-KN KON_PrimaryNot(KonState* kstate, KN args)
+KN KN_PrimaryNot(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    if (KON_IS_FALSE(item)) {
-        return KON_TRUE;
+    KN item = KN_CAR(args);
+    if (KN_IS_FALSE(item)) {
+        return KN_TRUE;
     }
     else {
-        return KON_FALSE;
+        return KN_FALSE;
     }
 }
 
 // pointer check
-KN KON_PrimaryEqual(KonState* kstate, KN args)
+KN KN_PrimaryEqual(KonState* kstate, KN args)
 {
-    KN left = KON_CAR(args);
-    KN right = KON_CADR(args);
+    KN left = KN_CAR(args);
+    KN right = KN_CADR(args);
     if (left == right) {
-        return KON_TRUE;
+        return KN_TRUE;
     }
     else {
-        return KON_FALSE;
+        return KN_FALSE;
     }
 }
 
 // basic types, boolean, number, char symbol, string value check
-KN KON_PrimaryEqv(KonState* kstate, KN args)
+KN KN_PrimaryEqv(KonState* kstate, KN args)
 {
-    KN left = KON_CAR(args);
-    KN right = KON_CADR(args);
-    if (left == KON_UNDEF || left == KON_UKN) {
-        return (left == right) ? KON_TRUE: KON_FALSE;
+    KN left = KN_CAR(args);
+    KN right = KN_CADR(args);
+    if (left == KN_UNDEF || left == KN_UKN) {
+        return (left == right) ? KN_TRUE: KN_FALSE;
     }
-    else if (KON_IS_NIL(left) || KON_IS_NIL(right)) {
-        return (KON_IS_NIL(left) && KON_IS_NIL(right)) ? KON_TRUE: KON_FALSE;
+    else if (KN_IS_NIL(left) || KN_IS_NIL(right)) {
+        return (KN_IS_NIL(left) && KN_IS_NIL(right)) ? KN_TRUE: KN_FALSE;
     }
-    else if (KON_IS_BOOLEAN(left) && KON_IS_BOOLEAN(right)) {
-        return (left == right) ? KON_TRUE: KON_FALSE;
+    else if (KN_IS_BOOLEAN(left) && KN_IS_BOOLEAN(right)) {
+        return (left == right) ? KN_TRUE: KN_FALSE;
     }
-    else if (KON_IS_FIXNUM(left) && KON_IS_FIXNUM(right)) {
-        return (left == right) ? KON_TRUE: KON_FALSE;
+    else if (KN_IS_FIXNUM(left) && KN_IS_FIXNUM(right)) {
+        return (left == right) ? KN_TRUE: KN_FALSE;
     }
-    else if (KON_IS_FLONUM(left) && KON_IS_FLONUM(right)) {
-        return (KON_UNBOX_FLONUM(left) == KON_UNBOX_FLONUM(right)) ? KON_TRUE: KON_FALSE;
+    else if (KN_IS_FLONUM(left) && KN_IS_FLONUM(right)) {
+        return (KN_UNBOX_FLONUM(left) == KN_UNBOX_FLONUM(right)) ? KN_TRUE: KN_FALSE;
     }
-    else if (KON_IS_CHAR(left) && KON_IS_CHAR(right)) {
-        return (KON_UNBOX_CHAR(left) == KON_UNBOX_CHAR(right)) ? KON_TRUE: KON_FALSE;
+    else if (KN_IS_CHAR(left) && KN_IS_CHAR(right)) {
+        return (KN_UNBOX_CHAR(left) == KN_UNBOX_CHAR(right)) ? KN_TRUE: KN_FALSE;
     }
-    // TODO KON_IS_BYTE
-    else if (KON_IS_SYMBOL(left) && KON_IS_SYMBOL(right)) {
-        const char* leftStr = KON_UNBOX_SYMBOL(left);
-        const char* rightStr = KON_UNBOX_SYMBOL(right);
-        return (strcmp(leftStr, rightStr) == 0) ? KON_TRUE: KON_FALSE;;
+    // TODO KN_IS_BYTE
+    else if (KN_IS_SYMBOL(left) && KN_IS_SYMBOL(right)) {
+        const char* leftStr = KN_UNBOX_SYMBOL(left);
+        const char* rightStr = KN_UNBOX_SYMBOL(right);
+        return (strcmp(leftStr, rightStr) == 0) ? KN_TRUE: KN_FALSE;;
     }
     
-    else if (KON_IS_STRING(left) && KON_IS_STRING(right)) {
-        const char* leftStr = KxStringBuffer_Cstr(KON_UNBOX_STRING(left));
-        const char* rightStr = KxStringBuffer_Cstr(KON_UNBOX_STRING(right));
-        return (strcmp(leftStr, rightStr) == 0) ? KON_TRUE: KON_FALSE;;
+    else if (KN_IS_STRING(left) && KN_IS_STRING(right)) {
+        const char* leftStr = KxStringBuffer_Cstr(KN_UNBOX_STRING(left));
+        const char* rightStr = KxStringBuffer_Cstr(KN_UNBOX_STRING(right));
+        return (strcmp(leftStr, rightStr) == 0) ? KN_TRUE: KN_FALSE;;
     }
     else {
-        return KON_FALSE;
+        return KN_FALSE;
     }
 }
 
-KN KON_PrimaryEq(KonState* kstate, KN args)
+KN KN_PrimaryEq(KonState* kstate, KN args)
 {
-    KN left = KON_CAR(args);
-    if (left == KON_UNDEF || left == KON_UKN
-        || KON_IS_NIL(left)
-        || KON_IS_BOOLEAN(left)
-        || KON_IS_FIXNUM(left)
-        || KON_IS_FLONUM(left)
-        || KON_IS_CHAR(left)
-        || KON_IS_SYMBOL(left)
-        || KON_IS_STRING(left)
+    KN left = KN_CAR(args);
+    if (left == KN_UNDEF || left == KN_UKN
+        || KN_IS_NIL(left)
+        || KN_IS_BOOLEAN(left)
+        || KN_IS_FIXNUM(left)
+        || KN_IS_FLONUM(left)
+        || KN_IS_CHAR(left)
+        || KN_IS_SYMBOL(left)
+        || KN_IS_STRING(left)
     ) {
-        return KON_PrimaryEqv(kstate, args);
+        return KN_PrimaryEqv(kstate, args);
     }
     else {
-        return KON_PrimaryEqual(kstate, args);
+        return KN_PrimaryEqual(kstate, args);
     }
 }
 
-KN KON_PrimaryNeq(KonState* kstate, KN args)
+KN KN_PrimaryNeq(KonState* kstate, KN args)
 {
-    KN result = KON_PrimaryEq(kstate, args);
-    if (result == KON_FALSE) {
-        return KON_TRUE;
+    KN result = KN_PrimaryEq(kstate, args);
+    if (result == KN_FALSE) {
+        return KN_TRUE;
     }
     else {
-        return KON_FALSE;
+        return KN_FALSE;
     }
 }
 
-KN KON_PrimaryNewline(KonState* kstate, KN args)
+KN KN_PrimaryNewline(KonState* kstate, KN args)
 {
     printf("\n");
-    return KON_MAKE_FIXNUM(1);
+    return KN_MAKE_FIXNUM(1);
 }
 
-KN KON_PrimaryDisplay(KonState* kstate, KN args)
+KN KN_PrimaryDisplay(KonState* kstate, KN args)
 {
     KN iter = args;
     KxStringBuffer* merged = KxStringBuffer_New();
 
     int state = 1; // 1 need verb, 2 need objects
     do {
-        KN item = KON_CAR(iter);
+        KN item = KN_CAR(iter);
 
-        KN formated = KON_ToFormatString(kstate, item, false, 0, "  ");
-        KxStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(formated));
+        KN formated = KN_ToFormatString(kstate, item, false, 0, "  ");
+        KxStringBuffer_AppendStringBuffer(merged, KN_UNBOX_STRING(formated));
 
-        iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
+        iter = KN_CDR(iter);
+    } while (iter != KN_NIL);
     printf("%s", KxStringBuffer_Cstr(merged));
     int size = KxStringBuffer_Length(merged);
-    return KON_MAKE_FIXNUM(size);
+    return KN_MAKE_FIXNUM(size);
 }
 
-KN KON_PrimaryDisplayln(KonState* kstate, KN args)
+KN KN_PrimaryDisplayln(KonState* kstate, KN args)
 {
-    KN size = KON_PrimaryDisplay(kstate, args);
-    KON_PrimaryNewline(kstate, args);
-    return KON_MAKE_FIXNUM(KON_UNBOX_FIXNUM(size) + 1);
+    KN size = KN_PrimaryDisplay(kstate, args);
+    KN_PrimaryNewline(kstate, args);
+    return KN_MAKE_FIXNUM(KN_UNBOX_FIXNUM(size) + 1);
 }
 
 // TODO select output
-KN KON_PrimaryWrite(KonState* kstate, KN args)
+KN KN_PrimaryWrite(KonState* kstate, KN args)
 {
     KN iter = args;
     KxStringBuffer* merged = KxStringBuffer_New();
 
     int state = 1; // 1 need verb, 2 need objects
     do {
-        KN item = KON_CAR(iter);
+        KN item = KN_CAR(iter);
 
-        if (KON_IS_STRING(item)) {
-            KxStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(item));
+        if (KN_IS_STRING(item)) {
+            KxStringBuffer_AppendStringBuffer(merged, KN_UNBOX_STRING(item));
         }
         else {
-            KN formated = KON_ToFormatString(kstate, item, false, 0, "  ");
-            KxStringBuffer_AppendStringBuffer(merged, KON_UNBOX_STRING(formated));
+            KN formated = KN_ToFormatString(kstate, item, false, 0, "  ");
+            KxStringBuffer_AppendStringBuffer(merged, KN_UNBOX_STRING(formated));
         }
-        iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
+        iter = KN_CDR(iter);
+    } while (iter != KN_NIL);
     printf("%s", KxStringBuffer_Cstr(merged));
     int size = KxStringBuffer_Length(merged);
-    return KON_MAKE_FIXNUM(size);
+    return KN_MAKE_FIXNUM(size);
 }
 
 // TODO select output
-KN KON_PrimaryWriteln(KonState* kstate, KN args)
+KN KN_PrimaryWriteln(KonState* kstate, KN args)
 {
-    KN size = KON_PrimaryWrite(kstate, args);
-    KON_PrimaryNewline(kstate, args);
-    return KON_MAKE_FIXNUM(KON_UNBOX_FIXNUM(size) + 1);
+    KN size = KN_PrimaryWrite(kstate, args);
+    KN_PrimaryNewline(kstate, args);
+    return KN_MAKE_FIXNUM(KN_UNBOX_FIXNUM(size) + 1);
 }
 
-KN KON_PrimaryStringify(KonState* kstate, KN args)
+KN KN_PrimaryStringify(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    KN formated = KON_ToFormatString(kstate, item, false, 0, "  ");
+    KN item = KN_CAR(args);
+    KN formated = KN_ToFormatString(kstate, item, false, 0, "  ");
 
     return formated;
 }
 
 // TODO
-KN KON_PrimaryParse(KonState* kstate, KN args)
+KN KN_PrimaryParse(KonState* kstate, KN args)
 {
-    // KN item = KON_CAR(args);
+    // KN item = KN_CAR(args);
     
     // return item;
-    return KON_UNDEF;
+    return KN_UNDEF;
 }
 
-KN KON_PrimaryIsTrue(KonState* kstate, KN args)
+KN KN_PrimaryIsTrue(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_TRUE(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_TRUE(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsFalse(KonState* kstate, KN args)
+KN KN_PrimaryIsFalse(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_FALSE(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_FALSE(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsNil(KonState* kstate, KN args)
+KN KN_PrimaryIsNil(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_NIL(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_NIL(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsNull(KonState* kstate, KN args)
+KN KN_PrimaryIsNull(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_UNDEF(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_UNDEF(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsUkn(KonState* kstate, KN args)
+KN KN_PrimaryIsUkn(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_UKN(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_UKN(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsPointer(KonState* kstate, KN args)
+KN KN_PrimaryIsPointer(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_POINTER(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_POINTER(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsFixnum(KonState* kstate, KN args)
+KN KN_PrimaryIsFixnum(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_FIXNUM(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_FIXNUM(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsFlonum(KonState* kstate, KN args)
+KN KN_PrimaryIsFlonum(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_FLONUM(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_FLONUM(item)) ? KN_TRUE : KN_FALSE;
 }
 
 
-KN KON_PrimaryIsImdtSymbol(KonState* kstate, KN args)
+KN KN_PrimaryIsImdtSymbol(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_IMDT_SYMBOL(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_IMDT_SYMBOL(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsChar(KonState* kstate, KN args)
+KN KN_PrimaryIsChar(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_CHAR(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_CHAR(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsBoolean(KonState* kstate, KN args)
+KN KN_PrimaryIsBoolean(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_BOOLEAN(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_BOOLEAN(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsBytes(KonState* kstate, KN args)
+KN KN_PrimaryIsBytes(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_BYTES(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_BYTES(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsString(KonState* kstate, KN args)
+KN KN_PrimaryIsString(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_STRING(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_STRING(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsSymbol(KonState* kstate, KN args)
+KN KN_PrimaryIsSymbol(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_SYMBOL(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_SYMBOL(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsVariable(KonState* kstate, KN args)
+KN KN_PrimaryIsVariable(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_VARIABLE(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_VARIABLE(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsIdentifier(KonState* kstate, KN args)
+KN KN_PrimaryIsIdentifier(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_IDENTIFIER(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_IDENTIFIER(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsWord(KonState* kstate, KN args)
+KN KN_PrimaryIsWord(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_WORD(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_WORD(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsAttrSlot(KonState* kstate, KN args)
+KN KN_PrimaryIsAttrSlot(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_ACCESSOR(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_ACCESSOR(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsPair(KonState* kstate, KN args)
+KN KN_PrimaryIsPair(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
+    KN item = KN_CAR(args);
     // auto unbox QUOTE_LIST
-    if (KON_IS_QUOTE_LIST(item)) {
-        item = KON_UNBOX_QUOTE(item);
+    if (KN_IS_QUOTE_LIST(item)) {
+        item = KN_UNBOX_QUOTE(item);
     }
-    return (KON_IS_PAIR(item)) ? KON_TRUE : KON_FALSE;
+    return (KN_IS_PAIR(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsPairList(KonState* kstate, KN args)
+KN KN_PrimaryIsPairList(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
+    KN item = KN_CAR(args);
     // auto unbox QUOTE_LIST
-    if (KON_IS_QUOTE_LIST(item)) {
-        item = KON_UNBOX_QUOTE(item);
+    if (KN_IS_QUOTE_LIST(item)) {
+        item = KN_UNBOX_QUOTE(item);
     }
-    return (KON_IsPairList(item)) ? KON_TRUE : KON_FALSE;
+    return (KN_IsPairList(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsVector(KonState* kstate, KN args)
+KN KN_PrimaryIsVector(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_VECTOR(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_VECTOR(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsTable(KonState* kstate, KN args)
+KN KN_PrimaryIsTable(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_TABLE(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_TABLE(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsCell(KonState* kstate, KN args)
+KN KN_PrimaryIsCell(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_CELL(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_CELL(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsEnv(KonState* kstate, KN args)
+KN KN_PrimaryIsEnv(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_ENV(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_ENV(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsProcedure(KonState* kstate, KN args)
+KN KN_PrimaryIsProcedure(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_PROCEDURE(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_PROCEDURE(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsContinuation(KonState* kstate, KN args)
+KN KN_PrimaryIsContinuation(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_CONTINUATION(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_CONTINUATION(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsCpointer(KonState* kstate, KN args)
+KN KN_PrimaryIsCpointer(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_CPOINTER(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_CPOINTER(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryIsException(KonState* kstate, KN args)
+KN KN_PrimaryIsException(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
-    return (KON_IS_EXCEPTION(item)) ? KON_TRUE : KON_FALSE;
+    KN item = KN_CAR(args);
+    return (KN_IS_EXCEPTION(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KON_PrimaryToVariable(KonState* kstate, KN args)
+KN KN_PrimaryToVariable(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
+    KN item = KN_CAR(args);
     char* symCstr = NULL;
-    if (KON_IS_SYMBOL(item)) {
-        symCstr = KON_UNBOX_SYMBOL(item);
+    if (KN_IS_SYMBOL(item)) {
+        symCstr = KN_UNBOX_SYMBOL(item);
     }
-    else if (KON_IS_STRING(item)) {
-        symCstr = KxStringBuffer_Cstr(KON_UNBOX_STRING(item));
+    else if (KN_IS_STRING(item)) {
+        symCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(item));
     }
     else {
-        return KON_UKN;
+        return KN_UKN;
     }
-    KonSymbol* value = KON_ALLOC_TYPE_TAG(kstate, KonSymbol, KON_T_SYMBOL);
-    value->Type = KON_SYM_VARIABLE;
+    KonSymbol* value = KN_ALLOC_TYPE_TAG(kstate, KonSymbol, KN_T_SYMBOL);
+    value->Type = KN_SYM_VARIABLE;
     value->Data = utf8dup(symCstr);
     return value;
 }
 
-KN KON_PrimaryToIdentifier(KonState* kstate, KN args)
+KN KN_PrimaryToIdentifier(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
+    KN item = KN_CAR(args);
     char* symCstr = NULL;
-    if (KON_IS_SYMBOL(item)) {
-        symCstr = KON_UNBOX_SYMBOL(item);
+    if (KN_IS_SYMBOL(item)) {
+        symCstr = KN_UNBOX_SYMBOL(item);
     }
-    else if (KON_IS_STRING(item)) {
-        symCstr = KxStringBuffer_Cstr(KON_UNBOX_STRING(item));
+    else if (KN_IS_STRING(item)) {
+        symCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(item));
     }
     else {
-        return KON_UKN;
+        return KN_UKN;
     }
-    KonSymbol* value = KON_ALLOC_TYPE_TAG(kstate, KonSymbol, KON_T_SYMBOL);
-    value->Type = KON_SYM_IDENTIFIER;
+    KonSymbol* value = KN_ALLOC_TYPE_TAG(kstate, KonSymbol, KN_T_SYMBOL);
+    value->Type = KN_SYM_IDENTIFIER;
     value->Data = utf8dup(symCstr);
     return value;
 }
 
-KN KON_PrimaryToSymString(KonState* kstate, KN args)
+KN KN_PrimaryToSymString(KonState* kstate, KN args)
 {
-    KN item = KON_CAR(args);
+    KN item = KN_CAR(args);
     char* symCstr = NULL;
-    if (KON_IS_SYMBOL(item)) {
-        symCstr = KON_UNBOX_SYMBOL(item);
+    if (KN_IS_SYMBOL(item)) {
+        symCstr = KN_UNBOX_SYMBOL(item);
     }
-    else if (KON_IS_STRING(item)) {
-        symCstr = KxStringBuffer_Cstr(KON_UNBOX_STRING(item));
+    else if (KN_IS_STRING(item)) {
+        symCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(item));
     }
     else {
-        return KON_UKN;
+        return KN_UKN;
     }
-    KonSymbol* value = KON_ALLOC_TYPE_TAG(kstate, KonSymbol, KON_T_SYMBOL);
-    value->Type = KON_SYM_STRING;
+    KonSymbol* value = KN_ALLOC_TYPE_TAG(kstate, KonSymbol, KN_T_SYMBOL);
+    value->Type = KN_SYM_STRING;
     value->Data = utf8dup(symCstr);
     return value;
 }
 
-KN KON_PrimaryUnboxQuote(KonState* kstate, KN args)
+KN KN_PrimaryUnboxQuote(KonState* kstate, KN args)
 {
-    KN obj = KON_CAR(args);
-    if (KON_IS_QUOTE(obj)) {
+    KN obj = KN_CAR(args);
+    if (KN_IS_QUOTE(obj)) {
         return ((KonQuote*)obj)->Inner;
     }
-    else if (KON_IS_QUASIQUOTE(obj)) {
+    else if (KN_IS_QUASIQUOTE(obj)) {
         return ((KonQuasiquote*)obj)->Inner;
     }
-    else if (KON_IS_EXPAND(obj)) {
+    else if (KN_IS_EXPAND(obj)) {
         return ((KonExpand*)obj)->Inner;
     }
-    else if (KON_IS_UNQUOTE(obj)) {
+    else if (KN_IS_UNQUOTE(obj)) {
         return ((KonUnquote*)obj)->Inner;
     }
     return obj;
 }
 
-KN KON_PrimaryGetDispatcherId(KonState* kstate, KN args)
+KN KN_PrimaryGetDispatcherId(KonState* kstate, KN args)
 {
-    KN obj = KON_CAR(args);
-    return KON_MAKE_FIXNUM(KON_NodeDispacherId(kstate, obj));
+    KN obj = KN_CAR(args);
+    return KN_MAKE_FIXNUM(KN_NodeDispacherId(kstate, obj));
 }
 
-KN KON_PrimarySetDispatcherId(KonState* kstate, KN args)
+KN KN_PrimarySetDispatcherId(KonState* kstate, KN args)
 {
-    KN obj = KON_CAR(args);
-    KN boxedId = KON_CADR(args);
-    unsigned int dispatcherId = KON_UNBOX_FIXNUM(boxedId);
-    if (KON_IS_POINTER(obj)) {
+    KN obj = KN_CAR(args);
+    KN boxedId = KN_CADR(args);
+    unsigned int dispatcherId = KN_UNBOX_FIXNUM(boxedId);
+    if (KN_IS_POINTER(obj)) {
         ((KonBase*)obj)->MsgDispatcherId = dispatcherId;
     }
-    return KON_TRUE;
+    return KN_TRUE;
 }
 
 // init internal types dispatcher id
-KN KON_PrimaryExportDispacherId(KonState* kstate, KonEnv* env)
+KN KN_PrimaryExportDispacherId(KonState* kstate, KonEnv* env)
 {
-    KON_EnvDefine(kstate, env, "BooleanDispacher", KON_MAKE_FIXNUM(KON_T_BOOLEAN));
-    KON_EnvDefine(kstate, env, "UnknownDispacher", KON_MAKE_FIXNUM(KON_T_UKN));
-    KON_EnvDefine(kstate, env, "UndefinedDispacher", KON_MAKE_FIXNUM(KON_T_UNDEF));
-    KON_EnvDefine(kstate, env, "SymbolDispacher", KON_MAKE_FIXNUM(KON_T_SYMBOL));
-    KON_EnvDefine(kstate, env, "CharDispacher", KON_MAKE_FIXNUM(KON_T_CHAR));
-    KON_EnvDefine(kstate, env, "NumberDispacher", KON_MAKE_FIXNUM(KON_T_NUMBER));
-    KON_EnvDefine(kstate, env, "StringDispacher", KON_MAKE_FIXNUM(KON_T_STRING));
-    KON_EnvDefine(kstate, env, "ListDispacher", KON_MAKE_FIXNUM(KON_T_PAIRLIST));
-    KON_EnvDefine(kstate, env, "VectorDispacher", KON_MAKE_FIXNUM(KON_T_VECTOR));
-    KON_EnvDefine(kstate, env, "TableDispacher", KON_MAKE_FIXNUM(KON_T_TABLE));
-    KON_EnvDefine(kstate, env, "CellDispacher", KON_MAKE_FIXNUM(KON_T_CELL));
-    KON_EnvDefine(kstate, env, "AttrSlotDispacher", KON_MAKE_FIXNUM(KON_T_ACCESSOR));
+    KN_EnvDefine(kstate, env, "BooleanDispacher", KN_MAKE_FIXNUM(KN_T_BOOLEAN));
+    KN_EnvDefine(kstate, env, "UnknownDispacher", KN_MAKE_FIXNUM(KN_T_UKN));
+    KN_EnvDefine(kstate, env, "UndefinedDispacher", KN_MAKE_FIXNUM(KN_T_UNDEF));
+    KN_EnvDefine(kstate, env, "SymbolDispacher", KN_MAKE_FIXNUM(KN_T_SYMBOL));
+    KN_EnvDefine(kstate, env, "CharDispacher", KN_MAKE_FIXNUM(KN_T_CHAR));
+    KN_EnvDefine(kstate, env, "NumberDispacher", KN_MAKE_FIXNUM(KN_T_NUMBER));
+    KN_EnvDefine(kstate, env, "StringDispacher", KN_MAKE_FIXNUM(KN_T_STRING));
+    KN_EnvDefine(kstate, env, "ListDispacher", KN_MAKE_FIXNUM(KN_T_PAIRLIST));
+    KN_EnvDefine(kstate, env, "VectorDispacher", KN_MAKE_FIXNUM(KN_T_VECTOR));
+    KN_EnvDefine(kstate, env, "TableDispacher", KN_MAKE_FIXNUM(KN_T_TABLE));
+    KN_EnvDefine(kstate, env, "CellDispacher", KN_MAKE_FIXNUM(KN_T_CELL));
+    KN_EnvDefine(kstate, env, "AttrSlotDispacher", KN_MAKE_FIXNUM(KN_T_ACCESSOR));
 
 }
 
 
-KN KON_PrimaryOpExport(KonState* kstate, KonEnv* env)
+KN KN_PrimaryOpExport(KonState* kstate, KonEnv* env)
 {
     
-    KON_EnvDefine(kstate, env, "not",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryNot)
+    KN_EnvDefine(kstate, env, "not",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryNot)
     );
-    KON_EnvDefine(kstate, env, "equal",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryEqual)
+    KN_EnvDefine(kstate, env, "equal",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryEqual)
     );
-    KON_EnvDefine(kstate, env, "eqv",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryEqv)
+    KN_EnvDefine(kstate, env, "eqv",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryEqv)
     );
-    KON_EnvDefine(kstate, env, "eq",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryEq)
+    KN_EnvDefine(kstate, env, "eq",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryEq)
     );
-    KON_EnvDefine(kstate, env, "neq",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryNeq)
+    KN_EnvDefine(kstate, env, "neq",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryNeq)
     );
 
     // IO
-    KON_EnvDefine(kstate, env, "newline",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryNewline)
+    KN_EnvDefine(kstate, env, "newline",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryNewline)
     );
-    KON_EnvDefine(kstate, env, "display",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryDisplay)
+    KN_EnvDefine(kstate, env, "display",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryDisplay)
     );
-    KON_EnvDefine(kstate, env, "displayln",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryDisplayln)
+    KN_EnvDefine(kstate, env, "displayln",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryDisplayln)
     );
-    KON_EnvDefine(kstate, env, "write",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryWrite)
+    KN_EnvDefine(kstate, env, "write",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryWrite)
     );
-    KON_EnvDefine(kstate, env, "writeln",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryWriteln)
-    );
-
-    KON_EnvDefine(kstate, env, "stringify",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryStringify)
+    KN_EnvDefine(kstate, env, "writeln",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryWriteln)
     );
 
-    KON_EnvDefine(kstate, env, "kon-from-str",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryParse)
+    KN_EnvDefine(kstate, env, "stringify",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryStringify)
+    );
+
+    KN_EnvDefine(kstate, env, "kon-from-str",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryParse)
     );
 
     // predict
-    KON_EnvDefine(kstate, env, "is-true",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsTrue)
+    KN_EnvDefine(kstate, env, "is-true",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsTrue)
     );
-    KON_EnvDefine(kstate, env, "is-false",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsFalse)
+    KN_EnvDefine(kstate, env, "is-false",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsFalse)
     );
-    KON_EnvDefine(kstate, env, "is-nil",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsNil)
+    KN_EnvDefine(kstate, env, "is-nil",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsNil)
     );
-    KON_EnvDefine(kstate, env, "is-null",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsNull)
+    KN_EnvDefine(kstate, env, "is-null",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsNull)
     );
-    KON_EnvDefine(kstate, env, "is-null",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsUkn)
+    KN_EnvDefine(kstate, env, "is-null",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsUkn)
     );
-    KON_EnvDefine(kstate, env, "is-pointer",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsPointer)
+    KN_EnvDefine(kstate, env, "is-pointer",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsPointer)
     );
-    KON_EnvDefine(kstate, env, "is-fixnum",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsFixnum)
+    KN_EnvDefine(kstate, env, "is-fixnum",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsFixnum)
     );
-    KON_EnvDefine(kstate, env, "is-flonum",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsFlonum)
+    KN_EnvDefine(kstate, env, "is-flonum",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsFlonum)
     );
-    KON_EnvDefine(kstate, env, "is-imdt-symbol",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsImdtSymbol)
+    KN_EnvDefine(kstate, env, "is-imdt-symbol",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsImdtSymbol)
     );
-    KON_EnvDefine(kstate, env, "is-char",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsChar)
+    KN_EnvDefine(kstate, env, "is-char",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsChar)
     );
-    KON_EnvDefine(kstate, env, "is-boolean",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsBoolean)
+    KN_EnvDefine(kstate, env, "is-boolean",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsBoolean)
     );
-    KON_EnvDefine(kstate, env, "is-bytes",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsBytes)
+    KN_EnvDefine(kstate, env, "is-bytes",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsBytes)
     );
-    KON_EnvDefine(kstate, env, "is-string",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsString)
+    KN_EnvDefine(kstate, env, "is-string",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsString)
     );
-    KON_EnvDefine(kstate, env, "is-symbol",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsSymbol)
+    KN_EnvDefine(kstate, env, "is-symbol",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsSymbol)
     );
-    KON_EnvDefine(kstate, env, "is-variable",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsVariable)
+    KN_EnvDefine(kstate, env, "is-variable",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsVariable)
     );
-    KON_EnvDefine(kstate, env, "is-identifier",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsIdentifier)
+    KN_EnvDefine(kstate, env, "is-identifier",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsIdentifier)
     );
-    KON_EnvDefine(kstate, env, "is-word",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsWord)
+    KN_EnvDefine(kstate, env, "is-word",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsWord)
     );
-    KON_EnvDefine(kstate, env, "is-attr-slot",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsAttrSlot)
+    KN_EnvDefine(kstate, env, "is-attr-slot",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsAttrSlot)
     );
-    KON_EnvDefine(kstate, env, "is-pair",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsPair)
+    KN_EnvDefine(kstate, env, "is-pair",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsPair)
     );
-    KON_EnvDefine(kstate, env, "is-list",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsPairList)
+    KN_EnvDefine(kstate, env, "is-list",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsPairList)
     );
-    KON_EnvDefine(kstate, env, "is-vector",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsVector)
+    KN_EnvDefine(kstate, env, "is-vector",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsVector)
     );
-    KON_EnvDefine(kstate, env, "is-table",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsTable)
+    KN_EnvDefine(kstate, env, "is-table",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsTable)
     );
-    KON_EnvDefine(kstate, env, "is-cell",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsCell)
+    KN_EnvDefine(kstate, env, "is-cell",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsCell)
     );
-    KON_EnvDefine(kstate, env, "is-env",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsEnv)
+    KN_EnvDefine(kstate, env, "is-env",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsEnv)
     );
-    KON_EnvDefine(kstate, env, "is-procedure",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsProcedure)
+    KN_EnvDefine(kstate, env, "is-procedure",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsProcedure)
     );
-    KON_EnvDefine(kstate, env, "is-continuation",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsContinuation)
+    KN_EnvDefine(kstate, env, "is-continuation",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsContinuation)
     );
-    KON_EnvDefine(kstate, env, "is-cpointer",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsCpointer)
+    KN_EnvDefine(kstate, env, "is-cpointer",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsCpointer)
     );
-    KON_EnvDefine(kstate, env, "is-exception",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryIsException)
+    KN_EnvDefine(kstate, env, "is-exception",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsException)
     );
-    KON_EnvDefine(kstate, env, "unbox-quote",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryUnboxQuote)
-    );
-
-    KON_EnvDefine(kstate, env, "get-dispatcher-id",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryGetDispatcherId)
+    KN_EnvDefine(kstate, env, "unbox-quote",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryUnboxQuote)
     );
 
-    KON_EnvDefine(kstate, env, "set-dispatcher-id",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimarySetDispatcherId)
+    KN_EnvDefine(kstate, env, "get-dispatcher-id",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryGetDispatcherId)
     );
 
-    KON_EnvDefine(kstate, env, "to-variable",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryToVariable)
+    KN_EnvDefine(kstate, env, "set-dispatcher-id",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimarySetDispatcherId)
     );
 
-    KON_EnvDefine(kstate, env, "to-identifier",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryToIdentifier)
+    KN_EnvDefine(kstate, env, "to-variable",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryToVariable)
     );
 
-    KON_EnvDefine(kstate, env, "to-sym-string",
-        MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KON_PrimaryToSymString)
+    KN_EnvDefine(kstate, env, "to-identifier",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryToIdentifier)
     );
 
-    KON_EnvDefine(kstate, env, "get-env", env);
+    KN_EnvDefine(kstate, env, "to-sym-string",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryToSymString)
+    );
 
-    KON_PrimaryExportDispacherId(kstate, env);
+    KN_EnvDefine(kstate, env, "get-env", env);
+
+    KN_PrimaryExportDispacherId(kstate, env);
 }

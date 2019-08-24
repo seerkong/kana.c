@@ -3,81 +3,81 @@
 #include "prefix_if.h"
 #include "../cps_interpreter.h"
 
-KonTrampoline* KON_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* cont)
 {
     KonEnv* parentEnv = env;
     KN param = proc->Composite.ArgList;
     KN body = proc->Composite.Body;
 
-    KON_DEBUG("param def %s", KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")));
-    KON_DEBUG("argList %s", KON_StringToCstr(KON_ToFormatString(kstate, argList, true, 0, "  ")));
-    KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
+    KN_DEBUG("param def %s", KN_StringToCstr(KN_ToFormatString(kstate, param, true, 0, "  ")));
+    KN_DEBUG("argList %s", KN_StringToCstr(KN_ToFormatString(kstate, argList, true, 0, "  ")));
+    KN_DEBUG("body %s", KN_StringToCstr(KN_ToFormatString(kstate, body, true, 0, "  ")));
 
-    KonEnv* procBindEnv = KON_MakeChildEnv(kstate, parentEnv);
-    KON_EnvDefine(kstate, procBindEnv, "return", cont);
+    KonEnv* procBindEnv = KN_MakeChildEnv(kstate, parentEnv);
+    KN_EnvDefine(kstate, procBindEnv, "return", cont);
     
     KonPair* iterParam = param;
     KonPair* iterArg = argList;
-    while ((KN)iterParam != KON_NIL) {
-        KN param = KON_CAR(iterParam);
-        KN arg = KON_CAR(iterArg);
+    while ((KN)iterParam != KN_NIL) {
+        KN param = KN_CAR(iterParam);
+        KN arg = KN_CAR(iterArg);
         // if this param is the last, the rest args should bind this param
-        if (KON_CDR(iterParam) == KON_NIL
-            && KON_CDR(iterArg) != KON_NIL
+        if (KN_CDR(iterParam) == KN_NIL
+            && KN_CDR(iterArg) != KN_NIL
         ) {
             arg = iterArg;
         }
-        const char* varName = KON_UNBOX_SYMBOL(param);
-        KON_DEBUG("arg %s cstr %s, bind value %s",
-            KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")),
+        const char* varName = KN_UNBOX_SYMBOL(param);
+        KN_DEBUG("arg %s cstr %s, bind value %s",
+            KN_StringToCstr(KN_ToFormatString(kstate, param, true, 0, "  ")),
             varName,
-            KON_StringToCstr(KON_ToFormatString(kstate, arg, true, 0, "  "))
+            KN_StringToCstr(KN_ToFormatString(kstate, arg, true, 0, "  "))
         );
-        KON_EnvDefine(kstate, procBindEnv, varName, arg);
+        KN_EnvDefine(kstate, procBindEnv, varName, arg);
 
-        iterParam = KON_CDR(iterParam);
-        iterArg = KON_CDR(iterArg);
+        iterParam = KN_CDR(iterParam);
+        iterArg = KN_CDR(iterArg);
     };
 
-    KonTrampoline* bounce = KON_EvalSentences(kstate, body, procBindEnv, cont);
+    KonTrampoline* bounce = KN_EvalSentences(kstate, body, procBindEnv, cont);
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixFunc(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
+KonTrampoline* KN_EvalPrefixFunc(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KON_DEBUG("meet prefix marcro func");
-    KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
-    KN param = KON_DTR(expression);
-    KN funcName = KON_UNDEF;
-    KN body = KON_NIL;
+    KN_DEBUG("meet prefix marcro func");
+    KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
+    KN param = KN_DTR(expression);
+    KN funcName = KN_UNDEF;
+    KN body = KN_NIL;
 
-    if (param == KON_UNDEF) {
-        funcName = KON_DCNR(expression);
-        param = KON_DTNR(expression);
-        body = KON_DLNR(expression);
+    if (param == KN_UNDEF) {
+        funcName = KN_DCNR(expression);
+        param = KN_DTNR(expression);
+        body = KN_DLNR(expression);
     }
     else {
-        body = KON_DLR(expression);
+        body = KN_DLR(expression);
     }
 
-    param = KON_ParamTableToList(kstate, param);
+    param = KN_ParamTableToList(kstate, param);
 
-    KON_DEBUG("funcName %s", KON_StringToCstr(KON_ToFormatString(kstate, funcName, true, 0, "  ")));
-    KON_DEBUG("param %s", KON_StringToCstr(KON_ToFormatString(kstate, param, true, 0, "  ")));
-    KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
+    KN_DEBUG("funcName %s", KN_StringToCstr(KN_ToFormatString(kstate, funcName, true, 0, "  ")));
+    KN_DEBUG("param %s", KN_StringToCstr(KN_ToFormatString(kstate, param, true, 0, "  ")));
+    KN_DEBUG("body %s", KN_StringToCstr(KN_ToFormatString(kstate, body, true, 0, "  ")));
 
-    KonProcedure* proc = KON_ALLOC_TYPE_TAG(kstate, KonProcedure, KON_T_PROCEDURE);
-    proc->Type = KON_COMPOSITE_FUNC;
+    KonProcedure* proc = KN_ALLOC_TYPE_TAG(kstate, KonProcedure, KN_T_PROCEDURE);
+    proc->Type = KN_COMPOSITE_FUNC;
     proc->Composite.LexicalEnv = env;
     proc->Composite.ArgList = param;
     proc->Composite.Body = body;
 
-    if (KON_IS_WORD(funcName)) {
-        const char* varNameCstr = KON_UNBOX_SYMBOL(funcName);
-        KON_EnvDefine(kstate, env, varNameCstr, (KN)proc);
+    if (KN_IS_WORD(funcName)) {
+        const char* varNameCstr = KN_UNBOX_SYMBOL(funcName);
+        KN_EnvDefine(kstate, env, varNameCstr, (KN)proc);
     }
 
-    KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
+    KonTrampoline* bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
     bounce->Run.Value = proc;
     bounce->Cont = cont;
     return bounce;
