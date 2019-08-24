@@ -5,7 +5,7 @@ KN KonTable_Init(KonState* kstate, KN args)
 {
     KonTable* value = KON_ALLOC_TYPE_TAG(kstate, KonTable, KON_T_TABLE);
     value->Table = KxHashTable_Init(10);
-    return value;
+    return (KN)value;
 }
 
 KN KonTable_Length(KonState* kstate, KN args)
@@ -360,7 +360,7 @@ KonAccessor* KonTable_Export(KonState* kstate, KonEnv* env)
     
     KON_DirAccessorPutKeyValue(
         kstate,
-        slot,
+        (KN)slot,
         "iter-head",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterHead),
         "r",
@@ -368,7 +368,7 @@ KonAccessor* KonTable_Export(KonState* kstate, KonEnv* env)
     );
     KON_DirAccessorPutKeyValue(
         kstate,
-        slot,
+        (KN)slot,
         "iter-tail",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterTail),
         "r",
@@ -376,7 +376,7 @@ KonAccessor* KonTable_Export(KonState* kstate, KonEnv* env)
     );
     KON_DirAccessorPutKeyValue(
         kstate,
-        slot,
+        (KN)slot,
         "iter-prev",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterPrev),
         "r",
@@ -384,7 +384,7 @@ KonAccessor* KonTable_Export(KonState* kstate, KonEnv* env)
     );
     KON_DirAccessorPutKeyValue(
         kstate,
-        slot,
+        (KN)slot,
         "iter-next",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterNext),
         "r",
@@ -392,7 +392,7 @@ KonAccessor* KonTable_Export(KonState* kstate, KonEnv* env)
     );
     KON_DirAccessorPutKeyValue(
         kstate,
-        slot,
+        (KN)slot,
         "iter-key",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterGetKey),
         "r",
@@ -400,7 +400,7 @@ KonAccessor* KonTable_Export(KonState* kstate, KonEnv* env)
     );
     KON_DirAccessorPutKeyValue(
         kstate,
-        slot,
+        (KN)slot,
         "iter-val",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonTable_IterGetVal),
         "r",

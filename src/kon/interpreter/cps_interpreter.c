@@ -82,7 +82,7 @@ KonTrampoline* AssignValueToAccessor(KonState* kstate, KN accessorKon, KN assign
     if (accessor->Setter != NULL) {
         KN assignArgList = KON_NIL;
         assignArgList = KON_CONS(kstate, assignTo, assignArgList);
-        assignArgList = KON_CONS(kstate, accessor, assignArgList);
+        assignArgList = KON_CONS(kstate, (KN)accessor, assignArgList);
 
         bounce = ApplyProcedureArguments(kstate, accessor->Setter, assignArgList, env, cont);
     }
@@ -103,7 +103,7 @@ KN UnBoxAccessorValue(KN konValue)
     }
     KonAccessor* accessor = CAST_Kon(Accessor, konValue);
     if (accessor->IsDir == true) {
-        return accessor;
+        return (KN)accessor;
     }
     KN value = accessor->Value;
     while (KON_IS_ACCESSOR(value)
@@ -132,7 +132,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
                 bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
                 bounce->Run.Value = KON_CADR(argList);
                 // goto this continuation directly. skip next exprs
-                bounce->Cont = subj;
+                bounce->Cont = (KonContinuation*)subj;
                 return bounce;
             }
 
@@ -317,7 +317,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
         }
         
         iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
+    } while ((KN)iter != KON_NIL);
     
     if (KxVector_Length(clauseVec) > 0) {
         KxVector_Push(clauseListVec, clauseVec);
@@ -374,7 +374,7 @@ KonTrampoline* KON_RunContinuation(KonState* kstate, KonContinuation* contBeingI
     }
     else if (kon_continuation_type(contBeingInvoked) == KON_CONT_EVAL_SENTENCE_LIST) {
         KN lastSentenceVal = val;
-        KN env = contBeingInvoked->Env;
+        KonEnv* env = contBeingInvoked->Env;
         KN restSentences = contBeingInvoked->RestJobs;
         if (restSentences == KON_NIL) {
             // block sentences all finished
@@ -542,7 +542,7 @@ bool KON_IsPrefixMarcro(KN word) {
     }
 }
 
-KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KonTrampoline* bounce;
     if (IsSelfEvaluated(expression)) {
@@ -555,10 +555,10 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
         if (KON_IsPrefixMarcro(first)) {
             const char* prefix = KON_UNBOX_SYMBOL(first);
             if (strcmp(prefix, "apply") == 0) {
-                bounce = KON_EvalPrefixApply(kstate, cell, env, cont);
+                bounce = KON_EvalPrefixApply(kstate, (KN)cell, env, cont);
             }
             else if (strcmp(prefix, "eval") == 0) {
-                bounce = KON_EvalPrefixEval(kstate, cell, env, cont);
+                bounce = KON_EvalPrefixEval(kstate, (KN)cell, env, cont);
             }
             else if (strcmp(prefix, "let") == 0) {
                 bounce = KON_EvalPrefixLet(kstate, KON_DNR(cell), env, cont);
@@ -567,16 +567,16 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
                 bounce = KON_EvalPrefixSet(kstate, KON_DNR(cell), env, cont);
             }
             else if (strcmp(prefix, "lambda") == 0) {
-                bounce = KON_EvalPrefixLambda(kstate, cell, env, cont);
+                bounce = KON_EvalPrefixLambda(kstate, (KN)cell, env, cont);
             }
             else if (strcmp(prefix, "func") == 0) {
-                bounce = KON_EvalPrefixFunc(kstate, cell, env, cont);
+                bounce = KON_EvalPrefixFunc(kstate, (KN)cell, env, cont);
             }
             else if (strcmp(prefix, "blk") == 0) {
-                bounce = KON_EvalPrefixBlk(kstate, cell, env, cont);
+                bounce = KON_EvalPrefixBlk(kstate, (KN)cell, env, cont);
             }
             else if (strcmp(prefix, "do") == 0) {
-                bounce = KON_EvalPrefixDo(kstate, cell, env, cont);
+                bounce = KON_EvalPrefixDo(kstate, (KN)cell, env, cont);
             }
             else if (strcmp(prefix, "cond") == 0) {
                 bounce = KON_EvalPrefixCond(kstate, KON_DNR(cell), env, cont);
@@ -585,7 +585,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
                 bounce = KON_EvalPrefixIf(kstate, KON_DNR(cell), env, cont);
             }
             else if (strcmp(prefix, "for") == 0) {
-                bounce = KON_EvalPrefixFor(kstate, cell, env, cont);
+                bounce = KON_EvalPrefixFor(kstate, (KN)cell, env, cont);
             }
             else if (strcmp(prefix, "break") == 0) {
                 bounce = KON_EvalPrefixBreak(kstate, KON_DNR(cell), env, cont);
@@ -681,7 +681,7 @@ KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonCo
     return bounce;
 }
 
-KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KonEnv* env, KonContinuation* cont)
 {
     if (sentences == KON_NIL) {
         // TODO throw error
@@ -705,7 +705,7 @@ KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonCont
 
 
 
-KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
+KN KON_ProcessSentences(KonState* kstate, KN sentences, KonEnv* rootEnv)
 {
     // TODO add step count when debug
     KN formated = KON_ToFormatString(kstate, sentences, true, 0, "  ");
@@ -732,7 +732,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_BLOCK) {
             KonTrampoline* oldBounce = bounce;
             KonContinuation* cont = bounce->Cont;
-            KN env = bounce->Bounce.Env;
+            KonEnv* env = bounce->Bounce.Env;
             KN sentence = bounce->Bounce.Value;
 
             bounce = KON_EvalExpression(kstate, sentence, env, cont);
@@ -740,7 +740,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
         else if (kon_bounce_type(bounce) == KON_TRAMPOLINE_SUBJ) {
             KonTrampoline* oldBounce = bounce;
             KonContinuation* cont = bounce->Cont;
-            KN env = bounce->Bounce.Env;
+            KonEnv* env = bounce->Bounce.Env;
             KN subj = bounce->Bounce.Value;
             if (KON_IsPairList(subj)) {
                 // the subj position is a list, should be evaluated
@@ -772,7 +772,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             KonContinuation* cont = bounce->Cont;
             
             KN subj = cont->EvalClauseList.Subj;
-            KN env = bounce->Bounce.Env;
+            KonEnv* env = bounce->Bounce.Env;
             KN clauseArgList = bounce->Bounce.Value;
             
 
@@ -836,7 +836,7 @@ KN KON_ProcessSentences(KonState* kstate, KN sentences, KN rootEnv)
             // eval each argment
             KonTrampoline* oldBounce = bounce;
             KonContinuation* cont = bounce->Cont;
-            KN env = bounce->Bounce.Env;
+            KonEnv* env = bounce->Bounce.Env;
             KN arg = bounce->Bounce.Value;
             if (KON_IsPairList(arg)) {
                 // the subj position is a list, should be evaluated

@@ -1,4 +1,5 @@
 #include "kon_list.h"
+#include "../env.h"
 
 KN KonList_Init(KonState* kstate, KN args)
 {
@@ -28,9 +29,9 @@ KN KonList_Push(KonState* kstate, KN args)
         return self;
     }
     KonPair* iter = self;
-    while (iter != KON_NIL) {
+    while ((KN)iter != KON_NIL) {
         KN next = KON_CDR(iter);
-        if (next == KON_NIL) {
+        if ((KN)next == KON_NIL) {
             // append
             KonPair* node = KON_ALLOC_TYPE_TAG(kstate, KonPair, KON_T_PAIR);
             node->Body = other;
@@ -62,7 +63,7 @@ KN KonList_Unshift(KonState* kstate, KN args)
     node->Prev = KON_NIL;
 
     
-    return node;
+    return (KN)node;
 }
 
 KN KonList_Cons(KonState* kstate, KN args)
@@ -238,7 +239,7 @@ KonAccessor* KonList_Export(KonState* kstate, KonEnv* env)
 
     KON_DirAccessorPutKeyValue(
         kstate,
-        slot,
+        (KN)slot,
         "init",
         MakeNativeProcedure(kstate, KON_NATIVE_FUNC, KonList_Init),
         "r",
@@ -247,7 +248,7 @@ KonAccessor* KonList_Export(KonState* kstate, KonEnv* env)
 
     KON_DirAccessorPutKeyValue(
         kstate,
-        slot,
+        (KN)slot,
         "length",
         MakeNativeProcedure(kstate, KON_NATIVE_OBJ_METHOD, KonList_Length),
         "r",
@@ -256,7 +257,7 @@ KonAccessor* KonList_Export(KonState* kstate, KonEnv* env)
 
     KON_DirAccessorPutKeyValue(
         kstate,
-        slot,
+        (KN)slot,
         "push",
         MakeNativeProcedure(kstate, KON_NATIVE_OBJ_METHOD, KonList_Push),
         "r",
@@ -265,7 +266,7 @@ KonAccessor* KonList_Export(KonState* kstate, KonEnv* env)
 
     KON_DirAccessorPutKeyValue(
         kstate,
-        slot,
+        (KN)slot,
         "unshift",
         MakeNativeProcedure(kstate, KON_NATIVE_OBJ_METHOD, KonList_Unshift),
         "r",

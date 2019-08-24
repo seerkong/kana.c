@@ -3,7 +3,7 @@
 #include "prefix_if.h"
 #include "../cps_interpreter.h"
 
-KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN argList, KN env, KonContinuation* cont)
+KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* cont)
 {
     KonEnv* parentEnv = proc->Composite.LexicalEnv;
     KN param = proc->Composite.ArgList;
@@ -18,7 +18,7 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
 
     KonPair* iterParam = param;
     KonPair* iterArg = argList;
-    while (iterParam != KON_NIL) {
+    while ((KN)iterParam != KON_NIL) {
         KN param = KON_CAR(iterParam);
         KN arg = KON_CAR(iterArg);
         // if this param is the last, the rest args should bind this param
@@ -43,7 +43,7 @@ KonTrampoline* KON_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixLambda(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixLambda(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro lambda");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

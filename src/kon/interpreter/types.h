@@ -46,7 +46,7 @@ struct _KonTrampoline {
 
         struct {
             KN Value;
-            KN Env;
+            KonEnv* Env;
         } Bounce;
     };
 };

@@ -15,12 +15,12 @@ KonTrampoline* AssignValueToAccessor(KonState* kstate, KN accessorKon, KN assign
 KN UnBoxAccessorValue(KN konValue);
 KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, KonEnv* env, KonContinuation* cont);
 
-KN KON_ProcessSentences(KonState* kstate, KN sentences, KN env);
+KN KON_ProcessSentences(KonState* kstate, KN sentences, KonEnv* env);
 
 KonContinuation* AllocContinuationWithType(KonState* kstate, KonContinuationType type);
 KonTrampoline* AllocBounceWithType(KonState* kstate, KonBounceType type);
-KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KN env, KonContinuation* cont);
-KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KN env, KonContinuation* cont);
+KonTrampoline* KON_EvalSentences(KonState* kstate, KN sentences, KonEnv* env, KonContinuation* cont);
+KonTrampoline* KON_EvalExpression(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont);
 KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, KonEnv* env, KonContinuation* cont);
 
 #ifdef __cplusplus

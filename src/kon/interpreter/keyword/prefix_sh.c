@@ -3,7 +3,7 @@
 #include "prefix_if.h"
 #include "../cps_interpreter.h"
 
-KonTrampoline* KON_EvalPrefixSh(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixSh(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro sh");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

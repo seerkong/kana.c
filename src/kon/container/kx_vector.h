@@ -18,19 +18,19 @@ extern "C" {
 #define KX_VEC_RESIZE_RATIO 1.618
 
 // a pointer or a fix number
-typedef unsigned long kx_vec_val_t;
+typedef long int kvec_val_t;
 
 typedef struct _KxVector KxVector;
 // typedef void* XN;
 // typedef volatile union _Kon* XN;
 
-#define KX_VEC_UNDEF 0x0e
-#define KX_VEC_NIL 0x1e
-#define KX_VEC_UKN 0x2e
+#define KX_VEC_UNDEF 0x0eL
+#define KX_VEC_NIL 0x1eL
+#define KX_VEC_UKN 0x2eL
 #define KX_VEC_FIXNUM_BITS 1
 #define KX_VEC_FIXNUM_TAG 1
-#define KX_VEC_BOX_UINT(n)    ((kx_vec_val_t) ((((kx_vec_val_t)(n))*(kx_vec_val_t)((kx_vec_val_t)1<<KX_VEC_FIXNUM_BITS)) | KX_VEC_FIXNUM_TAG))
-#define KX_VEC_UNBOX_UINT(n)   (((kx_vec_val_t)((kx_vec_val_t)(n) & ~KX_LIST_FIXNUM_TAG))/(kx_vec_val_t)((kx_vec_val_t)1<<KX_LIST_FIXNUM_BITS))
+#define KX_VEC_BOX_UINT(n)    ((kvec_val_t) ((((kvec_val_t)(n))*(kvec_val_t)((kvec_val_t)1<<KX_VEC_FIXNUM_BITS)) | KX_VEC_FIXNUM_TAG))
+#define KX_VEC_UNBOX_UINT(n)   (((kvec_val_t)((kvec_val_t)(n) & ~KX_LIST_FIXNUM_TAG))/(kvec_val_t)((kvec_val_t)1<<KX_LIST_FIXNUM_BITS))
 
 
 struct _KxVector {
@@ -39,7 +39,7 @@ struct _KxVector {
     // when call vec shift, offset + 1
     int32_t HeadOffset; 
     int32_t Length;  // how many items stored
-    kx_vec_val_t* BuffStart;    // an array of KonHashMapEntry pointers
+    kvec_val_t* BuffStart;    // an array of KonHashMapEntry pointers
 };
 
 KxVector* KxVector_Init();
@@ -66,19 +66,19 @@ void KxVector_Grow(KxVector* self);
 // TODO
 void KxVector_Shink(KxVector* self);
 
-int32_t KxVector_Push(KxVector* self, kx_vec_val_t value);
-kx_vec_val_t KxVector_Pop(KxVector* self);
+int32_t KxVector_Push(KxVector* self, kvec_val_t value);
+kvec_val_t KxVector_Pop(KxVector* self);
 // add to head
-int32_t KxVector_Unshift(KxVector* self, kx_vec_val_t value);
+int32_t KxVector_Unshift(KxVector* self, kvec_val_t value);
 // get head
-kx_vec_val_t KxVector_Shift(KxVector* self);
+kvec_val_t KxVector_Shift(KxVector* self);
 
-kx_vec_val_t KxVector_Head(KxVector* self);
-kx_vec_val_t KxVector_Tail(KxVector* self);
+kvec_val_t KxVector_Head(KxVector* self);
+kvec_val_t KxVector_Tail(KxVector* self);
 
-kx_vec_val_t KxVector_AtIndex(KxVector* self, int32_t index);
+kvec_val_t KxVector_AtIndex(KxVector* self, int32_t index);
 
-int32_t KxVector_SetIndex(KxVector* self, int32_t index, kx_vec_val_t value);
+int32_t KxVector_SetIndex(KxVector* self, int32_t index, kvec_val_t value);
 
 #ifdef __cplusplus
 }

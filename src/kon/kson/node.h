@@ -135,6 +135,8 @@ typedef enum {
     KON_T_EXCEPTION,
 } KonType;
 
+typedef struct KonBase KonBase;
+typedef struct KonFlonum KonFlonum;
 typedef struct KonState KonState;
 typedef struct KonSymbol KonSymbol;
 typedef struct KonSyntaxMarker KonSyntaxMarker;
@@ -154,6 +156,33 @@ typedef struct KonAccessor KonAccessor;
 typedef struct KonMsgDispatcher KonMsgDispatcher;
 typedef struct KonProcedure KonProcedure;
 typedef struct KonCpointer KonCpointer;
+typedef struct KonContinuation KonContinuation;
+
+typedef union _KN {
+    // kon_int_t AsInt;
+    // kon_int32_t AsInt32;
+    // long AsLong;
+    // double AsDouble;
+    // void* AsPointer;
+    KonBase* KonBase;
+    KonState* KonState;
+    KonSymbol* KonSymbol;
+    KonSyntaxMarker* KonSyntaxMarker;
+    KonString* KonString;
+    KonTable* KonTable;
+    KonVector* KonVector;
+    KonPair* KonPair;
+    KonCell* KonCell;
+    KonQuote* KonQuote;
+    KonQuasiquote* KonQuasiquote;
+    KonExpand* KonExpand;
+    KonMsgDispatcher* KonMsgDispatcher;
+    KonEnv* KonEnv;
+    KonAccessor* KonAccessor;
+    KonProcedure* KonProcedure;
+    KonCpointer* KonCpointer;
+    KonContinuation* KonContinuation;
+};
 
 // not used
 #define KON_GC_MARK_WHITE '0'
@@ -164,14 +193,16 @@ typedef struct KonCpointer KonCpointer;
 // can be reached from root, liveness: true
 #define KON_GC_MARK_BLACK '3'
 
-typedef struct KonBase {
+struct KonBase {
     KonType Tag;
     
     // unboxed fixnum
     unsigned int MsgDispatcherId;
     char GcMarkColor;
-} KonBase;
+};
 
+// typedef volatile union _Kon KN;
+// typedef union _Kon KN;
 typedef volatile union _Kon* KN;
 
 typedef enum {
@@ -347,8 +378,8 @@ struct KonProcedure {
         KonNativeObjMethodRef NativeObjMethod;
 
         struct {
-            KonPair* ArgList;
-            KonPair* Body;
+            KN ArgList;
+            KN Body;
             KonEnv* LexicalEnv;
         } Composite;
     };
@@ -359,7 +390,7 @@ struct KonCpointer {
     void* Pointer;
 };
 
-typedef struct _KonContinuation KonContinuation;
+
 
 typedef enum {
     // should be the first continuation created
@@ -380,10 +411,10 @@ typedef enum {
 
 typedef KN (*KonContFuncRef)(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
 
-struct _KonContinuation {
+struct KonContinuation {
     KonBase Base;
     KonContinuationType Type;
-    KN Env;
+    KonEnv* Env;
     // a Return continuation's Cont is empty
     KonContinuation* Cont;
     union {
@@ -444,10 +475,10 @@ struct KonState {
     unsigned int NextMsgDispatcherId;
 };
 
-typedef struct KonFlonum {
+struct KonFlonum {
     KonBase Base;
     double Flonum;
-} KonFlonum;
+};
 
 // TODO replace to kon string impl
 struct KonString {
@@ -470,26 +501,28 @@ struct KonParam {
     KxHashTable* Table;
 };
 
-union _Kon {
-    KonBase KonBase;
-    KonState KonState;
-    KonSymbol KonSymbol;
-    KonSyntaxMarker KonSyntaxMarker;
-    KonString KonString;
-    KonTable KonTable;
-    KonVector KonVector;
-    KonPair KonPair;
-    KonCell KonCell;
-    KonQuote KonQuote;
-    KonQuasiquote KonQuasiquote;
-    KonExpand KonExpand;
-    KonMsgDispatcher KonMsgDispatcher;
-    KonEnv KonEnv;
-    KonAccessor KonAccessor;
-    KonProcedure KonProcedure;
-    KonCpointer KonCpointer;
-    KonContinuation KonContinuation;
-};
+// union _Kon {
+//     KonBase KonBase;
+//     KonState KonState;
+//     KonSymbol KonSymbol;
+//     KonSyntaxMarker KonSyntaxMarker;
+//     KonString KonString;
+//     KonTable KonTable;
+//     KonVector KonVector;
+//     KonPair KonPair;
+//     KonCell KonCell;
+//     KonQuote KonQuote;
+//     KonQuasiquote KonQuasiquote;
+//     KonExpand KonExpand;
+//     KonMsgDispatcher KonMsgDispatcher;
+//     KonEnv KonEnv;
+//     KonAccessor KonAccessor;
+//     KonProcedure KonProcedure;
+//     KonCpointer KonCpointer;
+//     KonContinuation KonContinuation;
+// };
+
+
 
 // types end
 ////
@@ -528,7 +561,7 @@ KON_API unsigned int KON_NodeDispacherId(KonState* kstate, KN obj);
 #define KON_IS_UKN(x)    ((x) == KON_UKN)
 #define KON_IS_UNDEF(x)    ((x) == KON_UNDEF)
 #define KON_IS_NIL(x)    ((x) == KON_NIL || (KON_CHECK_TAG(x, KON_T_QUOTE) && KON_QUOTE_TYPE(x) == KON_QUOTE_LIST && ((KonQuote*)x)->Inner == KON_NIL))
-#define KON_IS_POINTER(x) (((kon_uint_t)(size_t)(x) & KON_POINTER_MASK) == KON_POINTER_TAG)
+#define KON_IS_POINTER(x) (((kon_uint_t)(void*)(x) & KON_POINTER_MASK) == KON_POINTER_TAG)
 #define KON_IS_FIXNUM(x)  (((kon_uint_t)(x) & KON_FIXNUM_MASK) == KON_FIXNUM_TAG)
 
 #define KON_IS_IMDT_SYMBOL(x) (((kon_uint_t)(x) & KON_IMDT_SYMBOL_BITS) == KON_IMDT_SYMBOL_TAG)
@@ -537,7 +570,7 @@ KON_API unsigned int KON_NodeDispacherId(KonState* kstate, KN obj);
 
 #define KON_GET_PTR_TAG(x)      (((KonBase*)x)->Tag)
 
-#define KON_CHECK_TAG(x,t)  (KON_IS_POINTER(x) && (KON_PTR_TYPE(x) == (t)))
+#define KON_CHECK_TAG(x,t)  (KON_IS_POINTER((void*)x) && (KON_PTR_TYPE(x) == (t)))
 
 // #define kon_slot_ref(x,i)   (((KN)&((x)->Value))[i])
 // #define kon_slot_set(x,i,v) (((KN)&((x)->Value))[i] = (v))
@@ -605,20 +638,20 @@ KON_API unsigned int KON_NodeDispacherId(KonState* kstate, KN obj);
 static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
   KonFlonum* result = (KonFlonum*)KON_AllocTagged(kstate, sizeof(KonFlonum), KON_T_FLONUM);
   result->Flonum = num;
-  return (result);
+  return (KN)(result);
 }
 #define KON_UNBOX_FLONUM(n) ((KonFlonum*)n)->Flonum
 
-#define KON_FIELD(x, type, field) (((type *)x)->field)
+#define KON_FIELD(x, type, field) (((type *)(void*)x)->field)
 
 #define kon_make_character(n)  ((KN) ((((kon_int_t)(n))<<KON_EXTENDED_BITS) + KON_CHAR_TAG))
 #define KON_UNBOX_CHAR(n) ((int) (((kon_int_t)(n))>>KON_EXTENDED_BITS))
 
-#define KON_UNBOX_STRING(str) (((KonString*)str)->String)
+#define KON_UNBOX_STRING(x) (((KonString*)x)->String)
 
-#define KON_UNBOX_VECTOR(str) (((KonVector*)str)->Vector)
+#define KON_UNBOX_VECTOR(x) (((KonVector*)x)->Vector)
 
-#define KON_UNBOX_TABLE(str) (((KonVector*)str)->Vector)
+#define KON_UNBOX_TABLE(x) (((KonTable*)x)->Table)
 
 #define KON_UNBOX_SYMBOL(x) (((KonSymbol*)x)->Data)
 
@@ -628,7 +661,7 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 #define KON_UNBOX_CPOINTER(x) (((KonCpointer*)x)->Pointer)
 
 // list
-#define KON_CONS(kstate, a, b) KON_Cons(kstate, NULL, 2, a, b)
+#define KON_CONS(kstate, a, b) KON_Cons(kstate, a, b)
 #define KON_CAR(x)         (KON_FIELD(x, KonPair, Body))
 #define KON_CDR(x)         (KON_FIELD(x, KonPair, Next))
 
@@ -650,15 +683,15 @@ static inline KN KON_MAKE_FLONUM(KonState* kstate, double num) {
 #define KON_LIST1(kstate,a)        KON_CONS((kstate), (a), KON_NIL)
 
 // cell core
-#define KON_DCR(x)         (KON_FIELD(x, KonCell, Core))
+#define KON_DCR(x)         ((KN)KON_FIELD(x, KonCell, Core))
 // cell next
-#define KON_DNR(x)         (KON_FIELD(x, KonCell, Next))
+#define KON_DNR(x)         ((KN)KON_FIELD(x, KonCell, Next))
 // cell prev
-#define KON_DPR(x)         (KON_FIELD(x, KonCell, Prev))
+#define KON_DPR(x)         ((KN)KON_FIELD(x, KonCell, Prev))
 // cell list
-#define KON_DLR(x)         (KON_FIELD(x, KonCell, List))
+#define KON_DLR(x)         ((KN)KON_FIELD(x, KonCell, List))
 // cell table
-#define KON_DTR(x)         (KON_FIELD(x, KonCell, Table))
+#define KON_DTR(x)         ((KN)KON_FIELD(x, KonCell, Table))
 // alias
 #define KON_DCNR(x)      (KON_DCR(KON_DNR(x)))
 #define KON_DTNR(x)      (KON_DTR(KON_DNR(x)))
@@ -699,7 +732,7 @@ KON_API const char* KON_SymbolToCstr(KN sym);
 
 // list
 // KON_API KN KON_MakePairList(KonState* kstate, ...);
-KON_API KN KON_Cons(KonState* kstate, KN self, kon_int_t n, KN head, KN tail);
+KON_API KN KON_Cons(KonState* kstate, KN head, KN tail);
 KON_API KN KON_PairList2(KonState* kstate, KN a, KN b);
 KON_API KN KON_PairList3(KonState* kstate, KN a, KN b, KN c);
 
@@ -742,7 +775,7 @@ KN KON_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 
 
 KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef);
-KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KN env);
+KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KonEnv* env);
 KonMsgDispatcher* MakeMsgDispatcher(KonState* kstate);
 int KON_SetMsgDispatcher(KonState* kstate, unsigned int dispatcherId, KonMsgDispatcher* dispatcher);
 unsigned int KON_SetNextMsgDispatcher(KonState* kstate, KonMsgDispatcher* dispatcher);

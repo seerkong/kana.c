@@ -6,7 +6,7 @@
 KN AfterBuilderDispatcherIdEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     unsigned int dispatcherId = KON_UNBOX_FIXNUM(evaledValue);
-    KN env = contBeingInvoked->Env;
+    KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KonCell* sourceCode = (KonCell*)KxHashTable_AtKey(memo, "BuilderSourceCode");
     KN className = (KonCell*)KxHashTable_AtKey(memo, "BuilderName");
@@ -26,7 +26,7 @@ KN AfterBuilderDispatcherIdEvaled(KonState* kstate, KN evaledValue, KonContinuat
 }
 
 
-KonTrampoline* KON_EvalPrefixDefBuilder(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixDefBuilder(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro def builder");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

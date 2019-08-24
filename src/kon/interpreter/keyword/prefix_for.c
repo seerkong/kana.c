@@ -9,7 +9,7 @@ KonTrampoline* AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuat
 
 KonTrampoline* BeforeForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KN env = contBeingInvoked->Env;
+    KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN predictExpr = KxHashTable_AtKey(memo, "PredictExpr");
 
@@ -26,7 +26,7 @@ KonTrampoline* BeforeForPrediction(KonState* kstate, KN evaledValue, KonContinua
 
 KonTrampoline* AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KN env = contBeingInvoked->Env;
+    KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN bodyExprs = KxHashTable_AtKey(memo, "BodyExprs");
 
@@ -51,7 +51,7 @@ KonTrampoline* AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuat
 
 KonTrampoline* AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KN env = contBeingInvoked->Env;
+    KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN afterBodyExpr = KxHashTable_AtKey(memo, "AfterExpr");
 
@@ -66,7 +66,7 @@ KonTrampoline* AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuat
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixFor(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixFor(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro for");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

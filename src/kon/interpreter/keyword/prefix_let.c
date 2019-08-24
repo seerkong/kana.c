@@ -6,7 +6,7 @@
 
 KonTrampoline* AfterLetValExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KN env = contBeingInvoked->Env;
+    KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     char* varName = KxHashTable_AtKey(memo, "VarName");
 
@@ -21,7 +21,7 @@ KonTrampoline* AfterLetValExprEvaled(KonState* kstate, KN evaledValue, KonContin
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixLet(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro let");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

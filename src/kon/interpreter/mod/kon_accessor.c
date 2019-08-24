@@ -145,7 +145,7 @@ KN KonAccessor_IterHead(KonState* kstate, KN args)
     KxHashTable* dir = accessor->Dir;
     
     KxHashTableIter iter = KxHashTable_IterHead(dir);
-    return KON_MakeCpointer(kstate, iter);
+    return (KN)KON_MakeCpointer(kstate, iter);
 }
 
 KN KonAccessor_IterTail(KonState* kstate, KN args)
@@ -155,7 +155,7 @@ KN KonAccessor_IterTail(KonState* kstate, KN args)
     KxHashTable* dir = accessor->Dir;
     
     KxHashTableIter iter = KxHashTable_IterTail(dir);
-    return KON_MakeCpointer(kstate, iter);
+    return (KN)KON_MakeCpointer(kstate, iter);
 }
 
 KN KonAccessor_IterPrev(KonState* kstate, KN args)
@@ -202,7 +202,7 @@ KN KonAccessor_IterGetKey(KonState* kstate, KN args)
     KonString* value = KON_ALLOC_TYPE_TAG(kstate, KonString, KON_T_STRING);
     value->String = KxStringBuffer_New();
     KxStringBuffer_AppendCstr(value->String, key);
-    return value;
+    return (KN)value;
 }
 
 KN KonAccessor_IterGetVal(KonState* kstate, KN args)

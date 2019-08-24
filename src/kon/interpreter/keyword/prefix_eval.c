@@ -21,7 +21,7 @@ KN AfterEvalExprBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* co
 }
 
 
-KonTrampoline* KON_EvalPrefixEval(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixEval(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro eval");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

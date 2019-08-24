@@ -9,8 +9,8 @@ extern "C"{
 #include "types.h"
 #include "primary.h"
 
-KN KON_MakeRootEnv(KonState* kstate);
-KN KON_MakeChildEnv(KonState* kstate, KonEnv* parentEnv);
+KonEnv* KON_MakeRootEnv(KonState* kstate);
+KonEnv* KON_MakeChildEnv(KonState* kstate, KonEnv* parentEnv);
 KN KON_EnvDefine(KonState* kstate, KonEnv* env, const char* key, KN value);
 KN KON_EnvLookup(KonState* kstate, KonEnv* env, const char* key);
 

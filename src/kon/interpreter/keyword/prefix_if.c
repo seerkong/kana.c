@@ -29,7 +29,7 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
         }
 
         iter = KON_CDR(iter);
-    } while (iter != KON_NIL);
+    } while ((KN)iter != KON_NIL);
     
     KN trueClause = KON_VectorToKonPairList(kstate, trueClauseVec);
     KN falseClause = KON_VectorToKonPairList(kstate, falseClauseVec);
@@ -39,7 +39,7 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
 
 KonTrampoline* AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KN env = contBeingInvoked->Env;
+    KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KN trueClause = KxHashTable_AtKey(memo, "TrueClause");
     KN falseClause = KxHashTable_AtKey(memo, "FalseClause");
@@ -60,7 +60,7 @@ KonTrampoline* AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonConti
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixIf(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro if");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

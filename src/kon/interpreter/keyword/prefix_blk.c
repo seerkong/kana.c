@@ -3,9 +3,9 @@
 #include "prefix_if.h"
 #include "../cps_interpreter.h"
 
-KonTrampoline* KON_ApplyCompositeBlk(KonState* kstate, KonProcedure* proc, KN argList, KN env, KonContinuation* cont)
+KonTrampoline* KON_ApplyCompositeBlk(KonState* kstate, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* cont)
 {
-    KN body = proc->Composite.Body;
+    KN body = (KN)proc->Composite.Body;
     KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 
     // KonEnv* procBindEnv = KON_MakeChildEnv(kstate, dynamicEnv);
@@ -14,10 +14,10 @@ KonTrampoline* KON_ApplyCompositeBlk(KonState* kstate, KonProcedure* proc, KN ar
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixBlk(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixBlk(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro blk");
-    KN body = KON_DLR(expression);
+    KN body = (KN)KON_DLR(expression);
 
     KON_DEBUG("body %s", KON_StringToCstr(KON_ToFormatString(kstate, body, true, 0, "  ")));
 
@@ -27,7 +27,7 @@ KonTrampoline* KON_EvalPrefixBlk(KonState* kstate, KN expression, KN env, KonCon
     proc->Composite.Body = body;
 
     KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);
-    bounce->Run.Value = proc;
+    bounce->Run.Value = (KN)proc;
     bounce->Cont = cont;
     return bounce;
 }

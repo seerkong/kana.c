@@ -1,7 +1,7 @@
 #include "env.h"
 #include "mod/kon_module.h"
 
-KN KON_MakeRootEnv(KonState* kstate)
+KonEnv* KON_MakeRootEnv(KonState* kstate)
 {
     KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
     env->Parent = KON_NIL;
@@ -18,7 +18,7 @@ KN KON_MakeRootEnv(KonState* kstate)
     return env;
 }
 
-KN KON_MakeChildEnv(KonState* kstate, KonEnv* parentEnv)
+KonEnv* KON_MakeChildEnv(KonState* kstate, KonEnv* parentEnv)
 {
     KonEnv* env = KON_ALLOC_TYPE_TAG(kstate, KonEnv, KON_T_ENV);
     env->Parent = parentEnv;
@@ -39,7 +39,7 @@ KN KON_EnvLookup(KonState* kstate, KonEnv* env, const char* key)
     if (value && value != KON_UNDEF) {
         return value;
     }
-    else if (CAST_Kon(Env, env)->Parent == KON_NIL) {
+    else if ((KN)CAST_Kon(Env, env)->Parent == KON_NIL) {
         return KON_UKN;
     }
     else {
@@ -54,7 +54,7 @@ KN KON_EnvLookupSet(KonState* kstate, KonEnv* env, const char* key, KN value)
         KxHashTable_PutKv(CAST_Kon(Env, env)->Bindings, key, value);
         return KON_TRUE;
     }
-    else if (CAST_Kon(Env, env)->Parent == KON_NIL) {
+    else if ((KN)CAST_Kon(Env, env)->Parent == KON_NIL) {
         return KON_FALSE;
     }
     else {
@@ -75,7 +75,7 @@ KN KON_EnvDispatcherLookup(KonState* kstate, KonEnv* env, const char* key)
     if (value && value != KON_UNDEF) {
         return value;
     }
-    else if (CAST_Kon(Env, env)->Parent == KON_NIL) {
+    else if ((KN)CAST_Kon(Env, env)->Parent == KON_NIL) {
         return KON_UKN;
     }
     else {
@@ -90,7 +90,7 @@ KN KON_EnvDispatcherLookupSet(KonState* kstate, KonEnv* env, const char* key, KN
         KxHashTable_PutKv(CAST_Kon(Env, env)->MsgDispatchers, key, value);
         return KON_TRUE;
     }
-    else if (CAST_Kon(Env, env)->Parent == KON_NIL) {
+    else if ((KN)CAST_Kon(Env, env)->Parent == KON_NIL) {
         return KON_FALSE;
     }
     else {

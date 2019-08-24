@@ -13,23 +13,24 @@ Note: KunuScript isn’t done yet. The implement may make breaking changes and p
 - [x] a mark-sweep GC.
 - [x] a xml-like data language.
 - [x] chained calls. SVOVOVO...
-- [] scheme-like Number tower
-- [] pattern matching
-- [] ffi
-- [] compile to GraalVM
-- [] coroutine
-- [] asyn await
-- [] multi-thread support
-- [] a simplified scheme-like marco system
-- [] IDE support
-- [] error handling
-- [] break point, debugger
-- [] module system
-- [] package manager
-- [] lightweight regex
-- [] perl6-like grammar syntax
-- [] pointer equality call-cc in tail call. `{call-cc {lambda (cc1) #[{call-cc {lambda (cc2) #[ [eq cc1 cc2] ] } } ] } } => #t;`
-- [] racket-like continuation marks
+- [ ] scheme-like Number tower
+- [ ] pattern matching
+- [ ] ffi
+- [ ] partial apply, curry
+- [ ] compile to GraalVM
+- [ ] coroutine
+- [ ] asyn await
+- [ ] multi-thread support
+- [ ] a simplified scheme-like marco system
+- [ ] IDE support
+- [ ] error handling
+- [ ] break point, debugger
+- [ ] module system
+- [ ] package manager
+- [ ] lightweight regex
+- [ ] perl6-like grammar syntax
+- [ ] pointer equality call-cc in tail call. `{call-cc {lambda (cc1) #[{call-cc {lambda (cc2) #[ [eq cc1 cc2] ] } } ] } } => #t;`
+- [ ] racket-like continuation marks
 
 # build
 
@@ -643,7 +644,7 @@ my-obj
 {p .print}
 
 `` p2 should not as same as p
-{let p2 [Person .clone] }
+{let p2 {Person .clone} }
 {p2 .print}
 
 ```

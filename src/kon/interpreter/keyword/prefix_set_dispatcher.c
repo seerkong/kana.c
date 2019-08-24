@@ -6,7 +6,7 @@
 KonTrampoline* AfterDispatcherIdEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     unsigned int dispatcherId = KON_UNBOX_FIXNUM(evaledValue);
-    KN env = contBeingInvoked->Env;
+    KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KonMsgDispatcher* dispatcher = (KonMsgDispatcher*)KxHashTable_AtKey(memo, "Dispatcher");
 
@@ -21,7 +21,7 @@ KonTrampoline* AfterDispatcherIdEvaled(KonState* kstate, KN evaledValue, KonCont
 }
 
 
-KonTrampoline* KON_EvalPrefixSetDispatcher(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixSetDispatcher(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro def dispatcher");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

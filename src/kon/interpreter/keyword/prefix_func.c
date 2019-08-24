@@ -3,7 +3,7 @@
 #include "prefix_if.h"
 #include "../cps_interpreter.h"
 
-KonTrampoline* KON_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN argList, KN env, KonContinuation* cont)
+KonTrampoline* KON_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* cont)
 {
     KonEnv* parentEnv = env;
     KN param = proc->Composite.ArgList;
@@ -18,7 +18,7 @@ KonTrampoline* KON_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN a
     
     KonPair* iterParam = param;
     KonPair* iterArg = argList;
-    while (iterParam != KON_NIL) {
+    while ((KN)iterParam != KON_NIL) {
         KN param = KON_CAR(iterParam);
         KN arg = KON_CAR(iterArg);
         // if this param is the last, the rest args should bind this param
@@ -43,7 +43,7 @@ KonTrampoline* KON_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN a
     return bounce;
 }
 
-KonTrampoline* KON_EvalPrefixFunc(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixFunc(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro func");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));
@@ -74,7 +74,7 @@ KonTrampoline* KON_EvalPrefixFunc(KonState* kstate, KN expression, KN env, KonCo
 
     if (KON_IS_WORD(funcName)) {
         const char* varNameCstr = KON_UNBOX_SYMBOL(funcName);
-        KON_EnvDefine(kstate, env, varNameCstr, proc);
+        KON_EnvDefine(kstate, env, varNameCstr, (KN)proc);
     }
 
     KonTrampoline* bounce = AllocBounceWithType(kstate, KON_TRAMPOLINE_RUN);

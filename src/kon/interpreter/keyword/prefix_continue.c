@@ -3,7 +3,7 @@
 #include "prefix_lambda.h"
 #include "../cps_interpreter.h"
 
-KonTrampoline* KON_EvalPrefixContinue(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixContinue(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro continue");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

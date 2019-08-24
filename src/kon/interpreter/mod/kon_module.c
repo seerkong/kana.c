@@ -14,51 +14,51 @@ KN KonModule_Export(KonState* kstate, KonEnv* env)
     
     KON_DirAccessorPutKeyProperty(
         kstate,
-        module,
+        (KN)module,
         "number",
-        KonNumber_Export(kstate, env)
+        (KN)KonNumber_Export(kstate, env)
     );
 
     KON_DirAccessorPutKeyProperty(
         kstate,
-        module,
+        (KN)module,
         "string",
-        KonString_Export(kstate, env)
+        (KN)KonString_Export(kstate, env)
     );
 
     KON_DirAccessorPutKeyProperty(
         kstate,
-        module,
+        (KN)module,
         "list",
-        KonList_Export(kstate, env)
+        (KN)KonList_Export(kstate, env)
     );
 
     KON_DirAccessorPutKeyProperty(
         kstate,
-        module,
+        (KN)module,
         "vector",
-        KonVector_Export(kstate, env)
+        (KN)KonVector_Export(kstate, env)
     );
 
     KON_DirAccessorPutKeyProperty(
         kstate,
-        module,
+        (KN)module,
         "table",
-        KonTable_Export(kstate, env)
+        (KN)KonTable_Export(kstate, env)
     );
 
     KON_DirAccessorPutKeyProperty(
         kstate,
-        module,
+        (KN)module,
         "cell",
-        KonCell_Export(kstate, env)
+        (KN)KonCell_Export(kstate, env)
     );
 
     KON_DirAccessorPutKeyProperty(
         kstate,
-        module,
+        (KN)module,
         "accessor",
-        KonAccessor_Export(kstate, env)
+        (KN)KonAccessor_Export(kstate, env)
     );
 
     return (KN)module;

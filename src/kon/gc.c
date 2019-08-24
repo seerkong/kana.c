@@ -49,7 +49,7 @@ void KON_ShowGcStatics(KonState* kstate)
     int barrierObjLength = KxList_Length(kstate->WriteBarrierGen);
 
     long long totalObjCnt = KON_CurrentObjCount(kstate);
-    KON_DEBUG("HeapPtrSegs count : %d, totalObjCnt %d, barrierObjLength %d\n", KxList_Length(kstate->HeapPtrSegs), totalObjCnt, barrierObjLength);
+    KON_DEBUG("HeapPtrSegs count : %d, totalObjCnt %lld, barrierObjLength %d\n", KxList_Length(kstate->HeapPtrSegs), totalObjCnt, barrierObjLength);
 }
 
 void KON_DestroyGc(KonState* kstate)
@@ -62,7 +62,7 @@ int KON_PushToHeapPtrSeg(KonState* kstate, KxList* heapPtrSegs, KN ptr)
     KxListNode* iter = KxList_IterHead(heapPtrSegs);
     // KON_DEBUG("KxList_IterHead(heapPtrSegs) addr %x\n", iter);
     int segIndex = -1;
-    while (iter != KON_NIL) {
+    while ((KN)iter != KON_NIL) {
         segIndex += 1;
         KxListNode* next = KxList_IterNext(iter);
 
@@ -98,7 +98,7 @@ long long KON_CurrentObjCount(KonState* kstate)
 {
     KxListNode* iter = KxList_IterHead(kstate->HeapPtrSegs);
     long long count = 0;
-    while (iter != KON_NIL) {
+    while ((KN)iter != KON_NIL) {
         KxListNode* next = KxList_IterNext(iter);
 
         KxVector* segment = (KxVector*)KxList_IterVal(iter);
@@ -123,7 +123,7 @@ bool KON_HasEnoughSegSpace(KonState* kstate, int requireSize)
 
 void KON_PushWriteBarrierObjsToHeapPtrSeg(KonState* kstate)
 {
-    kx_list_val_t konPtr = KxList_Shift(kstate->WriteBarrierGen);
+    klist_val_t konPtr = KxList_Shift(kstate->WriteBarrierGen);
 
     while (konPtr != KX_LIST_UNDEF) {
         ((KonBase*)konPtr)->GcMarkColor = KON_GC_MARK_WHITE;
@@ -147,7 +147,7 @@ void KON_SwitchContinuation(KonState* kstate, KonContinuation* cont)
     if (!firstTry) {
         long long totalObjCnt = KON_CurrentObjCount(kstate);
         long long limit = kstate->MaxObjCntLimit;
-        KON_DEBUG("requireSize %d, current totalObjCnt %d, max limit %d\n", barrierObjLength, totalObjCnt, limit);
+        KON_DEBUG("requireSize %d, current totalObjCnt %lld, max limit %lld\n", barrierObjLength, totalObjCnt, limit);
 
         KON_Gc(kstate);
         bool secondTry = KON_HasEnoughSegSpace(kstate, barrierObjLength);
@@ -187,7 +187,7 @@ void KON_MarkPhase(KonState* kstate)
     }
 
     KxListNode* iter = KxList_IterHead(kstate->WriteBarrierGen);
-    while (iter != KON_NIL) {
+    while ((KN)iter != KON_NIL) {
         KxListNode* next = KxList_IterNext(iter);
 
         KN ptr = KxList_IterVal(iter);
@@ -231,7 +231,7 @@ void KON_SweepPhase(KonState* kstate)
 
     // mark kstate->WriteBarrierGen objs to gray
     KxListNode* iter = KxList_IterHead(kstate->WriteBarrierGen);
-    while (iter != KON_NIL) {
+    while ((KN)iter != KON_NIL) {
         KxListNode* next = KxList_IterNext(iter);
 
         KonBase* ptr = (KonBase*)KxList_IterVal(iter);
@@ -261,7 +261,7 @@ void KON_ResetAndCopyPtrSegList(KonState* kstate)
     unsigned long redCnt = 0;
     unsigned long blackCnt = 0;
     
-    while (iter != KON_NIL) {
+    while ((KN)iter != KON_NIL) {
         KxListNode* next = KxList_IterNext(iter);
 
         KxVector* segment = (KxVector*)KxList_IterVal(iter);
@@ -285,7 +285,7 @@ void KON_ResetAndCopyPtrSegList(KonState* kstate)
             }
             // reset black node to white
             konPtr->GcMarkColor = KON_GC_MARK_WHITE;
-            KON_PushToHeapPtrSeg(kstate, newPtrSegList, konPtr);
+            KON_PushToHeapPtrSeg(kstate, newPtrSegList, (KN)konPtr);
         }
 
         KxVector_Destroy(segment);
@@ -348,15 +348,16 @@ void KON_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             break;
         }
         case KON_T_VECTOR: {
-            for (int i = 0; i < KxVector_Length(node); i++) {
-                KxList_Push(markTaskQueue, KxVector_AtIndex(node, i));
+            KxVector* vec = CAST_Kon(Vector, node)->Vector;
+            for (int i = 0; i < KxVector_Length(vec); i++) {
+                KxList_Push(markTaskQueue, KxVector_AtIndex(vec, i));
             }
             break;
         }
         case KON_T_TABLE: {
             KxHashTable* table = CAST_Kon(Table, node)->Table;
             KxHashTableIter iter = KxHashTable_IterHead(table);
-            while (iter != KON_NIL) {
+            while ((KN)iter != KON_NIL) {
                 KxHashTableIter next = KxHashTable_IterNext(table, iter);
                 KxList_Push(markTaskQueue, KxHashTable_IterGetVal(table, iter));
                 iter = next;
@@ -392,7 +393,7 @@ void KON_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             KonEnv* env = (KonEnv*)node;
             KxHashTable* tableBindings = env->Bindings;
             KxHashTableIter iterBindings = KxHashTable_IterHead(tableBindings);
-            while (iterBindings != KON_NIL) {
+            while ((KN)iterBindings != KON_NIL) {
                 KxHashTableIter next = KxHashTable_IterNext(tableBindings, iterBindings);
                 KxList_Push(markTaskQueue, KxHashTable_IterGetVal(tableBindings, iterBindings));
                 iterBindings = next;
@@ -400,7 +401,7 @@ void KON_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             
             KxHashTable* tableDispatchers = env->Bindings;
             KxHashTableIter iterDispatchers = KxHashTable_IterHead(tableDispatchers);
-            while (iterDispatchers != KON_NIL) {
+            while ((KN)iterDispatchers != KON_NIL) {
                 KxHashTableIter next = KxHashTable_IterNext(tableDispatchers, iterDispatchers);
                 KxList_Push(markTaskQueue, KxHashTable_IterGetVal(tableDispatchers, iterDispatchers));
                 iterDispatchers = next;
@@ -429,7 +430,7 @@ void KON_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             if (cont->Type == KON_CONT_NATIVE_CALLBACK) {
                 KxHashTable* table = cont->Native.MemoTable;
                 KxHashTableIter iter = KxHashTable_IterHead(table);
-                while (iter != KON_NIL) {
+                while ((KN)iter != KON_NIL) {
                     KxHashTableIter next = KxHashTable_IterNext(table, iter);
                     KxList_Push(markTaskQueue, KxHashTable_IterGetVal(table, iter));
                     iter = next;
@@ -552,7 +553,7 @@ void KON_DestroyNode(KonState* kstate, KonBase* node)
             
             KonEnv* env = CAST_Kon(Env, node);
             // don't clear root gc
-            if (env->Parent == KON_NIL) {
+            if ((KN)env->Parent == KON_NIL) {
                 break;
                 
             }
@@ -583,7 +584,7 @@ void KON_DestroyNode(KonState* kstate, KonBase* node)
             KonContinuation* cont = (KonContinuation*)node;
             if (cont->Type == KON_CONT_NATIVE_CALLBACK && cont->Native.MemoTable) {
                 KxHashTable* table = cont->Native.MemoTable;
-                KON_DEBUG("destroy memo table, table addr %x keys:", table);
+                KON_DEBUG("destroy memo table, table addr %x", table);
                 KxHashTable_PrintKeys(table);
                 KxHashTable_Destroy(table);
                 cont->Native.MemoTable = NULL;

@@ -17,7 +17,7 @@ bool IsElseTag(KN predicate)
 
 KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KN env = contBeingInvoked->Env;
+    KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN restPairs = KxHashTable_AtKey(memo, "RestPairs");
     KN ifTrueAction = KxHashTable_AtKey(memo, "IfTrue");
@@ -61,7 +61,7 @@ KN AfterCondClauseEvaled(KonState* kstate, KN evaledValue, KonContinuation* cont
 
 
 
-KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixCond(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro cond");
     // KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

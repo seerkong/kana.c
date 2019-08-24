@@ -7,7 +7,7 @@
 #include "prefix_blk.h"
 extern KN UnBoxAccessorValue(KN konValue);
 
-KonTrampoline* ApplyProcArguments(KonState* kstate, KonProcedure* proc, KN argList, KN env, KonContinuation* cont)
+KonTrampoline* ApplyProcArguments(KonState* kstate, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* cont)
 {
     KonTrampoline* bounce;
     // TODO assert subj is a procedure
@@ -46,8 +46,8 @@ KonTrampoline* ApplyProcArguments(KonState* kstate, KonProcedure* proc, KN argLi
 
 KonTrampoline* AfterApplyArgsExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KN env = contBeingInvoked->Env;
-    KN cont = contBeingInvoked->Cont;
+    KonEnv* env = contBeingInvoked->Env;
+    KonContinuation* cont = contBeingInvoked->Cont;
     KxHashTable* memo = contBeingInvoked->Native.MemoTable;
     KN applySym = KxHashTable_AtKey(memo, "ApplySym");
 
@@ -76,7 +76,7 @@ KonTrampoline* AfterApplyArgsExprEvaled(KonState* kstate, KN evaledValue, KonCon
 
 KonTrampoline* AfterApplySymExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KN env = contBeingInvoked->Env;
+    KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo =  KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN applyArgsExpr = KxHashTable_AtKey(memo, "ApplyArgsExpr");
 
@@ -99,7 +99,7 @@ KonTrampoline* AfterApplySymExprEvaled(KonState* kstate, KN evaledValue, KonCont
 // first arg should be a expr that returns a symbol
 // second arg should be a expr that returns a quoted list
 // 3rd arg is optional. is the apply env
-KonTrampoline* KON_EvalPrefixApply(KonState* kstate, KN expression, KN env, KonContinuation* cont)
+KonTrampoline* KON_EvalPrefixApply(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
     KON_DEBUG("meet prefix marcro apply");
     KON_DEBUG("rest words %s", KON_StringToCstr(KON_ToFormatString(kstate, expression, true, 0, "  ")));

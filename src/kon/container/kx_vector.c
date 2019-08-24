@@ -29,9 +29,9 @@ KxVector* KxVector_Init()
 }
 
 // alloc pool, default value set to KX_VEC_UNDEF
-kx_vec_val_t* KxVector_AllocPoolWithCapacity(int32_t capacity)
+kvec_val_t* KxVector_AllocPoolWithCapacity(int32_t capacity)
 {
-    kx_vec_val_t* poolStart = (kx_vec_val_t*)tb_nalloc0(capacity, sizeof(kx_vec_val_t));
+    kvec_val_t* poolStart = (kvec_val_t*)tb_nalloc0(capacity, sizeof(kvec_val_t));
     if (poolStart == NULL) {
         return NULL;
     }
@@ -43,7 +43,7 @@ kx_vec_val_t* KxVector_AllocPoolWithCapacity(int32_t capacity)
 KxVector* KxVector_InitWithCapacity(int32_t initCapacity)
 {
     KxVector* self = KxVector_Init();
-    kx_vec_val_t* poolStart = KxVector_AllocPoolWithCapacity(initCapacity);
+    kvec_val_t* poolStart = KxVector_AllocPoolWithCapacity(initCapacity);
     if (poolStart == NULL) {
         tb_free(self);
         return NULL;
@@ -83,6 +83,7 @@ int32_t KxVector_Clear(KxVector* self)
     self->Length = 0;
     self->HeadOffset = 0;
     memset(self->BuffStart, KX_VEC_UNDEF, self->BuffSize);
+    return 1;
 }
 
 int32_t KxVector_BuffSize(KxVector* self)
@@ -124,7 +125,7 @@ void KxVector_CheckResize(KxVector* self)
 void KxVector_Grow(KxVector* self)
 {
     int32_t poolSize = (int32_t)(self->BuffSize * KX_VEC_RESIZE_RATIO);
-    kx_vec_val_t* poolStart = KxVector_AllocPoolWithCapacity(poolSize);
+    kvec_val_t* poolStart = KxVector_AllocPoolWithCapacity(poolSize);
     if (poolStart == NULL) {
         tb_free(self);
         return;
@@ -145,11 +146,11 @@ void KxVector_Shink(KxVector* self)
 
 }
 
-int32_t KxVector_Push(KxVector* self, kx_vec_val_t value)
+int32_t KxVector_Push(KxVector* self, kvec_val_t value)
 {
     if (self->BuffSize == 0) {
         // first item
-        kx_vec_val_t* poolStart = KxVector_AllocPoolWithCapacity(KX_VEC_DEFAULT_CAPACITY);
+        kvec_val_t* poolStart = KxVector_AllocPoolWithCapacity(KX_VEC_DEFAULT_CAPACITY);
         if (poolStart == NULL) {
             tb_free(self);
             return -1;
@@ -160,27 +161,27 @@ int32_t KxVector_Push(KxVector* self, kx_vec_val_t value)
     else {
         KxVector_CheckResize(self);
     }
-    kx_vec_val_t* slotPtr = self->BuffStart + self->HeadOffset + self->Length;
+    kvec_val_t* slotPtr = self->BuffStart + self->HeadOffset + self->Length;
 
     *(slotPtr) = value;
     self->Length += 1;
     return 1;
 }
 
-kx_vec_val_t KxVector_Pop(KxVector* self)
+kvec_val_t KxVector_Pop(KxVector* self)
 {
-    kx_vec_val_t* slotPtr = self->BuffStart + self->HeadOffset + self->Length - 1;
-    kx_vec_val_t value = *(slotPtr);
+    kvec_val_t* slotPtr = self->BuffStart + self->HeadOffset + self->Length - 1;
+    kvec_val_t value = *(slotPtr);
     self->Length -= 1;
     return value;
 }
 
 // add to head
-int32_t KxVector_Unshift(KxVector* self, kx_vec_val_t value)
+int32_t KxVector_Unshift(KxVector* self, kvec_val_t value)
 {
     if (self->BuffSize == 0) {
         // first item
-        kx_vec_val_t* poolStart = KxVector_AllocPoolWithCapacity(KX_VEC_DEFAULT_CAPACITY);
+        kvec_val_t* poolStart = KxVector_AllocPoolWithCapacity(KX_VEC_DEFAULT_CAPACITY);
         if (poolStart == NULL) {
             tb_free(self);
             return -1;
@@ -194,7 +195,7 @@ int32_t KxVector_Unshift(KxVector* self, kx_vec_val_t value)
 
     // if have slots at head
     if (self->HeadOffset > 0) {
-        kx_vec_val_t* slotPtr = self->BuffStart + self->HeadOffset - 1;
+        kvec_val_t* slotPtr = self->BuffStart + self->HeadOffset - 1;
         *(slotPtr) = value;
         self->HeadOffset -= 1;
         self->Length += 1;
@@ -202,7 +203,7 @@ int32_t KxVector_Unshift(KxVector* self, kx_vec_val_t value)
     }
 
     // need alloc new pool
-    kx_vec_val_t* poolStart = NULL;
+    kvec_val_t* poolStart = NULL;
     int32_t poolSize = self->BuffSize;
     if ((self->HeadOffset + self->Length) >= self->BuffSize) {
         // need grow
@@ -233,42 +234,42 @@ int32_t KxVector_Unshift(KxVector* self, kx_vec_val_t value)
 }
 
 // get head
-kx_vec_val_t KxVector_Shift(KxVector* self)
+kvec_val_t KxVector_Shift(KxVector* self)
 {
-    kx_vec_val_t* slotPtr = self->BuffStart + self->HeadOffset;
-    kx_vec_val_t value = *(slotPtr);
+    kvec_val_t* slotPtr = self->BuffStart + self->HeadOffset;
+    kvec_val_t value = *(slotPtr);
     // move start offset
     self->HeadOffset += 1;
     self->Length -= 1;
     return value;
 }
 
-kx_vec_val_t KxVector_Head(KxVector* self)
+kvec_val_t KxVector_Head(KxVector* self)
 {
     return KxVector_AtIndex(self, 0);
 }
 
-kx_vec_val_t KxVector_Tail(KxVector* self)
+kvec_val_t KxVector_Tail(KxVector* self)
 {
     return KxVector_AtIndex(self, self->Length - 1);
 }
 
-kx_vec_val_t KxVector_AtIndex(KxVector* self, int32_t index)
+kvec_val_t KxVector_AtIndex(KxVector* self, int32_t index)
 {
     if (index < 0 || index >= self->Length) {
         return KX_VEC_UNDEF;
     }
-    kx_vec_val_t* slotPtr = self->BuffStart + self->HeadOffset + index;
-    kx_vec_val_t value = *(slotPtr);
+    kvec_val_t* slotPtr = self->BuffStart + self->HeadOffset + index;
+    kvec_val_t value = *(slotPtr);
     return value;
 }
 
-int32_t KxVector_SetIndex(KxVector* self, int32_t index, kx_vec_val_t value)
+int32_t KxVector_SetIndex(KxVector* self, int32_t index, kvec_val_t value)
 {
     if (index < 0 || index >= self->Length) {
         return -1;
     }
-    kx_vec_val_t* slotPtr = self->BuffStart + self->HeadOffset + index;
+    kvec_val_t* slotPtr = self->BuffStart + self->HeadOffset + index;
     *(slotPtr) = value;
     return 1;
 }
