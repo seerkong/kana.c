@@ -308,7 +308,7 @@ bool IsSpace(char ch)
 
 bool IsStopWord(char ch)
 {
-    char dest[] = ":%./|!#$@<>[](){};";
+    char dest[] = "=:%./|!#$@<>[](){};";
     if (strchr(dest, ch) > 0) {
         return true;
     }
@@ -515,28 +515,31 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             break;
         }
         else if (pc[0] == '<') {
-            // const char* nextChars = PeekChars(tokenizer, 2);
-            // if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
-            //     UpdateTokenContent(tokenizer, "<");
-            //     ForwardToken(tokenizer, 1);
-            //     tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
-            // }
-            // else {
-                ParseIdentifier(tokenizer);
+            const char* nextChars = PeekChars(tokenizer, 2);
+            if (nextChars[1] == '=') {
+                UpdateTokenContent(tokenizer, "<=");
+                ForwardToken(tokenizer, 2);
                 tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
-            // }
+            }
+            else if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
+                UpdateTokenContent(tokenizer, "<");
+                ForwardToken(tokenizer, 1);
+                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+                //     tokenizer->TokenKind = KON_TOKEN_VECTOR_START;
+            }
             break;
         }
         else if (pc[0] == '>') {
             const char* nextChars = PeekChars(tokenizer, 2);
-            if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
+            if (nextChars[1] == '=') {
+                UpdateTokenContent(tokenizer, ">=");
+                ForwardToken(tokenizer, 2);
+                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
+            }
+            else if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
                 UpdateTokenContent(tokenizer, ">");
                 ForwardToken(tokenizer, 1);
                 tokenizer->TokenKind = KON_TOKEN_VECTOR_END;
-            }
-            else {
-                ParseIdentifier(tokenizer);
-                tokenizer->TokenKind = KON_TOKEN_SYM_WORD;
             }
             break;
         }

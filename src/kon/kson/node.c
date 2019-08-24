@@ -782,7 +782,7 @@ KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char
                 AddLeftPadding(result->String, depth, padding);
                 KxStringBuffer_AppendCstr(result->String, ":'");
                 KxStringBuffer_AppendCstr(result->String, itemKey);
-                KxStringBuffer_AppendCstr(result->String, "'\n");
+                KxStringBuffer_AppendCstr(result->String, "'=\n");
             }
 
             AddLeftPadding(result->String, depth, padding);
@@ -809,7 +809,7 @@ KN KON_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char
             if (itemKey != NULL) {
                 KxStringBuffer_AppendCstr(result->String, ":'");
                 KxStringBuffer_AppendCstr(result->String, itemKey);
-                KxStringBuffer_AppendCstr(result->String, "' ");
+                KxStringBuffer_AppendCstr(result->String, "'= ");
             }
 
             KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(itemToKonStr));
@@ -951,7 +951,7 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
 
                 if (mapValue != NULL && mapValue != KON_UKN) {
                     KN mapValKonStr = KON_ToFormatString(kstate, mapValue, true, depth + 1, padding);
-                    KxStringBuffer_AppendCstr(result->String, " = ");
+                    KxStringBuffer_AppendCstr(result->String, "= ");
                     KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(mapValKonStr));
                 }
                 mapIter = mapIterNext;
@@ -1030,7 +1030,7 @@ KN KON_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char*
 
                 if (mapValue != NULL && mapValue != KON_UKN) {
                     KN mapValKonStr = KON_ToFormatString(kstate, mapValue, true, depth + 1, padding);
-                    KxStringBuffer_AppendCstr(result->String, " = ");
+                    KxStringBuffer_AppendCstr(result->String, "= ");
                     KxStringBuffer_AppendStringBuffer(result->String, KON_UNBOX_STRING(mapValKonStr));
                 }
                 mapIter = mapIterNext;
