@@ -15,5 +15,9 @@ target("kli")
     add_files("main.c")
     
     after_build(function (target)
-
+      -- local target_file = path.join(path.directory(target:targetfile()), target:basename() .. "")
+      -- assert(os.isfile(target_file), "executable file not found, please build %s first!", target:name())
+      -- show install info
+      print("after_build targetfile : %s , basename: %s ..", target:targetfile(), target:basename())
+      os.cp(target:targetfile(), "./kli")
     end)

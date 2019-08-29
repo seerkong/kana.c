@@ -30,7 +30,7 @@ extern int ENABLE_DEBUG;
 #endif
 
 // no time info
-#if 1
+#if 0
 #include <string.h>
 #include <errno.h>
 #define KN_VERBOSE(msg, ...) \
@@ -101,6 +101,53 @@ do {\
 } while (0)
 #endif
 
+
+#if 1
+#include <string.h>
+#include <errno.h>
+#define KN_VERBOSE(msg, ...) \
+do {\
+    if (ENABLE_DEBUG) {\
+        fprintf(stdout, "[V][%s] ", __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
+#define KN_DEBUG(msg, ...) \
+do {    \
+    if (ENABLE_DEBUG) {\
+        fprintf(stdout, "[D][%s] ", __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
+#define KN_INFO(msg, ...) \
+do {\
+    if (ENABLE_DEBUG) {\
+        fprintf(stdout, "[I][%s] ", __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
+#define KN_TRACE(msg, ...) \
+do {\
+    if (ENABLE_DEBUG) {\
+        fprintf(stdout, "[T][%s] ", __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
+#define KN_WARN(msg, ...) \
+do {\
+    if (ENABLE_DEBUG) {\
+        fprintf(stdout, "[W][%s] ", __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
+#define KN_ERROR(msg, ...) \
+do {\
+    if (ENABLE_DEBUG) {\
+        fprintf(stdout, "[E][%s] ", __FUNCTION__);\
+        fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n");\
+    }\
+} while (0)
+#endif
 
 #ifndef KN_AUTO_VERBOSE
 #undef KN_VERBOSE

@@ -29,7 +29,7 @@ KonState* KN_Init()
     kstate->Allocator = tb_default_allocator_init(kstate->LargeAllocator);
     
     if (!tb_init(tb_null, kstate->Allocator)) {
-        printf("tb_init failed");
+        printf("tb_init failed\n");
         return NULL;
     }
 

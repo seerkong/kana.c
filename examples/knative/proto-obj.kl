@@ -96,7 +96,7 @@
           ]
           else
           #[
-            [writeln "method not found"]
+            [writeln "method " msg " not found"]
           ]
         }
       ]
@@ -218,9 +218,9 @@ my-obj
       {func ()
         #[
           [writeln
-            "My name is  " {this .name} ", "
-            "I am " {this .age} " years old, "
-            "my sex is " {this .sex}
+            "My name is  " {this /name} ", "
+            "I am " {this /age} " years old, "
+            "my sex is " {this /sex}
           ]
         ]
       }
@@ -233,14 +233,15 @@ my-obj
 `` overwrite my-new-key
 {p .my-new-key := "my new key value 3"}
 `` show object structure
-[writeln p]
+``[writeln p]
 
 {p .name := "Loki"}
 {p .age :=  1500}
-[writeln p]
 {p set-sex ($male)}
+[writeln p]
 {p print}
+``[writeln {p /name}]
 
 `` p2 should not as same as p
-{let p2 {Person clone} }
-{p2 print}
+``{let p2 {Person clone} }
+``{p2 print}

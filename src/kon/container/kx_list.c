@@ -18,7 +18,7 @@ KxList* KxList_Init()
 {
     KxList* self = (KxList*)tb_nalloc0(1, sizeof(KxList));
     if (self == NULL) {
-        printf("KxList_Init failed");
+        printf("KxList_Init failed\n");
         return NULL;
     }
     self->Length = 0;

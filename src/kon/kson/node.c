@@ -23,7 +23,7 @@ KxStringBuffer* KN_ReadFileContent(const char* filePathOrigin)
 {
     int originPathStrLen = strlen(filePathOrigin);
     if ((originPathStrLen + 1) > PATH_MAX) {
-        printf("file path exceeded");
+        printf("file path exceeded\n");
         exit(1);
     }
     char* replaceHomePath = (char*)tb_nalloc0(PATH_MAX, sizeof(char));

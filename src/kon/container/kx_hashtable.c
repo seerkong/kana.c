@@ -1005,12 +1005,12 @@ KxHashTable* KxHashTable_ShadowClone(KxHashTable* source)
 // for debug
 void KxHashTable_PrintKeys(KxHashTable* self)
 {
-    KxHashTableValEntry* iter = self->ValListHead;
-    while ((ktable_val_t)iter != KX_HASH_TABLE_NIL) {
-        KxHashTableValEntry* next = iter->Next;
-        if (iter->Key != NULL) {
-            printf("key: %s\n", iter->Key);
-        }
-        iter = next;
-    }
+    // KxHashTableValEntry* iter = self->ValListHead;
+    // while ((ktable_val_t)iter != KX_HASH_TABLE_NIL) {
+    //     KxHashTableValEntry* next = iter->Next;
+    //     if (iter->Key != NULL) {
+    //         printf("key: %s\n", iter->Key);
+    //     }
+    //     iter = next;
+    // }
 }
