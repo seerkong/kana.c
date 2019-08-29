@@ -1,9 +1,9 @@
-# KunuScript
-KunuScript is a programming language. It is easy to make DSL and nested data using KunuScript's vector, map, table, list, cell data container. Heavily inspired by Scheme, _why's Potion language, JSON, XML.
+# Kunu
+Kunu is a programming language. Heavily inspired by Scheme, _why's Potion language, JSON, XML.
 
-Note: KunuScript isn’t done yet. The implement may make breaking changes and produce new bugs at anytime. Just play it for fun.
+Note: Kunu isn’t done yet. The implement may make breaking changes and produce new bugs at anytime. Just play it for fun.
 
-# TODO list
+# DONE list
 - [x] a CPS(Continuation Passing Style) interpreter
 - [x] call-cc (call with current continuation)
 - [x] eval, apply
@@ -13,6 +13,8 @@ Note: KunuScript isn’t done yet. The implement may make breaking changes and p
 - [x] a mark-sweep GC.
 - [x] a xml-like data language.
 - [x] chained calls. SVOVOVO...
+
+# TODO list
 - [ ] scheme-like Number tower
 - [ ] pattern matching
 - [ ] ffi
@@ -43,19 +45,18 @@ brew install xmake
 
 ## clone code and build
 ```
-https://github.com/seerkong/kunuscript.git
-cd kunuscript
+git cloen https://github.com/seerkong/kunu.c.git
+cd Kunu
 xmake
 ```
 
 ## run kon script file
 
-kli -f -q <file_path>
+kli <file_path>
 eg: 
 ```
-xmake run kli -f -q ~/<the path to your script>/xx.kl
+./kli <the path to your awesome script>/xx.kl
 ```
-remove `-q` option to show more debug info
 
 ### generate a xcode project
 for better debugging, you can generator a xcode project.
@@ -70,40 +71,143 @@ cd xcode
 cmake .. -G "Xcode"
 cd ..
 ```
-if xcode warns missing 'tbox.config.h', copy it to src/tbox/ and add to xcode manually
+if xcode warns missing 'tbox.config.h', copy it to lib/tbox/ and add to xcode manually
 ```
-cp ./build/macosx/x86_64/release/tbox.config.h ./src/tbox/
+cp ./build/macosx/x86_64/release/tbox.config.h ./lib/tbox/
 ```
 
-# A pamphlet about KunuScript
-Well, here we go. You want to learn KunuScript? Sure, okay. But first, bear in mind that KunuScript isn’t done yet. And it does very little.
+# A pamphlet about Kunu
+Well, here we go. You want to learn Kunu? Sure, okay. But first, bear in mind that Kunu isn’t done yet. And it does very little.
 
 The examples can be found in ./examples folder
 
 ## An Understanding
-a KunuScript expression is sepreated to a subject and a clause list like nature languages.
+There are two expression syntax.
+One uses list, like Lisp, eg: `[+ 1 2]`
+The other uses cell structure.
 
-expression starts with a `{`, ends with a `}`; clauses is sepreated by `;`
+Every cell structure can have a core data, a map of attributes, a sequence of items stored in tuple, a list of children, and a reference to next cell.
+
+
+eg:
 ```
-{+ % 1 2; .+ 3; |+ 4 5 6}
+{subj1
+  :a
+  :b=1
+  (1 :a=2 :b="zxc" 3)
+  #[
+    1
+    "abc"
+  ]
+  subj2 :t :f=2 (1 df)
+  #[
+    ff
+  ]
+^subj1}
+```
+
+similar to xml:
+```
+<subj1 a b="1">
+  <item>1</item>
+  <item key="a">2</item>
+  <item key="b">zxc</item>
+  <item>3</item>
+  <list>
+    <item>1</item>
+    <item>abc</item>
+  </list>
+  <next>
+    <subj2 t f="2">
+      <item>1</item>
+      <item>df</item>
+      <list>
+        <item>ff</item>
+      </list>
+    </subj2>
+  </next>
+</subj1>
+
+```
+
+
+similar to json:
+```
+{
+  "core": "subj1",
+  "attr": {
+    "a": true,
+    "b": 1
+  },
+  "table": [
+    {"val": 1},
+    {"key": "a", "val": 2},
+    {"key": "b", "val": "zxc"},
+    {"val": 3}
+  ],
+  "list": [
+    1,
+    "abc"
+  ],
+  "next": {
+    "core": "subj2",
+    "attr": {
+      "t": true,
+      "f": 2
+    },
+    "table": [
+      {"val": 1},
+      {"val": "df"}
+    ],
+    "list": [
+      "ff"
+    ],
+    "next": null
+  }
+}
+```
+
+
+All special forms expressions like `cond`, `if` ... uses cell structure.
+```
+{if [> a 1]
+  #[
+    `` if true
+  ]
+  else
+  #[
+    `` if false
+  ]
+}
+```
+
+
+Object message passing expressions uses cell structre too.
+```
+{+ % (1 2) + (3) | (+ 4 5 6)}
 ```
 we have a subject: `+`,
 and three verb-objects clauses:
-`% 1 2` , `.+ 3` , `|+ 4 5 6`
+`% 1 2` , `+ 3` , `| + 4 5 6`
 
-`%` is a infix means 'apply arguments to the subject'.
-the subject `+` is a procedure, after `+ % 1 2;` step, the subject changed to a number 3;
+`%` is a infix means 'apply arguments to the object'.
+`.` is a infix means 'send a signal the object'
 
-`.` is a infix means 'send a message call to the subject', just like method call in  OOP languages. the message signal is `+`, the arguments are `[3]`. after `.+ 3;` step, the subject changed to a number 6;
+`|` is a infix means 'pipe the object to the next function's first argument', just like the pipe symbol in shell cmd: 'ls |grep '.
 
-`|` is a infix means 'pipe the subject to the next function's first argument', just like the pipe symbol in shell cmd: 'ls |grep '. after `|+ 4 5 6` step, the subject changed to `[+ 6 4 5 6] => 21`;
-
-now, after all clauses processed, we got the expression value 21
+The similar method call style in Kunu eg:
+```
+{obj set-name ("zhangsan") }
+```
+`(`,`)` can be omitted if method argument length is 0.
+```
+{obj clone}
+```
 
 ## Comments
-Lines preceded by the backquote '`' are ignored by KunuScript.
+Lines preceded by the two backquotes '``' are ignored by Kunu.
 ```
-`bala bala
+``bala bala
 [+ 1 2]
 ```
 
@@ -392,7 +496,23 @@ break and continue
 [displayln {call-cc f} ]
 ```
 
-## make a tiny prototype-based inheritance example
+## fib example
+```
+{lambda fib (n)
+  #[
+    {if {or [eq n 1] [eq n 2]}
+      #[1]
+      else
+      #[
+        [+ [fib [- n 1 ] ] [fib [- n 2] ] ]
+      ]
+    }
+  ]
+}
+[writeln  "fib result " [fib 20] ]
+```
+
+## implement a tiny prototype-based inheritance example
 
 ```
 
@@ -409,9 +529,7 @@ break and continue
       #[
         ``[writeln "update in obj key " key " to val : " new-val]
         {kn/accessor/put-key-val %
-          obj
-          key
-          new-val
+          (obj key new-val)
         }
       ]
     }
@@ -421,22 +539,22 @@ break and continue
 `` if not found, return #undef;
 {lambda proto-obj_lookup-key (obj key)
   #[
-    {if {kn/accessor/has-key % obj key}
+    {if {kn/accessor/has-key % (obj key) }
       #[
-        {kn/accessor/at-key % obj key}
+        {kn/accessor/at-key % (obj key) }
       ]
       else
       #[
-        {let proto-obj {kn/accessor/at-key % obj "__proto"} }
+        {let proto-obj {kn/accessor/at-key % (obj "__proto") } }
 
         {if [neq #undef; proto-obj]
           #[
-            {set proto-obj {kn/accessor/unbox % proto-obj} }
+            {set proto-obj {kn/accessor/unbox % (proto-obj) } }
           ]
         }
         {if [neq #nil; proto-obj ]
           #[
-            {set proto-obj {kn/accessor/unbox % proto-obj} }
+            {set proto-obj {kn/accessor/unbox % (proto-obj)} }
             [proto-obj_lookup-key proto-obj key]
           ]
           else
@@ -459,18 +577,14 @@ break and continue
         {if [neq find-res #undef;]
           #[
             {kn/accessor/init-prop %
-              find-res
-              $r
-              [make-proto-obj-setter this sym]
+              (find-res $r [make-proto-obj-setter this sym] )
             }
           ]
           `` make a new symbol
           else
           #[
             {kn/accessor/init-prop %
-              #ukn;
-              $r
-              [make-proto-obj-setter this sym]
+              (#ukn; $r [make-proto-obj-setter this sym] )
             }
           ]
         }
@@ -492,14 +606,14 @@ break and continue
         {if
           {and
             [neq find-res #undef;]
-            [is-procedure {kn/accessor/unbox % find-res} ]
+            [is-procedure {kn/accessor/unbox % (find-res) } ]
           }
           #[
             [eval-method find-res]
           ]
           else
           #[
-            [writeln "method not found"]
+            [writeln "method " msg " not found"]
           ]
         }
       ]
@@ -520,38 +634,36 @@ break and continue
               `` create a new attr slot
               {let new-instance {kn/accessor/init-dir %} }
               `` set proto attr
-              {let proto-name {kn/cell/get-core % subj} }
-              {let obj-init-table {kn/cell/get-table % subj} }
+              {let proto-name {kn/cell/get-core % (subj) } }
+              {let obj-init-table {kn/cell/get-table % (subj) } }
               `` object structure layout version
-              {kn/accessor/put-key-val % new-instance "__scheme" $ProtoClass}
+              {kn/accessor/put-key-val % (new-instance "__scheme" $ProtoClass) }
 
               {if [eq proto-name #ukn; ]
                 #[
-                  {kn/accessor/put-key-val % new-instance "__proto" #nil;}
+                  {kn/accessor/put-key-val % (new-instance "__proto" #nil;) }
                 ]
                 else
                 #[
-                  {kn/accessor/put-key-val % new-instance "__proto" {eval [to-variable proto-name] } }
+                  {kn/accessor/put-key-val % (new-instance "__proto" {eval [to-variable proto-name] } ) }
                 ]
               }
               {for
                 (
-                  {let iter {kn/table/iter-head % obj-init-table} }
+                  {let iter {kn/table/iter-head % (obj-init-table) } }
                   [neq iter #nil;]
-                  {set iter {kn/table/iter-next % obj-init-table iter} }
+                  {set iter {kn/table/iter-next % (obj-init-table iter) } }
                 )
                 #[
-                  {let init-key {kn/table/iter-key % obj-init-table iter} }
-                  {let init-val {kn/table/iter-val % obj-init-table iter} }
+                  {let init-key {kn/table/iter-key % (obj-init-table iter) } }
+                  {let init-val {kn/table/iter-val % (obj-init-table iter) } }
                   ``[writeln "init key: " init-key  " val: " init-val ]
 
                   `` evaluate each val
                   {set init-val {eval init-val} }
                   
                   {kn/accessor/put-key-val %
-                    new-instance
-                    init-key
-                    init-val
+                    (new-instance init-key init-val)
                   }
                   
                 ]
@@ -588,19 +700,21 @@ break and continue
   }
 }
 
-{let my-obj {ProtoObj .clone} }
+
+{let my-obj {ProtoObj clone} }
 my-obj
-{my-obj __scheme}
-{my-obj default-attr1 := 8}
-{my-obj default-attr1}
+
+{my-obj .__scheme}
+{my-obj .default-attr1 := 8}
+{my-obj .default-attr1}
 
 `` test setter 1
-{my-obj my-new-key := "my new key value 1"}
-[writeln {my-obj my-new-key} ]
+{my-obj .my-new-key := "my new key value 1"}
+[writeln {my-obj .my-new-key} ]
 
 `` test setter 2
-{my-obj my-new-key := "my new key value 2"}
-[writeln {my-obj my-new-key} ]
+{my-obj .my-new-key := "my new key value 2"}
+[writeln {my-obj .my-new-key} ]
 
 
 {def-builder
@@ -614,16 +728,16 @@ my-obj
     :set-sex
       {func (sex)
         #[
-          {this sex := sex}
+          {this .sex := sex}
         ]
       }
     :print
       {func ()
         #[
           [writeln
-            "My name is  " {this name} ", "
-            "I am " {this age} " years old, "
-            "my sex is " {this sex}
+            "My name is  " {this /name} ", "
+            "I am " {this /age} " years old, "
+            "my sex is " {this /sex}
           ]
         ]
       }
@@ -631,20 +745,17 @@ my-obj
   }
 }
 
-{let p {Person .clone} }
+
+{let p {Person clone} }
 `` overwrite my-new-key
-{p my-new-key := "my new key value 3"}
+{p .my-new-key := "my new key value 3"}
 `` show object structure
-[writeln p]
+``[writeln p]
 
-{p name := "Loki"}
-{p age :=  1500}
+{p .name := "Loki"}
+{p .age :=  1500}
+{p set-sex ($male)}
 [writeln p]
-{p .set-sex $male}
-{p .print}
-
-`` p2 should not as same as p
-{let p2 {Person .clone} }
-{p2 .print}
+{p print}
 
 ```
