@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include "../greatest.h"
-#include "kon/kon.h"
+#include "core/kon.h"
 
 KonState* kstate;
 SUITE(suite);

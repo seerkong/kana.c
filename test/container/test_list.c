@@ -4,10 +4,10 @@
 #include <sys/time.h>
 #include <string.h>
 #include <stdint.h>
-#include "../../src/kon/container/kx_list.h"
+#include "../../core/container/kx_list.h"
 #include <assert.h>
 #include "../greatest.h"
-#include "tbox/tbox.h"
+#include "../../lib/tbox/tbox.h"
 
 SUITE(test_list);
 

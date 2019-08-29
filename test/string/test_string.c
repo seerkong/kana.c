@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <assert.h>
 #include "../greatest.h"
-#include "kon/kon.h"
-#include "tbox/tbox.h"
+#include "core/kon.h"
+#include "../../lib/tbox/tbox.h"
 
 KonState* kstate;
 SUITE(suite);
