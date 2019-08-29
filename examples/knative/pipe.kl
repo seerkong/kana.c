@@ -4,4 +4,4 @@
   ]
 }
 
-[writeln {+ % 1 2; |add5; |add5} ]
+[writeln {+ % (1 2) | (add5) | (add5)} ]

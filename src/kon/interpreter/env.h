@@ -14,10 +14,6 @@ KonEnv* KN_MakeChildEnv(KonState* kstate, KonEnv* parentEnv);
 KN KN_EnvDefine(KonState* kstate, KonEnv* env, const char* key, KN value);
 KN KN_EnvLookup(KonState* kstate, KonEnv* env, const char* key);
 
-KN KN_EnvDispatcherDefine(KonState* kstate, KonEnv* env, const char* key, KN value);
-KN KN_EnvDispatcherLookup(KonState* kstate, KonEnv* env, const char* key);
-KN KN_EnvDispatcherLookupSet(KonState* kstate, KonEnv* env, const char* key, KN value);
-
 #ifdef __cplusplus
 }
 #endif

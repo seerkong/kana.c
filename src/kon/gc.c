@@ -42,6 +42,8 @@ void KN_InitGc(KonState* kstate)
     }
     // KN_DEBUG("MaxObjCntLimit %d\n", maxObjCnt);
     kstate->MaxObjCntLimit = maxObjCnt;
+    kstate->GcThreshold = maxObjCnt - nextSize / 4;
+    kstate->NeedGc = false;
 }
 
 void KN_ShowGcStatics(KonState* kstate)
@@ -115,9 +117,15 @@ bool KN_HasEnoughSegSpace(KonState* kstate, int requireSize)
         return true;
     }
     long long totalObjCnt = KN_CurrentObjCount(kstate);
-    long long limit = kstate->MaxObjCntLimit;
-    // KN_DEBUG("requireSize %d, current totalObjCnt %d, max limit %d\n", requireSize, totalObjCnt, limit);
-    return (limit - totalObjCnt - requireSize) >= 0;
+    long long limit = kstate->GcThreshold;
+    
+    bool needGc = (limit - totalObjCnt - requireSize) >= 0;
+    if (!needGc) {
+        KN_DEBUG("requireSize %d, current totalObjCnt %d, max limit %d\n", requireSize, totalObjCnt, limit);
+        kstate->NeedGc = true;
+    }
+    
+    return needGc;
 }
 
 
@@ -147,16 +155,18 @@ void KN_SwitchContinuation(KonState* kstate, KonContinuation* cont)
     if (!firstTry) {
         long long totalObjCnt = KN_CurrentObjCount(kstate);
         long long limit = kstate->MaxObjCntLimit;
-        KN_DEBUG("requireSize %d, current totalObjCnt %lld, max limit %lld\n", barrierObjLength, totalObjCnt, limit);
+        KN_DEBUG("no EnoughSegSpace requireSize %d, current totalObjCnt %lld, max limit %lld\n", barrierObjLength, totalObjCnt, limit);
 
-        KN_Gc(kstate);
-        bool secondTry = KN_HasEnoughSegSpace(kstate, barrierObjLength);
+        // don't trigger gc at this time
 
-        if (!secondTry) {
-            KN_DEBUG("gc failed, reach ptr count limit\n");
-            KN_ShowGcStatics(kstate);
-            exit(1);
-        }
+        // KN_Gc(kstate);
+        // bool secondTry = KN_HasEnoughSegSpace(kstate, barrierObjLength);
+
+        // if (!secondTry) {
+        //     KN_DEBUG("gc failed, reach ptr count limit\n");
+        //     KN_ShowGcStatics(kstate);
+        //     exit(1);
+        // }
     }
     
     KN_PushWriteBarrierObjsToHeapPtrSeg(kstate);
@@ -173,19 +183,34 @@ void KN_RecordNewKonNode(KonState* kstate, KN newVal)
     KxList_Push(kstate->WriteBarrierGen, newVal);
 }
 
+// safepoint:
+// after function finished
+// after a loop body finished
+void KN_EnterGcSafepoint(KonState* kstate)
+{
+    if (kstate->NeedGc) {
+        KN_DEBUG("KN_EnterGcSafepoint");
+        KN_Gc(kstate);
+        kstate->NeedGc = false;
+    }
+}
+
 void KN_Gc(KonState* kstate)
 {
-    KN_DEBUG("\n**trigger gc\n");
+    KN_DEBUG("\n**trigger gc, before gc, statics:\n");
+    KN_ShowGcStatics(kstate);
     KN_MarkPhase(kstate);
     KN_SweepPhase(kstate);
 }
 
 void KN_MarkPhase(KonState* kstate)
 {
+    // code pointers should be reserved
     if (kstate->CurrCode != NULL) {
         KxList_Push(kstate->MarkTaskQueue, kstate->CurrCode);
     }
 
+    // pointers which are not set to pointer addr segments should be reserved
     KxListNode* iter = KxList_IterHead(kstate->WriteBarrierGen);
     while ((KN)iter != KN_NIL) {
         KxListNode* next = KxList_IterNext(iter);
@@ -196,6 +221,13 @@ void KN_MarkPhase(KonState* kstate)
         KxList_Push(kstate->MarkTaskQueue, ptr);
 
         iter = next;
+    }
+
+    // msg dispatchers should be reserved
+    int vecLen = KxVector_Length(kstate->MsgDispatchers);
+    for (int i = 0; i < vecLen; i++) {
+        KN dispatcherPtr = (KN)KxVector_AtIndex(kstate->MsgDispatchers, i);
+        KxList_Push(kstate->MarkTaskQueue, dispatcherPtr);
     }
 
     if (kstate->CurrCont != NULL) {
@@ -219,8 +251,7 @@ void KN_MarkPhase(KonState* kstate)
 void KN_Mark(KonState* kstate, KxList* taskQueue, char color)
 {
     while (KxList_Length(kstate->MarkTaskQueue) > 0) {
-        KonBase* konPtr = KxList_Shift(kstate->MarkTaskQueue);
- 
+        KonBase* konPtr = KxList_Shift(taskQueue);
         KN_MarkNode(konPtr, taskQueue, color);
         
     }
@@ -330,7 +361,6 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
         case KN_T_PAIR: {
             KonPair* pair = (KonPair*)node;
             KxList_Push(markTaskQueue, pair->Prev);
-            KxList_Push(markTaskQueue, pair->Prev);
             KxList_Push(markTaskQueue, pair->Next);
             KxList_Push(markTaskQueue, pair->Body);
             break;
@@ -370,6 +400,35 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             KxList_Push(markTaskQueue, cell->Vector);
             KxList_Push(markTaskQueue, cell->Table);
             KxList_Push(markTaskQueue, cell->List);
+            if (cell->Next != KN_NIL) {
+                KxList_Push(markTaskQueue, cell->Next);
+            }
+
+            KxHashTable* map = cell->Map;
+            KxHashTableIter iter = KxHashTable_IterHead(map);
+            while ((KN)iter != KN_NIL) {
+                KxHashTableIter next = KxHashTable_IterNext(map, iter);
+                KxList_Push(markTaskQueue, KxHashTable_IterGetVal(map, iter));
+                iter = next;
+            }
+
+            break;
+        }
+        case KN_T_PARAM: {
+            KxHashTable* table = CAST_Kon(Param, node)->Table;
+            KxHashTableIter iter = KxHashTable_IterHead(table);
+            while ((KN)iter != KN_NIL) {
+                KxHashTableIter next = KxHashTable_IterNext(table, iter);
+                KxList_Push(markTaskQueue, KxHashTable_IterGetVal(table, iter));
+                iter = next;
+            }
+            break;
+        }
+        case KN_T_BLOCK: {
+            KonBlock* pair = (KonBlock*)node;
+            KxList_Push(markTaskQueue, pair->Prev);
+            KxList_Push(markTaskQueue, pair->Next);
+            KxList_Push(markTaskQueue, pair->Body);
             break;
         }
         case KN_T_QUOTE: {
@@ -413,7 +472,13 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
         case KN_T_ACCESSOR: {
             KonAccessor* slot = (KonAccessor*)node;
             if (slot->IsDir) {
-                KxList_Push(markTaskQueue, slot->Dir);
+                KxHashTable* dirItems = slot->Dir;
+                KxHashTableIter iterDirItems = KxHashTable_IterHead(dirItems);
+                while ((KN)iterDirItems != KN_NIL) {
+                    KxHashTableIter next = KxHashTable_IterNext(dirItems, iterDirItems);
+                    KxList_Push(markTaskQueue, KxHashTable_IterGetVal(dirItems, iterDirItems));
+                    iterDirItems = next;
+                }
             }
             else {
                 KxList_Push(markTaskQueue, slot->Value);
@@ -421,7 +486,14 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             break;
         }
         case KN_T_MSG_DISPATCHER: {
-            // TODO
+            KonMsgDispatcher* dispatcher = (KonMsgDispatcher*)node;
+            KxList_Push(markTaskQueue, dispatcher->OnSymbol);
+            KxList_Push(markTaskQueue, dispatcher->OnApplyArgs);
+            KxList_Push(markTaskQueue, dispatcher->OnSelectPath);
+            KxList_Push(markTaskQueue, dispatcher->OnMethodCall);
+            KxList_Push(markTaskQueue, dispatcher->OnVisitVector);
+            KxList_Push(markTaskQueue, dispatcher->OnVisitTable);
+            KxList_Push(markTaskQueue, dispatcher->OnVisitCell);
             break;
         }
         case KN_T_CONTINUATION: {
@@ -535,7 +607,22 @@ void KN_DestroyNode(KonState* kstate, KonBase* node)
             break;
         }
         case KN_T_CELL: {
+            KonCell* cell = CAST_Kon(Cell, node);
+            if (cell->Map != NULL) {
+                KxHashTable_Destroy(cell->Map);
+                cell->Map = NULL;
+            }
             break;
+        }
+        case KN_T_PARAM: {
+            KonParam* table = CAST_Kon(Param, node);
+            if (table->Table != NULL) {
+                KxHashTable_Destroy(table->Table);
+                table->Table = NULL;
+            }
+            break;
+        }
+        case KN_T_BLOCK: {
         }
         case KN_T_QUOTE: {
             break;
@@ -561,11 +648,6 @@ void KN_DestroyNode(KonState* kstate, KonBase* node)
                 KxHashTable_Destroy(env->Bindings);
                 env->Bindings = NULL;
             }
-            if (env->MsgDispatchers != NULL) {
-                KxHashTable_Destroy(env->MsgDispatchers);
-                env->MsgDispatchers = NULL;
-            }
-            
             break;
         }
         case KN_T_ACCESSOR: {

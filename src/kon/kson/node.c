@@ -1076,6 +1076,82 @@ KN KN_CellCoresToList(KonState* kstate, KN source)
     return KN_PairListRevert(kstate, result);
 }
 
+// 1 msg signal, only needd cell core
+// {xxx . $abc . $efg}
+// [xxx . abc . efg]
+// 2 accessor, only needd cell core
+// xxx / abc / efg
+// xxx / @var-a / @var-b
+// 3 apply, pipe, 
+// xxx % arg1 arg2 arg3 ...;
+// xxx | proc arg2 arg3 ...;
+// xx := 2;
+// 4 need semicolon to seperate next clause
+// convert word to identifier
+// xxx abc arg1 arg2 ...;
+// xxx @var-a arg1 arg2 ...;
+
+
+// 1 only need cell core
+// {xx := 2}
+// 2 only need cell core
+// xxx / abc / efg
+// xxx / @var-a / @var-b
+// xxx . $abc . $efg
+// xxx . abc . efg
+// 3 need semicolon to seperate next clause
+// from {xxx % (arg1 arg2 arg3 ...) }
+// to [xxx % arg1 arg2 arg3 ...; ]
+// from { xxx | (proc arg2 arg3 ...) }
+// to [ xxx | proc arg2 arg3 ...;]
+// 4 need semicolon to seperate next clause
+// convert word to identifier
+// {xxx abc (arg1 arg2 ...) }
+// [xxx abc arg1 arg2 ...;]
+// {xxx @var-a (arg1 arg2 ...) }
+// xxx @var-a arg1 arg2 ...;
+KN KN_CellToWordList(KonState* kstate, KN source)
+{
+    KonCell* head = CAST_Kon(Cell, source);
+    KonCell* iter = head;
+    KN result = KN_NIL;
+    while ((KN)iter != KN_NIL) {
+        KN core = iter->Core;
+        KN next = iter->Next;
+        if (KN_IS_SYNTAX_MARKER(core)
+            && (
+                CAST_Kon(SyntaxMarker, core)->Type == KN_SYNTAX_MARKER_GET_SLOT
+                || CAST_Kon(SyntaxMarker, core)->Type == KN_SYNTAX_MARKER_MSG_SIGNAL
+                || CAST_Kon(SyntaxMarker, core)->Type == KN_SYNTAX_MARKER_ASSIGN
+            )
+        ) {
+            result = KN_CONS(kstate, core, result);
+            // forward 1 item
+            KonCell* nextCell = CAST_Kon(Cell, next);
+            result = KN_CONS(kstate, nextCell->Core, result);
+            next = nextCell->Next;
+        }
+        else {
+            result = KN_CONS(kstate, core, result);
+
+            // append param table and a ';'
+            if (iter->Table != KN_UNDEF) {
+                KN paramListIter = KN_ParamTableToList(kstate, iter->Table);
+                while (paramListIter != KN_NIL) {
+                    result = KN_CONS(kstate, KN_CAR(paramListIter), result);
+                    paramListIter = KN_CDR(paramListIter);
+                }
+            }
+            
+            KonSyntaxMarker* clauseEnd = KN_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
+            clauseEnd->Type = KN_SYNTAX_MARKER_CLAUSE_END;
+            result = KN_CONS(kstate, clauseEnd, result);
+        }
+        iter = next;
+    }
+    return KN_PairListRevert(kstate, result);
+}
+
 KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);

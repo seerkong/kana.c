@@ -1,20 +1,20 @@
 {let folder {kn/accessor/init-dir %} }
-{kn/accessor/put-key-val % folder "alice" 1}
-{kn/accessor/put-key-val % folder "bob" 2}
-{kn/accessor/put-key-val % folder "cindy" 3}
+{kn/accessor/put-key-val % (folder "alice" 1) }
+{kn/accessor/put-key-val % (folder "bob" 2) }
+{kn/accessor/put-key-val % (folder "cindy" 3) }
 
 {for
   (
-    {let iter {kn/accessor/iter-head % folder} }
+    {let iter {kn/accessor/iter-head % (folder) } }
     [neq iter #nil;]
-    {set iter {kn/accessor/iter-next % folder iter} }
+    {set iter {kn/accessor/iter-next % (folder iter) } }
   )
   #[
     [writeln
       "key: "
-      {kn/accessor/iter-key % folder iter}
+      {kn/accessor/iter-key % (folder iter) }
       " val: "
-      {kn/accessor/iter-val % folder iter}
+      {kn/accessor/iter-val % (folder iter) }
     ]
   ]
 }

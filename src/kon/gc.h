@@ -1,8 +1,8 @@
 #ifndef KN_GC_H
 #define KN_GC_H 1
 
-// #define KN_DISABLE_GC 0
-#define KN_DISABLE_GC 1
+#define KN_DISABLE_GC 0
+// #define KN_DISABLE_GC 1
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,6 +15,7 @@ long long KN_CurrentObjCount(KonState* kstate);
 void KN_SwitchContinuation(KonState* kstate, KonContinuation* cont);
 void KN_RecordNewKonNode(KonState* kstate, KN newVal);
 
+void KN_EnterGcSafepoint(KonState* kstate);
 void KN_Gc(KonState* kstate);
 
 void KN_MarkPhase(KonState* kstate);

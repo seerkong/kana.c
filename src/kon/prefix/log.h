@@ -30,7 +30,7 @@ extern int ENABLE_DEBUG;
 #endif
 
 // no time info
-#if 0
+#if 1
 #include <string.h>
 #include <errno.h>
 #define KN_VERBOSE(msg, ...) \
@@ -54,7 +54,7 @@ fprintf(stdout, msg, ##__VA_ARGS__); fprintf(stdout, "\n")
 #endif
 
 
-#if 1
+#if 0
 #include <string.h>
 #include <errno.h>
 #define KN_VERBOSE(msg, ...) \

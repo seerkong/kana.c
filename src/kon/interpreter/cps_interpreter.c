@@ -173,25 +173,23 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
         // send msg like . add 1 2;
         else if (CAST_Kon(SyntaxMarker, firstObj)->Type == KN_SYNTAX_MARKER_MSG_SIGNAL) {
             KN signalSym = KN_CADR(argList);
-            argList = KN_CDDR(argList);
 
-            // get dispatcher and eval OnMethodCall
-            // this dispatcherId is unboxed
             unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
             KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
 
-            KonProcedure* procedure = dispatcher->OnMethodCall;
+            KonProcedure* procedure = dispatcher->OnSymbol;
 
             // dispatcher functions should receive 3 arg
             // 1st is the object
-            // 2nd is the message symbol
-            // 3rd is the argument list
+            // 2nd is the symbol
             KN dispatchArgList = KN_NIL;
-            dispatchArgList = KN_CONS(kstate, argList, dispatchArgList);
             dispatchArgList = KN_CONS(kstate, signalSym, dispatchArgList);
             dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
 
+            // call method
             bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
+
+            
         }
         else if (CAST_Kon(SyntaxMarker, firstObj)->Type == KN_SYNTAX_MARKER_GET_SLOT) {
             KN signalSym = KN_CADR(argList);
@@ -207,42 +205,49 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
     // send msg like [123 $+ 5]
     else if (KN_IS_SYMBOL(firstObj)) {
         KN signalSym = firstObj;
+
         argList = KN_CDR(argList);
 
+        // get dispatcher and eval OnMethodCall
+        // this dispatcherId is unboxed
         unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
         KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
 
-        KonProcedure* procedure = dispatcher->OnSymbol;
+        KonProcedure* procedure = dispatcher->OnMethodCall;
 
         // dispatcher functions should receive 3 arg
         // 1st is the object
-        // 2nd is the symbol
+        // 2nd is the message symbol
+        // 3rd is the argument list
         KN dispatchArgList = KN_NIL;
+        dispatchArgList = KN_CONS(kstate, argList, dispatchArgList);
         dispatchArgList = KN_CONS(kstate, signalSym, dispatchArgList);
         dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
 
-        // call method
         bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
     }
 
+    KN_DEBUG("EnterGcSafepoint after apply subj: %s, objects: %s", KN_StringToCstr(subjFmtStr), KN_StringToCstr(objectsFmtStr));
+    KN_EnterGcSafepoint(kstate);
     return bounce;
 }
 
 
 // 1 don't need semicolon to seperate next clause
-// xxx $abc $efg
-// xxx abc efg
+// {xx := 2}
 // 2 don't need semicolon to seperate next clause
 // convert word to identifier
 // xxx / abc / efg
 // xxx / @var-a / @var-b
+// xxx . $abc . $efg
+// xxx . abc . efg
 // 3 need semicolon to seperate next clause
 // xxx % arg1 arg2 arg3 ...;
 // xxx | proc arg2 arg3 ...;
 // 4 need semicolon to seperate next clause
 // convert word to identifier
-// xxx . abc arg1 arg2 ...;
-// xxx . @var-a arg1 arg2 ...;
+// xxx abc arg1 arg2 ...;
+// xxx @var-a arg1 arg2 ...;
 KN SplitClauses(KonState* kstate, KN sentenceRestWords)
 {
     // TODO parse symbol type verb
@@ -262,18 +267,21 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
             if (KN_IS_SYNTAX_MARKER(item)
                 && (
                     CAST_Kon(SyntaxMarker, item)->Type == KN_SYNTAX_MARKER_APPLY
-                    || CAST_Kon(SyntaxMarker, item)->Type == KN_SYNTAX_MARKER_ASSIGN
-                    || CAST_Kon(SyntaxMarker, item)->Type == KN_SYNTAX_MARKER_MSG_SIGNAL
+                    
                     || CAST_Kon(SyntaxMarker, item)->Type == KN_SYNTAX_MARKER_PROC_PIPE
                 )
             ) {
-                // meet % / = |
+                // meet % |
                 KxVector_Push(clauseVec, item);
                 state = 2;
             }
-            // meet / eg: /abc only need one object
+            // meet . / := eg: .name /name := 5 only need one object
             else if (KN_IS_SYNTAX_MARKER(item)
-                && CAST_Kon(SyntaxMarker, item)->Type == KN_SYNTAX_MARKER_GET_SLOT) {
+                && (
+                    CAST_Kon(SyntaxMarker, item)->Type == KN_SYNTAX_MARKER_GET_SLOT
+                    || CAST_Kon(SyntaxMarker, item)->Type == KN_SYNTAX_MARKER_MSG_SIGNAL
+                    || CAST_Kon(SyntaxMarker, item)->Type == KN_SYNTAX_MARKER_ASSIGN
+                )) {
                 
                 KxVector_Push(clauseVec, item);
                 
@@ -288,9 +296,12 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
             //     || KN_IS_UNQUOTE(item)
             // ) {
             else {
-                KxVector* singleItemClause = KxVector_Init();
-                KxVector_Push(clauseListVec, singleItemClause);
-                KxVector_Push(singleItemClause, item);
+                KxVector_Push(clauseVec, item);
+                state = 2;
+
+                // KxVector* singleItemClause = KxVector_Init();
+                // KxVector_Push(clauseListVec, singleItemClause);
+                // KxVector_Push(singleItemClause, item);
             }
         }
         else if (state == 3) {
@@ -626,7 +637,11 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
         }
         else {
             bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_SUBJ);
-            KN restJobs = KN_CellCoresToList(kstate, KN_DNR(cell));
+            // KN restJobs = KN_CellCoresToList(kstate, KN_DNR(cell));
+            // transform cell to list
+            // eg: {abc method1 (arg1 arg2) . sig1 method2  / slot1}
+            // to {abc method1 arg1 arg2; . sig1 method2; / slot1}
+            KN restJobs = KN_CellToWordList(kstate, KN_DNR(cell));
             KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_SUBJ);
             k->Cont = cont;
             k->Env = env;

@@ -158,7 +158,7 @@ typedef struct KonProcedure KonProcedure;
 typedef struct KonCpointer KonCpointer;
 typedef struct KonContinuation KonContinuation;
 
-typedef union _KN {
+typedef union _KNValue {
     // kon_int_t AsInt;
     // kon_int32_t AsInt32;
     // long AsLong;
@@ -203,7 +203,7 @@ struct KonBase {
 
 // typedef volatile union _Kon KN;
 // typedef union _Kon KN;
-typedef volatile union _Kon* KN;
+typedef volatile union _KNValue* KN;
 
 typedef enum {
     KN_SYM_PREFIX_WORD, // !ass
@@ -313,7 +313,6 @@ struct KonEnv {
     KonBase Base;
     KonEnv* Parent;
     KxHashTable* Bindings;
-    KxHashTable* MsgDispatchers;
 };
 
 // an accessor is a value wrapper
@@ -463,6 +462,8 @@ struct KonState {
     KxList* HeapPtrSegs;
     KxVector* SegmentMaxSizeVec;    // buffsize of each ptr segment
     unsigned long MaxObjCntLimit;    // how many objs can be stored in ptr seg
+    unsigned long GcThreshold;  // trigger gc when obj count bigger than this number
+    bool NeedGc;
 
     // mark task queue. mark the value grey before add to this queue
     KxList* MarkTaskQueue;
@@ -561,7 +562,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_UKN(x)    ((x) == KN_UKN)
 #define KN_IS_UNDEF(x)    ((x) == KN_UNDEF)
 #define KN_IS_NIL(x)    ((x) == KN_NIL || (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && ((KonQuote*)x)->Inner == KN_NIL))
-#define KN_IS_POINTER(x) (((kon_uint_t)(void*)(x) & KN_POINTER_MASK) == KN_POINTER_TAG)
+#define KN_IS_POINTER(x) (((kon_uint_t)(size_t)(x) & KN_POINTER_MASK) == KN_POINTER_TAG)
 #define KN_IS_FIXNUM(x)  (((kon_uint_t)(x) & KN_FIXNUM_MASK) == KN_FIXNUM_TAG)
 
 #define KN_IS_IMDT_SYMBOL(x) (((kon_uint_t)(x) & KN_IMDT_SYMBOL_BITS) == KN_IMDT_SYMBOL_TAG)
@@ -570,7 +571,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 #define KN_GET_PTR_TAG(x)      (((KonBase*)x)->Tag)
 
-#define KN_CHECK_TAG(x,t)  (KN_IS_POINTER((void*)x) && (KN_PTR_TYPE(x) == (t)))
+#define KN_CHECK_TAG(x,t)  (KN_IS_POINTER(x) && (KN_PTR_TYPE(x) == (t)))
 
 // #define kon_slot_ref(x,i)   (((KN)&((x)->Value))[i])
 // #define kon_slot_set(x,i,v) (((KN)&((x)->Value))[i] = (v))
@@ -758,6 +759,10 @@ KN KN_ParamTableToList(KonState* kstate, KN source);
 KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 // eg: {sh ls -al} => [sh ls -al]
 KN KN_CellCoresToList(KonState* kstate, KN source);
+
+// eg: {abc method1 (arg1 arg2) | proc ( arg2 arg3) % (arg1 arg2 arg3) . sig1  / slot1}
+// to {abc method1 arg1 arg2; | proc arg2 arg3; % arg1 arg2 arg3; . sig1  / slot1}
+KN KN_CellToWordList(KonState* kstate, KN source);
 
 // attribute accessor
 KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);

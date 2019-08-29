@@ -51,6 +51,8 @@ KonTrampoline* AfterForPrediction(KonState* kstate, KN evaledValue, KonContinuat
 
 KonTrampoline* AfterForBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
+    KN_EnterGcSafepoint(kstate);
+    
     KonEnv* env = contBeingInvoked->Env;
     KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
     KN afterBodyExpr = KxHashTable_AtKey(memo, "AfterExpr");
