@@ -10,6 +10,10 @@
 #define MAXSYMLINKS 256
 #endif
 
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
 /* ref: https://github.com/matsumoto-r/mod_vlimit/blob/master/mod_vlimit.c#L734-L837 */
 
 char *realpath_safe(const char *path, char *resolved_path,

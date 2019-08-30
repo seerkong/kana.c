@@ -4,3 +4,5 @@ ide/
 vendor/
 .xmake/
 thoughts.txt
+lib/tbox/tbox.config.h
+CMakeLists.txt

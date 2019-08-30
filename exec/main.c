@@ -85,6 +85,9 @@ int main(int argc, char const* argv[])
     if (ExecMode == 1 && argc > 1) {
         KN_EvalFile(kstate, argv[1]);
     }
-    // KN_EvalFile(kstate, "/Users/kongweixian/lang/kunuscript/kunu-c/examples/sicp/fib-rec.kl");
+    else {
+        // KN_EvalFile(kstate, "/Users/kongweixian/lang/kunu/kunu.c/examples/knative/sh.kl");
+    }
+    
     return 0;
 }

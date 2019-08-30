@@ -4,14 +4,14 @@ Kunu is a programming language. Heavily inspired by Scheme, _why's Potion langua
 Note: Kunu isn’t done yet. The implement may make breaking changes and produce new bugs at anytime. Just play it for fun.
 
 # DONE list
-- [x] a CPS(Continuation Passing Style) interpreter
+- [x] a CPS (Continuation Passing Style) tree-walking interpreter
 - [x] call-cc (call with current continuation)
 - [x] eval, apply
 - [x] lexical-scoped procedure using `lambda` keyword
 - [x] dynamic-scoped procedure using `func` keyword
 - [x] dynamic-scoped code block can be assigned to a vairable using `blk` keyword.
 - [x] a mark-sweep GC.
-- [x] a xml-like data language.
+- [x] a data language like XML and JSON.
 - [x] chained calls. SVOVOVO...
 
 # TODO list
