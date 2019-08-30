@@ -418,6 +418,31 @@ void ParseSingleLineComment(KonTokenizer* tokenizer)
     tokenizer->ColEnd = tokenizer->CurrCol;
 }
 
+// `* * adsf * *`
+void ParseMultiLineComment(KonTokenizer* tokenizer)
+{
+    tokenizer->RowStart = tokenizer->CurrRow;
+    tokenizer->ColStart = tokenizer->CurrCol;
+    KxStringBuffer_Clear(tokenizer->Content);
+    // forward two char  "``"
+    ForwardChar(tokenizer);
+    ForwardChar(tokenizer);
+
+    char ch = '\0';
+    char* pc = NULL;
+    char lastCh = '\0';
+    while ((pc = PeekChars(tokenizer, 1)) && pc) {
+        lastCh = ch;
+        ch = ForwardChar(tokenizer);
+        KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
+        if (lastCh == '*' && ch == '`') {
+            break;
+        }
+    }
+    tokenizer->RowEnd = tokenizer->CurrRow;
+    tokenizer->ColEnd = tokenizer->CurrCol;
+}
+
 void ParseNumber(KonTokenizer* tokenizer)
 {
     tokenizer->RowStart = tokenizer->CurrRow;
@@ -817,6 +842,11 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             if (nextChars[1] == '`') {
                 ParseSingleLineComment(tokenizer);
                 tokenizer->TokenKind = KN_TOKEN_COMMENT_SINGLE_LINE;
+                break;
+            }
+            if (nextChars[1] == '*') {
+                ParseMultiLineComment(tokenizer);
+                tokenizer->TokenKind = KN_TOKEN_COMMENT_MULTI_LINE;
                 break;
             }
             else {

@@ -12,7 +12,8 @@ typedef enum
     KN_TOKEN_NONE = 0,
     KN_TOKEN_EOF,
     KN_TOKEN_WHITESPACE,
-    KN_TOKEN_COMMENT_SINGLE_LINE, // `
+    KN_TOKEN_COMMENT_SINGLE_LINE, // ``
+    KN_TOKEN_COMMENT_MULTI_LINE, // `* *`
     
     KN_TOKEN_LIST_START,   // [
     KN_TOKEN_BLOCK_START,   // #[

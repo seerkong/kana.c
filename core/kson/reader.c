@@ -267,9 +267,43 @@ KN MakeNumber(KonReader* reader)
     return value;
 }
 
-KN MakeString(KonReader* reader)
+KN MakeRawString(KonReader* reader)
 {
     KN value = KN_MakeString(reader->Kstate, KxStringBuffer_Cstr(reader->Tokenizer->Content));
+    return value;
+}
+
+KN MakeString(KonReader* reader)
+{
+    // replace excape chars
+    const char* origin = KxStringBuffer_Cstr(reader->Tokenizer->Content);
+    char* index = (char*)origin;
+    
+    KxStringBuffer* sb = KxStringBuffer_New();
+    while (*index != '\0') {
+        if (*index == '\\' && *(index + 1) != '\0') {
+            if (*(index + 1) == 'n') {
+                KxStringBuffer_NAppendChar(sb, '\n', 1);
+                index += 2;
+                continue;
+            }
+            else if (*(index + 1) == 'r') {
+                KxStringBuffer_NAppendChar(sb, '\r', 1);
+                index += 2;
+                continue;
+            }
+            else if (*(index + 1) == 't') {
+                KxStringBuffer_NAppendChar(sb, '\t', 1);
+                index += 2;
+                continue;
+            }
+        }
+        KxStringBuffer_NAppendChar(sb, *index, 1);
+        index += 1;
+    }
+    KonString* value = KN_ALLOC_TYPE_TAG(reader->Kstate, KonString, KN_T_STRING);
+    value->String = sb;
+
     return value;
 }
 
@@ -305,7 +339,7 @@ KN MakeLiteral(KonReader* reader, KonTokenKind event)
         value = MakeString(reader);
     }
     else if (event == KN_TOKEN_LITERAL_RAW_STRING) {
-        value = MakeString(reader);
+        value = MakeRawString(reader);
     }
     
     return value;
