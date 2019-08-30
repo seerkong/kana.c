@@ -1,3 +1,0 @@
-[submodule "3rd/hyperscan"]
-	path = 3rd/hyperscan
-	url = https://github.com/intel/hyperscan.git

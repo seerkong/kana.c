@@ -8,6 +8,7 @@ target("kon")
     add_defines("DEBUG", "__debug__")
 
     add_deps("tbox")
+    add_deps("sregex")
     
     -- add defines
     add_defines("__kon_prefix__=\"kon\"")

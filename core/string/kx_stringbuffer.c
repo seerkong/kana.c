@@ -248,3 +248,7 @@ int32_t KxStringBuffer_PrependCstr(KxStringBuffer* self, const char *str)
     return KxStringBuffer_NPrependCstr(self, str, strlen(str));
 }
 
+const char* KxStringBuffer_OffsetPtr(KxStringBuffer* self, int startOffset)
+{
+    return (self->BuffStart + self->HeadOffset + startOffset);
+}

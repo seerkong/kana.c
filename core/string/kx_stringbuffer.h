@@ -51,6 +51,7 @@ extern int KxStringBuffer_NPrependCstr(KxStringBuffer* self, const char *str, in
 // prepend cstr
 extern int KxStringBuffer_PrependCstr(KxStringBuffer* self, const char *str);
 
+extern const char* KxStringBuffer_OffsetPtr(KxStringBuffer* self, int startOffset);
 
 #ifdef __cplusplus
 }

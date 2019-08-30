@@ -100,40 +100,103 @@ KN KonVector_SetIndex(KonState* kstate, KN args)
 
 KonAccessor* KonVector_Export(KonState* kstate, KonEnv* env)
 {
-    KN_EnvDefine(kstate, env, "vector-init",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_Init)
-    );
-    KN_EnvDefine(kstate, env, "vector-init-capacity",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_InitWithCapacity)
-    );
-    KN_EnvDefine(kstate, env, "vector-init-size",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_InitWithSize)
-    );
-    KN_EnvDefine(kstate, env, "vector-length",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_Length)
-    );
-    KN_EnvDefine(kstate, env, "vector-clear",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_Clear)
-    );
-    KN_EnvDefine(kstate, env, "vector-push",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_Push)
-    );
-    KN_EnvDefine(kstate, env, "vector-pop",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_Pop)
-    );
-    KN_EnvDefine(kstate, env, "vector-unshift",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_Unshift)
-    );
-    KN_EnvDefine(kstate, env, "vector-shift",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_Shift)
-    );
-    KN_EnvDefine(kstate, env, "vector-at-index",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_AtIndex)
-    );
-    KN_EnvDefine(kstate, env, "vector-set-index",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_SetIndex)
-    );
 
     KonAccessor* slot = (KonAccessor*)KN_MakeDirAccessor(kstate, "dr", NULL);
+    
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "init",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_Init),
+        "r",
+        NULL
+    );
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "init-capacity",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_InitWithCapacity),
+        "r",
+        NULL
+    );
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "init-size",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonVector_InitWithSize),
+        "r",
+        NULL
+    );
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "length",
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonVector_Length),
+        "r",
+        NULL
+    );
+    
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "clear",
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonVector_Length),
+        "r",
+        NULL
+    );
+
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "push",
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonVector_Push),
+        "r",
+        NULL
+    );
+
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "pop",
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonVector_Pop),
+        "r",
+        NULL
+    );
+
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "unshift",
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonVector_Unshift),
+        "r",
+        NULL
+    );
+
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "shift",
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonVector_Shift),
+        "r",
+        NULL
+    );
+
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "at-i",
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonVector_AtIndex),
+        "r",
+        NULL
+    );
+
+    KN_DirAccessorPutKeyValue(
+        kstate,
+        (KN)slot,
+        "set-i",
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonVector_SetIndex),
+        "r",
+        NULL
+    );
     return slot;
 }

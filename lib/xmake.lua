@@ -172,4 +172,5 @@ end
 
 
 
-includes(format("tbox/%s.lua", "xmake")) 
+includes(format("tbox/%s.lua", "xmake"))
+includes(format("sregex/%s.lua", "xmake")) 
