@@ -5,6 +5,7 @@
 #include "kon_table.h"
 #include "kon_cell.h"
 #include "kon_accessor.h"
+#include "kon_file.h"
 
 #include "kon_module.h"
 
@@ -59,6 +60,13 @@ KN KonModule_Export(KonState* kstate, KonEnv* env)
         (KN)module,
         "accessor",
         (KN)KonAccessor_Export(kstate, env)
+    );
+
+    KN_DirAccessorPutKeyProperty(
+        kstate,
+        (KN)module,
+        "file",
+        (KN)KonFile_Export(kstate, env)
     );
 
     return (KN)module;

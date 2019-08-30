@@ -118,7 +118,7 @@ KN KonAccessor_PutKeyVal(KonState* kstate, KN args)
         setter = KN_CADDDR(args);
     }
 
-    return KN_DirAccessorPutKeyValue(kstate, self, keyCstr, val, mod, setter);
+    return KN_DirAccessorPutKeyValue(kstate, self, keyCstr, val, mod, setter) ? KN_TRUE : KN_FALSE;
 }
 
 KN KonAccessor_PutKeyProp(KonState* kstate, KN args)
@@ -135,7 +135,7 @@ KN KonAccessor_PutKeyProp(KonState* kstate, KN args)
         keyCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(key));
     }
 
-    return KN_DirAccessorPutKeyProperty(kstate, self, keyCstr, property);
+    return KN_DirAccessorPutKeyProperty(kstate, self, keyCstr, property) ? KN_TRUE : KN_FALSE;
 }
 
 KN KonAccessor_IterHead(KonState* kstate, KN args)
