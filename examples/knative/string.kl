@@ -1,2 +1,2 @@
 {let a "abcdefg"}
-[writeln {kn/str/sub-str % (a 1 0) } ]
+[writeln {kn/str/sub-str % (a 1 3) } ]

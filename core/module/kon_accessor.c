@@ -3,14 +3,12 @@
 #include "../container/kx_hashtable.h"
 extern KN UnBoxAccessorValue(KN konValue);
 
-KN KonAccessor_InitProperty(KonState* kstate, KN args)
+KN KonAccessor_InitProperty(KonState* kstate, KN val, KN rest)
 {
-    KN val = KN_CAR(args);
-
     KonProcedure* setter = NULL;
     char* modCstr = NULL;
-    if (KN_CDR(args) != KN_NIL) {
-        KN mod = KN_CADR(args);
+    if (rest != KN_NIL) {
+        KN mod = KN_CAR(rest);
         if (KN_IS_IDENTIFIER(mod)) {
             modCstr = KN_UNBOX_SYMBOL(mod);
         }
@@ -18,8 +16,8 @@ KN KonAccessor_InitProperty(KonState* kstate, KN args)
             modCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(mod));
         }
         
-        if (KN_CDDR(args) != KN_NIL) {
-            setter = KN_CADDR(args);
+        if (KN_CDR(rest) != KN_NIL) {
+            setter = KN_CADR(rest);
         }
     }
 
@@ -40,17 +38,13 @@ KN KonAccessor_InitDir(KonState* kstate, KN args)
     return self;
 }
 
-KN KonAccessor_Unbox(KonState* kstate, KN args)
+KN KonAccessor_Unbox(KonState* kstate, KN self)
 {
-    KN self = KN_CAR(args);
-    
     return UnBoxAccessorValue(self);
 }
 
-KN KonAccessor_SetVal(KonState* kstate, KN args)
+KN KonAccessor_SetVal(KonState* kstate, KN self, KN assignTo)
 {
-    KN self = KN_CAR(args);
-    KN assignTo = KN_CADR(args);
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     accessor->IsDir = false;
     accessor->Value = assignTo;
@@ -58,11 +52,8 @@ KN KonAccessor_SetVal(KonState* kstate, KN args)
     return self;
 }
 
-KN KonAccessor_HasKey(KonState* kstate, KN args)
+KN KonAccessor_HasKey(KonState* kstate, KN self, KN key)
 {
-    KN self = KN_CAR(args);
-    // key should be a symbol
-    KN key = KN_CADR(args);
     char* keyCstr = NULL;
     if (KN_IS_SYMBOL(key)) {
         keyCstr = KN_UNBOX_SYMBOL(key);
@@ -78,10 +69,8 @@ KN KonAccessor_HasKey(KonState* kstate, KN args)
     return KxHashTable_HasKey(dir, keyCstr) ? KN_TRUE : KN_FALSE;
 }
 
-KN KonAccessor_AtKey(KonState* kstate, KN args)
+KN KonAccessor_AtKey(KonState* kstate, KN self, KN key)
 {
-    KN self = KN_CAR(args);
-    KN key = KN_CADR(args);
     char* keyCstr = NULL;
     if (KN_IS_SYMBOL(key)) {
         keyCstr = KN_UNBOX_SYMBOL(key);
@@ -99,11 +88,8 @@ KN KonAccessor_AtKey(KonState* kstate, KN args)
     return findRes;
 }
 
-KN KonAccessor_PutKeyVal(KonState* kstate, KN args)
+KN KonAccessor_PutKeyVal(KonState* kstate, KN self, KN key, KN val, KN rest)
 {
-    KN self = KN_CAR(args);
-    KN key = KN_CADR(args);
-    KN val = KN_CADDR(args);
     const char* mod = NULL;
     KonProcedure* setter = NULL;
     char* keyCstr = NULL;
@@ -114,19 +100,15 @@ KN KonAccessor_PutKeyVal(KonState* kstate, KN args)
         keyCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(key));
     }
 
-    if (KN_CDDDR(args) != KN_NIL) {
-        setter = KN_CADDDR(args);
+    if (rest != KN_NIL) {
+        setter = KN_CAR(rest);
     }
 
     return KN_DirAccessorPutKeyValue(kstate, self, keyCstr, val, mod, setter) ? KN_TRUE : KN_FALSE;
 }
 
-KN KonAccessor_PutKeyProp(KonState* kstate, KN args)
+KN KonAccessor_PutKeyProp(KonState* kstate, KN self, KN key, KN property)
 {
-    KN self = KN_CAR(args);
-    KN key = KN_CADR(args);
-    KN property = KN_CADDR(args);
-
     char* keyCstr = NULL;
     if (KN_IS_SYMBOL(key)) {
         keyCstr = KN_UNBOX_SYMBOL(key);
@@ -138,9 +120,8 @@ KN KonAccessor_PutKeyProp(KonState* kstate, KN args)
     return KN_DirAccessorPutKeyProperty(kstate, self, keyCstr, property) ? KN_TRUE : KN_FALSE;
 }
 
-KN KonAccessor_IterHead(KonState* kstate, KN args)
+KN KonAccessor_IterHead(KonState* kstate, KN self)
 {
-    KN self = KN_CAR(args);
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     KxHashTable* dir = accessor->Dir;
     
@@ -148,9 +129,8 @@ KN KonAccessor_IterHead(KonState* kstate, KN args)
     return (KN)KN_MakeCpointer(kstate, iter);
 }
 
-KN KonAccessor_IterTail(KonState* kstate, KN args)
+KN KonAccessor_IterTail(KonState* kstate, KN self)
 {
-    KN self = KN_CAR(args);
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     KxHashTable* dir = accessor->Dir;
     
@@ -158,10 +138,8 @@ KN KonAccessor_IterTail(KonState* kstate, KN args)
     return (KN)KN_MakeCpointer(kstate, iter);
 }
 
-KN KonAccessor_IterPrev(KonState* kstate, KN args)
+KN KonAccessor_IterPrev(KonState* kstate, KN self, KN iter)
 {
-    KN self = KN_CAR(args);
-    KN iter = KN_CADR(args);
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     KxHashTable* dir = accessor->Dir;
     
@@ -174,11 +152,8 @@ KN KonAccessor_IterPrev(KonState* kstate, KN args)
     }
 }
 
-KN KonAccessor_IterNext(KonState* kstate, KN args)
-{
-    KN self = KN_CAR(args);
-    KN iter = KN_CADR(args);
-    
+KN KonAccessor_IterNext(KonState* kstate, KN self, KN iter)
+{   
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     KxHashTable* dir = accessor->Dir;
     
@@ -191,10 +166,8 @@ KN KonAccessor_IterNext(KonState* kstate, KN args)
     }
 }
 
-KN KonAccessor_IterGetKey(KonState* kstate, KN args)
+KN KonAccessor_IterGetKey(KonState* kstate, KN self, KN iter)
 {
-    KN self = KN_CAR(args);
-    KN iter = KN_CADR(args);
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     KxHashTable* dir = accessor->Dir;
     
@@ -205,10 +178,8 @@ KN KonAccessor_IterGetKey(KonState* kstate, KN args)
     return (KN)value;
 }
 
-KN KonAccessor_IterGetVal(KonState* kstate, KN args)
+KN KonAccessor_IterGetVal(KonState* kstate, KN self, KN iter)
 {
-    KN self = KN_CAR(args);
-    KN iter = KN_CADR(args);
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     KxHashTable* dir = accessor->Dir;
     
@@ -220,62 +191,62 @@ KonAccessor* KonAccessor_Export(KonState* kstate, KonEnv* env)
     KonAccessor* slot = (KonAccessor*)KN_MakeDirAccessor(kstate, "dr", NULL);
     KxHashTable_PutKv(slot->Dir,
         "init-prop",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_InitProperty)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_InitProperty, 1, 1, 0)
     );
 
     KxHashTable_PutKv(slot->Dir,
         "init-dir",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_InitDir)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_InitDir, 0, 1, 0)
     );
     KxHashTable_PutKv(slot->Dir,
         "unbox",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_Unbox)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_Unbox, 1, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
         "set-val",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_SetVal)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_SetVal, 2, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
         "has-key",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_HasKey)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_HasKey, 2, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
         "at-key",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_AtKey)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_AtKey, 2, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
         "put-key-val",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_PutKeyVal)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_PutKeyVal, 3, 1, 0)
     );
 
     KxHashTable_PutKv(slot->Dir,
         "put-key-prop",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_PutKeyProp)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_PutKeyProp, 3, 0, 0)
     );
 
     KxHashTable_PutKv(slot->Dir,
         "iter-head",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterHead)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterHead, 1, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
         "iter-tail",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterTail)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterTail, 1, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
         "iter-prev",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterPrev)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterPrev, 2, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
         "iter-next",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterNext)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterNext, 2, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
         "iter-key",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterGetKey)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterGetKey, 2, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
         "iter-val",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterGetVal)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonAccessor_IterGetVal, 2, 0, 0)
     );
 
     return slot;

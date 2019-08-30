@@ -1229,11 +1229,14 @@ KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 }
 
 
-KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef)
+KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef, int paramNum, int hasVAList, int hasVAMap)
 {
     KonProcedure* result = KN_ALLOC_TYPE_TAG(kstate, KonProcedure, KN_T_PROCEDURE);
     result->Type = type;
     result->NativeFuncRef = funcRef;
+    result->ParamNum = paramNum;
+    result->HasVAList = hasVAList != 0 ? 1 : 0;
+    result->HasVAMap = hasVAMap != 0 ? 1 : 0;
     return (KN)result;
 }
 

@@ -37,7 +37,7 @@ KonTrampoline* ApplyProcedureArguments(KonState* kstate, KonProcedure* proc, KN 
     // TODO assert if is a procedure
     if (proc->Type == KN_NATIVE_FUNC) {
         KonNativeFuncRef funcRef = proc->NativeFuncRef;
-        KN applyResult = (*funcRef)(kstate, argList);
+        KN applyResult = KN_ApplyArgsToNativeFunc(kstate, proc, argList);
         bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
         bounce->Run.Value = applyResult;
         bounce->Cont = cont;
@@ -46,7 +46,7 @@ KonTrampoline* ApplyProcedureArguments(KonState* kstate, KonProcedure* proc, KN 
         // treat as plain procedure when apply arg list
         // the first item in arg list is the object
         KonNativeFuncRef funcRef = proc->NativeFuncRef;
-        KN applyResult = (*funcRef)(kstate, argList);
+        KN applyResult = KN_ApplyArgsToNativeFunc(kstate, proc, argList);
         bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
         bounce->Run.Value = applyResult;
         bounce->Cont = cont;

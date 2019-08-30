@@ -363,18 +363,16 @@ typedef enum {
     KN_COMPOSITE_OBJ_METHOD,
 } KonProcedureType;
 
-typedef KN (*KonNativeFuncRef)(KonState* kstate, KN argList);
-typedef KN (*KonNativeObjMethodRef)(KonState* kstate, void* objRef, KN argList);
+typedef KN (*KonNativeFuncRef)(KonState* kstate, ...);
 
 struct KonProcedure {
     KonBase Base;
     KonProcedureType Type;
-    int ParamNum;   // exclude ... arg
-    bool HasVariableParam;   // if have ... in arg list
+    int ParamNum;   // arg num before ...
+    int HasVAList;   // if have ... in arg list
+    int HasVAMap;   // variable argument map
     union {
         KonNativeFuncRef NativeFuncRef;
-
-        KonNativeObjMethodRef NativeObjMethod;
 
         struct {
             KN ArgList;
@@ -779,7 +777,7 @@ KN KN_ExpandStringify(KonState* kstate, KN source, bool newLine, int depth, char
 KN KN_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
 
-KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef);
+KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef, int paramNum, int hasVAList, int hasVAMap);
 KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KonEnv* env);
 KonMsgDispatcher* MakeMsgDispatcher(KonState* kstate);
 int KN_SetMsgDispatcher(KonState* kstate, unsigned int dispatcherId, KonMsgDispatcher* dispatcher);

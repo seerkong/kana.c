@@ -42,10 +42,8 @@ process_string(sre_char *s, size_t len, sre_program_t *prog, sre_int_t *ovector,
 }
 
 
-KN KN_Regex_Match(KonState* kstate, KN args)
+KN KN_Regex_Match(KonState* kstate, KN regExpr, KN strToMatch)
 {
-    KN regExpr = KN_CAR(args);
-    KN strToMatch = KN_CADR(args);
     const char* regExprStr = KxStringBuffer_Cstr(KN_UNBOX_STRING(regExpr));
     const char* strToMatchCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(strToMatch));
     KonVector* result = KN_ALLOC_TYPE_TAG(kstate, KonVector, KN_T_VECTOR);
@@ -119,10 +117,6 @@ KN KN_Regex_Match(KonState* kstate, KN args)
 
     memcpy(s, p, len);
 
-    
-
-    
-
     int rc = process_string(s, len, prog, ovector, ovecsize, ncaps);
     if (rc >= 0) {
         for (i = 0; i < 2 * (ncaps + 1); i += 2) {
@@ -179,7 +173,7 @@ KonAccessor* KN_Regex_Export(KonState* kstate, KonEnv* env)
         kstate,
         (KN)slot,
         "match",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_Regex_Match),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_Regex_Match, 2, 0, 0),
         "r",
         NULL
     );

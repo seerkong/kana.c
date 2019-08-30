@@ -229,21 +229,8 @@ KN KN_PrimaryDivide(KonState* kstate, KN args)
 }
 
 
-KN KN_PrimaryMod(KonState* kstate, KN args)
+KN KN_PrimaryMod(KonState* kstate, KN first, KN second)
 {
-    KN iter = args;
-    KN first = KN_CAR(iter);
-    iter = KN_CDR(iter);
-    if (first == KN_NIL) {
-        return KN_MAKE_FIXNUM(0);
-    }
-    else if (iter == KN_NIL) {
-        return first;
-    }
-
-    KN second = KN_CAR(iter);
-
-
     int resFixnum = 0;
     if (KN_IS_FIXNUM(first)) {
         resFixnum = KN_UNBOX_FIXNUM(first);
@@ -439,32 +426,32 @@ KN KN_PrimaryGreaterOrEqual(KonState* kstate, KN args)
 KonAccessor* KonNumber_Export(KonState* kstate, KonEnv* env)
 {
     KN_EnvDefine(kstate, env, "+",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryPlus)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryPlus, 0, 1, 0)
     );
     KN_EnvDefine(kstate, env, "-",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryMinus)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryMinus, 0, 1, 0)
     );
     KN_EnvDefine(kstate, env, "*",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryMultiply)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryMultiply, 0, 1, 0)
     );
     KN_EnvDefine(kstate, env, "/",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryDivide)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryDivide, 0, 1, 0)
     );
     KN_EnvDefine(kstate, env, "mod",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryMod)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryMod, 2, 0, 0)
     );
 
     KN_EnvDefine(kstate, env, "<",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryLowerThan)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryLowerThan, 0, 1, 0)
     );
     KN_EnvDefine(kstate, env, "<=",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryLowerOrEqual)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryLowerOrEqual, 0, 1, 0)
     );
     KN_EnvDefine(kstate, env, ">",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryGreaterThan)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryGreaterThan, 0, 1, 0)
     );
     KN_EnvDefine(kstate, env, ">=",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryGreaterOrEqual)
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryGreaterOrEqual, 0, 1, 0)
     );
 
     KonAccessor* slot = (KonAccessor*)KN_MakeDirAccessor(kstate, "dr", NULL);

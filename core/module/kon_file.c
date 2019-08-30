@@ -2,27 +2,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-KN KonFile_Init(KonState* kstate, KN args)
+KN KonFile_Init(KonState* kstate, KN path, KN mode)
 {
-    KN path = KN_CAR(args);
-    KN mode = KN_CADR(args);
     const char* modeStr = KxStringBuffer_Cstr(KN_UNBOX_STRING(mode));
     const char* pathCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(path));
     FILE* fp = fopen(pathCstr, modeStr);
     return KN_MakeCpointer(kstate, fp);
 }
 
-KN KonFile_Close(KonState* kstate, KN args)
+KN KonFile_Close(KonState* kstate, KN fh)
 {
-    KN fh = KN_CAR(args);
     FILE* fp = CAST_Kon(Cpointer, fh)->Pointer;
     fclose(fp);
     return KN_TRUE;
 }
 
-KN KonFile_ReadAll(KonState* kstate, KN args)
+KN KonFile_ReadAll(KonState* kstate, KN fh)
 {
-    KN fh = KN_CAR(args);
     KxStringBuffer* sb = KxStringBuffer_New();
     FILE* fp = CAST_Kon(Cpointer, fh)->Pointer;
     int ch;
@@ -36,10 +32,8 @@ KN KonFile_ReadAll(KonState* kstate, KN args)
     return value;
 }
 
-KN KonFile_Puts(KonState* kstate, KN args)
+KN KonFile_Puts(KonState* kstate, KN fh, KN data)
 {
-    KN fh = KN_CAR(args);
-    KN data = KN_CADR(args);
     FILE* fp = CAST_Kon(Cpointer, fh)->Pointer;
     const char* dataCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(data));
     // fprintf(fp, "");
@@ -55,7 +49,7 @@ KonAccessor* KonFile_Export(KonState* kstate, KonEnv* env)
         kstate,
         (KN)slot,
         "init",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonFile_Init),
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonFile_Init, 2, 0, 0),
         "r",
         NULL
     );
@@ -64,7 +58,7 @@ KonAccessor* KonFile_Export(KonState* kstate, KonEnv* env)
         kstate,
         (KN)slot,
         "close",
-        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonFile_Close),
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonFile_Close, 1, 0, 0),
         "r",
         NULL
     );
@@ -73,7 +67,7 @@ KonAccessor* KonFile_Export(KonState* kstate, KonEnv* env)
         kstate,
         (KN)slot,
         "read-all",
-        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonFile_ReadAll),
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonFile_ReadAll, 1, 0, 0),
         "r",
         NULL
     );
@@ -82,7 +76,7 @@ KonAccessor* KonFile_Export(KonState* kstate, KonEnv* env)
         kstate,
         (KN)slot,
         "puts",
-        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonFile_Puts),
+        MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonFile_Puts, 2, 0, 0),
         "r",
         NULL
     );
