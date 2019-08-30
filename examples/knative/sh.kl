@@ -1,2 +1,9 @@
-{sh ls -al}
-{sh "ps" "-h"}
+`*
+{let a "ls"}
+{sh @a -al './'}
+*`
+{lambda foo ()
+  #[ "-h" ]
+}
+
+{sh "ps" [foo] }
