@@ -88,7 +88,7 @@ char *realpath_safe(const char *path, char *resolved_path,
       char newbuf[m + n + 1];
       memcpy(newbuf, link_path, n);
       memcpy(newbuf + n, path, m + 1);
-      path = buf = newbuf;
+      path = newbuf;
     }
     *npath++ = '/';
   }
