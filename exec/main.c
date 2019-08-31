@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "core/kon.h"
 #include "commander.h"
 
@@ -68,6 +69,16 @@ int RunMain(int argc, char **argv)
     return KN_TRUE;
 }
 
+int LoadInitScript()
+{
+    const char* initScriptPath = "/usr/local/etc/kunu/init.kl";
+    if ((access(initScriptPath, F_OK)) != -1) {
+        if (access(initScriptPath, R_OK) != -1) {
+            KN_EvalFile(kstate, initScriptPath);
+        }
+    }
+}
+
 int main(int argc, char const* argv[])
 {
     ExecMode = 1;
@@ -82,11 +93,13 @@ int main(int argc, char const* argv[])
     //     ExitSuccess(kstate);
     // }
 
+    LoadInitScript();
+
     if (ExecMode == 1 && argc > 1) {
         KN_EvalFile(kstate, argv[1]);
     }
     else {
-        // KN_EvalFile(kstate, "/Users/kongweixian/lang/kunu/kunu.c/examples/knative/sh.kl");
+        // KN_EvalFile(kstate, "/Users/kongweixian/lang/kunu/kunu.c/examples/knative/mk-dispatcher.kl");
     }
     
     return 0;
