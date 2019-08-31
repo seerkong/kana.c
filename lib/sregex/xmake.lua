@@ -12,6 +12,7 @@ target("sregex")
 
     -- add options
     add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+    add_cflags("-std=gnu99", "", {force = true})
     add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
   
     -- add the common source files

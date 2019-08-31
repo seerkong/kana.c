@@ -24,9 +24,7 @@ char *realpath_safe(const char *path, char *resolved_path,
 
   char *npath;
   char link_path[PATH_MAX + 1];
-  char *buf;
 
-  buf = alloca(sizeof(char *));
   npath = resolved_path;
 
   if (*path != '/') {
@@ -78,7 +76,6 @@ char *realpath_safe(const char *path, char *resolved_path,
       }
     } else {
       int m;
-      char *newbuf;
 
       link_path[n] = '\0';
       if (*link_path == '/') {
@@ -88,7 +85,7 @@ char *realpath_safe(const char *path, char *resolved_path,
           ;
       }
       m = strlen(path);
-      newbuf = alloca(m + n + 1);
+      char newbuf[m + n + 1];
       memcpy(newbuf, link_path, n);
       memcpy(newbuf + n, path, m + 1);
       path = buf = newbuf;

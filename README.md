@@ -42,13 +42,21 @@ Mac:
 ```
 brew install xmake
 ```
+centos:
+```
+wget https://raw.githubusercontent.com/xmake-io/xmake/master/scripts/get.sh
+chmod +x ./get.sh
+XMAKE_ROOT=y ./get.sh
+source ~/.xmake/profile
+```
 
 ## clone code and build
 ```
-git cloen https://github.com/seerkong/kunu.c.git
-cd Kunu
+git clone https://github.com/seerkong/kunu.c.git
+cd kunu.c
 xmake
 ```
+use `xmake --root` if is root
 
 ## run kon script file
 
