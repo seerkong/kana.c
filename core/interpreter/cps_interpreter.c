@@ -18,6 +18,8 @@ bool IsSelfEvaluated(KN source)
         // $'abc'
         || (KN_IS_SYMBOL(source) && CAST_Kon(Symbol, source)->Type == KN_SYM_STRING)
         || KN_IS_QUOTE(source)
+        || KN_IS_VECTOR(source)
+        || KN_IS_TABLE(source)
         || source == KN_TRUE
         || source == KN_FALSE
         || source == KN_NIL
@@ -202,7 +204,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             bounce->Cont = cont;
         }
     }
-    // send msg like [123 $+ 5]
+    // send msg like {123 $+ 5}
     else if (KN_IS_SYMBOL(firstObj)) {
         KN signalSym = firstObj;
 
@@ -222,6 +224,70 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
         KN dispatchArgList = KN_NIL;
         dispatchArgList = KN_CONS(kstate, argList, dispatchArgList);
         dispatchArgList = KN_CONS(kstate, signalSym, dispatchArgList);
+        dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
+
+        bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
+    }
+    // send msg like {abc $[1]}
+    else if (KN_IS_PAIR(firstObj)) {
+        // get dispatcher and eval OnVisitList
+        // this dispatcherId is unboxed
+        unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
+        KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
+
+        KonProcedure* procedure = dispatcher->OnVisitList;
+        KN dispatchArgList = KN_NIL;
+        dispatchArgList = KN_CONS(kstate, firstObj, dispatchArgList);
+        dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
+
+        bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
+    }
+    else if (KN_IS_VECTOR(firstObj)) {
+        // get dispatcher and eval OnVisitVector
+        // this dispatcherId is unboxed
+        unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
+        KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
+
+        KonProcedure* procedure = dispatcher->OnVisitVector;
+        KN dispatchArgList = KN_NIL;
+        dispatchArgList = KN_CONS(kstate, firstObj, dispatchArgList);
+        dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
+
+        bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
+    }
+    else if (KN_IS_TABLE(firstObj)) {
+        // get dispatcher and eval OnVisitTable
+        // this dispatcherId is unboxed
+        unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
+        KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
+
+        KonProcedure* procedure = dispatcher->OnVisitTable;
+        KN dispatchArgList = KN_NIL;
+        dispatchArgList = KN_CONS(kstate, firstObj, dispatchArgList);
+        dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
+
+        bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
+    }
+    else if (KN_IS_CELL(firstObj)) {
+        // get dispatcher and eval OnVisitCell
+        // this dispatcherId is unboxed
+        unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
+        KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
+
+        KonProcedure* procedure = dispatcher->OnVisitCell;
+        KN dispatchArgList = KN_NIL;
+        dispatchArgList = KN_CONS(kstate, firstObj, dispatchArgList);
+        dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
+
+        bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
+    }
+    else {
+        unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
+        KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
+
+        KonProcedure* procedure = dispatcher->OnOtherType;
+        KN dispatchArgList = KN_NIL;
+        dispatchArgList = KN_CONS(kstate, firstObj, dispatchArgList);
         dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
 
         bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
@@ -287,21 +353,23 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
                 
                 state = 3;
             }
-            // else if (KN_IS_VECTOR(item)
-            //     || KN_IsPairList(item)
-            //     || KN_IS_CELL(item)
-            //     || KN_IS_SYMBOL(item)
-            //     || KN_IS_QUOTE(item)
-            //     || KN_IS_QUASIQUOTE(item)
-            //     || KN_IS_UNQUOTE(item)
-            // ) {
+            else if (KN_IS_VECTOR(item)
+                || KN_IS_TABLE(item)
+                || KN_IsPairList(item)
+                || KN_IsBlock(item)
+                || KN_IS_CELL(item)
+                || KN_IS_QUOTE(item)
+                || KN_IS_QUASIQUOTE(item)
+                || KN_IS_UNQUOTE(item)
+            ) {
+                printf("SplitClauses is container type\n");
+                KxVector* singleItemClause = KxVector_Init();
+                KxVector_Push(clauseListVec, singleItemClause);
+                KxVector_Push(singleItemClause, item);
+            }
             else {
                 KxVector_Push(clauseVec, item);
                 state = 2;
-
-                // KxVector* singleItemClause = KxVector_Init();
-                // KxVector_Push(clauseListVec, singleItemClause);
-                // KxVector_Push(singleItemClause, item);
             }
         }
         else if (state == 3) {
@@ -637,10 +705,7 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
         }
         else {
             bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_SUBJ);
-            // KN restJobs = KN_CellCoresToList(kstate, KN_DNR(cell));
             // transform cell to list
-            // eg: {abc method1 (arg1 arg2) . sig1 method2  / slot1}
-            // to {abc method1 arg1 arg2; . sig1 method2; / slot1}
             KN restJobs = KN_CellToWordList(kstate, KN_DNR(cell));
             KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_SUBJ);
             k->Cont = cont;
@@ -845,6 +910,19 @@ KN KN_ProcessSentences(KonState* kstate, KN sentences, KonEnv* rootEnv)
                 bounce->Bounce.Env = env;
                 bounce->Bounce.Value = firstArg; // the first arg is /abc
             }
+            else {
+                KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_CLAUSE_ARGS);
+                k->Cont = cont;
+                k->Env = env;
+                k->EvalClauseArgs.Subj = subj;
+                k->EvalClauseArgs.RestArgList = KN_CDR(clauseArgList);
+                k->EvalClauseArgs.EvaledArgList = KN_NIL;
+                
+                bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_ARG_LIST);
+                bounce->Cont = k;
+                bounce->Bounce.Env = env;
+                bounce->Bounce.Value = firstArg;
+            }
         }
 
         else if (kon_bounce_type(bounce) == KN_TRAMPOLINE_ARG_LIST) {
@@ -905,6 +983,14 @@ KN KN_ProcessSentences(KonState* kstate, KN sentences, KonEnv* rootEnv)
             else if (IsSelfEvaluated(arg)) {
                 bounce = KN_RunContinuation(kstate, cont, arg);
             }
+            else {
+                printf("unhandled arg type\n");
+                exit(1);
+            }
+        }
+        else {
+            printf("unhandled bounce type\n");
+            exit(1);
         }
     }
     // no other continuations

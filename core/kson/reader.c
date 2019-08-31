@@ -443,10 +443,11 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         // 1 core is set, meet next core
         // 2 table is set, meet next core or table
         // 3 list is set, meet next core or table or list
-        if (KN_IS_VECTOR(value)) {
-            CellBuilderSetVector(topBuilder, value);
-        }
-        else if (KN_IS_PARAM(value)) {
+        // if (KN_IS_VECTOR(value)) {
+        //     CellBuilderSetVector(topBuilder, value);
+        // }
+        // else 
+        if (KN_IS_PARAM(value)) {
             CellBuilderSetTable(topBuilder, value);
         }
         else if (KN_IS_BLOCK(value)) {

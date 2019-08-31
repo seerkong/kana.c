@@ -23,6 +23,33 @@ KonTrampoline* KN_EvalSentences(KonState* kstate, KN sentences, KonEnv* env, Kon
 KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont);
 KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, KonEnv* env, KonContinuation* cont);
 
+// 1 need one next cell core
+// {xx := 2}
+// 2 need one next cell core. if is a word, convert to identifier
+// {xxx / abc / efg}
+// {xxx / @var-a / @var-b}
+// {xxx . $abc . $efg}
+// {xxx . abc . efg}
+// 3 need semicolon to seperate next clause
+// {xxx % arg1 arg2 arg3 ...; % arg1 arg2}
+// {xxx | proc arg2 arg3 ...; | proc2}
+// 4 need semicolon to seperate next clause
+// convert word to identifier
+// {xxx abc arg1 arg2 ...}
+// {xxx @var-a arg1 arg2 ...}
+static inline KN KN_CellToWordList(KonState* kstate, KN source)
+{
+    KonCell* head = CAST_Kon(Cell, source);
+    KonCell* iter = head;
+    KN result = KN_NIL;
+    while ((KN)iter != KN_NIL) {
+        KN core = iter->Core;
+        result = KN_CONS(kstate, core, result);
+        iter = iter->Next;
+    }
+    return KN_PairListRevert(kstate, result);
+}
+
 // apply argument list to a native function
 static inline KN KN_ApplyArgsToNativeFunc(KonState* kstate, KonProcedure* proc, KN argList) {
     int paramLen = proc->ParamNum;

@@ -1,17 +1,6 @@
+
 {set-dispatcher NumberDispacher
   #(
-  :on-apply-args
-    {lambda (args)
-      #[
-        [displayln "on-apply-args"]
-      ]
-    }
-  :on-select-path
-    {lambda (args)
-      #[
-        [displayln "on-select-path"]
-      ]
-    }
   :on-method-call
     {lambda (subj msg method-args)
       #[
@@ -20,37 +9,44 @@
         {cond
           [eq $+ msg]
           #[
-            [writeln "composited + arg list " {kn/list/unshift % (method-args subj)} ]
-            {apply $+ {kn/list/unshift % (method-args subj)} }
+            [writeln "composited + arg list " {kn/list/unshift % method-args subj} ]
+            {apply $+ {kn/list/unshift % method-args subj} }
           ]
         }
       ]
     }
+  :on-other-type
+    {lambda (args)
+      #[
+        [displayln "on-other-type " args]
+      ]
+    }
+  )
+}
+
+{set-dispatcher VectorDispacher
+  #(
   :on-visit-vector
     {lambda (args)
       #[
-        [displayln "on-visit-vector"]
+        [displayln "on-visit-vector " args]
       ]
     }
   :on-visit-table
-    {lambda (args)
+    {lambda (subj msg)
       #[
-        [displayln "on-visit-table"]
+        [writeln "on-visit-table, subj: " subj " msg: " msg]
+        [writeln {kn/table/at-idx % msg 0} ]
+        {kn/vector/at-idx % subj {kn/table/at-idx % msg 0} }
       ]
     }
-  :on-visit-cell
-    {lambda (args)
-      #[
-        [displayln "on-visit-cell"]
-      ]
-    }
-
   )
 }
 
 
+``[writeln [get-dispatcher-id 5] ]
 
-[writeln [get-dispatcher-id 5] ]
+[writeln {5 + 2 3 4; + 6} ]
 
-[writeln {5 + (2 3 4) } ]
-
+[writeln {#<"a" "b" "c"> #<2> } ]
+[writeln {#<"a" "b" "c"> #(2) } ]

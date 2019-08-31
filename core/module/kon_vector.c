@@ -169,7 +169,7 @@ KonAccessor* KonVector_Export(KonState* kstate, KonEnv* env)
     KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
-        "at-i",
+        "at-idx",
         MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonVector_AtIndex, 2, 0, 0),
         "r",
         NULL
@@ -178,7 +178,7 @@ KonAccessor* KonVector_Export(KonState* kstate, KonEnv* env)
     KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
-        "set-i",
+        "set-idx",
         MakeNativeProcedure(kstate, KN_NATIVE_OBJ_METHOD, KonVector_SetIndex, 3, 0, 0),
         "r",
         NULL

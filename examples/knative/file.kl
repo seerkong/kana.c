@@ -1,10 +1,10 @@
 
-{let write-fh {kn/file/init % ("examples/abc.txt" "w") } }
+{let write-fh {kn/file/init % "examples/abc.txt" "w"} }
 
-{kn/file/puts % (write-fh "hello world2\n") }
-{kn/file/close % (write-fh) }
+{kn/file/puts % write-fh "hello world2\n"}
+{kn/file/close % write-fh}
 
-{let read-fh {kn/file/init % ("examples/abc.txt" "r") } }
-{let content {kn/file/read-all % (read-fh) } }
+{let read-fh {kn/file/init % "examples/abc.txt" "r"} }
+{let content {kn/file/read-all % read-fh} }
 [writeln content]
 

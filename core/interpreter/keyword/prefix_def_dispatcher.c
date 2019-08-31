@@ -15,20 +15,22 @@ KonTrampoline* KN_EvalPrefixDefDispatcher(KonState* kstate, KN expression, KonEn
     KxHashTable* configTable = ((KonTable*)config)->Table;
     
     KN onSymbol = KxHashTable_AtKey(configTable, "on-symbol");  // [obj key1 = 2]
-    KN onApplyArgs = KxHashTable_AtKey(configTable, "on-apply-args");  // % p1 p2;
-    KN onSelectPath = KxHashTable_AtKey(configTable, "on-select-path");  // /abc /efg
+    KN onSyntaxMarker = KxHashTable_AtKey(configTable, "on-syntax-marker");  // % p1 p2;
     KN onMethodCall = KxHashTable_AtKey(configTable, "on-method-call"); // .push 1 2;
+    KN onVisitList = KxHashTable_AtKey(configTable, "on-visit-list");
     KN onVisitVector = KxHashTable_AtKey(configTable, "on-visit-vector");  // <>
     KN onVisitTable = KxHashTable_AtKey(configTable, "on-visit-table"); // ()
     KN onVisitCell = KxHashTable_AtKey(configTable, "on-visit-cell");  // {}
+    KN onOtherType = KxHashTable_AtKey(configTable, "on-other-type");
 
     dispatcher->OnSymbol = MakeDispatchProc(kstate, onSymbol, env);
-    dispatcher->OnApplyArgs = MakeDispatchProc(kstate, onApplyArgs, env);
-    dispatcher->OnSelectPath = MakeDispatchProc(kstate, onSelectPath, env);
+    dispatcher->OnSyntaxMarker = MakeDispatchProc(kstate, onSyntaxMarker, env);
+    dispatcher->OnVisitList = MakeDispatchProc(kstate, onVisitList, env);
     dispatcher->OnMethodCall = MakeDispatchProc(kstate, onMethodCall, env);
     dispatcher->OnVisitVector = MakeDispatchProc(kstate, onVisitVector, env);
     dispatcher->OnVisitTable = MakeDispatchProc(kstate, onVisitTable, env);
     dispatcher->OnVisitCell = MakeDispatchProc(kstate, onVisitCell, env);
+    dispatcher->OnOtherType = MakeDispatchProc(kstate, onOtherType, env);
 
     unsigned int dispatcherId = KN_SetNextMsgDispatcher(kstate, dispatcher);
 

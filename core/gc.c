@@ -488,12 +488,13 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
         case KN_T_MSG_DISPATCHER: {
             KonMsgDispatcher* dispatcher = (KonMsgDispatcher*)node;
             KxList_Push(markTaskQueue, dispatcher->OnSymbol);
-            KxList_Push(markTaskQueue, dispatcher->OnApplyArgs);
-            KxList_Push(markTaskQueue, dispatcher->OnSelectPath);
+            KxList_Push(markTaskQueue, dispatcher->OnSyntaxMarker);
             KxList_Push(markTaskQueue, dispatcher->OnMethodCall);
+            KxList_Push(markTaskQueue, dispatcher->OnVisitList);
             KxList_Push(markTaskQueue, dispatcher->OnVisitVector);
             KxList_Push(markTaskQueue, dispatcher->OnVisitTable);
             KxList_Push(markTaskQueue, dispatcher->OnVisitCell);
+            KxList_Push(markTaskQueue, dispatcher->OnOtherType);
             break;
         }
         case KN_T_CONTINUATION: {

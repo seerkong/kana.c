@@ -1,8 +1,8 @@
 #ifndef KN_GC_H
 #define KN_GC_H 1
 
-#define KN_DISABLE_GC 0
-// #define KN_DISABLE_GC 1
+// #define KN_DISABLE_GC 0
+#define KN_DISABLE_GC 1
 
 #ifdef __cplusplus
 extern "C" {

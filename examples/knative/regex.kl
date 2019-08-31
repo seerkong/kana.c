@@ -13,8 +13,8 @@
     {set i [+ i 1] }
   )
   #[
-    {let match {vec/at-i % (matches i) } }
-    [writeln match " start: " {vec/at-i % (match 0) } " end " {vec/at-i % (match 1) } ]
-    [writeln {kn/str/sub-str % (a {vec/at-i % (match 0) } {vec/at-i % (match 1) } ) } ]
+    {let match {vec/at-idx % (matches i) } }
+    [writeln match " start: " {vec/at-idx % (match 0) } " end " {vec/at-idx % (match 1) } ]
+    [writeln {kn/str/sub-str % (a {vec/at-idx % (match 0) } {vec/at-idx % (match 1) } ) } ]
   ]
 }

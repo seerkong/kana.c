@@ -11,9 +11,7 @@
     {lambda (accessor new-val)
       #[
         ``[writeln "update in obj key " key " to val : " new-val]
-        {kn/accessor/put-key-val %
-          (obj key new-val)
-        }
+        {kn/accessor/put-key-val % obj key new-val}
       ]
     }
   ]
@@ -22,22 +20,22 @@
 `` if not found, return #undef;
 {lambda proto-obj_lookup-key (obj key)
   #[
-    {if {kn/accessor/has-key % (obj key) }
+    {if {kn/accessor/has-key % obj key}
       #[
-        {kn/accessor/at-key % (obj key) }
+        {kn/accessor/at-key % obj key}
       ]
       else
       #[
-        {let proto-obj {kn/accessor/at-key % (obj "__proto") } }
+        {let proto-obj {kn/accessor/at-key % obj "__proto"} }
 
         {if [neq #undef; proto-obj]
           #[
-            {set proto-obj {kn/accessor/unbox % (proto-obj) } }
+            {set proto-obj {kn/accessor/unbox % proto-obj} }
           ]
         }
         {if [neq #nil; proto-obj ]
           #[
-            {set proto-obj {kn/accessor/unbox % (proto-obj)} }
+            {set proto-obj {kn/accessor/unbox % proto-obj} }
             [proto-obj_lookup-key proto-obj key]
           ]
           else
@@ -56,18 +54,19 @@
   :on-symbol
     {lambda (this sym)
       #[
+        ``[writeln "before lookup key " sym]
         {let find-res [proto-obj_lookup-key this sym] }
         {if [neq find-res #undef;]
           #[
             {kn/accessor/init-prop %
-              (find-res $r [make-proto-obj-setter this sym] )
+              find-res $r [make-proto-obj-setter this sym]
             }
           ]
           `` make a new symbol
           else
           #[
             {kn/accessor/init-prop %
-              (#ukn; $r [make-proto-obj-setter this sym] )
+              #ukn; $r [make-proto-obj-setter this sym]
             }
           ]
         }
@@ -89,7 +88,7 @@
         {if
           {and
             [neq find-res #undef;]
-            [is-procedure {kn/accessor/unbox % (find-res) } ]
+            [is-procedure {kn/accessor/unbox % find-res} ]
           }
           #[
             [eval-method find-res]
@@ -117,36 +116,36 @@
               `` create a new attr slot
               {let new-instance {kn/accessor/init-dir %} }
               `` set proto attr
-              {let proto-name {kn/cell/get-core % (subj) } }
-              {let obj-init-table {kn/cell/get-table % (subj) } }
+              {let proto-name {kn/cell/get-core % subj} }
+              {let obj-init-table {kn/cell/get-table % subj} }
               `` object structure layout version
-              {kn/accessor/put-key-val % (new-instance "__scheme" $ProtoClass) }
+              {kn/accessor/put-key-val % new-instance "__scheme" $ProtoClass}
 
               {if [eq proto-name #ukn; ]
                 #[
-                  {kn/accessor/put-key-val % (new-instance "__proto" #nil;) }
+                  {kn/accessor/put-key-val % new-instance "__proto" #nil;}
                 ]
                 else
                 #[
-                  {kn/accessor/put-key-val % (new-instance "__proto" {eval [to-variable proto-name] } ) }
+                  {kn/accessor/put-key-val % new-instance "__proto" {eval [to-variable proto-name] } }
                 ]
               }
               {for
                 (
-                  {let iter {kn/table/iter-head % (obj-init-table) } }
+                  {let iter {kn/table/iter-head % obj-init-table} }
                   [neq iter #nil;]
-                  {set iter {kn/table/iter-next % (obj-init-table iter) } }
+                  {set iter {kn/table/iter-next % obj-init-table iter} }
                 )
                 #[
-                  {let init-key {kn/table/iter-key % (obj-init-table iter) } }
-                  {let init-val {kn/table/iter-val % (obj-init-table iter) } }
-                  ``[writeln "init key: " init-key  " val: " init-val ]
+                  {let init-key {kn/table/iter-key % obj-init-table iter} }
+                  {let init-val {kn/table/iter-val % obj-init-table iter} }
+                  [writeln "init key: " init-key  " val: " init-val ]
 
                   `` evaluate each val
                   {set init-val {eval init-val} }
                   
                   {kn/accessor/put-key-val %
-                    (new-instance init-key init-val)
+                    new-instance init-key init-val
                   }
                   
                 ]
@@ -237,7 +236,7 @@ my-obj
 
 {p .name := "Loki"}
 {p .age :=  1500}
-{p set-sex ($male)}
+{p set-sex $male}
 [writeln p]
 {p print}
 ``[writeln {p /name}]

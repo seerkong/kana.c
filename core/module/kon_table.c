@@ -246,11 +246,11 @@ KonAccessor* KonTable_Export(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonTable_AtKey, 2, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
-        "at-index",
+        "at-idx",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonTable_ValAtIndex, 2, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
-        "get-index-key",
+        "get-idx-key",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonTable_KeyAtIndex, 2, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
@@ -282,15 +282,15 @@ KonAccessor* KonTable_Export(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonTable_PutKv, 3, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
-        "set-index-key",
+        "set-idx-key",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonTable_SetIndexKey, 3, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
-        "set-index-val",
+        "set-idx-val",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonTable_SetIndexVal, 3, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
-        "set-index-kv",
+        "set-idx-kv",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonTable_SetIndexKv, 4, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
@@ -298,7 +298,7 @@ KonAccessor* KonTable_Export(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonTable_DelByKey, 2, 0, 0)
     );
     KxHashTable_PutKv(slot->Dir,
-        "del-index",
+        "del-idx",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonTable_DelByIndex, 2, 0, 0)
     );
     

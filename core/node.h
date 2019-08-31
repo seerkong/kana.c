@@ -158,7 +158,7 @@ typedef struct KonProcedure KonProcedure;
 typedef struct KonCpointer KonCpointer;
 typedef struct KonContinuation KonContinuation;
 
-typedef union _KNValue {
+union _KNValue {
     // kon_int_t AsInt;
     // kon_int32_t AsInt32;
     // long AsLong;
@@ -201,9 +201,9 @@ struct KonBase {
     char GcMarkColor;
 };
 
-// typedef volatile union _Kon KN;
+typedef volatile union _Kon* KN;
 // typedef union _Kon KN;
-typedef volatile union _KNValue* KN;
+// typedef volatile union _KNValue KN;
 
 typedef enum {
     KN_SYM_PREFIX_WORD, // !ass
@@ -337,13 +337,14 @@ struct KonAccessor {
 
 struct KonMsgDispatcher {
     KonBase Base;
-    KonProcedure* OnSymbol;   // [obj key1 = 5]
-    KonProcedure* OnApplyArgs;  // % p1 p2;
-    KonProcedure* OnSelectPath;  // /abc /efg
-    KonProcedure* OnMethodCall; // . push 1 2;
-    KonProcedure* OnVisitVector;  // <>
-    KonProcedure* OnVisitTable; // ()
-    KonProcedure* OnVisitCell;  // {}
+    KonProcedure* OnSymbol;   // {obj .key1 = 5}
+    KonProcedure* OnSyntaxMarker;  // % p1 p2; /abc /efg
+    KonProcedure* OnMethodCall; // {5 + 1 2}
+    KonProcedure* OnVisitList;  // {#<1 2 3> $[1]}
+    KonProcedure* OnVisitVector;  // #<>
+    KonProcedure* OnVisitTable; // #()
+    KonProcedure* OnVisitCell;  // #{}
+    KonProcedure* OnOtherType;  // {5 5} number, string etc
 };
 
 typedef enum {
@@ -500,26 +501,26 @@ struct KonParam {
     KxHashTable* Table;
 };
 
-// union _Kon {
-//     KonBase KonBase;
-//     KonState KonState;
-//     KonSymbol KonSymbol;
-//     KonSyntaxMarker KonSyntaxMarker;
-//     KonString KonString;
-//     KonTable KonTable;
-//     KonVector KonVector;
-//     KonPair KonPair;
-//     KonCell KonCell;
-//     KonQuote KonQuote;
-//     KonQuasiquote KonQuasiquote;
-//     KonExpand KonExpand;
-//     KonMsgDispatcher KonMsgDispatcher;
-//     KonEnv KonEnv;
-//     KonAccessor KonAccessor;
-//     KonProcedure KonProcedure;
-//     KonCpointer KonCpointer;
-//     KonContinuation KonContinuation;
-// };
+union _Kon {
+    KonBase KonBase;
+    KonState KonState;
+    KonSymbol KonSymbol;
+    KonSyntaxMarker KonSyntaxMarker;
+    KonString KonString;
+    KonTable KonTable;
+    KonVector KonVector;
+    KonPair KonPair;
+    KonCell KonCell;
+    KonQuote KonQuote;
+    KonQuasiquote KonQuasiquote;
+    KonExpand KonExpand;
+    KonMsgDispatcher KonMsgDispatcher;
+    KonEnv KonEnv;
+    KonAccessor KonAccessor;
+    KonProcedure KonProcedure;
+    KonCpointer KonCpointer;
+    KonContinuation KonContinuation;
+};
 
 
 
@@ -757,10 +758,6 @@ KN KN_ParamTableToList(KonState* kstate, KN source);
 KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 // eg: {sh ls -al} => [sh ls -al]
 KN KN_CellCoresToList(KonState* kstate, KN source);
-
-// eg: {abc method1 (arg1 arg2) | proc ( arg2 arg3) % (arg1 arg2 arg3) . sig1  / slot1}
-// to {abc method1 arg1 arg2; | proc arg2 arg3; % arg1 arg2 arg3; . sig1  / slot1}
-KN KN_CellToWordList(KonState* kstate, KN source);
 
 // attribute accessor
 KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);

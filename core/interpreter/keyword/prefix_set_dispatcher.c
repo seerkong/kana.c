@@ -23,7 +23,7 @@ KonTrampoline* AfterDispatcherIdEvaled(KonState* kstate, KN evaledValue, KonCont
 
 KonTrampoline* KN_EvalPrefixSetDispatcher(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KN_DEBUG("meet prefix marcro def dispatcher");
+    KN_DEBUG("meet prefix marcro set dispatcher");
     KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
     
     KN dispatcherIdExpr = KN_DCR(expression);
@@ -35,21 +35,22 @@ KonTrampoline* KN_EvalPrefixSetDispatcher(KonState* kstate, KN expression, KonEn
     KxHashTable* configTable = ((KonTable*)config)->Table;
     
     KN onSymbol = KxHashTable_AtKey(configTable, "on-symbol");  // [obj key1 = 2]
-    KN onApplyArgs = KxHashTable_AtKey(configTable, "on-apply-args");  // % p1 p2;
-    KN onSelectPath = KxHashTable_AtKey(configTable, "on-select-path");  // /abc /efg
+    KN OnSyntaxMarker = KxHashTable_AtKey(configTable, "on-syntax-marker");  // % p1 p2;
     KN onMethodCall = KxHashTable_AtKey(configTable, "on-method-call"); // .push 1 2;
+    KN OnVisitList = KxHashTable_AtKey(configTable, "on-visit-list");
     KN onVisitVector = KxHashTable_AtKey(configTable, "on-visit-vector");  // <>
     KN onVisitTable = KxHashTable_AtKey(configTable, "on-visit-table"); // ()
     KN onVisitCell = KxHashTable_AtKey(configTable, "on-visit-cell");  // {}
+    KN onOtherType = KxHashTable_AtKey(configTable, "on-other-type");
 
     dispatcher->OnSymbol = MakeDispatchProc(kstate, onSymbol, env);
-    dispatcher->OnApplyArgs = MakeDispatchProc(kstate, onApplyArgs, env);
-    dispatcher->OnSelectPath = MakeDispatchProc(kstate, onSelectPath, env);
+    dispatcher->OnSyntaxMarker = MakeDispatchProc(kstate, OnSyntaxMarker, env);
     dispatcher->OnMethodCall = MakeDispatchProc(kstate, onMethodCall, env);
+    dispatcher->OnVisitList = MakeDispatchProc(kstate, OnVisitList, env);
     dispatcher->OnVisitVector = MakeDispatchProc(kstate, onVisitVector, env);
     dispatcher->OnVisitTable = MakeDispatchProc(kstate, onVisitTable, env);
     dispatcher->OnVisitCell = MakeDispatchProc(kstate, onVisitCell, env);
-
+    dispatcher->OnOtherType = MakeDispatchProc(kstate, onOtherType, env);
 
     KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
     k->Cont = cont;
