@@ -395,13 +395,35 @@ void ParseRawString(KonTokenizer* tokenizer)
     tokenizer->ColEnd = tokenizer->CurrCol;
 }
 
+void SkipUnixScriptFistLine(KonTokenizer* tokenizer)
+{
+    tokenizer->RowStart = tokenizer->CurrRow;
+    tokenizer->ColStart = tokenizer->CurrCol;
+    KxStringBuffer_Clear(tokenizer->Content);
+    // forward two char  "#!"
+    ForwardChar(tokenizer);
+    ForwardChar(tokenizer);
+
+    char ch = '\0';
+    char* pc = NULL;
+    while ((pc = PeekChars(tokenizer, 1)) && pc) {
+        if (pc[0] == '\n') {
+            break;
+        }
+        ch = ForwardChar(tokenizer);
+        KxStringBuffer_NAppendChar(tokenizer->Content, ch, 1);
+    }
+    tokenizer->RowEnd = tokenizer->CurrRow;
+    tokenizer->ColEnd = tokenizer->CurrCol;
+}
+
 // single line comment like `` xxx
 void ParseSingleLineComment(KonTokenizer* tokenizer)
 {
     tokenizer->RowStart = tokenizer->CurrRow;
     tokenizer->ColStart = tokenizer->CurrCol;
     KxStringBuffer_Clear(tokenizer->Content);
-    // forward two char  "//"
+    // forward two char  "``"
     ForwardChar(tokenizer);
     ForwardChar(tokenizer);
 
@@ -638,6 +660,11 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
         else if (pc[0] == '#') {
             const char* nextChars = PeekChars(tokenizer, 3);
             if (nextChars == NULL) {
+                break;
+            }
+            if (nextChars[1] == '!') {
+                SkipUnixScriptFistLine(tokenizer);
+                tokenizer->TokenKind = KN_TOKEN_UNIX_SCRIPT_FIST_LINE;
                 break;
             }
             if (nextChars[1] == '<') {
