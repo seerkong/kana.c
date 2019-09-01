@@ -1,0 +1,11 @@
+{let a 1}
+{let b $[+ a 3]}
+
+{lambda c ()
+  #[
+    5
+  ]
+}
+
+`` return [1 2 3 $[+ a 3 ] 5 ]
+[writeln @[$.a 2 $.[+ a 2] $.b $.[c]]]

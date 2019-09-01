@@ -247,9 +247,9 @@ struct KonQuasiquote {
 };
 
 typedef enum {
-    KN_EXPAND_REPLACE,          // $.abc
-    KN_EXPAND_SEQ,        // $~.[1 2 3]
-    KN_EXPAND_KV        // $%.(:a 1 :b 2)
+    KN_EXPAND_REPLACE,          // @.abc
+    KN_EXPAND_SEQ,        // @~.[1 2 3]
+    KN_EXPAND_KV        // @%.(:a 1 :b 2)
 } KonExpandType;
 
 struct KonExpand {
@@ -259,9 +259,9 @@ struct KonExpand {
 };
 
 typedef enum {
-    KN_UNQUOTE_REPLACE,          // @.abc
-    KN_UNQUOTE_SEQ,        // @~.[(1 2 3)]
-    KN_UNQUOTE_KV        // @%.[$(:a $var :b 2)]
+    KN_UNQUOTE_REPLACE,          // $.abc
+    KN_UNQUOTE_SEQ,        // $~.[(1 2 3)]
+    KN_UNQUOTE_KV        // $%.[#(:a $var :b 2)]
 } KonUnquoteType;
 
 struct KonUnquote {
@@ -408,6 +408,8 @@ typedef enum {
     KN_CONT_EVAL_CLAUSE_LIST,
     KN_CONT_EVAL_CLAUSE_ARGS,
 
+    KN_CONT_EVAL_QUASI_LIST_ITEMS,
+
     // native callback, use a MemoTable to store info
     KN_CONT_NATIVE_CALLBACK
 
@@ -424,6 +426,11 @@ struct KonContinuation {
     union {
         // most continuations use this store rest jobs to do
         KN RestJobs;
+
+        struct {
+            KN RestList;
+            KN EvaledList;
+        } EvalListItems;
         
         // for continuations need sentence subject
         struct {
@@ -614,6 +621,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_QUOTE_CELL(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_CELL)
 #define KN_IS_QUOTE_STR(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_SYM_STRING)
 #define KN_IS_QUASIQUOTE(x)    (KN_CHECK_TAG(x, KN_T_QUASIQUOTE))
+#define KN_IS_QUASI_PAIR(x)    (KN_CHECK_TAG(x, KN_T_QUASIQUOTE) && KN_QUASI_TYPE(x) == KN_QUASI_LIST && ((KonQuasiquote*)x)->Inner != KN_NIL)
 #define KN_IS_EXPAND(x)    (KN_CHECK_TAG(x, KN_T_EXPAND))
 #define KN_IS_UNQUOTE(x)    (KN_CHECK_TAG(x, KN_T_UNQUOTE))
 
@@ -668,6 +676,11 @@ static inline KN KN_MAKE_FLONUM(KonState* kstate, double num) {
 
 #define KN_UNBOX_QUOTE(x) (((KonQuote*)x)->Inner)
 #define KN_QUOTE_TYPE(x) (((KonQuote*)x)->Type)
+
+#define KN_UNBOX_QUASI(x) (((KonQuasiquote*)x)->Inner)
+#define KN_QUASI_TYPE(x) (((KonQuasiquote*)x)->Type)
+
+#define KN_UNBOX_UNQUOTE(x) (((KonUnquote*)x)->Inner)
 
 #define KN_UNBOX_CPOINTER(x) (((KonCpointer*)x)->Pointer)
 

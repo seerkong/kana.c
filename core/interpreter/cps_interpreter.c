@@ -360,7 +360,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
                 || KN_IS_CELL(item)
                 || KN_IS_QUOTE(item)
                 || KN_IS_QUASIQUOTE(item)
-                || KN_IS_UNQUOTE(item)
+                || KN_IS_EXPAND(item)
             ) {
                 KxVector* singleItemClause = KxVector_Init();
                 KxVector_Push(clauseListVec, singleItemClause);
@@ -555,7 +555,7 @@ KonTrampoline* KN_RunContinuation(KonState* kstate, KonContinuation* contBeingIn
             return ApplySubjVerbAndObjects(kstate, subj, argList, contBeingInvoked->Env, contBeingInvoked->Cont);
         }
         else {
-            // eval the next clause
+            // eval the next arg
             KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_CLAUSE_ARGS);
             k->Cont = contBeingInvoked->Cont;
             k->Env = contBeingInvoked->Env;
@@ -571,8 +571,47 @@ KonTrampoline* KN_RunContinuation(KonState* kstate, KonContinuation* contBeingIn
         }
     }
 
+    else if (kon_continuation_type(contBeingInvoked) == KN_CONT_EVAL_QUASI_LIST_ITEMS) {
+        KN lastItemEvaled = val;
+        KN restList = contBeingInvoked->EvalListItems.RestList;
+        KN evaledList = contBeingInvoked->EvalListItems.EvaledList;
+        // NOTE! the evaluated  list here is reverted saved
+        // should reverted back when rest is nil
+        evaledList = KN_CONS(kstate, lastItemEvaled, evaledList);
+
+        if (restList == KN_NIL) {
+            KN evaledQuasi = KN_PairListRevert(kstate, evaledList);
+            KonTrampoline* bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
+            bounce->Cont = contBeingInvoked->Cont;
+            bounce->Run.Value = evaledQuasi;
+            return bounce;
+        }
+        else {
+            // eval the next list item
+            KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_QUASI_LIST_ITEMS);
+            k->Cont = contBeingInvoked->Cont;
+            k->Env = contBeingInvoked->Env;
+            k->EvalListItems.RestList = KN_CDR(restList);
+            k->EvalListItems.EvaledList = evaledList;
+            
+            KN listItem = KN_CAR(restList);
+            
+            KonTrampoline* bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_QUASI_ITEM);
+            bounce->Cont = k;
+            bounce->Bounce.Env = contBeingInvoked->Env;
+            bounce->Bounce.Value = listItem;
+            return bounce;
+        }
+    }
+
     else {
         // TODO throw error
+//        KonTrampoline* bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
+//        bounce->Cont = contBeingInvoked->Cont;
+//        bounce->Run.Value = KON_TRUE;
+//        return bounce;
+        printf("unhandled continuation type\n");
+        exit(1);
     }
 }
 
@@ -720,30 +759,22 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
         // passed a sentence like [writeln % "abc" "efg"]
         KN words = expression;
         KN first = KN_CAR(words);
-        // TODO subject is a quasiquote or unquote
-        if (KN_IS_QUASIQUOTE(first)) {
-            KN_DEBUG("error! unhandled subject type");
-            bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
-            bounce->Run.Value = KN_UKN;
-            bounce->Cont = cont;
-        }
-        else {
-            bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_SUBJ);
+        bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_SUBJ);
             
-            // seperate and transform [+ 1 2 3] to subj: +, restJobs: [% 1 2 3]
-            KonSyntaxMarker* applyMarker = KN_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
-            applyMarker->Type = KN_SYNTAX_MARKER_APPLY;
-            KN restJobs = KN_CONS(kstate, applyMarker, KN_CDR(words));
+        // seperate and transform [+ 1 2 3] to subj: +, restJobs: [% 1 2 3]
+        KonSyntaxMarker* applyMarker = KN_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
+        applyMarker->Type = KN_SYNTAX_MARKER_APPLY;
+        KN restJobs = KN_CONS(kstate, applyMarker, KN_CDR(words));
 
-            KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_SUBJ);
-            k->Cont = cont;
-            k->Env = env;
-            k->RestJobs = restJobs;
-            
-            bounce->Bounce.Value = first;  // get subj word
-            bounce->Cont = k;
-            bounce->Bounce.Env = env;
-        }
+        KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_SUBJ);
+        k->Cont = cont;
+        k->Env = env;
+        k->RestJobs = restJobs;
+        
+        bounce->Bounce.Value = first;  // get subj word
+        bounce->Cont = k;
+        bounce->Bounce.Env = env;
+
     }
     else if (KN_IS_REFERENCE(expression)) {
         // a code block like { a }
@@ -753,6 +784,35 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
         assert(val != KN_UNDEF);
         bounce = KN_RunContinuation(kstate, cont, val);
     }
+    else if (KN_IS_ACCESSOR(expression)) {
+        // unbox
+        KN val = UnBoxAccessorValue(expression);
+        bounce = KN_RunContinuation(kstate, cont, val);
+    }
+    else if (KN_IS_QUASI_PAIR(expression)) {
+        KN_DEBUG("eval quansiquote list expression");
+        bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_QUASI_ITEM);
+        KN innerList = KN_UNBOX_QUASI(expression);
+        KN restJobs = KN_CDR(innerList);
+
+        KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_QUASI_LIST_ITEMS);
+        k->Cont = cont;
+        k->Env = env;
+        k->EvalListItems.RestList = restJobs;
+        k->EvalListItems.EvaledList = KN_NIL;
+        
+        bounce->Bounce.Value = KN_CAR(innerList);  // get subj word
+        bounce->Cont = k;
+        bounce->Bounce.Env = env;
+    }
+//    else if (KN_IS_UNQUOTE(expression)) {
+//        // illegal! syntax error [+ $.x], should be @[+ $.x]
+//        bounce = KN_RunContinuation(kstate, cont, expression);
+//    }
+//    else if (KN_IS_EXPAND(expression)) {
+//        // TODO
+//        bounce = KN_RunContinuation(kstate, cont, expression);
+//    }
     else {
         KN_DEBUG("unhandled expression type");
         exit(1);
@@ -763,9 +823,11 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
 KonTrampoline* KN_EvalSentences(KonState* kstate, KN sentences, KonEnv* env, KonContinuation* cont)
 {
     if (sentences == KN_NIL) {
-        // TODO throw error
-        // should not go here
-        return KN_UNDEF;
+        // block is empty, no sentence
+        KonTrampoline* bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
+        bounce->Run.Value = KN_TRUE;
+        bounce->Cont = cont;
+        return bounce;
     }
     else {
         KonTrampoline* bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_BLOCK);
@@ -945,66 +1007,26 @@ KN KN_ProcessSentences(KonState* kstate, KN sentences, KonEnv* rootEnv)
         }
 
         else if (kon_bounce_type(bounce) == KN_TRAMPOLINE_ARG_LIST) {
-            // eval each argment
             KonTrampoline* oldBounce = bounce;
             KonContinuation* cont = bounce->Cont;
             KonEnv* env = bounce->Bounce.Env;
             KN arg = bounce->Bounce.Value;
-            if (KN_IsPairList(arg)) {
-                // the subj position is a list, should be evaluated
-                // like the first sentence in this eg block {{ + % 5 {+ % 1 2} }}
-                KN argExpr = arg;
-                bounce = KN_EvalExpression(kstate, argExpr, env, cont);
-            }
-            else if (KN_IS_VECTOR(arg)) {
-                // TODO !!! verify cell inner content
-                // whether have Quasiquote, Expand, Unquote, KN_SYM_VARIABLE node
-                bounce = KN_RunContinuation(kstate, cont, arg);
-            }
-            else if (KN_IS_TABLE(arg)) {
-                // TODO !!! verify cell inner content key, value
-                // whether have Quasiquote, Expand, Unquote, KN_SYM_VARIABLE node
-                bounce = KN_RunContinuation(kstate, cont, arg);
-            }
-            else if (KN_IS_CELL(arg)) {
-                // TODO !!! verify cell inner content(tag, list, vector, table )
-                // whether have Quasiquote, Expand, Unquote, KN_SYM_VARIABLE node
-                KN argExpr = arg;
-                bounce = KN_EvalExpression(kstate, argExpr, env, cont);
-            }
-            else if (KN_IS_QUOTE(arg)) {
-                // treat as pure data, don't eval
-                bounce = KN_RunContinuation(kstate, cont, arg);
-            }
-            else if (KN_IS_QUASIQUOTE(arg)) {
-                // TODO eval the EXPAND, UNQUOTE nodes in ast
-                bounce = KN_RunContinuation(kstate, cont, arg);
-            }
-            else if (KN_IS_EXPAND(arg)) {
-                // TODO
-                bounce = KN_RunContinuation(kstate, cont, arg);
-            }
-            else if (KN_IS_UNQUOTE(arg)) {
-                // TODO
-                bounce = KN_RunContinuation(kstate, cont, arg);
-            }
-            else if (KN_IS_ACCESSOR(arg)) {
-                // unbox
-                KN val = UnBoxAccessorValue(arg);
-                bounce = KN_RunContinuation(kstate, cont, val);
-            }
-            else if (KN_IS_REFERENCE(arg)) {
-                // env lookup this val
-                KN val = KN_EnvLookup(kstate, env, KN_SymbolToCstr(arg));;
-                assert(val != NULL);
-                bounce = KN_RunContinuation(kstate, cont, val);
-            }
-            else if (IsSelfEvaluated(arg)) {
-                bounce = KN_RunContinuation(kstate, cont, arg);
+            // eager evaluation
+            bounce = KN_EvalExpression(kstate, arg, env, cont);
+        }
+        else if (kon_bounce_type(bounce) == KN_TRAMPOLINE_QUASI_ITEM) {
+            // eval each quasi list item
+            KonTrampoline* oldBounce = bounce;
+            KonContinuation* cont = bounce->Cont;
+            KonEnv* env = bounce->Bounce.Env;
+            KN item = bounce->Bounce.Value;
+            if (KN_IS_UNQUOTE(item)) {
+                bounce = KN_EvalExpression(kstate, KN_UNBOX_UNQUOTE(item), env, cont);
             }
             else {
-                printf("unhandled arg type\n");
-                exit(1);
+                bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
+                bounce->Run.Value = item;
+                bounce->Cont = cont;
             }
         }
         else {

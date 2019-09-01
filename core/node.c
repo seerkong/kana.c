@@ -489,7 +489,7 @@ KN KN_ExpandStringify(KonState* kstate, KN source, bool newLine, int depth, char
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
     result->String = KxStringBuffer_New();
 
-    KxStringBuffer_AppendCstr(result->String, "$");
+    KxStringBuffer_AppendCstr(result->String, "@");
 
     switch (type) {
         case KN_EXPAND_REPLACE: {
@@ -521,7 +521,7 @@ KN KN_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, cha
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
     result->String = KxStringBuffer_New();
 
-    KxStringBuffer_AppendCstr(result->String, "@");
+    KxStringBuffer_AppendCstr(result->String, "$");
 
     switch (type) {
         case KN_UNQUOTE_SEQ: {

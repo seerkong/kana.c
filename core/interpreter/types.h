@@ -28,6 +28,8 @@ typedef enum {
     KN_TRAMPOLINE_CLAUSE_LIST,
     // push a clause scope continuation
     KN_TRAMPOLINE_ARG_LIST,
+    // eval quasiquote list item
+    KN_TRAMPOLINE_QUASI_ITEM,
 } KonBounceType;
 
 struct _KonTrampoline {

@@ -54,13 +54,13 @@ typedef enum
     KN_TOKEN_QUASI_LIST,   // @[]
     KN_TOKEN_QUASI_CELL,   // @{}
 
-    KN_TOKEN_EXPAND_REPLACE,   // $.abc
-    KN_TOKEN_EXPAND_KV,        // $%.abc
-    KN_TOKEN_EXPAND_SEQ,        // $~.abc
+    KN_TOKEN_EXPAND_REPLACE,   // @.abc
+    KN_TOKEN_EXPAND_KV,        // @%.abc
+    KN_TOKEN_EXPAND_SEQ,        // @~.abc
 
-    KN_TOKEN_UNQUOTE_REPLACE,  // @.abc @.[5 .+ $.a]
-    KN_TOKEN_UNQUOTE_KV,        // @%.abc
-    KN_TOKEN_UNQUOTE_SEQ,        // @~.abc
+    KN_TOKEN_UNQUOTE_REPLACE,  // $.abc $.[+ a 2]
+    KN_TOKEN_UNQUOTE_KV,        // $%.abc
+    KN_TOKEN_UNQUOTE_SEQ,        // $~.abc
 
     KN_TOKEN_TABLE_TAG,    // :
     

@@ -773,17 +773,17 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             else if (nextChars[1] == '.') {
                 UpdateTokenContent(tokenizer, "$.");
                 ForwardToken(tokenizer, 2);
-                tokenizer->TokenKind = KN_TOKEN_EXPAND_REPLACE;
+                tokenizer->TokenKind = KN_TOKEN_UNQUOTE_REPLACE;
             }
             else if (nextChars[1] == '%' && nextChars[2] == '.') {
                 UpdateTokenContent(tokenizer, "$%.");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KN_TOKEN_EXPAND_KV;
+                tokenizer->TokenKind = KN_TOKEN_UNQUOTE_KV;
             }
             else if (nextChars[1] == '~' && nextChars[2] == '.') {
                 UpdateTokenContent(tokenizer, "$~.");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KN_TOKEN_EXPAND_SEQ;
+                tokenizer->TokenKind = KN_TOKEN_UNQUOTE_SEQ;
             }
             else if (nextChars[1] == '{') {
                 UpdateTokenContent(tokenizer, "$");
@@ -816,17 +816,17 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             else if (nextChars[1] == '.') {
                 UpdateTokenContent(tokenizer, "@.");
                 ForwardToken(tokenizer, 2);
-                tokenizer->TokenKind = KN_TOKEN_UNQUOTE_REPLACE;
+                tokenizer->TokenKind = KN_TOKEN_EXPAND_REPLACE;
             }
             else if (nextChars[1] == '%' && nextChars[2] == '.') {
                 UpdateTokenContent(tokenizer, "@%.");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KN_TOKEN_UNQUOTE_KV;
+                tokenizer->TokenKind = KN_TOKEN_EXPAND_KV;
             }
             else if (nextChars[1] == '~' && nextChars[2] == '.') {
                 UpdateTokenContent(tokenizer, "@~.");
                 ForwardToken(tokenizer, 3);
-                tokenizer->TokenKind = KN_TOKEN_UNQUOTE_SEQ;
+                tokenizer->TokenKind = KN_TOKEN_EXPAND_SEQ;
             }
             else if (nextChars[1] == '{') {
                 UpdateTokenContent(tokenizer, "@");
