@@ -6,33 +6,31 @@ Note: Kunu isn’t done yet. The implement may make breaking changes and produce
 # DONE list
 - [x] a CPS (Continuation Passing Style) tree-walking interpreter
 - [x] call-cc (call with current continuation)
+- [x] simplified marco system. a lexical-scoped macro builder and a dynamic-scoped macro builder.
 - [x] eval, apply
 - [x] lexical-scoped procedure using `lambda` keyword
 - [x] dynamic-scoped procedure using `func` keyword
-- [x] dynamic-scoped code block can be assigned to a vairable using `blk` keyword.
+- [x] quasiquote and unquote.
 - [x] a mark-sweep GC.
+- [x] A non-backtracking NFA/DFA-based Perl-compatible regex engine.
 - [x] a data language like XML and JSON.
-- [x] chained calls. SVOVOVO...
 
 # TODO list
-- [ ] scheme-like Number tower
+- [ ] module system
+- [ ] package manager
 - [ ] pattern matching
+- [ ] scheme-like Number tower
+- [ ] register based bitcode interperter
 - [ ] ffi
-- [ ] partial apply, curry
 - [ ] compile to GraalVM
 - [ ] coroutine
 - [ ] asyn await
 - [ ] multi-thread support
-- [ ] a simplified scheme-like marco system
 - [ ] IDE support
 - [ ] error handling
 - [ ] break point, debugger
-- [ ] module system
-- [ ] package manager
-- [ ] lightweight regex
 - [ ] perl6-like grammar syntax
 - [ ] pointer equality call-cc in tail call. `{call-cc {lambda (cc1) #[{call-cc {lambda (cc2) #[ [eq cc1 cc2] ] } } ] } } => #t;`
-- [ ] racket-like continuation marks
 
 # build
 
@@ -94,8 +92,8 @@ There are two expression syntax.
 One uses list, like Lisp, eg: `[+ 1 2]`
 The other uses cell structure.
 
+### Kunu's cell structure
 Every cell structure can have a core data, a map of attributes, a sequence of items stored in tuple, a list of children, and a reference to next cell.
-
 
 eg:
 ```
@@ -175,8 +173,11 @@ similar to json:
 }
 ```
 
-
+### keywords uses cell structure
 All special forms expressions like `cond`, `if` ... uses cell structure.
+in cell structure
+
+eg:
 ```
 {if [> a 1]
   #[
@@ -189,28 +190,51 @@ All special forms expressions like `cond`, `if` ... uses cell structure.
 }
 ```
 
-
+### message passing part
 Object message passing expressions uses cell structre too.
-```
-{+ % (1 2) + (3) | (+ 4 5 6)}
-```
-we have a subject: `+`,
-and three verb-objects clauses:
-`% 1 2` , `+ 3` , `| + 4 5 6`
+A sentence is seperated to a subject and clause list
 
+eg:
+```
+{kn/str/length % "abc"; | + 4 5 6}
+{Person clone}
+{p .name := "Loki"}
+{p set-sex $male}
+```
+in Kunu internal, the sentences above will splited as below:
+
+```
+[kn [
+  [/ str]
+  [/ length]
+  [% "abc"]
+  [| + 4 5 6]
+] ]
+
+[Person [
+  [clone]
+] ]
+
+[p [
+  [. name]
+  [:= "Loki"]
+] ]
+
+[p [
+  [set-sex $male]
+] ]
+```
+
+
+in message passing style expression:
+`/` is a infix means 'get the left value'.
 `%` is a infix means 'apply arguments to the object'.
-`.` is a infix means 'send a signal the object'
-
 `|` is a infix means 'pipe the object to the next function's first argument', just like the pipe symbol in shell cmd: 'ls |grep '.
+`.` is a infix means 'send a signal the object'.
+`:=` is a infix means 'assign a value to a left value'.
+`;` is a syntax marker, means 'the end of arguments'.
 
-The similar method call style in Kunu eg:
-```
-{obj set-name ("zhangsan") }
-```
-`(`,`)` can be omitted if method argument length is 0.
-```
-{obj clone}
-```
+if the first word in a clause is a word, means 'do method call to an object', eg: `{p set-sex $male}`
 
 ## Comments
 Lines preceded by the two backquotes '``' are ignored by Kunu.
@@ -247,60 +271,64 @@ just like the `undefined` in javascript
 #c,b;
 ```
 
-
-## Number
-
-### Number compare
-
-```
-[> 5 3] `` #t;
-[< 5 3] `` #f;
-[>= 5 5] `` #t;
-[<= 2 4] `` #t;
-```
-
 ## string
+string
 ```
-"hello world"
+"hello world\n"
+```
+raw string
+```
+'hello world\n'
 ```
 
 ## Vector
 ```
-#< 1 2 3 4 >
+#<1 2 3 4 >
 ```
 
 ## Table
 a sequence of values.
 the key is optional
+the `=` is optional
 ```
-(0 :a 1 :b 2)
+#(0 :a 1 :b = 2)
 ```
 
 ## List
+quoted list
 ```
 $[1 2 3]
 ```
+quasiquoted list
+```
+{let a 1}
+@[$.a 2 $.[+ a 2] ] `` => [1 2 3 ]
+```
+
 
 ## Cell
+the data in `()` will be stored in cell table field
+the data in `#[]` will be stored in cell list field
+the key value pair will be stored in cell map field
+
+eg:
 ```
-{div (:width 200 :height 100)  
-  #[
+${div :width =200 :height = 100 :disabled
+  (
     {text ("hello") }
     {text ("world") }
+  )  
+  #[
+    [writeln "script here"]
   ]
 }
 ```
 
-## Define variable
+## declare and set variable
 ```
 {let a 1}
-```
-
-## Update variable
-```
 {set a 2}
 ```
-
 
 ## Procedure call
 there a two ways to make a procedure call
@@ -350,23 +378,6 @@ the '%' meas apply arguments to the object
 }
 
 [bar]   `` return 3
-```
-
-## Block
-```
-{let t
-  {blk
-    #[
-      {set a 1}
-      [+ a b c]
-    ]
-  }
-}
-{let a 5}
-{let b 6}
-{let c 7}
-[t]   `` return 14
-
 ```
 
 ## Condition
@@ -520,250 +531,71 @@ break and continue
 [writeln  "fib result " [fib 20] ]
 ```
 
-## implement a tiny prototype-based inheritance example
+## quasiquote and unquote
+```
+{let a 1}
+{let b $[+ a 3]}
+
+{lambda c ()
+  #[
+    5
+  ]
+}
+
+`` return [1 2 3 $[+ a 3 ] 5 ]
+[writeln @[$.a 2 $.[+ a 2] $.b $.[c]]]
+```
+
+## macro
+receive ast tree. should add a `!` before macro function
+
+```
+{let m
+  {macro-lambda (ast)
+    #[
+      [writeln ast]
+    ]
+  }
+}
+
+`` outputs:  {!m tt :'a'= 1 :'b' (1 2 3 ) #[t f t] m}
+{!m tt :a = 1 :b (1 2 3) #[t f t] m}
+
+`` outputs: [1 3 adsf adiop ]
+[!m 1 3 adsf adiop ]
+```
+
+
+## accessor
+Kunu's accessor is similar to file system which can store directory and file
+```
+{let a 1}
+{let b {kn/accessor/init-prop % a} }
+{b := 2}
+[writeln "after =, a " a ", b " b]
+
+{let folder {kn/accessor/init-dir %} }
+{kn/accessor/put-key-val % folder "alice" 1}
+{kn/accessor/put-key-val % folder "bob" 2}
 
 ```
 
-{let ProtoObjDispatcher
-  {def-dispatcher
-    #(
-    )
-  }
+## regex
+```
+{let a "abcdefgcd"}
+{let regex-pattern '(ab.*?)d.*(fg)' }
+{let matches {kn/regex/match % regex-pattern a} }
+[writeln matches] `` outputs #<#<0 7 > #<0 3 > #<5 7 > >
+```
+
+## build in syntax sugar to call shell cmds
+```
+{let a "ls"}
+{sh @a -al './'}
+
+{lambda foo ()
+  #[ "-h" ]
 }
 
-{lambda make-proto-obj-setter (obj key)
-  #[
-    {lambda (accessor new-val)
-      #[
-        ``[writeln "update in obj key " key " to val : " new-val]
-        {kn/accessor/put-key-val %
-          (obj key new-val)
-        }
-      ]
-    }
-  ]
-}
-
-`` if not found, return #undef;
-{lambda proto-obj_lookup-key (obj key)
-  #[
-    {if {kn/accessor/has-key % (obj key) }
-      #[
-        {kn/accessor/at-key % (obj key) }
-      ]
-      else
-      #[
-        {let proto-obj {kn/accessor/at-key % (obj "__proto") } }
-
-        {if [neq #undef; proto-obj]
-          #[
-            {set proto-obj {kn/accessor/unbox % (proto-obj) } }
-          ]
-        }
-        {if [neq #nil; proto-obj ]
-          #[
-            {set proto-obj {kn/accessor/unbox % (proto-obj)} }
-            [proto-obj_lookup-key proto-obj key]
-          ]
-          else
-          #[
-            #undef;
-          ]
-        }
-      ]
-    }
-  ]
-
-}
-
-{set-dispatcher ProtoObjDispatcher
-  #(
-  :on-symbol
-    {lambda (this sym)
-      #[
-        {let find-res [proto-obj_lookup-key this sym] }
-        {if [neq find-res #undef;]
-          #[
-            {kn/accessor/init-prop %
-              (find-res $r [make-proto-obj-setter this sym] )
-            }
-          ]
-          `` make a new symbol
-          else
-          #[
-            {kn/accessor/init-prop %
-              (#ukn; $r [make-proto-obj-setter this sym] )
-            }
-          ]
-        }
-      ]
-    }
-  :on-method-call
-    {lambda (self msg args)
-      #[
-        {lambda eval-method (method)
-          #[
-            {let this self}
-            {apply method args}
-          ]
-        }
-
-        {let find-res [proto-obj_lookup-key self msg] }
-
-        `` check if is a procedure
-        {if
-          {and
-            [neq find-res #undef;]
-            [is-procedure {kn/accessor/unbox % (find-res) } ]
-          }
-          #[
-            [eval-method find-res]
-          ]
-          else
-          #[
-            [writeln "method " msg " not found"]
-          ]
-        }
-      ]
-    }
-  )
-}
-
-
-{let ProtoObjBuilderDispatcher
-  {def-dispatcher
-    #(
-    :on-method-call
-      {lambda (subj msg method-args)
-        #[
-          {lambda clone-proto-obj ()
-            #[
-              {set subj [unbox-quote subj] }
-              `` create a new attr slot
-              {let new-instance {kn/accessor/init-dir %} }
-              `` set proto attr
-              {let proto-name {kn/cell/get-core % (subj) } }
-              {let obj-init-table {kn/cell/get-table % (subj) } }
-              `` object structure layout version
-              {kn/accessor/put-key-val % (new-instance "__scheme" $ProtoClass) }
-
-              {if [eq proto-name #ukn; ]
-                #[
-                  {kn/accessor/put-key-val % (new-instance "__proto" #nil;) }
-                ]
-                else
-                #[
-                  {kn/accessor/put-key-val % (new-instance "__proto" {eval [to-variable proto-name] } ) }
-                ]
-              }
-              {for
-                (
-                  {let iter {kn/table/iter-head % (obj-init-table) } }
-                  [neq iter #nil;]
-                  {set iter {kn/table/iter-next % (obj-init-table iter) } }
-                )
-                #[
-                  {let init-key {kn/table/iter-key % (obj-init-table iter) } }
-                  {let init-val {kn/table/iter-val % (obj-init-table iter) } }
-                  ``[writeln "init key: " init-key  " val: " init-val ]
-
-                  `` evaluate each val
-                  {set init-val {eval init-val} }
-                  
-                  {kn/accessor/put-key-val %
-                    (new-instance init-key init-val)
-                  }
-                  
-                ]
-              }
-
-              [set-dispatcher-id new-instance ProtoObjDispatcher]
-              new-instance
-            ]
-          }
-
-          {cond
-            [eq $clone msg]
-            #[
-              [clone-proto-obj]
-            ]
-            else
-            `` TODO handle other class level message
-            #ukn;
-          }
-        ]
-      }
-    )
-  }
-}
-
-{def-builder
-  ProtoObj
-  ProtoObjBuilderDispatcher
-  ${
-    (
-    :default-attr1 5
-    :default-attr2 "absddd"
-    )
-  }
-}
-
-
-{let my-obj {ProtoObj clone} }
-my-obj
-
-{my-obj .__scheme}
-{my-obj .default-attr1 := 8}
-{my-obj .default-attr1}
-
-`` test setter 1
-{my-obj .my-new-key := "my new key value 1"}
-[writeln {my-obj .my-new-key} ]
-
-`` test setter 2
-{my-obj .my-new-key := "my new key value 2"}
-[writeln {my-obj .my-new-key} ]
-
-
-{def-builder
-  Person
-  ProtoObjBuilderDispatcher
-  ${my-obj `` parent proto name
-    (
-    :name "Undefined"
-    :age 0
-    :sex #ukn;
-    :set-sex
-      {func (sex)
-        #[
-          {this .sex := sex}
-        ]
-      }
-    :print
-      {func ()
-        #[
-          [writeln
-            "My name is  " {this /name} ", "
-            "I am " {this /age} " years old, "
-            "my sex is " {this /sex}
-          ]
-        ]
-      }
-    )
-  }
-}
-
-
-{let p {Person clone} }
-`` overwrite my-new-key
-{p .my-new-key := "my new key value 3"}
-`` show object structure
-``[writeln p]
-
-{p .name := "Loki"}
-{p .age :=  1500}
-{p set-sex ($male)}
-[writeln p]
-{p print}
-
+{sh "ps" [foo] }
 ```
