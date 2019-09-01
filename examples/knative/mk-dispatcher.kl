@@ -1,4 +1,5 @@
 
+
 {set-dispatcher NumberDispacher
   #(
   :on-method-call
@@ -27,9 +28,9 @@
 {set-dispatcher VectorDispacher
   #(
   :on-visit-vector
-    {lambda (args)
+    {lambda (subj msg)
       #[
-        [displayln "on-visit-vector " args]
+        [writeln "on-visit-vector, subj: " subj " msg: " msg]
       ]
     }
   :on-visit-table
@@ -40,13 +41,33 @@
         {kn/vector/at-idx % subj {kn/table/at-idx % msg 0} }
       ]
     }
+  :on-visit-list
+    {lambda (subj msg)
+      #[
+        [writeln "on-visit-list, subj: " subj " msg: " msg]
+        [writeln "get vector index at " [car msg] ]
+        {kn/vector/at-idx % subj [car msg] }
+      ]
+    }
+  :on-visit-cell
+    {lambda (subj msg)
+      #[
+        [writeln "on-visit-cell, subj: " subj " msg: " msg]
+      ]
+    }
   )
 }
 
 
 ``[writeln [get-dispatcher-id 5] ]
 
-[writeln {5 + 2 3 4; + 6} ]
+``[writeln {5 + 2 3 4; + 6} ]
 
-[writeln {#<"a" "b" "c"> #<2> } ]
-[writeln {#<"a" "b" "c"> #(2) } ]
+``{#<"a" "b" "c"> #<2> }
+
+``[writeln {#<"a" "b" "c"> #(2) } ]
+[writeln {#<"a" "b" "c">[0] } ]
+[writeln {#<"a" "b" #<"e" "f" "g">>[2][1] } ]
+``{#<"a" "b" "c"> [2] }
+``{#<"a" "b" "c"> {abc} }
+``[writeln {#<"a" "b" "c"> {abc} } ]

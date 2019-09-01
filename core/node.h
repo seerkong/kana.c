@@ -602,6 +602,9 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_QUOTE(x)    (KN_CHECK_TAG(x, KN_T_QUOTE))
 #define KN_IS_QUOTE_LIST(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST)
 #define KN_IS_QUOTE_NIL(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && ((KonQuote*)x)->Inner == KN_NIL)
+#define KN_IS_QUOTE_PAIR(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && ((KonQuote*)x)->Inner != KN_NIL)
+#define KN_IS_QUOTE_CELL(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_CELL)
+#define KN_IS_QUOTE_STR(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_SYM_STRING)
 #define KN_IS_QUASIQUOTE(x)    (KN_CHECK_TAG(x, KN_T_QUASIQUOTE))
 #define KN_IS_EXPAND(x)    (KN_CHECK_TAG(x, KN_T_EXPAND))
 #define KN_IS_UNQUOTE(x)    (KN_CHECK_TAG(x, KN_T_UNQUOTE))
@@ -682,9 +685,9 @@ static inline KN KN_MAKE_FLONUM(KonState* kstate, double num) {
 
 #define KN_LIST1(kstate,a)        KN_CONS((kstate), (a), KN_NIL)
 
-// cell core
+// cell core, similar to car
 #define KN_DCR(x)         ((KN)KN_FIELD(x, KonCell, Core))
-// cell next
+// cell next, similar to cdr
 #define KN_DNR(x)         ((KN)KN_FIELD(x, KonCell, Next))
 // cell prev
 #define KN_DPR(x)         ((KN)KN_FIELD(x, KonCell, Prev))
@@ -696,8 +699,16 @@ static inline KN KN_MAKE_FLONUM(KonState* kstate, double num) {
 #define KN_DCNR(x)      (KN_DCR(KN_DNR(x)))
 #define KN_DTNR(x)      (KN_DTR(KN_DNR(x)))
 #define KN_DLNR(x)      (KN_DLR(KN_DNR(x)))
-#define KN_DCNNR(x)      (KN_DCR(KN_DNR(KN_DNR(x))))
+#define KN_DCCR(x)      (KN_DCR(KN_DCR(x)))
+#define KN_DTCR(x)      (KN_DTR(KN_DCR(x)))
+#define KN_DLCR(x)      (KN_DLR(KN_DCR(x)))
 
+#define KN_DCNNR(x)      (KN_DCR(KN_DNR(KN_DNR(x))))
+#define KN_DTNNR(x)      (KN_DTR(KN_DNR(KN_DNR(x))))
+#define KN_DLNNR(x)      (KN_DLR(KN_DNR(KN_DNR(x))))
+#define KN_DCCNR(x)      (KN_DCR(KN_DCR(KN_DNR(x))))
+#define KN_DTCNR(x)      (KN_DTR(KN_DCR(KN_DNR(x))))
+#define KN_DLCNR(x)      (KN_DLR(KN_DCR(KN_DNR(x))))
 
 // data structure util end
 ////

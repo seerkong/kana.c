@@ -1,100 +1,5 @@
 #include "primary.h"
 
-
-KN KonList_Cons(KonState* kstate, KN self, KN other)
-{
-    return KN_CONS(kstate, self, other);
-}
-
-KN KonList_Car(KonState* kstate, KN self)
-{
-    // auto unbox QUOTE_LIST
-    if (KN_IS_QUOTE_LIST(self)) {
-        self = KN_UNBOX_QUOTE(self);
-    }
-    return KN_CAR(self);
-}
-
-KN KonList_Cdr(KonState* kstate, KN self)
-{
-    // auto unbox QUOTE_LIST
-    if (KN_IS_QUOTE_LIST(self)) {
-        self = KN_UNBOX_QUOTE(self);
-    }
-    return KN_CDR(self);
-}
-
-KN KonList_Caar(KonState* kstate, KN self)
-{
-    return KN_CAAR(self);
-}
-
-KN KonList_Cadr(KonState* kstate, KN self)
-{
-    return KN_CADR(self);
-}
-
-KN KonList_Cdar(KonState* kstate, KN self)
-{
-    return KN_CDAR(self);
-}
-
-KN KonList_Cddr(KonState* kstate, KN self)
-{
-    return KN_CDDR(self);
-}
-
-KN KonList_Caaar(KonState* kstate, KN self)
-{
-    return KN_CAAAR(self);
-}
-
-KN KonList_Caadr(KonState* kstate, KN self)
-{
-    return KN_CAADR(self);
-}
-
-KN KonList_Cadar(KonState* kstate, KN self)
-{
-    return KN_CADAR(self);
-}
-
-KN KonList_Caddr(KonState* kstate, KN self)
-{
-    return KN_CADDR(self);
-}
-
-KN KonList_Cdaar(KonState* kstate, KN self)
-{
-    return KN_CDAAR(self);
-}
-
-KN KonList_Cdadr(KonState* kstate, KN self)
-{
-    return KN_CDADR(self);
-}
-
-KN KonList_Cddar(KonState* kstate, KN self)
-{
-    return KN_CDDAR(self);
-}
-
-KN KonList_Cdddr(KonState* kstate, KN self)
-{
-    return KN_CDDDR(self);
-}
-
-KN KonList_Cadddr(KonState* kstate, KN self)
-{
-    return KN_CADDDR(self);
-}
-
-KN KonList_Cddddr(KonState* kstate, KN self)
-{
-    return KN_CDDDDR(self);
-}
-
-
 // not(kon_false) => true, not(other) => false
 KN KN_PrimaryNot(KonState* kstate, KN item)
 {
@@ -496,6 +401,187 @@ KN KN_PrimarySetDispatcherId(KonState* kstate, KN obj, KN boxedId)
     return KN_TRUE;
 }
 
+
+
+KN KonList_CONS(KonState* kstate, KN self, KN other)
+{
+    return KN_CONS(kstate, self, other);
+}
+
+KN KonList_CAR(KonState* kstate, KN self)
+{
+    // auto unbox QUOTE_LIST
+    if (KN_IS_QUOTE_LIST(self)) {
+        self = KN_UNBOX_QUOTE(self);
+    }
+    return KN_CAR(self);
+}
+
+KN KonList_CDR(KonState* kstate, KN self)
+{
+    // auto unbox QUOTE_LIST
+    if (KN_IS_QUOTE_LIST(self)) {
+        self = KN_UNBOX_QUOTE(self);
+    }
+    return KN_CDR(self);
+}
+
+KN KonList_CAAR(KonState* kstate, KN self)
+{
+    return KN_CAAR(self);
+}
+
+KN KonList_CADR(KonState* kstate, KN self)
+{
+    return KN_CADR(self);
+}
+
+KN KonList_CDAR(KonState* kstate, KN self)
+{
+    return KN_CDAR(self);
+}
+
+KN KonList_CDDR(KonState* kstate, KN self)
+{
+    return KN_CDDR(self);
+}
+
+KN KonList_CAAAR(KonState* kstate, KN self)
+{
+    return KN_CAAAR(self);
+}
+
+KN KonList_CAADR(KonState* kstate, KN self)
+{
+    return KN_CAADR(self);
+}
+
+KN KonList_CADAR(KonState* kstate, KN self)
+{
+    return KN_CADAR(self);
+}
+
+KN KonList_CADDR(KonState* kstate, KN self)
+{
+    return KN_CADDR(self);
+}
+
+KN KonList_CDAAR(KonState* kstate, KN self)
+{
+    return KN_CDAAR(self);
+}
+
+KN KonList_CDADR(KonState* kstate, KN self)
+{
+    return KN_CDADR(self);
+}
+
+KN KonList_CDDAR(KonState* kstate, KN self)
+{
+    return KN_CDDAR(self);
+}
+
+KN KonList_CDDDR(KonState* kstate, KN self)
+{
+    return KN_CDDDR(self);
+}
+
+KN KonList_CADDDR(KonState* kstate, KN self)
+{
+    return KN_CADDDR(self);
+}
+
+KN KonList_CDDDDR(KonState* kstate, KN self)
+{
+    return KN_CDDDDR(self);
+}
+
+KN KonCell_DCR(KonState* kstate, KN self)
+{
+    return KN_DCR(self);
+}
+
+KN KonCell_DNR(KonState* kstate, KN self)
+{
+    return KN_DNR(self);
+}
+
+KN KonCell_DPR(KonState* kstate, KN self)
+{
+    return KN_DPR(self);
+}
+
+KN KonCell_DLR(KonState* kstate, KN self)
+{
+    return KN_DLR(self);
+}
+
+KN KonCell_DTR(KonState* kstate, KN self)
+{
+    return KN_DTR(self);
+}
+
+KN KonCell_DCNR(KonState* kstate, KN self)
+{
+    return KN_DCNR(self);
+}
+
+KN KonCell_DTNR(KonState* kstate, KN self)
+{
+    return KN_DTNR(self);
+}
+
+KN KonCell_DLNR(KonState* kstate, KN self)
+{
+    return KN_DLNR(self);
+}
+
+KN KonCell_DCCR(KonState* kstate, KN self)
+{
+    return KN_DCCR(self);
+}
+
+KN KonCell_DTCR(KonState* kstate, KN self)
+{
+    return KN_DTCR(self);
+}
+
+KN KonCell_DLCR(KonState* kstate, KN self)
+{
+    return KN_DLCR(self);
+}
+
+KN KonCell_DCNNR(KonState* kstate, KN self)
+{
+    return KN_DCNNR(self);
+}
+
+KN KonCell_DTNNR(KonState* kstate, KN self)
+{
+    return KN_DTNNR(self);
+}
+
+KN KonCell_DLNNR(KonState* kstate, KN self)
+{
+    return KN_DLNNR(self);
+}
+
+KN KonCell_DCCNR(KonState* kstate, KN self)
+{
+    return KN_DCCNR(self);
+}
+
+KN KonCell_DTCNR(KonState* kstate, KN self)
+{
+    return KN_DTCNR(self);
+}
+
+KN KonCell_DLCNR(KonState* kstate, KN self)
+{
+    return KN_DLCNR(self);
+}
+
+
 // init internal types dispatcher id
 KN KN_PrimaryExportDispacherId(KonState* kstate, KonEnv* env)
 {
@@ -517,58 +603,6 @@ KN KN_PrimaryExportDispacherId(KonState* kstate, KonEnv* env)
 
 KN KN_PrimaryOpExport(KonState* kstate, KonEnv* env)
 {
-    KN_EnvDefine(kstate, env, "cons",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cons, 2, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "car",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Car, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cdr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cdr, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "caar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Caar, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cadr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cadr, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cdar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cdar, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cddr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cddr, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "caaar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Caaar, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "caadr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Caadr, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cadar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cadar, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "caddr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Caddr, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cdaar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cdaar, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cdadr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cdadr, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cddar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cddar, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cdddr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cdddr, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cadddr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cadddr, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cddddr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_Cddddr, 1, 0, 0)
-    );
-
     KN_EnvDefine(kstate, env, "not",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryNot, 1, 0, 0)
     );
@@ -722,4 +756,109 @@ KN KN_PrimaryOpExport(KonState* kstate, KonEnv* env)
     KN_EnvDefine(kstate, env, "get-env", env);
 
     KN_PrimaryExportDispacherId(kstate, env);
+
+    KN_EnvDefine(kstate, env, "cons",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CONS, 2, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "car",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CAR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cdr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "caar",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CAAR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cadr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CADR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cdar",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDAR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cddr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDDR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "caaar",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CAAAR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "caadr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CAADR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cadar",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CADAR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "caddr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CADDR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cdaar",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDAAR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cdadr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDADR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cddar",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDDAR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cdddr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDDDR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cadddr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CADDDR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "cddddr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDDDDR, 1, 0, 0)
+    );
+
+    KN_EnvDefine(kstate, env, "dcr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DCR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dnr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DNR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dpr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DPR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dlr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DLR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dtr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DTR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dcnr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DCNR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dtnr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DTNR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dlnr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DLNR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dccr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DCCR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dtcr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DTCR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dlcr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DLCR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dcnnr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DCNNR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dtnnr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DTNNR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dlnnr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DLNNR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dccnr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DCCNR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dtcnr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DTCNR, 1, 0, 0)
+    );
+    KN_EnvDefine(kstate, env, "dlcnr",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DLCNR, 1, 0, 0)
+    );
+
 }

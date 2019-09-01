@@ -575,7 +575,7 @@ KN KN_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, char
         KxStringBuffer_AppendCstr(result->String, ">");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "#< ");
+        KxStringBuffer_AppendCstr(result->String, "#<");
         
         for (int i = 0; i < vecLen; i++) {
             KN item = KxVector_AtIndex(items, i);

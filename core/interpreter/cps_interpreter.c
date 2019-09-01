@@ -228,20 +228,6 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
 
         bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
     }
-    // send msg like {abc $[1]}
-    else if (KN_IS_PAIR(firstObj)) {
-        // get dispatcher and eval OnVisitList
-        // this dispatcherId is unboxed
-        unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
-        KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
-
-        KonProcedure* procedure = dispatcher->OnVisitList;
-        KN dispatchArgList = KN_NIL;
-        dispatchArgList = KN_CONS(kstate, firstObj, dispatchArgList);
-        dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
-
-        bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
-    }
     else if (KN_IS_VECTOR(firstObj)) {
         // get dispatcher and eval OnVisitVector
         // this dispatcherId is unboxed
@@ -268,7 +254,21 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
 
         bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
     }
-    else if (KN_IS_CELL(firstObj)) {
+    // send msg like {abc $[1]}
+    else if (KN_IS_QUOTE_PAIR(firstObj)) {
+        // get dispatcher and eval OnVisitList
+        // this dispatcherId is unboxed
+        unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
+        KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
+        
+        KonProcedure* procedure = dispatcher->OnVisitList;
+        KN dispatchArgList = KN_NIL;
+        dispatchArgList = KN_CONS(kstate, KN_UNBOX_QUOTE(firstObj), dispatchArgList);
+        dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
+        
+        bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
+    }
+    else if (KN_IS_QUOTE_CELL(firstObj)) {
         // get dispatcher and eval OnVisitCell
         // this dispatcherId is unboxed
         unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
@@ -276,7 +276,7 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
 
         KonProcedure* procedure = dispatcher->OnVisitCell;
         KN dispatchArgList = KN_NIL;
-        dispatchArgList = KN_CONS(kstate, firstObj, dispatchArgList);
+        dispatchArgList = KN_CONS(kstate, KN_UNBOX_QUOTE(firstObj), dispatchArgList);
         dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
 
         bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
@@ -362,7 +362,6 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
                 || KN_IS_QUASIQUOTE(item)
                 || KN_IS_UNQUOTE(item)
             ) {
-                printf("SplitClauses is container type\n");
                 KxVector* singleItemClause = KxVector_Init();
                 KxVector_Push(clauseListVec, singleItemClause);
                 KxVector_Push(singleItemClause, item);
@@ -858,6 +857,10 @@ KN KN_ProcessSentences(KonState* kstate, KN sentences, KonEnv* rootEnv)
 
             KN firstArg = KN_CAR(clauseArgList);
 
+            ////
+            // infix processing
+            
+            // infix: % | / .
             if (KN_IS_SYNTAX_MARKER(firstArg)) {
                 KN evaledArgList;
                 KN restArgList;
@@ -892,7 +895,11 @@ KN KN_ProcessSentences(KonState* kstate, KN sentences, KonEnv* rootEnv)
                 bounce->Bounce.Value = firstToEval; // the first arg is % or . or |
 
             }
-            else if (KN_IS_SYMBOL(firstArg)) {
+            // infix word, list, cell, convert it to data type
+            else if (KN_IS_SYMBOL(firstArg)
+                || KN_IS_PAIR(firstArg)
+                || KN_IS_CELL(firstArg)
+            ) {
 
                 KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_CLAUSE_ARGS);
                 k->Cont = cont;
@@ -901,9 +908,21 @@ KN KN_ProcessSentences(KonState* kstate, KN sentences, KonEnv* rootEnv)
                 k->EvalClauseArgs.RestArgList = KN_CDR(clauseArgList);
                 k->EvalClauseArgs.EvaledArgList = KN_NIL;
 
-                // a sentence like [obj key1 = 2] current clause [key1]
+                // eg: {obj clone}, convert clone to $clone
                 if (KN_IS_WORD(firstArg)) {
                     ((KonSymbol*)firstArg)->Type = KN_SYM_IDENTIFIER;
+                }
+                else if (KN_IS_PAIR(firstArg)) {
+                    KonQuote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuote, KN_T_QUOTE);
+                    tmp->Type = KN_QUOTE_LIST;
+                    tmp->Inner = firstArg;
+                    firstArg = (KN)tmp;
+                }
+                else if (KN_IS_CELL(firstArg)) {
+                    KonQuote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuote, KN_T_QUOTE);
+                    tmp->Type = KN_QUOTE_CELL;
+                    tmp->Inner = firstArg;
+                    firstArg = (KN)tmp;
                 }
                 bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_ARG_LIST);
                 bounce->Cont = k;
