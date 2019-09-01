@@ -1,6 +1,6 @@
 {let a "abcdefgcd"}
 {let regex-pattern '(ab.*?)d.*(fg)' }
-{let matches {kn/regex/match %(regex-pattern a) } }
+{let matches {kn/regex/match % regex-pattern a} }
 
 [writeln "test target: " a]
 [writeln "regex-pattern: " regex-pattern]
@@ -9,12 +9,12 @@
 [writeln matches]
 {for (
     {let i 0}
-    [< i {vec/length % (matches) } ]
+    [< i {vec/length % matches} ]
     {set i [+ i 1] }
   )
   #[
-    {let match {vec/at-idx % (matches i) } }
-    [writeln match " start: " {vec/at-idx % (match 0) } " end " {vec/at-idx % (match 1) } ]
-    [writeln {kn/str/sub-str % (a {vec/at-idx % (match 0) } {vec/at-idx % (match 1) } ) } ]
+    {let match {vec/at-idx % matches i} }
+    [writeln match " start: " {vec/at-idx % match 0} " end " {vec/at-idx % match 1} ]
+    [writeln {kn/str/sub-str % a {vec/at-idx % match 0} {vec/at-idx % match 1} } ]
   ]
 }
