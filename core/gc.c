@@ -394,24 +394,25 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             }
             break;
         }
-        case KN_T_CELL: {
-            KonCell* cell = (KonCell*)node;
-            KxList_Push(markTaskQueue, cell->Core);
-            KxList_Push(markTaskQueue, cell->Vector);
-            KxList_Push(markTaskQueue, cell->Table);
-            KxList_Push(markTaskQueue, cell->List);
-            if (cell->Next != KN_NIL) {
-                KxList_Push(markTaskQueue, cell->Next);
-            }
-
-            KxHashTable* map = cell->Map;
+        case KN_T_MAP: {
+            KxHashTable* map = CAST_Kon(Map, node)->Map;
             KxHashTableIter iter = KxHashTable_IterHead(map);
             while ((KN)iter != KN_NIL) {
                 KxHashTableIter next = KxHashTable_IterNext(map, iter);
                 KxList_Push(markTaskQueue, KxHashTable_IterGetVal(map, iter));
                 iter = next;
             }
-
+            break;
+        }
+        case KN_T_CELL: {
+            KonCell* cell = (KonCell*)node;
+            KxList_Push(markTaskQueue, cell->Core);
+            KxList_Push(markTaskQueue, cell->Map);
+            KxList_Push(markTaskQueue, cell->Table);
+            KxList_Push(markTaskQueue, cell->List);
+            if (cell->Next != KN_NIL) {
+                KxList_Push(markTaskQueue, cell->Next);
+            }
             break;
         }
         case KN_T_PARAM: {
@@ -607,12 +608,16 @@ void KN_DestroyNode(KonState* kstate, KonBase* node)
             }
             break;
         }
+        case KN_T_MAP: {
+            KxHashTable* map = CAST_Kon(Map, node)->Map;
+            if (map != NULL) {
+                KxHashTable_Destroy(map);
+                map = NULL;
+            }
+            break;
+        }
         case KN_T_CELL: {
             KonCell* cell = CAST_Kon(Cell, node);
-            if (cell->Map != NULL) {
-                KxHashTable_Destroy(cell->Map);
-                cell->Map = NULL;
-            }
             break;
         }
         case KN_T_PARAM: {

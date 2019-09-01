@@ -23,9 +23,8 @@ typedef enum {
 
 typedef struct {
     KN Core;
-    KN Vector; // vector of KN
     KN Table;
-    KxHashTable* Map;
+    KN Map;
     KN List; // vector of KN
 } CellBuilderItem;
 
@@ -98,10 +97,9 @@ void KvPairDestroy(KonBuilder* builder);
 
 KonBuilder* CreateCellBuilder();
 void CellBuilderSetCore(KonBuilder* builder, KN name);
-void CellBuilderSetVector(KonBuilder* builder, KN vector);
 void CellBuilderSetList(KonBuilder* builder, KN list);
 void CellBuilderSetTable(KonBuilder* builder, KN table);
-void CellBuilderAddPair(KonBuilder* builder, KonBuilder* pair);
+void CellBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair);
 KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder);
 
 KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind);

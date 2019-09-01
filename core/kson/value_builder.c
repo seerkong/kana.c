@@ -238,10 +238,9 @@ CellBuilderItem* CreateCellBuilderItem()
     CellBuilderItem* cellItem = (CellBuilderItem*)tb_malloc(sizeof(CellBuilderItem));
     
     cellItem->Core = KN_UNDEF;
-    cellItem->Vector = KN_UNDEF;
     cellItem->Table = KN_UNDEF;
     cellItem->List = KN_UNDEF;
-    cellItem->Map = KxHashTable_Init(4);
+    cellItem->Map = KN_UNDEF;
     return cellItem;
 }
 
@@ -282,13 +281,6 @@ void CellBuilderSetCore(KonBuilder* builder, KN name)
     cellItem->Core = name;
 }
 
-void CellBuilderSetVector(KonBuilder* builder, KN vector)
-{
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
-
-    cellItem->Vector = vector;
-}
-
 void CellBuilderSetList(KonBuilder* builder, KN list)
 {
     CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
@@ -313,13 +305,18 @@ void CellBuilderSetTable(KonBuilder* builder, KN table)
     cellItem->Table = table;
 }
 
-void CellBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
+void CellBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair)
 {
     CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
+    if (cellItem->Map == KN_UNDEF) {
+        KonMap* newMap = KN_ALLOC_TYPE_TAG(kstate, KonMap, KN_T_MAP);
+        newMap->Map = KxHashTable_Init(4);
+        cellItem->Map = newMap;
+    }
 
     char* key = KxStringBuffer_Cstr(pair->KvPair.Key);
-    
-    KxHashTable_PutKv(cellItem->Map, key, pair->KvPair.Value);
+    KxHashTable* unboxedMap = CAST_Kon(Map, cellItem->Map)->Map;
+    KxHashTable_PutKv(unboxedMap, key, pair->KvPair.Value);
     KN_DEBUG("CellBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
 }
@@ -328,7 +325,6 @@ KonCell* CreateNewKonCellNode(KonState* kstate, CellBuilderItem* cellItem)
 {
     KonCell* value = KN_ALLOC_TYPE_TAG(kstate, KonCell, KN_T_CELL);
     value->Core = cellItem->Core;
-    value->Vector = cellItem->Vector;
     value->Table = cellItem->Table;
     value->List = cellItem->List;
     value->Map = cellItem->Map;

@@ -118,6 +118,7 @@ typedef enum {
     KN_T_STRING,
     KN_T_VECTOR,
     KN_T_TABLE,
+    KN_T_MAP,
     KN_T_CELL,
     KN_T_PARAM,
     KN_T_BLOCK,
@@ -144,6 +145,7 @@ typedef struct KonString KonString;
 typedef struct KonTable KonTable;
 typedef struct KonVector KonVector;
 typedef struct KonPair KonPair;
+typedef struct KonMap KonMap;
 typedef struct KonCell KonCell;
 typedef struct KonParam KonParam;
 typedef struct KonBlock KonBlock;
@@ -172,6 +174,7 @@ union _KNValue {
     KonTable* KonTable;
     KonVector* KonVector;
     KonPair* KonPair;
+    KonMap* KonMap;
     KonCell* KonCell;
     KonQuote* KonQuote;
     KonQuasiquote* KonQuasiquote;
@@ -298,11 +301,14 @@ struct KonBlock {
     KN Next;
 };
 
+struct KonMap {
+    KxHashTable* Map;
+};
+
 struct KonCell {
     KonBase Base;
     KN Core;
-    KxHashTable* Map;
-    KonVector* Vector;
+    KonMap* Map;
     KonTable* Table;
     KonPair* List;
     KonCell* Next;
@@ -340,10 +346,10 @@ struct KonMsgDispatcher {
     KonProcedure* OnSymbol;   // {obj .key1 = 5}
     KonProcedure* OnSyntaxMarker;  // % p1 p2; /abc /efg
     KonProcedure* OnMethodCall; // {5 + 1 2}
-    KonProcedure* OnVisitList;  // {#<1 2 3> $[1]}
+    KonProcedure* OnVisitList;  // {#<1 2 3> [1]}
     KonProcedure* OnVisitVector;  // #<>
     KonProcedure* OnVisitTable; // #()
-    KonProcedure* OnVisitCell;  // #{}
+    KonProcedure* OnVisitCell;  // {}
     KonProcedure* OnOtherType;  // {5 5} number, string etc
 };
 
@@ -510,6 +516,7 @@ union _Kon {
     KonTable KonTable;
     KonVector KonVector;
     KonPair KonPair;
+    KonMap KonMap;
     KonCell KonCell;
     KonQuote KonQuote;
     KonQuasiquote KonQuasiquote;
@@ -597,6 +604,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_VECTOR(x)     (KN_CHECK_TAG(x, KN_T_VECTOR))
 #define KN_IS_TABLE(x)     (KN_CHECK_TAG(x, KN_T_TABLE))
 #define KN_IS_PARAM(x)     (KN_CHECK_TAG(x, KN_T_PARAM))
+#define KN_IS_MAP(x)     (KN_CHECK_TAG(x, KN_T_MAP))
 #define KN_IS_CELL(x)     (KN_CHECK_TAG(x, KN_T_CELL))
 
 #define KN_IS_QUOTE(x)    (KN_CHECK_TAG(x, KN_T_QUOTE))

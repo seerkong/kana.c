@@ -6,7 +6,7 @@ KN KonCell_Init(KonState* kstate)
 {
     KonCell* value = KN_ALLOC_TYPE_TAG(kstate, KonCell, KN_T_CELL);
     value->Core = KN_UNDEF;
-    value->Vector = KN_UNDEF;
+    value->Map = KN_UNDEF;
     value->Table = KN_UNDEF;
     value->List = KN_UNDEF;
     return (KN)value;
@@ -32,31 +32,31 @@ KN KonCell_DelCore(KonState* kstate, KN cell)
     return (KN)self;
 }
 
-KN KonCell_SetVector(KonState* kstate, KN cell, KN vector)
+KN KonCell_SetMap(KonState* kstate, KN cell, KN map)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->Vector = vector;
+    self->Map = map;
     return (KN)self;
 }
 
-KN KonCell_GetVector(KonState* kstate, KN cell)
+KN KonCell_GetMap(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    return (KN)self->Vector;
+    return (KN)self->Map;
 }
 
-KN KonCell_DelVector(KonState* kstate, KN cell)
+KN KonCell_DelMap(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->Vector = KN_UNDEF;
+    self->Map = KN_UNDEF;
     return (KN)self;
 }
 
-KN KonCell_ClearVector(KonState* kstate, KN cell)
+KN KonCell_ClearMap(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    KxVector* vector = KN_UNBOX_VECTOR(self->Vector);
-    KxVector_Clear(vector);
+    KxHashTable* map = KN_UNBOX_TABLE(self->Map);
+    KxHashTable_Clear(map);
     return (KN)self;
 }
 
@@ -83,7 +83,7 @@ KN KonCell_DelTable(KonState* kstate, KN cell)
 KN KonCell_ClearTable(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    KxHashTable* table = KN_UNBOX_VECTOR(self->Table);
+    KxHashTable* table = KN_UNBOX_TABLE(self->Table);
     KxHashTable_Clear(table);
     return (KN)self;
 }
@@ -153,32 +153,32 @@ KonAccessor* KonCell_Export(KonState* kstate, KonEnv* env)
     KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
-        "set-vector",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_SetVector, 2, 0, 0),
+        "set-map",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_SetMap, 2, 0, 0),
         "r",
         NULL
     );
     KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
-        "get-vector",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_GetVector, 1, 0, 0),
+        "get-map",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_GetMap, 1, 0, 0),
         "r",
         NULL
     );
     KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
-        "del-vector",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DelVector, 1, 0, 0),
+        "del-map",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DelMap, 1, 0, 0),
         "r",
         NULL
     );
     KN_DirAccessorPutKeyValue(
         kstate,
         (KN)slot,
-        "clear-vector",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_ClearVector, 1, 0, 0),
+        "clear-map",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_ClearMap, 1, 0, 0),
         "r",
         NULL
     );
