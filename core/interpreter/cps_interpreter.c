@@ -59,6 +59,19 @@ KonTrampoline* ApplyProcedureArguments(KonState* kstate, KonProcedure* proc, KN 
     else if (proc->Type == KN_COMPOSITE_FUNC) {
         bounce = KN_ApplyCompositeFunc(kstate, proc, argList, env, cont);
     }
+
+    // NOTE! the arguments are quoted before, unbox here
+    else if (proc->Type == KN_COMPOSITE_MACRO_LAMBDA) {
+        KN unboxed = KN_UNBOX_QUOTE(KN_CAR(argList));
+        argList = KN_CONS(kstate, unboxed, KN_NIL);
+        bounce = KN_ApplyCompositeLambda(kstate, proc, argList, env, cont);
+    }
+    else if (proc->Type == KN_COMPOSITE_MACRO_FUNC) {
+        KN unboxed = KN_UNBOX_QUOTE(KN_CAR(argList));
+        argList = KN_CONS(kstate, unboxed, KN_NIL);
+        bounce = KN_ApplyCompositeFunc(kstate, proc, argList, env, cont);
+    }
+
     else if (proc->Type == KN_COMPOSITE_BLK) {
         bounce = KN_ApplyCompositeBlk(kstate, proc, KN_NIL, env, cont);
     }
@@ -644,9 +657,8 @@ bool KN_IsPrefixMarcro(KN word) {
         || strcmp(prefix, "if") == 0
         || strcmp(prefix, "lambda") == 0
         || strcmp(prefix, "let") == 0
-        || strcmp(prefix, "letrec") == 0
-        || strcmp(prefix, "letstar") == 0
-        || strcmp(prefix, "local") == 0
+        || strcmp(prefix, "macro-func") == 0
+        || strcmp(prefix, "macro-lambda") == 0
         || strcmp(prefix, "or") == 0
         || strcmp(prefix, "set") == 0
         || strcmp(prefix, "set-dispatcher") == 0
@@ -688,6 +700,12 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
             }
             else if (strcmp(prefix, "func") == 0) {
                 bounce = KN_EvalPrefixFunc(kstate, (KN)cell, env, cont);
+            }
+            else if (strcmp(prefix, "macro-lambda") == 0) {
+                bounce = KN_EvalPrefixMacroLambda(kstate, (KN)cell, env, cont);
+            }
+            else if (strcmp(prefix, "macro-func") == 0) {
+                bounce = KN_EvalPrefixMacroFunc(kstate, (KN)cell, env, cont);
             }
             else if (strcmp(prefix, "blk") == 0) {
                 bounce = KN_EvalPrefixBlk(kstate, (KN)cell, env, cont);
@@ -743,8 +761,26 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
         }
         else {
             bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_SUBJ);
-            // transform cell to list
-            KN restJobs = KN_CellToWordList(kstate, KN_DNR(cell));
+            KN restJobs;
+
+            if (KN_IS_PREFIX_MARCRO(first)) {
+                KonQuote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuote, KN_T_QUOTE);
+                tmp->Type = KN_QUOTE_CELL;
+                tmp->Inner = cell;
+
+                KonSyntaxMarker* applyMarker = KN_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
+                applyMarker->Type = KN_SYNTAX_MARKER_APPLY;
+
+                // [${!xxx}]
+                KN wrapperedArgs = KN_CONS(kstate, tmp, KN_NIL);
+                // [% ${!xxx}]
+                restJobs = KN_CONS(kstate, applyMarker, wrapperedArgs);
+            }
+            else {
+                // transform cell to list
+                restJobs = KN_CellToWordList(kstate, KN_DNR(cell));
+            }
+            
             KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_SUBJ);
             k->Cont = cont;
             k->Env = env;
@@ -759,12 +795,27 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
         // passed a sentence like [writeln % "abc" "efg"]
         KN words = expression;
         KN first = KN_CAR(words);
+
         bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_SUBJ);
-            
+
         // seperate and transform [+ 1 2 3] to subj: +, restJobs: [% 1 2 3]
         KonSyntaxMarker* applyMarker = KN_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
         applyMarker->Type = KN_SYNTAX_MARKER_APPLY;
-        KN restJobs = KN_CONS(kstate, applyMarker, KN_CDR(words));
+
+        KN arguments = KN_CDR(words);
+
+        // if the first is a macro marker, quote the arguments
+        if (KN_IS_PREFIX_MARCRO(first)) {
+            KonQuote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuote, KN_T_QUOTE);
+            tmp->Type = KN_QUOTE_LIST;
+            tmp->Inner = arguments;
+            KN wrapperedArgs = KN_CONS(kstate, tmp, KN_NIL);
+
+            arguments = wrapperedArgs;
+        }
+
+        KN restJobs = KN_CONS(kstate, applyMarker, arguments);
+        
 
         KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_SUBJ);
         k->Cont = cont;

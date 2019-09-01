@@ -45,7 +45,7 @@ KonTrampoline* KN_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN ar
 
 KonTrampoline* KN_EvalPrefixFunc(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KN_DEBUG("meet prefix marcro func");
+    KN_DEBUG("meet prefix func");
     KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
     KN param = KN_DTR(expression);
     KN funcName = KN_UNDEF;

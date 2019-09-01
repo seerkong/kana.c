@@ -1,0 +1,11 @@
+{let m
+  {macro-lambda (ast)
+    #[
+      [writeln "macro-lambda args ast: " ast]
+    ]
+  }
+}
+
+{!m tt :a = 1 :b (1 2 3) #[t f t] m}
+
+[!m 1 3 adsf adiop ]

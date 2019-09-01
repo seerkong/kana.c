@@ -354,15 +354,18 @@ struct KonMsgDispatcher {
 };
 
 typedef enum {
-    // KN_PRIMARY_FUNC,   // high order native func
     KN_NATIVE_FUNC,
     KN_NATIVE_OBJ_METHOD,
     // dynamic scope.
-    // make by !func
     KN_COMPOSITE_FUNC,
     // lexial(static) scope
-    // make by !lambda
     KN_COMPOSITE_LAMBDA,
+
+    // dynamic scope.
+    KN_COMPOSITE_MACRO_FUNC,
+    // lexial(static) scope
+    KN_COMPOSITE_MACRO_LAMBDA,
+
     // a block of code, can be assigned to a var, and call
     // vars lookup in eval env. like a func without params
     // make by !blk
@@ -600,7 +603,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_IDENTIFIER(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->Type == KN_SYM_IDENTIFIER)
 #define KN_IS_WORD(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->Type == KN_SYM_WORD)
 // is a variable like @abc or a word like abc
-#define KN_IS_REFERENCE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && (((KonSymbol*)x)->Type == KN_SYM_WORD || ((KonSymbol*)x)->Type == KN_SYM_VARIABLE))
+#define KN_IS_REFERENCE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && (((KonSymbol*)x)->Type == KN_SYM_WORD || ((KonSymbol*)x)->Type == KN_SYM_VARIABLE || ((KonSymbol*)x)->Type == KN_SYM_PREFIX_WORD))
 #define KN_IS_PREFIX_MARCRO(x) (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->Type == KN_SYM_PREFIX_WORD)
 #define KN_IS_SYNTAX_MARKER(x) (KN_CHECK_TAG(x, KN_T_SYNTAX_MARKER))
 

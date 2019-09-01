@@ -45,7 +45,7 @@ KonTrampoline* KN_ApplyCompositeLambda(KonState* kstate, KonProcedure* proc, KN 
 
 KonTrampoline* KN_EvalPrefixLambda(KonState* kstate, KN expression, KonEnv* env, KonContinuation* cont)
 {
-    KN_DEBUG("meet prefix marcro lambda");
+    KN_DEBUG("meet prefix lambda");
     KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, expression, true, 0, "  ")));
 
     KN param = KN_DTR(expression);

@@ -8,6 +8,8 @@
 #include "prefix_set.h"
 #include "prefix_func.h"
 #include "prefix_lambda.h"
+#include "prefix_macro_func.h"
+#include "prefix_macro_lambda.h"
 #include "prefix_blk.h"
 #include "prefix_do.h"
 #include "prefix_and.h"
