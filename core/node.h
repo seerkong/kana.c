@@ -361,16 +361,12 @@ typedef enum {
     // lexial(static) scope
     KN_COMPOSITE_LAMBDA,
 
+    KN_COMPOSITE_OBJ_METHOD,
+
     // dynamic scope.
     KN_COMPOSITE_MACRO_FUNC,
     // lexial(static) scope
     KN_COMPOSITE_MACRO_LAMBDA,
-
-    // a block of code, can be assigned to a var, and call
-    // vars lookup in eval env. like a func without params
-    // make by !blk
-    KN_COMPOSITE_BLK,
-    KN_COMPOSITE_OBJ_METHOD,
 } KonProcedureType;
 
 typedef KN (*KonNativeFuncRef)(KonState* kstate, ...);

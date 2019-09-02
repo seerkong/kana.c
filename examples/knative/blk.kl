@@ -1,12 +1,13 @@
-{let t
-  {blk
-    #[
-      {set a 1}
-      [+ a b c]
-    ]
-  }
-}
+
 {let a 5}
 {let b 6}
 {let c 7}
-[t]
+[blk
+  {set a 1}
+  [writeln [+ a b c]]
+  `` should be 1
+  [writeln "in blk current a " a]
+]
+
+`` should be 5
+[writeln "out of blk a " a]

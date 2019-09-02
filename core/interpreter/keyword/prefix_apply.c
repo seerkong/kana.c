@@ -33,9 +33,6 @@ KonTrampoline* ApplyProcArguments(KonState* kstate, KonProcedure* proc, KN argLi
     else if (proc->Type == KN_COMPOSITE_FUNC) {
         bounce = KN_ApplyCompositeFunc(kstate, proc, argList, env, cont);
     }
-    else if (proc->Type == KN_COMPOSITE_BLK) {
-        bounce = KN_ApplyCompositeBlk(kstate, proc, KN_NIL, env, cont);
-    }
     else if (proc->Type == KN_COMPOSITE_OBJ_METHOD) {
         // treat as plain procedure when apply arg list
         // the first item in arg list is the object

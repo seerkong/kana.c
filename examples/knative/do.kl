@@ -1,7 +1,13 @@
-{do
-  #[
-    {let a 5}
-    [writeln "a value in do block: " a]
-  ]
-}
-[writeln "a value outside of do block: " a]
+
+{let a 5}
+{let b 6}
+{let c 7}
+[do
+  {set a 1}
+  [writeln [+ a b c]]
+  `` should be 1
+  [writeln "in do, current a " a]
+]
+
+`` should be 1
+[writeln "out of do a " a]

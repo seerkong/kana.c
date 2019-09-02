@@ -71,10 +71,6 @@ KonTrampoline* ApplyProcedureArguments(KonState* kstate, KonProcedure* proc, KN 
         argList = unboxed;
         bounce = KN_ApplyCompositeFunc(kstate, proc, argList, env, cont);
     }
-
-    else if (proc->Type == KN_COMPOSITE_BLK) {
-        bounce = KN_ApplyCompositeBlk(kstate, proc, KN_NIL, env, cont);
-    }
     else if (proc->Type == KN_COMPOSITE_OBJ_METHOD) {
         // treat as plain procedure when apply arg list
         // the first item in arg list is the object
@@ -628,7 +624,7 @@ KonTrampoline* KN_RunContinuation(KonState* kstate, KonContinuation* contBeingIn
     }
 }
 
-bool KN_IsPrefixMarcro(KN word) {
+bool KN_IsKeyword(KN word) {
     if (!(KN_CHECK_TAG(word, KN_T_SYMBOL))) {
         return false;
     }
@@ -681,7 +677,7 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
         // passed a sentence like {writeln "abc" "efg"}
         KonCell* cell = CAST_Kon(Cell, expression);
         KN first = cell->Core;
-        if (KN_IsPrefixMarcro(first)) {
+        if (KN_IsKeyword(first)) {
             const char* prefix = KN_UNBOX_SYMBOL(first);
             if (strcmp(prefix, "apply") == 0) {
                 bounce = KN_EvalPrefixApply(kstate, (KN)cell, env, cont);
@@ -706,12 +702,6 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
             }
             else if (strcmp(prefix, "macro-func") == 0) {
                 bounce = KN_EvalPrefixMacroFunc(kstate, (KN)cell, env, cont);
-            }
-            else if (strcmp(prefix, "blk") == 0) {
-                bounce = KN_EvalPrefixBlk(kstate, (KN)cell, env, cont);
-            }
-            else if (strcmp(prefix, "do") == 0) {
-                bounce = KN_EvalPrefixDo(kstate, (KN)cell, env, cont);
             }
             else if (strcmp(prefix, "cond") == 0) {
                 bounce = KN_EvalPrefixCond(kstate, KN_DNR(cell), env, cont);
@@ -796,36 +786,53 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
         KN words = expression;
         KN first = KN_CAR(words);
 
-        bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_SUBJ);
-
-        // seperate and transform [+ 1 2 3] to subj: +, restJobs: [% 1 2 3]
-        KonSyntaxMarker* applyMarker = KN_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
-        applyMarker->Type = KN_SYNTAX_MARKER_APPLY;
-
-        KN arguments = KN_CDR(words);
-
-        // if the first is a macro marker, quote the arguments
-        if (KN_IS_PREFIX_MARCRO(first)) {
-            KonQuote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuote, KN_T_QUOTE);
-            tmp->Type = KN_QUOTE_LIST;
-            tmp->Inner = arguments;
-            KN wrapperedArgs = KN_CONS(kstate, tmp, KN_NIL);
-
-            arguments = wrapperedArgs;
+        if (KN_IsKeyword(first)) {
+            const char* prefix = KN_UNBOX_SYMBOL(first);
+            if (strcmp(prefix, "blk") == 0) {
+                bounce = KN_EvalPrefixBlk(kstate, KN_CDR(words), env, cont);
+            }
+            else if (strcmp(prefix, "do") == 0) {
+                bounce = KN_EvalPrefixDo(kstate, KN_CDR(words), env, cont);
+            }
+            else {
+                KN_DEBUG("error! unhandled keyword");
+                bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
+                bounce->Run.Value = KN_UKN;
+                bounce->Cont = cont;
+            }
         }
+        else {
+            bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_SUBJ);
 
-        KN restJobs = KN_CONS(kstate, applyMarker, arguments);
-        
+            // seperate and transform [+ 1 2 3] to subj: +, restJobs: [% 1 2 3]
+            KonSyntaxMarker* applyMarker = KN_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
+            applyMarker->Type = KN_SYNTAX_MARKER_APPLY;
 
-        KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_SUBJ);
-        k->Cont = cont;
-        k->Env = env;
-        k->RestJobs = restJobs;
-        
-        bounce->Bounce.Value = first;  // get subj word
-        bounce->Cont = k;
-        bounce->Bounce.Env = env;
+            KN arguments = KN_CDR(words);
 
+
+            // if the first is a macro marker, quote the arguments
+            if (KN_IS_PREFIX_MARCRO(first)) {
+                KonQuote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuote, KN_T_QUOTE);
+                tmp->Type = KN_QUOTE_LIST;
+                tmp->Inner = arguments;
+                KN wrapperedArgs = KN_CONS(kstate, tmp, KN_NIL);
+
+                arguments = wrapperedArgs;
+            }
+
+            KN restJobs = KN_CONS(kstate, applyMarker, arguments);
+            
+
+            KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_EVAL_SUBJ);
+            k->Cont = cont;
+            k->Env = env;
+            k->RestJobs = restJobs;
+            
+            bounce->Bounce.Value = first;  // get subj word
+            bounce->Cont = k;
+            bounce->Bounce.Env = env;
+        }
     }
     else if (KN_IS_REFERENCE(expression)) {
         // a code block like { a }
