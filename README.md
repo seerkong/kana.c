@@ -29,6 +29,7 @@ Note: Kunu isn’t done yet. The implement may make breaking changes and produce
 - [ ] IDE support
 - [ ] error handling
 - [ ] break point, debugger
+- [ ] integrate [Cap'n Proto serialization/RPC system](https://github.com/capnproto/capnproto)
 - [ ] perl6-like grammar syntax
 - [ ] pointer equality call-cc in tail call. `{call-cc {lambda (cc1) #[{call-cc {lambda (cc2) #[ [eq cc1 cc2] ] } } ] } } => #t;`
 
@@ -237,11 +238,19 @@ in message passing style expression:
 if the first word in a clause is a word, means 'do method call to an object', eg: `{p set-sex $male}`
 
 ## Comments
-Lines preceded by the two backquotes '``' are ignored by Kunu.
+
+
 ```
-``bala bala
+`` single line comment
+
+`*
+multi-line comment
 [+ 1 2]
+*`
+
 ```
+
+
 
 ## Boolean
 true : ` #t; `
@@ -330,7 +339,7 @@ ${div :width =200 :height = 100 :disabled
 {set a 2}
 ```
 
-## Procedure call
+## procedure call
 there a two ways to make a procedure call
 first is a lisp-like style, using '[' ']'
 ```
@@ -342,7 +351,7 @@ the '%' meas apply arguments to the object
 {+ % 1 2}
 ```
 
-## Lexical-Scoped procedure
+## lexical-scoped procedure
 ```
 {let a 2}
 {lambda foo ()
@@ -361,7 +370,7 @@ the '%' meas apply arguments to the object
 [bar]   `` return 2
 ```
 
-## Dynamic-Scoped procedure
+## dynamic-scoped procedure
 ```
 {let a 2}
 {func foo ()
@@ -378,6 +387,35 @@ the '%' meas apply arguments to the object
 }
 
 [bar]   `` return 3
+```
+
+## do and blk
+use Kunu's `do` and `blk` keyword execute a code block.
+the code block using `blk` have a private env
+
+```
+{let a 5}
+[do
+  {set a 1}
+  `` should print 1
+  [writeln "in do, current a " a]
+]
+
+`` should print 1
+[writeln "out of do a " a]
+
+```
+
+```
+{let a 5}
+[blk
+  {set a 1}
+  `` should print 1
+  [writeln "in blk current a " a]
+]
+
+`` should print 5
+[writeln "out of blk a " a]
 ```
 
 ## Condition
@@ -515,21 +553,6 @@ break and continue
 [displayln {call-cc f} ]
 ```
 
-## fib example
-```
-{lambda fib (n)
-  #[
-    {if {or [eq n 1] [eq n 2]}
-      #[1]
-      else
-      #[
-        [+ [fib [- n 1 ] ] [fib [- n 2] ] ]
-      ]
-    }
-  ]
-}
-[writeln  "fib result " [fib 20] ]
-```
 
 ## quasiquote and unquote
 ```
@@ -588,6 +611,22 @@ Kunu's accessor is similar to file system which can store directory and file
 [writeln matches] `` outputs #<#<0 7 > #<0 3 > #<5 7 > >
 ```
 
+## fib example
+```
+{lambda fib (n)
+  #[
+    {if {or [eq n 1] [eq n 2]}
+      #[1]
+      else
+      #[
+        [+ [fib [- n 1 ] ] [fib [- n 2] ] ]
+      ]
+    }
+  ]
+}
+[writeln  "fib result " [fib 20] ]
+```
+
 ## build in syntax sugar to call shell cmds
 ```
 {let a "ls"}
@@ -599,3 +638,6 @@ Kunu's accessor is similar to file system which can store directory and file
 
 {sh "ps" [foo] }
 ```
+
+## make a tiny prototype-based inheritance example
+[examples/knative/proto-obj.kl](https://github.com/seerkong/kunu.c/blob/master/examples/knative/proto-obj.kl)

@@ -5,9 +5,9 @@
 [do
   {set a 1}
   [writeln [+ a b c]]
-  `` should be 1
+  `` should print 1
   [writeln "in do, current a " a]
 ]
 
-`` should be 1
+`` should print 1
 [writeln "out of do a " a]

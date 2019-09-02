@@ -3,11 +3,11 @@
 {let b 6}
 {let c 7}
 [blk
-  {set a 1}
+  {let a 1}
   [writeln [+ a b c]]
-  `` should be 1
+  `` should print 1
   [writeln "in blk current a " a]
 ]
 
-`` should be 5
+`` should print 5
 [writeln "out of blk a " a]
