@@ -63,12 +63,12 @@ KonTrampoline* ApplyProcedureArguments(KonState* kstate, KonProcedure* proc, KN 
     // NOTE! the arguments are quoted before, unbox here
     else if (proc->Type == KN_COMPOSITE_MACRO_LAMBDA) {
         KN unboxed = KN_UNBOX_QUOTE(KN_CAR(argList));
-        argList = KN_CONS(kstate, unboxed, KN_NIL);
+        argList = unboxed;
         bounce = KN_ApplyCompositeLambda(kstate, proc, argList, env, cont);
     }
     else if (proc->Type == KN_COMPOSITE_MACRO_FUNC) {
         KN unboxed = KN_UNBOX_QUOTE(KN_CAR(argList));
-        argList = KN_CONS(kstate, unboxed, KN_NIL);
+        argList = unboxed;
         bounce = KN_ApplyCompositeFunc(kstate, proc, argList, env, cont);
     }
 
@@ -766,7 +766,7 @@ KonTrampoline* KN_EvalExpression(KonState* kstate, KN expression, KonEnv* env, K
             if (KN_IS_PREFIX_MARCRO(first)) {
                 KonQuote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuote, KN_T_QUOTE);
                 tmp->Type = KN_QUOTE_CELL;
-                tmp->Inner = cell;
+                tmp->Inner = KN_CONS(kstate, cell, KN_NIL);
 
                 KonSyntaxMarker* applyMarker = KN_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
                 applyMarker->Type = KN_SYNTAX_MARKER_APPLY;

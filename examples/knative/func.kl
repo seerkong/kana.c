@@ -1,3 +1,5 @@
+
+
 {let m
   {func (x y)
     #[
@@ -30,3 +32,21 @@
 }
 
 [bar]
+
+
+{lambda delay (x)
+  #[
+    {let a 100}
+    {func :capture=[x a] ()
+      #[
+        [writeln "before deley eval x: " x]
+        [writeln "before deley eval a: " a]
+        {eval x}
+      ]
+    }
+  ]
+}
+
+{let a [delay 5]}
+[writeln a]
+[writeln [a]]

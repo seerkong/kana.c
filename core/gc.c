@@ -533,6 +533,7 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
                 KxList_Push(markTaskQueue, proc->Composite.ArgList);
                 KxList_Push(markTaskQueue, proc->Composite.Body);
                 KxList_Push(markTaskQueue, proc->Composite.LexicalEnv);
+                KxList_Push(markTaskQueue, proc->Composite.CaptureList);
             }
             break;
         }

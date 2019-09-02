@@ -385,6 +385,7 @@ struct KonProcedure {
         KonNativeFuncRef NativeFuncRef;
 
         struct {
+            KN CaptureList;
             KN ArgList;
             KN Body;
             KonEnv* LexicalEnv;

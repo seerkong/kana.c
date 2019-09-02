@@ -127,7 +127,7 @@
                 ]
                 else
                 #[
-                  {kn/accessor/put-key-val % new-instance "__proto" {eval [to-variable proto-name] } }
+                  {kn/accessor/put-key-val % new-instance "__proto" {eval [var-from-sym proto-name] } }
                 ]
               }
               {for

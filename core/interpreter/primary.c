@@ -316,7 +316,7 @@ KN KN_PrimaryIsException(KonState* kstate, KN item)
     return (KN_IS_EXCEPTION(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryToVariable(KonState* kstate, KN item)
+KN KN_PrimaryVarFromSym(KonState* kstate, KN item)
 {
     char* symCstr = NULL;
     if (KN_IS_SYMBOL(item)) {
@@ -741,8 +741,8 @@ KN KN_PrimaryOpExport(KonState* kstate, KonEnv* env)
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimarySetDispatcherId, 2, 0, 0)
     );
 
-    KN_EnvDefine(kstate, env, "to-variable",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryToVariable, 1, 0, 0)
+    KN_EnvDefine(kstate, env, "var-from-sym",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryVarFromSym, 1, 0, 0)
     );
 
     KN_EnvDefine(kstate, env, "to-identifier",

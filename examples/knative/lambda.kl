@@ -1,3 +1,5 @@
+
+
 {let m
   {lambda (x y)
     #[
@@ -36,3 +38,31 @@
 `` nested lambda, should return 4
 `` TODO add this line as a seperate test case
 [writeln "[ {lambda (x) #[x] } 4 ] => "  [ {lambda (x) #[x] } 4] ]
+
+
+{lambda make-method ()
+  #[
+    {let this 100}
+    {let x 20}
+    {lambda :capture=[this] ()
+      #[
+        [writeln "this value: " this]
+        [writeln "x value: " x]
+      ]
+    }
+  ]
+}
+
+{lambda build-class ()
+  #[
+    {let this 5}
+    {let a [make-method] }
+    [writeln a]
+
+    `` x should be 20, this should be 5
+    [writeln [a]]
+  ]
+
+}
+
+[build-class]

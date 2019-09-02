@@ -2,20 +2,39 @@
 #include "stdlib.h"
 #include "prefix_if.h"
 #include "../cps_interpreter.h"
+#include "../../container/kx_hashtable.h"
 
 KonTrampoline* KN_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* cont)
 {
     KonEnv* parentEnv = env;
     KN param = proc->Composite.ArgList;
     KN body = proc->Composite.Body;
+    KN captureList = proc->Composite.CaptureList;
+    KonEnv* lexicalEnv = proc->Composite.LexicalEnv;
 
     KN_DEBUG("param def %s", KN_StringToCstr(KN_ToFormatString(kstate, param, true, 0, "  ")));
     KN_DEBUG("argList %s", KN_StringToCstr(KN_ToFormatString(kstate, argList, true, 0, "  ")));
-    KN_DEBUG("body %s", KN_StringToCstr(KN_ToFormatString(kstate, body, true, 0, "  ")));
+    //KN_DEBUG("body %s", KN_StringToCstr(KN_ToFormatString(kstate, body, true, 0, "  ")));
 
     KonEnv* procBindEnv = KN_MakeChildEnv(kstate, parentEnv);
     KN_EnvDefine(kstate, procBindEnv, "return", cont);
-    
+
+    // bind caputure var to procedure env
+    KN captureVarIter = ((KN)captureList == KN_UNDEF) ? KN_NIL : captureList;
+    while ((KN)captureVarIter != KN_NIL) {
+        KN outerVar = KN_CAR(captureVarIter);
+
+        const char* varName = KN_UNBOX_SYMBOL(outerVar);
+        KN varValue = KN_EnvLookup(kstate, lexicalEnv, varName);
+        KN_DEBUG("capture varName  %s varValue %s",
+            varName,
+            KN_StringToCstr(KN_ToFormatString(kstate, varValue, true, 0, "  "))
+        );
+        KN_EnvDefine(kstate, procBindEnv, varName, varValue);
+
+        captureVarIter = KN_CDR(captureVarIter);
+    }
+
     KonPair* iterParam = param;
     KonPair* iterArg = argList;
     while ((KN)iterParam != KN_NIL) {
@@ -50,27 +69,40 @@ KonTrampoline* KN_EvalPrefixFunc(KonState* kstate, KN expression, KonEnv* env, K
     KN param = KN_DTR(expression);
     KN funcName = KN_UNDEF;
     KN body = KN_NIL;
+    KN captureList = KN_UNDEF;
 
     if (param == KN_UNDEF) {
         funcName = KN_DCNR(expression);
         param = KN_DTNR(expression);
         body = KN_DLNR(expression);
+        KonCell* nextCell = (KonCell*)KN_DNR(expression);
+        if (nextCell->Map != KN_UNDEF) {
+            KxHashTable* unboxedMap = nextCell->Map->Map;
+            captureList = KxHashTable_AtKey(unboxedMap, "capture");
+        }
     }
     else {
         body = KN_DLR(expression);
+        KonCell* currCell = CAST_Kon(Cell, expression);
+        if ((KN)currCell->Map != KN_UNDEF) {
+            KxHashTable* unboxedMap = currCell->Map->Map;
+            captureList = KxHashTable_AtKey(unboxedMap, "capture");
+        }
     }
 
     param = KN_ParamTableToList(kstate, param);
 
     KN_DEBUG("funcName %s", KN_StringToCstr(KN_ToFormatString(kstate, funcName, true, 0, "  ")));
     KN_DEBUG("param %s", KN_StringToCstr(KN_ToFormatString(kstate, param, true, 0, "  ")));
+    KN_DEBUG("capture list %s", KN_StringToCstr(KN_ToFormatString(kstate, captureList, true, 0, "  ")));
     KN_DEBUG("body %s", KN_StringToCstr(KN_ToFormatString(kstate, body, true, 0, "  ")));
-
+    
     KonProcedure* proc = KN_ALLOC_TYPE_TAG(kstate, KonProcedure, KN_T_PROCEDURE);
     proc->Type = KN_COMPOSITE_FUNC;
     proc->Composite.LexicalEnv = env;
     proc->Composite.ArgList = param;
     proc->Composite.Body = body;
+    proc->Composite.CaptureList = captureList;
 
     if (KN_IS_WORD(funcName)) {
         const char* varNameCstr = KN_UNBOX_SYMBOL(funcName);
