@@ -14,8 +14,8 @@ KN AfterEvalExprBodyEvaled(KonState* kstate, KN evaledValue, KonContinuation* co
 
     KonTrampoline* bounce = KN_EvalExpression(
         kstate, evaledValue,
-        contBeingInvoked->Env, 
-        contBeingInvoked->Cont);
+        contBeingInvoked->env, 
+        contBeingInvoked->cont);
 
     return bounce;
 }
@@ -30,10 +30,10 @@ KonTrampoline* KN_EvalPrefixEval(KonState* kstate, KN expression, KonEnv* env, K
     KN evalEnv = env;
 
     KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
-    k->Cont = cont;
-    k->Env = evalEnv;
+    k->cont = cont;
+    k->env = evalEnv;
 
-    k->Native.Callback = AfterEvalExprBodyEvaled;
+    k->native.callback = AfterEvalExprBodyEvaled;
 
     KonTrampoline* bounce;
     bounce = KN_EvalExpression(kstate, expr, env, k);

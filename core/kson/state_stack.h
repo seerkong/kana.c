@@ -62,13 +62,13 @@ typedef enum
 } KonReaderState;
 
 typedef struct _StateStackNode {
-    KonReaderState Data;
-    struct _StateStackNode *Next;
+    KonReaderState data;
+    struct _StateStackNode *next;
 } StateStackNode;
 
 typedef struct _StateStack {
-    long Length;
-    StateStackNode* Top;
+    long length;
+    StateStackNode* top;
 } StateStack;
 
 StateStack* StateStackInit();

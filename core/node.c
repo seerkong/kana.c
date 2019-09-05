@@ -118,22 +118,22 @@ const char* KN_HumanFormatTime()
 
 KN KN_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
 {
-    KN res = (KN)tb_allocator_malloc0(kstate->Allocator, size);
+    KN res = (KN)tb_allocator_malloc0(kstate->allocator, size);
 
     // add to heap ptr store
     KN_RecordNewKonNode(kstate, res);
 
     if (res && ! KN_IS_EXCEPTION(res)) {
-        ((KonBase*)res)->Tag = tag;
+        ((KonBase*)res)->tag = tag;
         // set dispatcher id
         if (tag == KN_T_FIXNUM || tag == KN_T_FLONUM || tag == KN_T_BIGNUM) {
-            ((KonBase*)res)->MsgDispatcherId = KN_T_NUMBER;
+            ((KonBase*)res)->msgDispatcherId = KN_T_NUMBER;
         }
         else if (tag == KN_T_NIL || tag == KN_T_PAIR) {
-            ((KonBase*)res)->MsgDispatcherId = KN_T_PAIRLIST;
+            ((KonBase*)res)->msgDispatcherId = KN_T_PAIRLIST;
         }
         else {
-            ((KonBase*)res)->MsgDispatcherId = tag;
+            ((KonBase*)res)->msgDispatcherId = tag;
         }
         
     }
@@ -165,7 +165,7 @@ unsigned int KN_NodeDispacherId(KonState* kstate, KN obj)
         return KN_T_CHAR;
     }
     else if (KN_IS_POINTER(obj)) {
-        return ((KonBase*)obj)->MsgDispatcherId;
+        return ((KonBase*)obj)->msgDispatcherId;
     }
     else {
         // not handled
@@ -276,8 +276,8 @@ KN KN_FixnumStringify(KonState* kstate, KN source)
     itoa(num, buf, 10);
 
     KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    value->String = KxStringBuffer_New();
-    KxStringBuffer_AppendCstr(value->String, buf);
+    value->string = KxStringBuffer_New();
+    KxStringBuffer_AppendCstr(value->string, buf);
 
     return (KN)value;
 }
@@ -297,8 +297,8 @@ KN KN_FlonumStringify(KonState* kstate, KN source)
     double_to_str(num, 2, buf);
 
     KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    value->String = KxStringBuffer_New();
-    KxStringBuffer_AppendCstr(value->String, buf);
+    value->string = KxStringBuffer_New();
+    KxStringBuffer_AppendCstr(value->string, buf);
     return (KN)value;
 }
 
@@ -310,38 +310,38 @@ KN KN_CharStringify(KonState* kstate, KN source)
     }
 
     KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    value->String = KxStringBuffer_New();
-    KxStringBuffer_AppendCstr(value->String, "#c,");
+    value->string = KxStringBuffer_New();
+    KxStringBuffer_AppendCstr(value->string, "#c,");
     int charcode = KN_UNBOX_CHAR(source);
     char buf[10] = {'\0'};
     snprintf(buf, 10, "%c", charcode);
-    KxStringBuffer_AppendCstr(value->String, buf);
-    KxStringBuffer_AppendCstr(value->String, ";");
+    KxStringBuffer_AppendCstr(value->string, buf);
+    KxStringBuffer_AppendCstr(value->string, ";");
     return (KN)value;
 }
 
 KN KN_StringStringify(KonState* kstate, KN source)
 {
     KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    value->String = KxStringBuffer_New();
-    KxStringBuffer_AppendCstr(value->String, "\"");
-    KxStringBuffer_AppendStringBuffer(value->String, KN_UNBOX_STRING(source));
-    KxStringBuffer_AppendCstr(value->String, "\"");
+    value->string = KxStringBuffer_New();
+    KxStringBuffer_AppendCstr(value->string, "\"");
+    KxStringBuffer_AppendStringBuffer(value->string, KN_UNBOX_STRING(source));
+    KxStringBuffer_AppendCstr(value->string, "\"");
     return (KN)value;
 }
 
 KN KN_MakeString(KonState* kstate, const char* str)
 {
     KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    value->String = KxStringBuffer_New();
-    KxStringBuffer_AppendCstr(value->String, str);
+    value->string = KxStringBuffer_New();
+    KxStringBuffer_AppendCstr(value->string, str);
     return (KN)value;
 }
 
 KN KN_MakeEmptyString(KonState* kstate)
 {
     KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    value->String = KxStringBuffer_New();
+    value->string = KxStringBuffer_New();
     return (KN)value;
 }
 
@@ -362,42 +362,42 @@ void AddLeftPadding(KxStringBuffer* str, int depth, char* padding)
 
 KN KN_SymbolStringify(KonState* kstate, KN source)
 {
-    KonSymbolType type = CAST_Kon(Symbol, source)->Type;
+    KonSymbolType type = CAST_Kon(Symbol, source)->type;
     const char* data = KN_UNBOX_SYMBOL(source);
 
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
     switch (type) {
         case KN_SYM_PREFIX_WORD: {
-            KxStringBuffer_AppendCstr(result->String, "!");
-            KxStringBuffer_AppendCstr(result->String, data);
+            KxStringBuffer_AppendCstr(result->string, "!");
+            KxStringBuffer_AppendCstr(result->string, data);
             break;
         }
         case KN_SYM_SUFFIX_WORD: {
-            KxStringBuffer_AppendCstr(result->String, "^");
-            KxStringBuffer_AppendCstr(result->String, data);
+            KxStringBuffer_AppendCstr(result->string, "^");
+            KxStringBuffer_AppendCstr(result->string, data);
             break;
         }
 
         case KN_SYM_WORD: {
-            KxStringBuffer_AppendCstr(result->String, data);
+            KxStringBuffer_AppendCstr(result->string, data);
             break;
         }
         case KN_SYM_VARIABLE: {
-            KxStringBuffer_AppendCstr(result->String, "@");
-            KxStringBuffer_AppendCstr(result->String, data);
+            KxStringBuffer_AppendCstr(result->string, "@");
+            KxStringBuffer_AppendCstr(result->string, data);
             break;
         }
         case KN_SYM_IDENTIFIER: {
-            KxStringBuffer_AppendCstr(result->String, "$");
-            KxStringBuffer_AppendCstr(result->String, data);
+            KxStringBuffer_AppendCstr(result->string, "$");
+            KxStringBuffer_AppendCstr(result->string, data);
             break;
         }
         case KN_SYM_STRING: {
-            KxStringBuffer_AppendCstr(result->String, "$\'");
-            KxStringBuffer_AppendCstr(result->String, data);
-            KxStringBuffer_AppendCstr(result->String, "\'");
+            KxStringBuffer_AppendCstr(result->string, "$\'");
+            KxStringBuffer_AppendCstr(result->string, data);
+            KxStringBuffer_AppendCstr(result->string, "\'");
             break;
         }
     }
@@ -411,38 +411,38 @@ const char* KN_SymbolToCstr(KN sym)
 
 KN KN_SyntaxMarkerStringify(KonState* kstate, KN source)
 {
-    KonSyntaxMarkerType type = CAST_Kon(SyntaxMarker, source)->Type;
+    KonSyntaxMarkerType type = CAST_Kon(SyntaxMarker, source)->type;
 
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
     switch (type) {
         case KN_SYNTAX_MARKER_APPLY: {
-            KxStringBuffer_AppendCstr(result->String, "%");
+            KxStringBuffer_AppendCstr(result->string, "%");
             break;
         }
         case KN_SYNTAX_MARKER_EQUAL: {
-            KxStringBuffer_AppendCstr(result->String, "=");
+            KxStringBuffer_AppendCstr(result->string, "=");
             break;
         }
         case KN_SYNTAX_MARKER_ASSIGN: {
-            KxStringBuffer_AppendCstr(result->String, ":=");
+            KxStringBuffer_AppendCstr(result->string, ":=");
             break;
         }
         case KN_SYNTAX_MARKER_MSG_SIGNAL: {
-            KxStringBuffer_AppendCstr(result->String, ".");
+            KxStringBuffer_AppendCstr(result->string, ".");
             break;
         }
         case KN_SYNTAX_MARKER_GET_SLOT: {
-            KxStringBuffer_AppendCstr(result->String, "/");
+            KxStringBuffer_AppendCstr(result->string, "/");
             break;
         }
         case KN_SYNTAX_MARKER_PROC_PIPE: {
-            KxStringBuffer_AppendCstr(result->String, "|");
+            KxStringBuffer_AppendCstr(result->string, "|");
             break;
         }
         case KN_SYNTAX_MARKER_CLAUSE_END: {
-            KxStringBuffer_AppendCstr(result->String, ";");
+            KxStringBuffer_AppendCstr(result->string, ";");
             break;
         }
     }
@@ -451,93 +451,93 @@ KN KN_SyntaxMarkerStringify(KonState* kstate, KN source)
 
 KN KN_QuoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonQuoteType type = CAST_Kon(Quote, source)->Type;
-    KN inner = CAST_Kon(Quote, source)->Inner;
+    KonQuoteType type = CAST_Kon(Quote, source)->type;
+    KN inner = CAST_Kon(Quote, source)->inner;
 
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
-    KxStringBuffer_AppendCstr(result->String, "$");
+    KxStringBuffer_AppendCstr(result->string, "$");
 
     KN innerToKonStr = KN_ToFormatString(kstate, inner, newLine, depth, padding);
-    KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(innerToKonStr));
+    KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerToKonStr));
 
     return (KN)result;
 }
 
 KN KN_QuasiquoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonQuasiquoteType type = CAST_Kon(Quasiquote, source)->Type;
-    KN inner = CAST_Kon(Quasiquote, source)->Inner;
+    KonQuasiquoteType type = CAST_Kon(Quasiquote, source)->type;
+    KN inner = CAST_Kon(Quasiquote, source)->inner;
 
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
-    KxStringBuffer_AppendCstr(result->String, "@");
+    KxStringBuffer_AppendCstr(result->string, "@");
 
     KN innerToKonStr = KN_ToFormatString(kstate, inner, newLine, depth, padding);
-    KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(innerToKonStr));
+    KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerToKonStr));
 
     return (KN)result;
 }
 
 KN KN_ExpandStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonExpandType type = CAST_Kon(Expand, source)->Type;
-    KN inner = CAST_Kon(Expand, source)->Inner;
+    KonExpandType type = CAST_Kon(Expand, source)->type;
+    KN inner = CAST_Kon(Expand, source)->inner;
 
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
-    KxStringBuffer_AppendCstr(result->String, "@");
+    KxStringBuffer_AppendCstr(result->string, "@");
 
     switch (type) {
         case KN_EXPAND_REPLACE: {
             break;
         }
         case KN_EXPAND_KV: {
-            KxStringBuffer_AppendCstr(result->String, "%");
+            KxStringBuffer_AppendCstr(result->string, "%");
             break;
         }
         case KN_EXPAND_SEQ: {
-            KxStringBuffer_AppendCstr(result->String, "~");
+            KxStringBuffer_AppendCstr(result->string, "~");
             break;
         }
     }
 
-    KxStringBuffer_AppendCstr(result->String, ".");
+    KxStringBuffer_AppendCstr(result->string, ".");
 
     KN innerToKonStr = KN_ToFormatString(kstate, inner, newLine, depth, padding);
-    KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(innerToKonStr));
+    KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerToKonStr));
 
     return (KN)result;
 }
 
 KN KN_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonUnquoteType type = CAST_Kon(Unquote, source)->Type;
-    KN inner = CAST_Kon(Unquote, source)->Inner;
+    KonUnquoteType type = CAST_Kon(Unquote, source)->type;
+    KN inner = CAST_Kon(Unquote, source)->inner;
 
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
-    KxStringBuffer_AppendCstr(result->String, "$");
+    KxStringBuffer_AppendCstr(result->string, "$");
 
     switch (type) {
         case KN_UNQUOTE_SEQ: {
-            KxStringBuffer_AppendCstr(result->String, "~");
+            KxStringBuffer_AppendCstr(result->string, "~");
             break;
         }
         case KN_UNQUOTE_KV: {
-            KxStringBuffer_AppendCstr(result->String, "%");
+            KxStringBuffer_AppendCstr(result->string, "%");
             break;
         }
     }
 
-    KxStringBuffer_AppendCstr(result->String, ".");
+    KxStringBuffer_AppendCstr(result->string, ".");
 
     KN innerToKonStr = KN_ToFormatString(kstate, inner, newLine, depth, padding);
-    KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(innerToKonStr));
+    KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerToKonStr));
 
     return (KN)result;
 }
@@ -551,45 +551,45 @@ KN KN_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, cha
 KN KN_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
-    KxVector* items = CAST_Kon(Vector, source)->Vector;
+    KxVector* items = CAST_Kon(Vector, source)->vector;
 
     int vecLen = KxVector_Length(items);
     
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "#<\n");
+        KxStringBuffer_AppendCstr(result->string, "#<\n");
 
         
         for (int i = 0; i < vecLen; i++) {
             KN item = KxVector_AtIndex(items, i);
             KN itemToKonStr = KN_ToFormatString(kstate, item, true, depth + 1, padding);
 
-            AddLeftPadding(result->String, depth, padding);
-            KxStringBuffer_AppendCstr(result->String, padding);
-            KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(itemToKonStr));
-            KxStringBuffer_AppendCstr(result->String, "\n");
+            AddLeftPadding(result->string, depth, padding);
+            KxStringBuffer_AppendCstr(result->string, padding);
+            KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
+            KxStringBuffer_AppendCstr(result->string, "\n");
         }
 
-        AddLeftPadding(result->String, depth, padding);
-        KxStringBuffer_AppendCstr(result->String, ">");
+        AddLeftPadding(result->string, depth, padding);
+        KxStringBuffer_AppendCstr(result->string, ">");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "#<");
+        KxStringBuffer_AppendCstr(result->string, "#<");
         
         for (int i = 0; i < vecLen; i++) {
             KN item = KxVector_AtIndex(items, i);
             
             KN itemToKonStr = KN_ToFormatString(kstate, item, false, depth + 1, padding);
-            KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(itemToKonStr));
+            KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
 
             // if (i != vecLen - 1) {
-                KxStringBuffer_AppendCstr(result->String, " ");
+                KxStringBuffer_AppendCstr(result->string, " ");
             // }
             
         }
 
-        KxStringBuffer_AppendCstr(result->String, ">");
+        KxStringBuffer_AppendCstr(result->string, ">");
     }
 
     return (KN)result;
@@ -627,15 +627,15 @@ KN KN_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 {
     assert(KN_IsPairList(source));
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
     if (source == KN_NIL) {
-        KxStringBuffer_AppendCstr(result->String, "#nil;");
+        KxStringBuffer_AppendCstr(result->string, "#nil;");
         return (KN)result;
     }
     
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "[\n");
+        KxStringBuffer_AppendCstr(result->string, "[\n");
         if (source != KN_NIL && KN_IS_PAIR(source)) {
             KonPair* iter = source;
 
@@ -645,20 +645,20 @@ KN KN_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 
                 KN itemToKonStr = KN_ToFormatString(kstate, item, true, depth + 1, padding);
                 
-                AddLeftPadding(result->String, depth, padding);
-                KxStringBuffer_AppendCstr(result->String, padding);
-                KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(itemToKonStr));
-                KxStringBuffer_AppendCstr(result->String, "\n");
+                AddLeftPadding(result->string, depth, padding);
+                KxStringBuffer_AppendCstr(result->string, padding);
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
+                KxStringBuffer_AppendCstr(result->string, "\n");
 
                 iter = next;
             }
         }
 
-        AddLeftPadding(result->String, depth, padding);
-        KxStringBuffer_AppendCstr(result->String, "]");
+        AddLeftPadding(result->string, depth, padding);
+        KxStringBuffer_AppendCstr(result->string, "]");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "[");
+        KxStringBuffer_AppendCstr(result->string, "[");
         
         if (source != KN_NIL && KN_IS_PAIR(source)) {
             KonPair* iter = source;
@@ -668,15 +668,15 @@ KN KN_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, ch
                 KN next = KN_CDR(iter);
                 
                 KN itemToKonStr = KN_ToFormatString(kstate, item, false, depth + 1, padding);
-                KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(itemToKonStr));
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
                 // if (next != KN_NIL) {
-                    KxStringBuffer_AppendCstr(result->String, " ");
+                    KxStringBuffer_AppendCstr(result->string, " ");
                 // }
                 iter = next;
             }
         }
 
-        KxStringBuffer_AppendCstr(result->String, "]");
+        KxStringBuffer_AppendCstr(result->string, "]");
     }
 
     return (KN)result;
@@ -685,16 +685,16 @@ KN KN_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 KN KN_BlockStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
-    KxStringBuffer_AppendCstr(result->String, "#");
+    result->string = KxStringBuffer_New();
+    KxStringBuffer_AppendCstr(result->string, "#");
     if (source == KN_NIL) {
-        KxStringBuffer_AppendCstr(result->String, "[]");
+        KxStringBuffer_AppendCstr(result->string, "[]");
     }
     else {
         // change first element tag to list pair
-        ((KonBase*)source)->Tag = KN_T_PAIR;
+        ((KonBase*)source)->tag = KN_T_PAIR;
         KN formated = KN_PairListStringify(kstate, source, true, depth, padding);
-        KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(formated));
+        KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(formated));
     }
     return (KN)result;
 }
@@ -739,9 +739,9 @@ KN KN_Cons(KonState* kstate, KN head, KN tail)
   if (KN_IS_EXCEPTION(node)) {
       return (KN)node;
   }
-  node->Prev = KN_NIL;
+  node->prev = KN_NIL;
   if (KN_IS_PAIR(tail)) {
-      CAST_Kon(Pair, tail)->Prev = (KN)node;
+      CAST_Kon(Pair, tail)->prev = (KN)node;
   }
   KN_CAR(node) = head;
   KN_CDR(node) = tail;
@@ -766,13 +766,13 @@ KN KN_PairList3(KonState* kstate, KN a, KN b, KN c)
 KN KN_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
-    KxHashTable* hashTable = CAST_Kon(Table, source)->Table;
+    KxHashTable* hashTable = CAST_Kon(Table, source)->table;
     KxHashTableIter iter = KxHashTable_IterHead(hashTable);
 
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "#(\n");
+        KxStringBuffer_AppendCstr(result->string, "#(\n");
 
 
         while ((KN)iter != KN_NIL) {
@@ -782,25 +782,25 @@ KN KN_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char*
 
             KN itemToKonStr = KN_ToFormatString(kstate, itemValue, true, depth + 1, padding);
             if (itemKey != NULL) {
-                AddLeftPadding(result->String, depth, padding);
-                KxStringBuffer_AppendCstr(result->String, ":'");
-                KxStringBuffer_AppendCstr(result->String, itemKey);
-                KxStringBuffer_AppendCstr(result->String, "'=\n");
+                AddLeftPadding(result->string, depth, padding);
+                KxStringBuffer_AppendCstr(result->string, ":'");
+                KxStringBuffer_AppendCstr(result->string, itemKey);
+                KxStringBuffer_AppendCstr(result->string, "'=\n");
             }
 
-            AddLeftPadding(result->String, depth, padding);
-            KxStringBuffer_AppendCstr(result->String, padding);
-            KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(itemToKonStr));
-            KxStringBuffer_AppendCstr(result->String, "\n");
+            AddLeftPadding(result->string, depth, padding);
+            KxStringBuffer_AppendCstr(result->string, padding);
+            KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
+            KxStringBuffer_AppendCstr(result->string, "\n");
 
             iter = next;
         }
 
-        AddLeftPadding(result->String, depth, padding);
-        KxStringBuffer_AppendCstr(result->String, ")");
+        AddLeftPadding(result->string, depth, padding);
+        KxStringBuffer_AppendCstr(result->string, ")");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "#(");
+        KxStringBuffer_AppendCstr(result->string, "#(");
 
         while ((KN)iter != KN_NIL) {
             KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
@@ -810,20 +810,20 @@ KN KN_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char*
             KN itemToKonStr = KN_ToFormatString(kstate, itemValue, false, depth + 1, padding);
 
             if (itemKey != NULL) {
-                KxStringBuffer_AppendCstr(result->String, ":'");
-                KxStringBuffer_AppendCstr(result->String, itemKey);
-                KxStringBuffer_AppendCstr(result->String, "'= ");
+                KxStringBuffer_AppendCstr(result->string, ":'");
+                KxStringBuffer_AppendCstr(result->string, itemKey);
+                KxStringBuffer_AppendCstr(result->string, "'= ");
             }
 
-            KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(itemToKonStr));
+            KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
             
             // if (next != KN_NIL) {
-                KxStringBuffer_AppendCstr(result->String, " ");
+                KxStringBuffer_AppendCstr(result->string, " ");
             // }
 
             iter = next;
         }
-        KxStringBuffer_AppendCstr(result->String, ")");
+        KxStringBuffer_AppendCstr(result->string, ")");
     }
 
     return (KN)result;
@@ -832,13 +832,13 @@ KN KN_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char*
 KN KN_ParamStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
-    KxHashTable* hashTable = CAST_Kon(Param, source)->Table;
+    KxHashTable* hashTable = CAST_Kon(Param, source)->table;
     KxHashTableIter iter = KxHashTable_IterHead(hashTable);
 
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "(\n");
+        KxStringBuffer_AppendCstr(result->string, "(\n");
 
 
         while ((KN)iter != KN_NIL) {
@@ -848,25 +848,25 @@ KN KN_ParamStringify(KonState* kstate, KN source, bool newLine, int depth, char*
 
             KN itemToKonStr = KN_ToFormatString(kstate, itemValue, true, depth + 1, padding);
             if (itemKey != NULL) {
-                AddLeftPadding(result->String, depth, padding);
-                KxStringBuffer_AppendCstr(result->String, ":'");
-                KxStringBuffer_AppendCstr(result->String, itemKey);
-                KxStringBuffer_AppendCstr(result->String, "'\n");
+                AddLeftPadding(result->string, depth, padding);
+                KxStringBuffer_AppendCstr(result->string, ":'");
+                KxStringBuffer_AppendCstr(result->string, itemKey);
+                KxStringBuffer_AppendCstr(result->string, "'\n");
             }
 
-            AddLeftPadding(result->String, depth, padding);
-            KxStringBuffer_AppendCstr(result->String, padding);
-            KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(itemToKonStr));
-            KxStringBuffer_AppendCstr(result->String, "\n");
+            AddLeftPadding(result->string, depth, padding);
+            KxStringBuffer_AppendCstr(result->string, padding);
+            KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
+            KxStringBuffer_AppendCstr(result->string, "\n");
 
             iter = next;
         }
 
-        AddLeftPadding(result->String, depth, padding);
-        KxStringBuffer_AppendCstr(result->String, ")");
+        AddLeftPadding(result->string, depth, padding);
+        KxStringBuffer_AppendCstr(result->string, ")");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "(");
+        KxStringBuffer_AppendCstr(result->string, "(");
 
         while ((KN)iter != KN_NIL) {
             KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
@@ -876,20 +876,20 @@ KN KN_ParamStringify(KonState* kstate, KN source, bool newLine, int depth, char*
             KN itemToKonStr = KN_ToFormatString(kstate, itemValue, false, depth + 1, padding);
 
             if (itemKey != NULL) {
-                KxStringBuffer_AppendCstr(result->String, ":'");
-                KxStringBuffer_AppendCstr(result->String, itemKey);
-                KxStringBuffer_AppendCstr(result->String, "' ");
+                KxStringBuffer_AppendCstr(result->string, ":'");
+                KxStringBuffer_AppendCstr(result->string, itemKey);
+                KxStringBuffer_AppendCstr(result->string, "' ");
             }
 
-            KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(itemToKonStr));
+            KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
             
             // if (next != KN_NIL) {
-                KxStringBuffer_AppendCstr(result->String, " ");
+                KxStringBuffer_AppendCstr(result->string, " ");
             // }
 
             iter = next;
         }
-        KxStringBuffer_AppendCstr(result->String, ")");
+        KxStringBuffer_AppendCstr(result->string, ")");
     }
 
     return (KN)result;
@@ -897,7 +897,7 @@ KN KN_ParamStringify(KonState* kstate, KN source, bool newLine, int depth, char*
 
 KN KN_ParamTableToList(KonState* kstate, KN source)
 {
-    KxHashTable* hashTable = CAST_Kon(Param, source)->Table;
+    KxHashTable* hashTable = CAST_Kon(Param, source)->table;
     KxHashTableIter iter = KxHashTable_IterHead(hashTable);
     KN result = KN_NIL;
     while ((KN)iter != KN_NIL) {
@@ -913,122 +913,122 @@ KN KN_ParamTableToList(KonState* kstate, KN source)
 KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
     KonCell* head = CAST_Kon(Cell, source);
     KonCell* iter = head;
 
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "{");
+        KxStringBuffer_AppendCstr(result->string, "{");
 
         while ((KN)iter != KN_NIL) {
-            KN name = iter->Core;
-            KonMap* innerMap = iter->Map;
-            KonTable* innerTable = iter->Table;
-            KonPair* innerList = iter->List;
+            KN name = iter->core;
+            KonMap* innerMap = iter->map;
+            KonTable* innerTable = iter->table;
+            KonPair* innerList = iter->list;
             
             
             if (name != KN_UNDEF) {
                 KN nameToKonStr = KN_ToFormatString(kstate, name, true, depth + 1, padding);
                 if (iter != head) {
-                    KxStringBuffer_AppendCstr(result->String, "\n");
-                    AddLeftPadding(result->String, depth, padding);
-                    KxStringBuffer_AppendCstr(result->String, padding);
+                    KxStringBuffer_AppendCstr(result->string, "\n");
+                    AddLeftPadding(result->string, depth, padding);
+                    KxStringBuffer_AppendCstr(result->string, padding);
                 }
-                KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(nameToKonStr));
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(nameToKonStr));
             }
 
             if (innerMap != KN_UNDEF) {
-                KxHashTable* unboxedMap = innerMap->Map;
+                KxHashTable* unboxedMap = innerMap->map;
                 KxHashTableIter mapIter = KxHashTable_IterHead(unboxedMap);
                 while ((KN)mapIter != KN_NIL) {
                     KxHashTableIter mapIterNext = KxHashTable_IterNext(unboxedMap, mapIter);
                     const char* mapKey = KxHashTable_IterGetKey(unboxedMap, mapIter);
                     KN mapValue = (KN)KxHashTable_IterGetVal(unboxedMap, mapIter);
-                    KxStringBuffer_AppendCstr(result->String, "\n");
-                    AddLeftPadding(result->String, depth, padding);
-                    KxStringBuffer_AppendCstr(result->String, padding);
+                    KxStringBuffer_AppendCstr(result->string, "\n");
+                    AddLeftPadding(result->string, depth, padding);
+                    KxStringBuffer_AppendCstr(result->string, padding);
 
-                    KxStringBuffer_AppendCstr(result->String, ":'");
-                    KxStringBuffer_AppendCstr(result->String, mapKey);
-                    KxStringBuffer_AppendCstr(result->String, "'");
+                    KxStringBuffer_AppendCstr(result->string, ":'");
+                    KxStringBuffer_AppendCstr(result->string, mapKey);
+                    KxStringBuffer_AppendCstr(result->string, "'");
 
                     if (mapValue != NULL && mapValue != KN_UKN) {
                         KN mapValKonStr = KN_ToFormatString(kstate, mapValue, true, depth + 1, padding);
-                        KxStringBuffer_AppendCstr(result->String, "= ");
-                        KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(mapValKonStr));
+                        KxStringBuffer_AppendCstr(result->string, "= ");
+                        KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(mapValKonStr));
                     }
                     mapIter = mapIterNext;
                 }
             }
             
             if ((KN)innerTable != KN_UNDEF) {
-                KxStringBuffer_AppendCstr(result->String, "\n");
-                AddLeftPadding(result->String, depth, padding);
-                KxStringBuffer_AppendCstr(result->String, padding);
+                KxStringBuffer_AppendCstr(result->string, "\n");
+                AddLeftPadding(result->string, depth, padding);
+                KxStringBuffer_AppendCstr(result->string, padding);
 
                 KN innerTableToKonStr = KN_ParamStringify(kstate, (KN)innerTable, true, depth + 1, padding);
-                KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(innerTableToKonStr));
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerTableToKonStr));
             }
 
             if ((KN)innerList != KN_UNDEF) {
-                 KxStringBuffer_AppendCstr(result->String, "\n");
-                 AddLeftPadding(result->String, depth, padding);
-                 KxStringBuffer_AppendCstr(result->String, padding);
+                 KxStringBuffer_AppendCstr(result->string, "\n");
+                 AddLeftPadding(result->string, depth, padding);
+                 KxStringBuffer_AppendCstr(result->string, padding);
 
                  KN innerListToKonStr = KN_BlockStringify(kstate, (KN)innerList, true, depth + 1, padding);
-                 KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(innerListToKonStr));
+                 KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerListToKonStr));
              }
             
-            iter = iter->Next;
+            iter = iter->next;
         }
 
         if ((KN)head != KN_NIL
-            || (KN)head->Table != KN_UNDEF
-            || (KN)head->List != KN_UNDEF
-            || (KN)head->Next != KN_NIL
+            || (KN)head->table != KN_UNDEF
+            || (KN)head->list != KN_UNDEF
+            || (KN)head->next != KN_NIL
         ) {
-            KxStringBuffer_AppendCstr(result->String, "\n");
-            AddLeftPadding(result->String, depth, padding);
+            KxStringBuffer_AppendCstr(result->string, "\n");
+            AddLeftPadding(result->string, depth, padding);
         }
 
-        KxStringBuffer_AppendCstr(result->String, "}");
+        KxStringBuffer_AppendCstr(result->string, "}");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "{");
+        KxStringBuffer_AppendCstr(result->string, "{");
 
         while ((KN)iter != KN_NIL) {
-            KN name = iter->Core;
-            KonMap* innerMap = iter->Map;
-            KonTable* innerTable = iter->Table;
-            KonPair* innerList = iter->List;
+            KN name = iter->core;
+            KonMap* innerMap = iter->map;
+            KonTable* innerTable = iter->table;
+            KonPair* innerList = iter->list;
 
             if (name != KN_UNDEF) {
                 KN nameToKonStr = KN_ToFormatString(kstate, name, true, depth, padding);
                 if (iter != head) {
-                    KxStringBuffer_AppendCstr(result->String, " ");
+                    KxStringBuffer_AppendCstr(result->string, " ");
                 }
-                KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(nameToKonStr));
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(nameToKonStr));
             }
 
             if (innerMap != KN_UNDEF) {
-                KxHashTable* unboxedMap = innerMap->Map;
+                KxHashTable* unboxedMap = innerMap->map;
 
                 KxHashTableIter mapIter = KxHashTable_IterHead(unboxedMap);
                 while ((KN)mapIter != KN_NIL) {
                     KxHashTableIter mapIterNext = KxHashTable_IterNext(unboxedMap, mapIter);
                     const char* mapKey = KxHashTable_IterGetKey(unboxedMap, mapIter);
                     KN mapValue = (KN)KxHashTable_IterGetVal(unboxedMap, mapIter);
-                    KxStringBuffer_AppendCstr(result->String, " ");
+                    KxStringBuffer_AppendCstr(result->string, " ");
 
-                    KxStringBuffer_AppendCstr(result->String, ":'");
-                    KxStringBuffer_AppendCstr(result->String, mapKey);
-                    KxStringBuffer_AppendCstr(result->String, "'");
+                    KxStringBuffer_AppendCstr(result->string, ":'");
+                    KxStringBuffer_AppendCstr(result->string, mapKey);
+                    KxStringBuffer_AppendCstr(result->string, "'");
 
                     if (mapValue != NULL && mapValue != KN_UKN) {
                         KN mapValKonStr = KN_ToFormatString(kstate, mapValue, true, depth + 1, padding);
-                        KxStringBuffer_AppendCstr(result->String, "= ");
-                        KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(mapValKonStr));
+                        KxStringBuffer_AppendCstr(result->string, "= ");
+                        KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(mapValKonStr));
                     }
                     mapIter = mapIterNext;
                 }
@@ -1036,20 +1036,20 @@ KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* 
             
             
             if ((KN)innerTable != KN_UNDEF) {
-                KxStringBuffer_AppendCstr(result->String, " ");
+                KxStringBuffer_AppendCstr(result->string, " ");
                 KN innerTableToKonStr = KN_ParamStringify(kstate, (KN)innerTable, false, depth + 1, padding);
-                KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(innerTableToKonStr));
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerTableToKonStr));
             }
 
             if ((KN)innerList != KN_UNDEF) {
-                KxStringBuffer_AppendCstr(result->String, " ");
+                KxStringBuffer_AppendCstr(result->string, " ");
                 KN innerListToKonStr = KN_BlockStringify(kstate, (KN)innerList, false, depth + 1, padding);
-                KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(innerListToKonStr));
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerListToKonStr));
             }
 
-            iter = iter->Next;
+            iter = iter->next;
         }
-        KxStringBuffer_AppendCstr(result->String, "}");
+        KxStringBuffer_AppendCstr(result->string, "}");
     }
 
     return (KN)result;
@@ -1061,9 +1061,9 @@ KN KN_CellCoresToList(KonState* kstate, KN source)
     KonCell* iter = head;
     KN result = KN_NIL;
     while ((KN)iter != KN_NIL) {
-        KN core = iter->Core;
+        KN core = iter->core;
         result = KN_CONS(kstate, core, result);
-        iter = iter->Next;
+        iter = iter->next;
     }
     return KN_PairListRevert(kstate, result);
 }
@@ -1074,24 +1074,24 @@ KN KN_CellCoresToList(KonState* kstate, KN source)
 KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
     KonAccessor* accessor = CAST_Kon(Accessor, source);
-    if (!accessor->IsDir) {
-        KN value = accessor->Value;
+    if (!accessor->isDir) {
+        KN value = accessor->value;
         // get accessor inner value
         while (KN_IS_ACCESSOR(value)
-            && !CAST_Kon(Accessor, value)->IsDir
+            && !CAST_Kon(Accessor, value)->isDir
         ) {
-            value = CAST_Kon(Accessor, value)->Value;
+            value = CAST_Kon(Accessor, value)->value;
         }
         return KN_ToFormatString(kstate, value, true, depth, padding);
     }
-    KxHashTable* hashTable = accessor->Dir;
+    KxHashTable* hashTable = accessor->dir;
     KxHashTableIter iter = KxHashTable_IterHead(hashTable);
 
     if (newLine) {
-        KxStringBuffer_AppendCstr(result->String, "#accesor.(\n");
+        KxStringBuffer_AppendCstr(result->string, "#accesor.(\n");
 
         while ((KN)iter != KN_NIL) {
             KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
@@ -1100,24 +1100,24 @@ KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 
             KN itemToKonStr = KN_ToFormatString(kstate, itemValue, true, depth + 1, padding);
 
-            AddLeftPadding(result->String, depth, padding);
-            KxStringBuffer_AppendCstr(result->String, ":'");
-            KxStringBuffer_AppendCstr(result->String, itemKey);
-            KxStringBuffer_AppendCstr(result->String, "'=\n");
+            AddLeftPadding(result->string, depth, padding);
+            KxStringBuffer_AppendCstr(result->string, ":'");
+            KxStringBuffer_AppendCstr(result->string, itemKey);
+            KxStringBuffer_AppendCstr(result->string, "'=\n");
 
-            AddLeftPadding(result->String, depth, padding);
-            KxStringBuffer_AppendCstr(result->String, padding);
-            KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(itemToKonStr));
-            KxStringBuffer_AppendCstr(result->String, "\n");
+            AddLeftPadding(result->string, depth, padding);
+            KxStringBuffer_AppendCstr(result->string, padding);
+            KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
+            KxStringBuffer_AppendCstr(result->string, "\n");
 
             iter = next;
         }
 
-        AddLeftPadding(result->String, depth, padding);
-        KxStringBuffer_AppendCstr(result->String, ")");
+        AddLeftPadding(result->string, depth, padding);
+        KxStringBuffer_AppendCstr(result->string, ")");
     }
     else {
-        KxStringBuffer_AppendCstr(result->String, "#accesor.(");
+        KxStringBuffer_AppendCstr(result->string, "#accesor.(");
 
         while ((KN)iter != KN_NIL) {
             KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
@@ -1126,19 +1126,19 @@ KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 
             KN itemToKonStr = KN_ToFormatString(kstate, itemValue, false, depth + 1, padding);
 
-            KxStringBuffer_AppendCstr(result->String, ":'");
-            KxStringBuffer_AppendCstr(result->String, itemKey);
-            KxStringBuffer_AppendCstr(result->String, "'= ");
+            KxStringBuffer_AppendCstr(result->string, ":'");
+            KxStringBuffer_AppendCstr(result->string, itemKey);
+            KxStringBuffer_AppendCstr(result->string, "'= ");
 
-            KxStringBuffer_AppendStringBuffer(result->String, KN_UNBOX_STRING(itemToKonStr));
+            KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
             
             // if (next != KN_NIL) {
-                KxStringBuffer_AppendCstr(result->String, " ");
+                KxStringBuffer_AppendCstr(result->string, " ");
             // }
 
             iter = next;
         }
-        KxStringBuffer_AppendCstr(result->String, ")");
+        KxStringBuffer_AppendCstr(result->string, ")");
     }
 
     return (KN)result;
@@ -1148,11 +1148,11 @@ KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef, int paramNum, int hasVAList, int hasVAMap)
 {
     KonProcedure* result = KN_ALLOC_TYPE_TAG(kstate, KonProcedure, KN_T_PROCEDURE);
-    result->Type = type;
-    result->NativeFuncRef = funcRef;
-    result->ParamNum = paramNum;
-    result->HasVAList = hasVAList != 0 ? 1 : 0;
-    result->HasVAMap = hasVAMap != 0 ? 1 : 0;
+    result->type = type;
+    result->nativeFuncRef = funcRef;
+    result->paramNum = paramNum;
+    result->hasVAList = hasVAList != 0 ? 1 : 0;
+    result->hasVAMap = hasVAMap != 0 ? 1 : 0;
     return (KN)result;
 }
 
@@ -1179,10 +1179,11 @@ KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KonEnv* env)
     
     param = KN_ParamTableToList(kstate, param);
     
-    proc->Type = KN_COMPOSITE_LAMBDA;
-    proc->Composite.LexicalEnv = env;
-    proc->Composite.ArgList = param;
-    proc->Composite.Body = body;
+    proc->type = KN_COMPOSITE_LAMBDA;
+    proc->composite.lexicalEnv = env;
+    proc->composite.argList = param;
+    proc->composite.body = body;
+    proc->composite.captureList = KN_UNDEF;
     return proc;
 }
 
@@ -1190,33 +1191,33 @@ KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KonEnv* env)
 KonMsgDispatcher* MakeMsgDispatcher(KonState* kstate)
 {
     KonMsgDispatcher* result = KN_ALLOC_TYPE_TAG(kstate, KonMsgDispatcher, KN_T_MSG_DISPATCHER);
-    result->OnSymbol = (KonProcedure*)KN_UNDEF;
-    result->OnSyntaxMarker = (KonProcedure*)KN_UNDEF;
-    result->OnMethodCall = (KonProcedure*)KN_UNDEF;
-    result->OnVisitList = (KonProcedure*)KN_UNDEF;
-    result->OnVisitVector = (KonProcedure*)KN_UNDEF;
-    result->OnVisitTable = (KonProcedure*)KN_UNDEF;
-    result->OnVisitCell = (KonProcedure*)KN_UNDEF;
+    result->onSymbol = (KonProcedure*)KN_UNDEF;
+    result->onSyntaxMarker = (KonProcedure*)KN_UNDEF;
+    result->onMethodCall = (KonProcedure*)KN_UNDEF;
+    result->onVisitList = (KonProcedure*)KN_UNDEF;
+    result->onVisitVector = (KonProcedure*)KN_UNDEF;
+    result->onVisitTable = (KonProcedure*)KN_UNDEF;
+    result->onVisitCell = (KonProcedure*)KN_UNDEF;
     return result;
 }
 
 int KN_SetMsgDispatcher(KonState* kstate, unsigned int dispatcherId, KonMsgDispatcher* dispatcher)
 {
-    KxVector_SetIndex(kstate->MsgDispatchers, dispatcherId, dispatcher);
+    KxVector_SetIndex(kstate->msgDispatchers, dispatcherId, dispatcher);
     return 1;
 }
 
 unsigned int KN_SetNextMsgDispatcher(KonState* kstate, KonMsgDispatcher* dispatcher)
 {
-    int dispacherId = kstate->NextMsgDispatcherId;
+    int dispacherId = kstate->nextMsgDispatcherId;
     KN_SetMsgDispatcher(kstate, dispacherId, dispatcher);
-    kstate->NextMsgDispatcherId += 1;
+    kstate->nextMsgDispatcherId += 1;
     return dispacherId;
 }
 
 KonMsgDispatcher* KN_GetMsgDispatcher(KonState* kstate, unsigned int dispatcherId)
 {
-    KN dispatcher = KxVector_AtIndex(kstate->MsgDispatchers, dispatcherId);
+    KN dispatcher = KxVector_AtIndex(kstate->msgDispatchers, dispatcherId);
     if (dispatcher == KN_UKN || dispatcher == NULL) {
         return NULL;
     }
@@ -1228,33 +1229,33 @@ KonMsgDispatcher* KN_GetMsgDispatcher(KonState* kstate, unsigned int dispatcherI
 KonCpointer* KN_MakeCpointer(KonState* kstate, void* pointer)
 {
     KonCpointer* result = KN_ALLOC_TYPE_TAG(kstate, KonCpointer, KN_T_CPOINTER);
-    result->Pointer = pointer;
+    result->pointer = pointer;
     return result;
 }
 
 KonAccessor* KN_InitAccessorWithMod(KonState* kstate, char* mod)
 {
     KonAccessor* result = KN_ALLOC_TYPE_TAG(kstate, KonAccessor, KN_T_ACCESSOR);
-    result->IsDir = false;
-    result->OpenToRef = false;
-    result->OpenToChildren = false;
-    result->OpenToSibling = false;
-    result->CanWrite = false;
+    result->isDir = false;
+    result->openToRef = false;
+    result->openToChildren = false;
+    result->openToSibling = false;
+    result->canWrite = false;
     // result->CanExec = false;
     // result->IsMethod = false;
-    result->Value = KN_UNDEF;
-    result->Dir = NULL;
-    result->Setter = NULL;
+    result->value = KN_UNDEF;
+    result->dir = NULL;
+    result->setter = NULL;
     // set mod
     if (mod != NULL) {
         if (strchr(mod, 'd')) {
-            result->IsDir = true;
+            result->isDir = true;
         }
         if (strchr(mod, 'r')) {
-            result->OpenToRef = true;
+            result->openToRef = true;
         }
         if (strchr(mod, 'w')) {
-            result->CanWrite = true;
+            result->canWrite = true;
         }
         else if (strchr(mod, 'x')) {
             // result->CanExec = true;
@@ -1269,10 +1270,10 @@ KonAccessor* KN_InitAccessorWithMod(KonState* kstate, char* mod)
 KN KN_MakePropertyAccessor(KonState* kstate, KN value, char* mod, KonProcedure* setter)
 {
     KonAccessor* result = KN_InitAccessorWithMod(kstate, mod);
-    result->IsDir = false;
-    result->Value = value;
+    result->isDir = false;
+    result->value = value;
     if (setter != NULL) {
-        result->Setter = setter;
+        result->setter = setter;
     }
     return result;
 }
@@ -1280,24 +1281,24 @@ KN KN_MakePropertyAccessor(KonState* kstate, KN value, char* mod, KonProcedure* 
 KN KN_MakeDirAccessor(KonState* kstate, char* mod, KonProcedure* setter)
 {
     KonAccessor* result = KN_InitAccessorWithMod(kstate, mod);
-    result->IsDir = true;
-    result->Value = KN_NIL;
-    result->Dir = KxHashTable_Init(4);
+    result->isDir = true;
+    result->value = KN_NIL;
+    result->dir = KxHashTable_Init(4);
     if (setter != NULL) {
-        result->Setter = setter;
+        result->setter = setter;
     }
     return (KN)result;
 }
 
 bool KN_DirAccessorPutKeyProperty(KonState* kstate, KN dir, char* key, KN property)
 {
-    if (!(KN_IS_ACCESSOR(dir) && CAST_Kon(Accessor, dir)->IsDir == true)
+    if (!(KN_IS_ACCESSOR(dir) && CAST_Kon(Accessor, dir)->isDir == true)
         || !KN_IS_ACCESSOR(property)) {
         return false;
     }
 
     KxHashTable_PutKv(
-        CAST_Kon(Accessor, dir)->Dir,
+        CAST_Kon(Accessor, dir)->dir,
         key,
         property
     );

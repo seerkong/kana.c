@@ -47,7 +47,7 @@ KN KN_Regex_Match(KonState* kstate, KN regExpr, KN strToMatch)
     const char* regExprStr = KxStringBuffer_Cstr(KN_UNBOX_STRING(regExpr));
     const char* strToMatchCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(strToMatch));
     KonVector* result = KN_ALLOC_TYPE_TAG(kstate, KonVector, KN_T_VECTOR);
-    result->Vector = KxVector_Init();
+    result->vector = KxVector_Init();
 
 
     sre_uint_t           i, n;
@@ -123,11 +123,11 @@ KN KN_Regex_Match(KonState* kstate, KN regExpr, KN strToMatch)
             printf(" (%ld, %ld)", (long) ovector[i], (long) ovector[i + 1]);
         
             KonVector* match = KN_ALLOC_TYPE_TAG(kstate, KonVector, KN_T_VECTOR);
-            match->Vector = KxVector_Init();
-            KxVector_Push(match->Vector, KN_MAKE_FIXNUM(ovector[i]));
-            KxVector_Push(match->Vector, KN_MAKE_FIXNUM(ovector[i + 1]));
+            match->vector = KxVector_Init();
+            KxVector_Push(match->vector, KN_MAKE_FIXNUM(ovector[i]));
+            KxVector_Push(match->vector, KN_MAKE_FIXNUM(ovector[i + 1]));
 
-            KxVector_Push(result->Vector, match);
+            KxVector_Push(result->vector, match);
         }
 
         printf("\n");

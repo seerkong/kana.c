@@ -81,30 +81,30 @@ typedef enum
 typedef struct
 {
     // the event
-    KonTokenKind TokenKind;
+    KonTokenKind tokenKind;
 
-    int CurrRow;
-    int CurrCol;
+    int currRow;
+    int currCol;
 
-    int RowStart;
-    int RowEnd;
-    int ColStart;
-    int ColEnd;
+    int rowStart;
+    int rowEnd;
+    int colStart;
+    int colEnd;
 
     // full code string
-    KxStringBuffer* CodeString;
-    int CodeLen;
-    int ReadCursor;
+    KxStringBuffer* codeString;
+    int codeLen;
+    int readCursor;
 
     // the element
-    KxStringBuffer* Content;
+    KxStringBuffer* content;
 
     // 解析number用的
-    bool NumIsPositive;
-    KxStringBuffer* NumBeforeDot;   // 234.
-    KxStringBuffer* NumAfterDot;    // .12
-    bool NumIsPowerPositive;    // e-2
-    KxStringBuffer* NumAfterPower;  // e5
+    bool numIsPositive;
+    KxStringBuffer* numBeforeDot;   // 234.
+    KxStringBuffer* numAfterDot;    // .12
+    bool numIsPowerPositive;    // e-2
+    KxStringBuffer* numAfterPower;  // e5
 
 } KonTokenizer;
 

@@ -21,9 +21,9 @@ KxList* KxList_Init()
         printf("KxList_Init failed\n");
         return NULL;
     }
-    self->Length = 0;
-    self->Head = KX_LIST_NIL;
-    self->Tail = KX_LIST_NIL;
+    self->length = 0;
+    self->head = KX_LIST_NIL;
+    self->tail = KX_LIST_NIL;
     return self;
 }
 
@@ -39,9 +39,9 @@ int KxList_Destroy(KxList* self)
 
 int KxList_Clear(KxList* self)
 {
-    KxListNode* iter = self->Head;
+    KxListNode* iter = self->head;
     while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->Next;
+        KxListNode* next = iter->next;
         tb_free(iter);
         iter = next;
     }
@@ -51,19 +51,19 @@ int KxList_Clear(KxList* self)
 // number of elements
 uint32_t KxList_Length(KxList* self)
 {
-    return self->Length;
+    return self->length;
 }
 
 // get val by index number
 klist_val_t KxList_ValAt(KxList* self, int index)
 {
     int cursor = 0;
-    KxListNode* iter = self->Head;
+    KxListNode* iter = self->head;
     while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->Next;
+        KxListNode* next = iter->next;
         
         if (index == cursor) {
-            return iter->Val;
+            return iter->val;
         }
 
         cursor += 1;
@@ -76,8 +76,8 @@ klist_val_t KxList_ValAt(KxList* self, int index)
 
 klist_val_t KxList_Head(KxList* self)
 {
-    if ((klist_val_t)self->Head != KX_LIST_NIL) {
-        return self->Head->Val;
+    if ((klist_val_t)self->head != KX_LIST_NIL) {
+        return self->head->val;
     }
     else {
         return KX_LIST_NIL;
@@ -86,8 +86,8 @@ klist_val_t KxList_Head(KxList* self)
 
 klist_val_t KxList_Tail(KxList* self)
 {
-    if ((klist_val_t)self->Tail != KX_LIST_NIL) {
-        return self->Tail->Val;
+    if ((klist_val_t)self->tail != KX_LIST_NIL) {
+        return self->tail->val;
     }
     else {
         return KX_LIST_NIL;
@@ -100,9 +100,9 @@ KxListNode* KxList_NewNode(klist_val_t value)
     if (node == NULL) {
         return NULL;
     }
-    node->Val = value;
-    node->Prev = KX_LIST_NIL;
-    node->Next = KX_LIST_NIL;
+    node->val = value;
+    node->prev = KX_LIST_NIL;
+    node->next = KX_LIST_NIL;
     return node;
 }
 
@@ -113,38 +113,38 @@ int KxList_Push(KxList* self, klist_val_t value)
     if (node == NULL) {
         return -1;
     }
-    if ((klist_val_t)self->Tail != KX_LIST_NIL) {
-        self->Tail->Next = node;
+    if ((klist_val_t)self->tail != KX_LIST_NIL) {
+        self->tail->next = node;
     }
-    if (self->Length == 0) {
+    if (self->length == 0) {
         // lenth is 0
-        self->Head = node;
+        self->head = node;
     }
-    node->Prev = self->Tail;
-    self->Tail = node;
-    self->Length += 1;
+    node->prev = self->tail;
+    self->tail = node;
+    self->length += 1;
     return 1;
 }
 // get tail and remove
 klist_val_t KxList_Pop(KxList* self)
 {
-    if ((klist_val_t)self->Tail == KX_LIST_NIL) {
+    if ((klist_val_t)self->tail == KX_LIST_NIL) {
         return KX_LIST_UNDEF;
     }
-    klist_val_t tailVal = self->Tail->Val;
-    KxListNode* newTail = self->Tail->Prev;
+    klist_val_t tailVal = self->tail->val;
+    KxListNode* newTail = self->tail->prev;
 
-    if (self->Length == 1) {
-        self->Head = KX_LIST_NIL;
+    if (self->length == 1) {
+        self->head = KX_LIST_NIL;
     }
 
-    tb_free(self->Tail);
+    tb_free(self->tail);
     if ((klist_val_t)newTail != KX_LIST_NIL) {
-        newTail->Next = KX_LIST_NIL;
+        newTail->next = KX_LIST_NIL;
     }
     
-    self->Tail = newTail;
-    self->Length -= 1;
+    self->tail = newTail;
+    self->length -= 1;
     return tailVal;
 }
 
@@ -152,11 +152,11 @@ klist_val_t KxList_Pop(KxList* self)
 int KxList_Append(KxList* self, KxList* other)
 {
     int cursor = 0;
-    KxListNode* iter = other->Head;
+    KxListNode* iter = other->head;
     while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->Next;
+        KxListNode* next = iter->next;
         
-        klist_val_t val = iter->Val;
+        klist_val_t val = iter->val;
         KxList_Push(self, val);
 
         cursor += 1;
@@ -173,39 +173,39 @@ int KxList_Unshift(KxList* self, klist_val_t value)
     if (node == NULL) {
         return -1;
     }
-    if ((klist_val_t)self->Head != KX_LIST_NIL) {
-        self->Head->Prev = node;
+    if ((klist_val_t)self->head != KX_LIST_NIL) {
+        self->head->prev = node;
     }
-    if (self->Length == 0) {
+    if (self->length == 0) {
         // lenth is 0
-        self->Tail = node;
+        self->tail = node;
     }
-    node->Next = self->Head;
-    self->Head = node;
-    self->Length += 1;
+    node->next = self->head;
+    self->head = node;
+    self->length += 1;
     return 1;
 }
 
 // get head and remove
 klist_val_t KxList_Shift(KxList* self)
 {
-    if ((klist_val_t)self->Head == KX_LIST_NIL) {
+    if ((klist_val_t)self->head == KX_LIST_NIL) {
         return KX_LIST_UNDEF;
     }
-    klist_val_t headVal = self->Head->Val;
-    KxListNode* newHead = self->Head->Next;
+    klist_val_t headVal = self->head->val;
+    KxListNode* newHead = self->head->next;
 
-    if (self->Length == 1) {
+    if (self->length == 1) {
         
-        self->Tail = KX_LIST_NIL;
+        self->tail = KX_LIST_NIL;
     }
-    tb_free(self->Head);
+    tb_free(self->head);
     if ((klist_val_t)newHead != KX_LIST_NIL) {
-        newHead->Prev = KX_LIST_NIL;
+        newHead->prev = KX_LIST_NIL;
     }
     
-    self->Head = newHead;
-    self->Length -= 1;
+    self->head = newHead;
+    self->length -= 1;
     return headVal;
 }
 
@@ -213,11 +213,11 @@ klist_val_t KxList_Shift(KxList* self)
 int KxList_Prepend(KxList* self, KxList* other)
 {
     int cursor = 0;
-    KxListNode* iter = other->Head;
+    KxListNode* iter = other->head;
     while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->Next;
+        KxListNode* next = iter->next;
         
-        klist_val_t val = iter->Val;
+        klist_val_t val = iter->val;
         KxList_Unshift(self, val);
 
         cursor += 1;
@@ -237,13 +237,13 @@ int KxList_InsertBefore(KxList* self, KxListNode* node, klist_val_t value)
     if (newNode == NULL) {
         return -1;
     }
-    if ((klist_val_t)node->Prev != KX_LIST_NIL) {
-        node->Prev->Next = newNode;
+    if ((klist_val_t)node->prev != KX_LIST_NIL) {
+        node->prev->next = newNode;
     }
-    newNode->Next = node;
-    newNode->Prev = node->Prev;
-    node->Prev = newNode;
-    self->Length += 1;
+    newNode->next = node;
+    newNode->prev = node->prev;
+    node->prev = newNode;
+    self->length += 1;
     return 1;
 }
 
@@ -258,15 +258,15 @@ int KxList_InsertAfter(KxList* self, KxListNode* node, klist_val_t value)
     if (newNode == NULL) {
         return -1;
     }
-    if ((klist_val_t)node->Next != KX_LIST_NIL) {
-        node->Next->Prev = newNode;
+    if ((klist_val_t)node->next != KX_LIST_NIL) {
+        node->next->prev = newNode;
     }
     
-    node->Prev = node;
-    newNode->Next = node->Next;
-    node->Next = newNode;
+    node->prev = node;
+    newNode->next = node->next;
+    node->next = newNode;
 
-    self->Length += 1;
+    self->length += 1;
     return 1;
 }
 
@@ -278,9 +278,9 @@ int KxList_InsertAt(KxList* self, int index, klist_val_t value)
     }
 
     int cursor = 0;
-    KxListNode* iter = self->Head;
+    KxListNode* iter = self->head;
     while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->Next;
+        KxListNode* next = iter->next;
         
         if (index == cursor) {
             KxList_InsertBefore(self, iter, newNode);
@@ -297,26 +297,26 @@ int KxList_InsertAt(KxList* self, int index, klist_val_t value)
 // del by index, if out of range, do nothing
 int KxList_DelNode(KxList* self, KxListNode* node)
 {
-    if (self->Length == 1 && self->Head == node) {
+    if (self->length == 1 && self->head == node) {
         
-        self->Head = KX_LIST_NIL;
-        self->Tail = KX_LIST_NIL;
+        self->head = KX_LIST_NIL;
+        self->tail = KX_LIST_NIL;
     }
-    else if (self->Head == node) {
-        self->Head = node->Next;
+    else if (self->head == node) {
+        self->head = node->next;
     }
-    else if (self->Tail == node) {
-        self->Tail = node->Prev;
+    else if (self->tail == node) {
+        self->tail = node->prev;
     }
-    if ((klist_val_t)node->Next != KX_LIST_NIL) {
-        node->Next->Prev = node->Prev;
+    if ((klist_val_t)node->next != KX_LIST_NIL) {
+        node->next->prev = node->prev;
     }
-    if ((klist_val_t)node->Prev != KX_LIST_NIL) {
-        node->Prev->Next = node->Next;
+    if ((klist_val_t)node->prev != KX_LIST_NIL) {
+        node->prev->next = node->next;
     }
     tb_free(node);
 
-    self->Length -= 1;
+    self->length -= 1;
     return 1;
 }
 
@@ -324,9 +324,9 @@ int KxList_DelNode(KxList* self, KxListNode* node)
 int KxList_DelAt(KxList* self, int index)
 {
     int cursor = 0;
-    KxListNode* iter = self->Head;
+    KxListNode* iter = self->head;
     while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->Next;
+        KxListNode* next = iter->next;
         
         if (index == cursor) {
             KxList_DelNode(self, iter);
@@ -345,12 +345,12 @@ int KxList_DelAt(KxList* self, int index)
 // iterator
 KxListNode* KxList_IterHead(KxList* self)
 {
-    return self->Head;
+    return self->head;
 }
 
 KxListNode* KxList_IterTail(KxList* self)
 {
-    return self->Tail;
+    return self->tail;
 }
 
 bool KxList_IterHasNext(KxListNode* iter)
@@ -358,18 +358,18 @@ bool KxList_IterHasNext(KxListNode* iter)
     if (iter == NULL || (klist_val_t)iter == KX_LIST_NIL) {
         return false;
     }
-    return ((klist_val_t)iter->Next == KX_LIST_NIL) ? false : true;
+    return ((klist_val_t)iter->next == KX_LIST_NIL) ? false : true;
 }
 
 KxListNode* KxList_IterNext(KxListNode* iter)
 {
-    return iter->Next;
+    return iter->next;
 }
 
 klist_val_t KxList_IterVal(KxListNode* iter)
 {
     if ((klist_val_t)iter != KX_LIST_NIL) {
-        return iter->Val;
+        return iter->val;
     }
     else {
         return KX_LIST_UNDEF;

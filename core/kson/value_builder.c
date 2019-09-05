@@ -43,20 +43,20 @@ KonBuilder* CreateVectorBuilder()
     if (builder == NULL) {
         return NULL;
     }
-    builder->Type = KN_BUILDER_VECTOR;
-    builder->Vector = KxVector_Init();
+    builder->type = KN_BUILDER_VECTOR;
+    builder->vector = KxVector_Init();
     return builder;
 }
 
 void VectorBuilderAddItem(KonBuilder* builder, KN item)
 {
-    KxVector_Push(builder->Vector, item);
+    KxVector_Push(builder->vector, item);
 }
 
 KN MakeVectorByBuilder(KonState* kstate, KonBuilder* builder)
 {
     KonVector* value = KN_ALLOC_TYPE_TAG(kstate, KonVector, KN_T_VECTOR);
-    value->Vector = builder->Vector;
+    value->vector = builder->vector;
     tb_free(builder);
     return value;
 }
@@ -67,21 +67,21 @@ KonBuilder* CreateListBuilder()
     if (builder == NULL) {
         return NULL;
     }
-    builder->Type = KN_BUILDER_LIST;
-    builder->List = KxVector_Init();
+    builder->type = KN_BUILDER_LIST;
+    builder->list = KxVector_Init();
     return builder;
 }
 
 void ListBuilderAddItem(KonBuilder* builder, KN item)
 {
-    KxVector_Push(builder->List, item);
+    KxVector_Push(builder->list, item);
 }
 
 KN MakeListByBuilder(KonState* kstate, KonBuilder* builder)
 {
     KN pair = KN_NIL;
     
-    KonVector* list = builder->List;
+    KonVector* list = builder->list;
 
     // reverse add
     int len = KxVector_Length(list);
@@ -100,21 +100,21 @@ KonBuilder* CreateBlockBuilder()
     if (builder == NULL) {
         return NULL;
     }
-    builder->Type = KN_BUILDER_BLOCK;
-    builder->Block = KxVector_Init();
+    builder->type = KN_BUILDER_BLOCK;
+    builder->block = KxVector_Init();
     return builder;
 }
 
 void BlockBuilderAddItem(KonBuilder* builder, KN item)
 {
-    KxVector_Push(builder->Block, item);
+    KxVector_Push(builder->block, item);
 }
 
 KN MakeBlockByBuilder(KonState* kstate, KonBuilder* builder)
 {
     KN pair = KN_NIL;
     
-    KonVector* list = builder->Block;
+    KonVector* list = builder->block;
 
     // reverse add
     int len = KxVector_Length(list);
@@ -124,7 +124,7 @@ KN MakeBlockByBuilder(KonState* kstate, KonBuilder* builder)
     }
     if (len > 0) {
         // change first element tag to BLOCK
-        ((KonBase*)pair)->Tag = KN_T_BLOCK;
+        ((KonBase*)pair)->tag = KN_T_BLOCK;
     }
 
     return pair;
@@ -136,29 +136,29 @@ KonBuilder* CreateParamBuilder()
     if (builder == NULL) {
         return NULL;
     }
-    builder->Type = KN_BUILDER_PARAM;
-    builder->Param = KxHashTable_Init(10);;
+    builder->type = KN_BUILDER_PARAM;
+    builder->param = KxHashTable_Init(10);;
     return builder;
 }
 
 void ParamBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
 {
-    char* key = KxStringBuffer_Cstr(pair->KvPair.Key);
+    char* key = KxStringBuffer_Cstr(pair->kvPair.key);
     
-    KxHashTable_PushKv(builder->Param, key, pair->KvPair.Value);
+    KxHashTable_PushKv(builder->param, key, pair->kvPair.value);
     KN_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
 }
 
 void ParamBuilderAddValue(KonBuilder* builder, KN value)
 {
-    KxHashTable_PushVal(builder->Param, value);
+    KxHashTable_PushVal(builder->param, value);
 }
 
 KN MakeParamByBuilder(KonState* kstate, KonBuilder* builder)
 {
     KonParam* value = KN_ALLOC_TYPE_TAG(kstate, KonTable, KN_T_PARAM);
-    value->Table = builder->Param;
+    value->table = builder->param;
     tb_free(builder);
     return value;
 }
@@ -170,29 +170,29 @@ KonBuilder* CreateTableBuilder()
     if (builder == NULL) {
         return NULL;
     }
-    builder->Type = KN_BUILDER_TABLE;
-    builder->Table = KxHashTable_Init(10);;
+    builder->type = KN_BUILDER_TABLE;
+    builder->table = KxHashTable_Init(10);;
     return builder;
 }
 
 void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
 {
-    char* key = KxStringBuffer_Cstr(pair->KvPair.Key);
+    char* key = KxStringBuffer_Cstr(pair->kvPair.key);
     
-    KxHashTable_PushKv(builder->Table, key, pair->KvPair.Value);
+    KxHashTable_PushKv(builder->table, key, pair->kvPair.value);
     KN_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
 }
 
 void TableBuilderAddValue(KonBuilder* builder, KN value)
 {
-    KxHashTable_PushVal(builder->Table, value);
+    KxHashTable_PushVal(builder->table, value);
 }
 
 KN MakeTableByBuilder(KonState* kstate, KonBuilder* builder)
 {
     KonTable* value = KN_ALLOC_TYPE_TAG(kstate, KonTable, KN_T_TABLE);
-    value->Table = builder->Table;
+    value->table = builder->table;
     tb_free(builder);
     return value;
 }
@@ -204,22 +204,22 @@ KonBuilder* CreateKvPairBuilder()
     if (builder == NULL) {
         return NULL;
     }
-    builder->Type = KN_BUILDER_KV_PAIR;
-    builder->KvPair.Key = KxStringBuffer_New();
-    builder->KvPair.Value = KN_UNDEF;
+    builder->type = KN_BUILDER_KV_PAIR;
+    builder->kvPair.key = KxStringBuffer_New();
+    builder->kvPair.value = KN_UNDEF;
     return builder;
 }
 
 void KvPairSetKey(KonBuilder* builder, char* key)
 {
     assert(key);
-    KxStringBuffer_AppendCstr(builder->KvPair.Key, key);
+    KxStringBuffer_AppendCstr(builder->kvPair.key, key);
 }
 
 void KvPairSetValue(KonBuilder* builder, KN value)
 {
     assert(value);
-    builder->KvPair.Value = value;
+    builder->kvPair.value = value;
 }
 
 void KvPairDestroy(KonBuilder* builder)
@@ -229,7 +229,7 @@ void KvPairDestroy(KonBuilder* builder)
 
 KonBuilder* MakeKvPairBuilder(KonBuilder* builder, KN value)
 {
-    builder->KvPair.Value = value;
+    builder->kvPair.value = value;
     return builder;
 }
 
@@ -237,10 +237,10 @@ CellBuilderItem* CreateCellBuilderItem()
 {
     CellBuilderItem* cellItem = (CellBuilderItem*)tb_malloc(sizeof(CellBuilderItem));
     
-    cellItem->Core = KN_UNDEF;
-    cellItem->Table = KN_UNDEF;
-    cellItem->List = KN_UNDEF;
-    cellItem->Map = KN_UNDEF;
+    cellItem->core = KN_UNDEF;
+    cellItem->table = KN_UNDEF;
+    cellItem->list = KN_UNDEF;
+    cellItem->map = KN_UNDEF;
     return cellItem;
 }
 
@@ -251,12 +251,12 @@ KonBuilder* CreateCellBuilder()
         return NULL;
     }
 
-    builder->Type = KN_BUILDER_CELL;
-    builder->Cell = KxVector_Init();
+    builder->type = KN_BUILDER_CELL;
+    builder->cell = KxVector_Init();
 
     CellBuilderItem* cellItem = CreateCellBuilderItem();
 
-    KxVector_Push(builder->Cell, cellItem);
+    KxVector_Push(builder->cell, cellItem);
 
     return builder;
 }
@@ -269,54 +269,54 @@ KonBuilder* CreateCellBuilder()
 void CellBuilderSetCore(KonBuilder* builder, KN name)
 {
     KN_DEBUG("CellBuilderSetCore");
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
-    if (cellItem->Core != KN_UNDEF
-        || cellItem->Table != KN_UNDEF
-        || cellItem->List != KN_UNDEF
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    if (cellItem->core != KN_UNDEF
+        || cellItem->table != KN_UNDEF
+        || cellItem->list != KN_UNDEF
     ) {
         CellBuilderItem* newCellItem = CreateCellBuilderItem();
-        KxVector_Push(builder->Cell, newCellItem);
+        KxVector_Push(builder->cell, newCellItem);
         cellItem = newCellItem;
     }
-    cellItem->Core = name;
+    cellItem->core = name;
 }
 
 void CellBuilderSetList(KonBuilder* builder, KN list)
 {
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
-    if (cellItem->List != KN_UNDEF) {
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    if (cellItem->list != KN_UNDEF) {
         CellBuilderItem* newCellItem = CreateCellBuilderItem();
-        KxVector_Push(builder->Cell, newCellItem);
+        KxVector_Push(builder->cell, newCellItem);
         cellItem = newCellItem;
     }
-    cellItem->List = list;
+    cellItem->list = list;
 }
 
 void CellBuilderSetTable(KonBuilder* builder, KN table)
 {
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
-    if (cellItem->Table != KN_UNDEF
-        || cellItem->List != KN_UNDEF
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    if (cellItem->table != KN_UNDEF
+        || cellItem->list != KN_UNDEF
     ) {
         CellBuilderItem* newCellItem = CreateCellBuilderItem();
-        KxVector_Push(builder->Cell, newCellItem);
+        KxVector_Push(builder->cell, newCellItem);
         cellItem = newCellItem;
     }
-    cellItem->Table = table;
+    cellItem->table = table;
 }
 
 void CellBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair)
 {
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->Cell);
-    if (cellItem->Map == KN_UNDEF) {
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    if (cellItem->map == KN_UNDEF) {
         KonMap* newMap = KN_ALLOC_TYPE_TAG(kstate, KonMap, KN_T_MAP);
-        newMap->Map = KxHashTable_Init(4);
-        cellItem->Map = newMap;
+        newMap->map = KxHashTable_Init(4);
+        cellItem->map = newMap;
     }
 
-    char* key = KxStringBuffer_Cstr(pair->KvPair.Key);
-    KxHashTable* unboxedMap = CAST_Kon(Map, cellItem->Map)->Map;
-    KxHashTable_PutKv(unboxedMap, key, pair->KvPair.Value);
+    char* key = KxStringBuffer_Cstr(pair->kvPair.key);
+    KxHashTable* unboxedMap = CAST_Kon(Map, cellItem->map)->map;
+    KxHashTable_PutKv(unboxedMap, key, pair->kvPair.value);
     KN_DEBUG("CellBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
 }
@@ -324,18 +324,18 @@ void CellBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair)
 KonCell* CreateNewKonCellNode(KonState* kstate, CellBuilderItem* cellItem)
 {
     KonCell* value = KN_ALLOC_TYPE_TAG(kstate, KonCell, KN_T_CELL);
-    value->Core = cellItem->Core;
-    value->Table = cellItem->Table;
-    value->List = cellItem->List;
-    value->Map = cellItem->Map;
-    value->Next = KN_NIL;
-    value->Prev = KN_NIL;
+    value->core = cellItem->core;
+    value->table = cellItem->table;
+    value->list = cellItem->list;
+    value->map = cellItem->map;
+    value->next = KN_NIL;
+    value->prev = KN_NIL;
     return value;
 }
 
 KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder)
 {
-    KonVector* cell = builder->Cell;
+    KonVector* cell = builder->cell;
 
     KonCell* currentHead = KN_NIL;
     // reverse add
@@ -343,9 +343,9 @@ KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder)
     for (int i = len - 1; i >= 0; i--) {
         CellBuilderItem* cellBuilderItem = (CellBuilderItem*)KxVector_AtIndex(cell, i);
         KonCell* newNode = CreateNewKonCellNode(kstate, cellBuilderItem);
-        newNode->Next = currentHead;
+        newNode->next = currentHead;
         if (currentHead != KN_NIL) {
-            currentHead->Prev = newNode;
+            currentHead->prev = newNode;
         }
         currentHead = newNode;
     }
@@ -361,37 +361,37 @@ KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind)
     if (builder == NULL) {
         return NULL;
     }
-    builder->Type = type;
-    builder->Wrapper.Inner = KN_UNDEF;
-    builder->Wrapper.TokenKind = tokenKind;
+    builder->type = type;
+    builder->wrapper.inner = KN_UNDEF;
+    builder->wrapper.tokenKind = tokenKind;
     return builder;
 }
 
 void WrapperSetInner(KonState* kstate, KonBuilder* builder, KN inner)
 {
-    builder->Wrapper.Inner = inner;
+    builder->wrapper.inner = inner;
 }
 
 KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
 {
-    KN inner = builder->Wrapper.Inner;
-    KonBuilderType type = builder->Type;
-    KonTokenKind tokenKind = builder->Wrapper.TokenKind;
+    KN inner = builder->wrapper.inner;
+    KonBuilderType type = builder->type;
+    KonTokenKind tokenKind = builder->wrapper.tokenKind;
     KN result = KN_UNDEF;
     if (type == KN_BUILDER_QUOTE) {
         KonQuote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuote, KN_T_QUOTE);
-        tmp->Inner = inner;
+        tmp->inner = inner;
         switch (tokenKind) {
             case KN_TOKEN_SYM_STRING: {
-                tmp->Type = KN_SYM_STRING;
+                tmp->type = KN_SYM_STRING;
                 break;
             }
             case KN_TOKEN_QUOTE_LIST: {
-                tmp->Type = KN_QUOTE_LIST;
+                tmp->type = KN_QUOTE_LIST;
                 break;
             }
             case KN_TOKEN_QUOTE_CELL: {
-                tmp->Type = KN_QUOTE_CELL;
+                tmp->type = KN_QUOTE_CELL;
                 break;
             }
         }
@@ -399,14 +399,14 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
     }
     else if (type == KN_BUILDER_QUASIQUOTE) {
         KonQuasiquote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuasiquote, KN_T_QUASIQUOTE);
-        tmp->Inner = inner;
+        tmp->inner = inner;
         switch (tokenKind) {
             case KN_TOKEN_QUASI_LIST: {
-                tmp->Type = KN_QUASI_LIST;
+                tmp->type = KN_QUASI_LIST;
                 break;
             }
             case KN_TOKEN_QUASI_CELL: {
-                tmp->Type = KN_QUASI_CELL;
+                tmp->type = KN_QUASI_CELL;
                 break;
             }
         }
@@ -414,18 +414,18 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
     }
     else if (type == KN_BUILDER_EXPAND) {
         KonExpand* tmp = KN_ALLOC_TYPE_TAG(kstate, KonExpand, KN_T_EXPAND);
-        tmp->Inner = inner;
+        tmp->inner = inner;
         switch (tokenKind) {
             case KN_TOKEN_EXPAND_REPLACE: {
-                tmp->Type = KN_EXPAND_REPLACE;
+                tmp->type = KN_EXPAND_REPLACE;
                 break;
             }
             case KN_TOKEN_EXPAND_KV: {
-                tmp->Type = KN_EXPAND_KV;
+                tmp->type = KN_EXPAND_KV;
                 break;
             }
             case KN_TOKEN_EXPAND_SEQ: {
-                tmp->Type = KN_EXPAND_SEQ;
+                tmp->type = KN_EXPAND_SEQ;
                 break;
             }
         }
@@ -433,18 +433,18 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
     }
     else if (type == KN_BUILDER_UNQUOTE) {
         KonUnquote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonUnquote, KN_T_UNQUOTE);
-        tmp->Inner = inner;
+        tmp->inner = inner;
         switch (tokenKind) {
             case KN_TOKEN_UNQUOTE_REPLACE: {
-                tmp->Type = KN_UNQUOTE_REPLACE;
+                tmp->type = KN_UNQUOTE_REPLACE;
                 break;
             }
             case KN_TOKEN_UNQUOTE_KV: {
-                tmp->Type = KN_UNQUOTE_KV;
+                tmp->type = KN_UNQUOTE_KV;
                 break;
             }
             case KN_TOKEN_UNQUOTE_SEQ: {
-                tmp->Type = KN_UNQUOTE_SEQ;
+                tmp->type = KN_UNQUOTE_SEQ;
                 break;
             }
         }
@@ -461,19 +461,19 @@ BuilderStack* BuilderStackInit()
     if (stack == NULL) {
         return NULL;
     }
-    stack->Length = 0;
-    stack->Top = NULL;
+    stack->length = 0;
+    stack->top = NULL;
     return stack;
 }
 
 void BuilderStackDestroy(BuilderStack* stack)
 {
     // TODO iter node, free
-    BuilderStackNode* top = stack->Top;
+    BuilderStackNode* top = stack->top;
     while (top) {
         BuilderStackNode* oldTop = top;
         tb_free(oldTop);
-        top = top->Next;
+        top = top->next;
     }
     tb_free(stack);
 }
@@ -481,25 +481,25 @@ void BuilderStackDestroy(BuilderStack* stack)
 void BuilderStackPush(BuilderStack* stack, KonBuilder* item)
 {
     assert(stack);
-    BuilderStackNode* oldTop = stack->Top;
+    BuilderStackNode* oldTop = stack->top;
     BuilderStackNode* newTop = (BuilderStackNode*)tb_malloc(sizeof(BuilderStackNode));
     assert(newTop);
-    newTop->Data = item;
-    newTop->Next = oldTop;
-    stack->Top = newTop;
-    stack->Length = stack->Length + 1;
+    newTop->data = item;
+    newTop->next = oldTop;
+    stack->top = newTop;
+    stack->length = stack->length + 1;
 }
 
 KonBuilder* BuilderStackPop(BuilderStack* stack)
 {
     assert(stack);
-    BuilderStackNode* top = stack->Top;
+    BuilderStackNode* top = stack->top;
     assert(top);
-    BuilderStackNode* next = stack->Top->Next;
+    BuilderStackNode* next = stack->top->next;
 
-    KonBuilder* data = top->Data;
-    stack->Top = next;
-    stack->Length = stack->Length - 1;
+    KonBuilder* data = top->data;
+    stack->top = next;
+    stack->length = stack->length - 1;
 
     tb_free(top);
     return data;
@@ -508,15 +508,15 @@ KonBuilder* BuilderStackPop(BuilderStack* stack)
 long BuilderStackLength(BuilderStack* stack)
 {
     assert(stack);
-    return stack->Length;
+    return stack->length;
 }
 
 KonBuilder* BuilderStackTop(BuilderStack* stack)
 {
     assert(stack);
-    BuilderStackNode* top = stack->Top;
+    BuilderStackNode* top = stack->top;
     assert(top);
-    return top->Data;
+    return top->data;
 }
 
 

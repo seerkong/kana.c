@@ -12,7 +12,7 @@ KN KonFile_Init(KonState* kstate, KN path, KN mode)
 
 KN KonFile_Close(KonState* kstate, KN fh)
 {
-    FILE* fp = CAST_Kon(Cpointer, fh)->Pointer;
+    FILE* fp = CAST_Kon(Cpointer, fh)->pointer;
     fclose(fp);
     return KN_TRUE;
 }
@@ -20,7 +20,7 @@ KN KonFile_Close(KonState* kstate, KN fh)
 KN KonFile_ReadAll(KonState* kstate, KN fh)
 {
     KxStringBuffer* sb = KxStringBuffer_New();
-    FILE* fp = CAST_Kon(Cpointer, fh)->Pointer;
+    FILE* fp = CAST_Kon(Cpointer, fh)->pointer;
     int ch;
     ch = fgetc(fp);
     while (ch != EOF) {
@@ -28,13 +28,13 @@ KN KonFile_ReadAll(KonState* kstate, KN fh)
         ch = fgetc(fp);
     }
     KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    value->String = sb;
+    value->string = sb;
     return value;
 }
 
 KN KonFile_Puts(KonState* kstate, KN fh, KN data)
 {
-    FILE* fp = CAST_Kon(Cpointer, fh)->Pointer;
+    FILE* fp = CAST_Kon(Cpointer, fh)->pointer;
     const char* dataCstr = KxStringBuffer_Cstr(KN_UNBOX_STRING(data));
     // fprintf(fp, "");
     fprintf(fp, dataCstr);

@@ -34,12 +34,12 @@ typedef struct _KxVector KxVector;
 
 
 struct _KxVector {
-    int32_t BuffSize;
+    int32_t buffSize;
     // vector first data pos: BuffStart + HeadOffset
     // when call vec shift, offset + 1
-    int32_t HeadOffset; 
-    int32_t Length;  // how many items stored
-    kvec_val_t* BuffStart;    // an array of KonHashMapEntry pointers
+    int32_t headOffset; 
+    int32_t length;  // how many items stored
+    kvec_val_t* buffStart;    // an array of KonHashMapEntry pointers
 };
 
 KxVector* KxVector_Init();

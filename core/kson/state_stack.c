@@ -7,19 +7,19 @@ StateStack* StateStackInit()
     if (stack == NULL) {
         return NULL;
     }
-    stack->Length = 0;
-    stack->Top = NULL;
+    stack->length = 0;
+    stack->top = NULL;
     return stack;
 }
 
 void StateStackDestroy(StateStack* stack)
 {
     // TODO iter node, free
-    StateStackNode* top = stack->Top;
+    StateStackNode* top = stack->top;
     while (top) {
         StateStackNode* oldTop = top;
         tb_free(oldTop);
-        top = top->Next;
+        top = top->next;
     }
     tb_free(stack);
 }
@@ -27,25 +27,25 @@ void StateStackDestroy(StateStack* stack)
 void StateStackPush(StateStack* stack, KonReaderState item)
 {
     assert(stack);
-    StateStackNode* oldTop = stack->Top;
+    StateStackNode* oldTop = stack->top;
     StateStackNode* newTop = (StateStackNode*)tb_malloc(sizeof(StateStackNode));
     assert(newTop);
-    newTop->Data = item;
-    newTop->Next = oldTop;
-    stack->Top = newTop;
-    stack->Length = stack->Length + 1;
+    newTop->data = item;
+    newTop->next = oldTop;
+    stack->top = newTop;
+    stack->length = stack->length + 1;
 }
 
 KonReaderState StateStackPop(StateStack* stack)
 {
     assert(stack);
-    StateStackNode* top = stack->Top;
+    StateStackNode* top = stack->top;
     assert(top);
-    StateStackNode* next = stack->Top->Next;
+    StateStackNode* next = stack->top->next;
 
-    long data = top->Data;
-    stack->Top = next;
-    stack->Length = stack->Length - 1;
+    long data = top->data;
+    stack->top = next;
+    stack->length = stack->length - 1;
 
     tb_free(top);
     return data;
@@ -54,21 +54,21 @@ KonReaderState StateStackPop(StateStack* stack)
 KonReaderState StateStackLength(StateStack* stack)
 {
     assert(stack);
-    return stack->Length;
+    return stack->length;
 }
 
 KonReaderState StateStackTop(StateStack* stack)
 {
     assert(stack);
-    StateStackNode* top = stack->Top;
+    StateStackNode* top = stack->top;
     assert(top);
-    return top->Data;
+    return top->data;
 }
 
 void StateStackSetTopValue(StateStack* stack, KonReaderState newData)
 {
     assert(stack);
-    StateStackNode* top = stack->Top;
+    StateStackNode* top = stack->top;
     assert(top);
-    top->Data = newData;
+    top->data = newData;
 }

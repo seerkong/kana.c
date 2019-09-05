@@ -5,57 +5,57 @@
 KN KonCell_Init(KonState* kstate)
 {
     KonCell* value = KN_ALLOC_TYPE_TAG(kstate, KonCell, KN_T_CELL);
-    value->Core = KN_UNDEF;
-    value->Map = KN_UNDEF;
-    value->Table = KN_UNDEF;
-    value->List = KN_UNDEF;
+    value->core = KN_UNDEF;
+    value->map = KN_UNDEF;
+    value->table = KN_UNDEF;
+    value->list = KN_UNDEF;
     return (KN)value;
 }
 
 KN KonCell_SetCore(KonState* kstate, KN cell, KN core)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->Core = core;
+    self->core = core;
     return (KN)self;
 }
 
 KN KonCell_GetCore(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    return (KN)self->Core;
+    return (KN)self->core;
 }
 
 KN KonCell_DelCore(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->Core = KN_UNDEF;
+    self->core = KN_UNDEF;
     return (KN)self;
 }
 
 KN KonCell_SetMap(KonState* kstate, KN cell, KN map)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->Map = map;
+    self->map = map;
     return (KN)self;
 }
 
 KN KonCell_GetMap(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    return (KN)self->Map;
+    return (KN)self->map;
 }
 
 KN KonCell_DelMap(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->Map = KN_UNDEF;
+    self->map = KN_UNDEF;
     return (KN)self;
 }
 
 KN KonCell_ClearMap(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    KxHashTable* map = KN_UNBOX_TABLE(self->Map);
+    KxHashTable* map = KN_UNBOX_TABLE(self->map);
     KxHashTable_Clear(map);
     return (KN)self;
 }
@@ -63,27 +63,27 @@ KN KonCell_ClearMap(KonState* kstate, KN cell)
 KN KonCell_SetTable(KonState* kstate, KN cell, KN table)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->Table = table;
+    self->table = table;
     return self;
 }
 
 KN KonCell_GetTable(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    return (KN)self->Table;
+    return (KN)self->table;
 }
 
 KN KonCell_DelTable(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->Table = KN_UNDEF;
+    self->table = KN_UNDEF;
     return (KN)self;
 }
 
 KN KonCell_ClearTable(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    KxHashTable* table = KN_UNBOX_TABLE(self->Table);
+    KxHashTable* table = KN_UNBOX_TABLE(self->table);
     KxHashTable_Clear(table);
     return (KN)self;
 }
@@ -91,27 +91,27 @@ KN KonCell_ClearTable(KonState* kstate, KN cell)
 KN KonCell_SetList(KonState* kstate, KN cell, KN list)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->List = list;
+    self->list = list;
     return (KN)self;
 }
 
 KN KonCell_GetList(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    return (KN)self->List;
+    return (KN)self->list;
 }
 
 KN KonCell_DelList(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->List = KN_UNDEF;
+    self->list = KN_UNDEF;
     return (KN)self;
 }
 
 KN KonCell_ClearList(KonState* kstate, KN cell)
 {
     KonCell* self = CAST_Kon(Cell, cell);
-    self->List = KN_NIL;
+    self->list = KN_NIL;
     return (KN)self;
 }
 

@@ -6,15 +6,15 @@
 KN CmdWordToIdentifier(KN source)
 {
     if (KN_IS_WORD(source)) {
-        ((KonSymbol*)source)->Type = KN_SYM_IDENTIFIER;
+        ((KonSymbol*)source)->type = KN_SYM_IDENTIFIER;
     }
     return source;
 }
 
 KN AfterShellCmdEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KonEnv* env = contBeingInvoked->Env;
-    KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
+    KonEnv* env = contBeingInvoked->env;
+    KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->native.memoTable);
     KN restCmdWords = KxHashTable_AtKey(memo, "RestCmdWords");
     KN evaled = KxHashTable_AtKey(memo, "Evaled");
     evaled = KN_CONS(kstate, evaledValue, evaled);
@@ -49,21 +49,21 @@ KN AfterShellCmdEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBe
         KN_DEBUG("exec shell cmd finished");
 
         bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
-        bounce->Run.Value = KN_TRUE;
-        bounce->Cont = contBeingInvoked->Cont;
+        bounce->run.value = KN_TRUE;
+        bounce->cont = contBeingInvoked->cont;
     }
     else {
         // next condition
         KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
-        k->Cont = contBeingInvoked->Cont;
-        k->Env = env;
+        k->cont = contBeingInvoked->cont;
+        k->env = env;
 
         KxHashTable* memo = KxHashTable_Init(4);
         KxHashTable_PutKv(memo, "RestCmdWords", KN_CDR(restCmdWords));
         KxHashTable_PutKv(memo, "Evaled", evaled);
 
-        k->Native.MemoTable = memo;
-        k->Native.Callback = AfterShellCmdEvaled;
+        k->native.memoTable = memo;
+        k->native.callback = AfterShellCmdEvaled;
 
         bounce = KN_EvalExpression(kstate, CmdWordToIdentifier(KN_CAR(restCmdWords)), env, k);
     }
@@ -78,15 +78,15 @@ KonTrampoline* KN_EvalPrefixSh(KonState* kstate, KN expression, KonEnv* env, Kon
     KN_DEBUG("rest words %s", KN_StringToCstr(KN_ToFormatString(kstate, arguments, true, 0, "  ")));
 
     KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
-    k->Cont = cont;
-    k->Env = env;
+    k->cont = cont;
+    k->env = env;
 
     KxHashTable* memo = KxHashTable_Init(4);
     KxHashTable_PutKv(memo, "RestCmdWords", KN_CDR(arguments));
     KxHashTable_PutKv(memo, "Evaled", KN_NIL);
 
-    k->Native.MemoTable = memo;
-    k->Native.Callback = AfterShellCmdEvaled;
+    k->native.memoTable = memo;
+    k->native.callback = AfterShellCmdEvaled;
 
     KonTrampoline* bounce = KN_EvalExpression(kstate, CmdWordToIdentifier(KN_CAR(arguments)), env, k);
 

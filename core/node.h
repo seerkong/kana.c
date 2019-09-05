@@ -103,11 +103,11 @@ typedef enum {
     KN_T_UNDEF,
     KN_T_NIL,
 
-    // determined by tagging system and ((KonBase*)x)->Tag
+    // determined by tagging system and ((KonBase*)x)->tag
     KN_T_NUMBER,
     KN_T_PAIRLIST, // KN_T_NIL AND KN_T_PAIR
 
-    // determined by ((KonBase*)x)->Tag
+    // determined by ((KonBase*)x)->tag
     KN_T_STATE,
     KN_T_FLONUM,
     KN_T_BIGNUM,
@@ -161,30 +161,30 @@ typedef struct KonCpointer KonCpointer;
 typedef struct KonContinuation KonContinuation;
 
 union _KNValue {
-    // kon_int_t AsInt;
-    // kon_int32_t AsInt32;
-    // long AsLong;
-    // double AsDouble;
-    // void* AsPointer;
-    KonBase* KonBase;
-    KonState* KonState;
-    KonSymbol* KonSymbol;
-    KonSyntaxMarker* KonSyntaxMarker;
-    KonString* KonString;
-    KonTable* KonTable;
-    KonVector* KonVector;
-    KonPair* KonPair;
-    KonMap* KonMap;
-    KonCell* KonCell;
-    KonQuote* KonQuote;
-    KonQuasiquote* KonQuasiquote;
-    KonExpand* KonExpand;
-    KonMsgDispatcher* KonMsgDispatcher;
-    KonEnv* KonEnv;
-    KonAccessor* KonAccessor;
-    KonProcedure* KonProcedure;
-    KonCpointer* KonCpointer;
-    KonContinuation* KonContinuation;
+    // kon_int_t asInt;
+    // kon_int32_t asInt32;
+    // long asLong;
+    // double asDouble;
+    // void* asPointer;
+    KonBase* konBase;
+    KonState* konState;
+    KonSymbol* konSymbol;
+    KonSyntaxMarker* konSyntaxMarker;
+    KonString* konString;
+    KonTable* konTable;
+    KonVector* konVector;
+    KonPair* konPair;
+    KonMap* konMap;
+    KonCell* konCell;
+    KonQuote* konQuote;
+    KonQuasiquote* konQuasiquote;
+    KonExpand* konExpand;
+    KonMsgDispatcher* konMsgDispatcher;
+    KonEnv* konEnv;
+    KonAccessor* konAccessor;
+    KonProcedure* konProcedure;
+    KonCpointer* konCpointer;
+    KonContinuation* konContinuation;
 };
 
 // not used
@@ -197,11 +197,11 @@ union _KNValue {
 #define KN_GC_MARK_BLACK '3'
 
 struct KonBase {
-    KonType Tag;
+    KonType tag;
     
     // unboxed fixnum
-    unsigned int MsgDispatcherId;
-    char GcMarkColor;
+    unsigned int msgDispatcherId;
+    char gcMarkColor;
 };
 
 typedef volatile union _Kon* KN;
@@ -218,9 +218,9 @@ typedef enum {
 } KonSymbolType;
 
 struct KonSymbol {
-    KonBase Base;
-    const char* Data;
-    KonSymbolType Type;
+    KonBase base;
+    const char* data;
+    KonSymbolType type;
 };
 
 typedef enum {
@@ -229,9 +229,9 @@ typedef enum {
 } KonQuoteType;
 
 struct KonQuote {
-    KonBase Base;
-    KN Inner;
-    KonQuoteType Type;
+    KonBase base;
+    KN inner;
+    KonQuoteType type;
 };
 
 
@@ -241,9 +241,9 @@ typedef enum {
 } KonQuasiquoteType;
 
 struct KonQuasiquote {
-    KonBase Base;
-    KN Inner;
-    KonQuasiquoteType Type;
+    KonBase base;
+    KN inner;
+    KonQuasiquoteType type;
 };
 
 typedef enum {
@@ -253,9 +253,9 @@ typedef enum {
 } KonExpandType;
 
 struct KonExpand {
-    KonBase Base;
-    KN Inner;
-    KonExpandType Type;
+    KonBase base;
+    KN inner;
+    KonExpandType type;
 };
 
 typedef enum {
@@ -265,9 +265,9 @@ typedef enum {
 } KonUnquoteType;
 
 struct KonUnquote {
-    KonBase Base;
-    KN Inner;
-    KonUnquoteType Type;
+    KonBase base;
+    KN inner;
+    KonUnquoteType type;
 };
 
 
@@ -283,42 +283,42 @@ typedef enum {
 
 // eg: % | ;
 struct KonSyntaxMarker {
-    KonBase Base;
-    KonSyntaxMarkerType Type;
+    KonBase base;
+    KonSyntaxMarkerType type;
 };
 
 struct KonPair {
-    KonBase Base;
-    KN Prev;
-    KN Body;
-    KN Next;
+    KonBase base;
+    KN prev;
+    KN body;
+    KN next;
 };
 
 struct KonBlock {
-    KonBase Base;
-    KN Prev;
-    KN Body;
-    KN Next;
+    KonBase base;
+    KN prev;
+    KN body;
+    KN next;
 };
 
 struct KonMap {
-    KxHashTable* Map;
+    KxHashTable* map;
 };
 
 struct KonCell {
-    KonBase Base;
-    KN Core;
-    KonMap* Map;
-    KonTable* Table;
-    KonPair* List;
-    KonCell* Next;
-    KonCell* Prev;
+    KonBase base;
+    KN core;
+    KonMap* map;
+    KonTable* table;
+    KonPair* list;
+    KonCell* next;
+    KonCell* prev;
 };
 
 struct KonEnv {
-    KonBase Base;
-    KonEnv* Parent;
-    KxHashTable* Bindings;
+    KonBase base;
+    KonEnv* parent;
+    KxHashTable* bindings;
 };
 
 // an accessor is a value wrapper
@@ -326,31 +326,31 @@ struct KonEnv {
 // if IsDir is true, data is stored in Dir, 
 // if IsDir is false, means it is a leaf node, is a property
 struct KonAccessor {
-    KonBase Base;
-    bool IsDir; // d
-    bool OpenToRef;    // r. only used in dir mod
-    bool OpenToChildren;
-    bool OpenToSibling;
-    bool CanWrite;  // w
-    // bool CanExec;    // x func, blk, lambda
-    // bool IsMethod;  // m func(self, p2, p3)
-    KxHashTable* Dir;   // key: cstr, value: KonAccessor*
+    KonBase base;
+    bool isDir; // d
+    bool openToRef;    // r. only used in dir mod
+    bool openToChildren;
+    bool openToSibling;
+    bool canWrite;  // w
+    // bool canExec;    // x func, blk, lambda
+    // bool isMethod;  // m func(self, p2, p3)
+    KxHashTable* dir;   // key: cstr, value: KonAccessor*
 
-    KN Value;
-    KonProcedure* Setter;
-    // KonProcedure* Getter;
+    KN value;
+    KonProcedure* setter;
+    // KonProcedure* getter;
 };
 
 struct KonMsgDispatcher {
-    KonBase Base;
-    KonProcedure* OnSymbol;   // {obj .key1 = 5}
-    KonProcedure* OnSyntaxMarker;  // % p1 p2; /abc /efg
-    KonProcedure* OnMethodCall; // {5 + 1 2}
-    KonProcedure* OnVisitList;  // {#<1 2 3> [1]}
-    KonProcedure* OnVisitVector;  // #<>
-    KonProcedure* OnVisitTable; // #()
-    KonProcedure* OnVisitCell;  // {}
-    KonProcedure* OnOtherType;  // {5 5} number, string etc
+    KonBase base;
+    KonProcedure* onSymbol;   // {obj .key1 = 5}
+    KonProcedure* onSyntaxMarker;  // % p1 p2; /abc /efg
+    KonProcedure* onMethodCall; // {5 + 1 2}
+    KonProcedure* onVisitList;  // {#<1 2 3> [1]}
+    KonProcedure* onVisitVector;  // #<>
+    KonProcedure* onVisitTable; // #()
+    KonProcedure* onVisitCell;  // {}
+    KonProcedure* onOtherType;  // {5 5} number, string etc
 };
 
 typedef enum {
@@ -372,26 +372,26 @@ typedef enum {
 typedef KN (*KonNativeFuncRef)(KonState* kstate, ...);
 
 struct KonProcedure {
-    KonBase Base;
-    KonProcedureType Type;
-    int ParamNum;   // arg num before ...
-    int HasVAList;   // if have ... in arg list
-    int HasVAMap;   // variable argument map
+    KonBase base;
+    KonProcedureType type;
+    int paramNum;   // arg num before ...
+    int hasVAList;   // if have ... in arg list
+    int hasVAMap;   // variable argument map
     union {
-        KonNativeFuncRef NativeFuncRef;
+        KonNativeFuncRef nativeFuncRef;
 
         struct {
-            KN CaptureList;
-            KN ArgList;
-            KN Body;
-            KonEnv* LexicalEnv;
-        } Composite;
+            KN captureList;
+            KN argList;
+            KN body;
+            KonEnv* lexicalEnv;
+        } composite;
     };
 };
 
 struct KonCpointer {
-    KonBase Base;
-    void* Pointer;
+    KonBase base;
+    void* pointer;
 };
 
 
@@ -418,122 +418,122 @@ typedef enum {
 typedef KN (*KonContFuncRef)(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
 
 struct KonContinuation {
-    KonBase Base;
-    KonContinuationType Type;
-    KonEnv* Env;
+    KonBase base;
+    KonContinuationType type;
+    KonEnv* env;
     // a Return continuation's Cont is empty
-    KonContinuation* Cont;
+    KonContinuation* cont;
     union {
         // most continuations use this store rest jobs to do
-        KN RestJobs;
+        KN restJobs;
 
         struct {
-            KN RestList;
-            KN EvaledList;
-        } EvalListItems;
+            KN restList;
+            KN evaledList;
+        } evalListItems;
         
         // for continuations need sentence subject
         struct {
-            KN Subj;
-            KN RestArgList;
-            KN EvaledArgList;
-        } EvalClauseArgs;
+            KN subj;
+            KN restArgList;
+            KN evaledArgList;
+        } evalClauseArgs;
 
         struct {
-            KN Subj;
-            KN RestClauses;
-        } EvalClauseList;
+            KN subj;
+            KN restClauses;
+        } evalClauseList;
 
         struct {
-            KonContFuncRef Callback;
+            KonContFuncRef callback;
             // used for native marcros, save more custom info
-            KxHashTable* MemoTable;
-        } Native;
+            KxHashTable* memoTable;
+        } native;
     };
 };
 
 
 struct KonState {
-    KonBase Base;
-    KonEnv* RootEnv;
+    KonBase base;
+    KonEnv* rootEnv;
 
     ////
     // gc root source start
 
-    KonContinuation* CurrCont;
+    KonContinuation* currCont;
     // temp pointer type KN list allocated between two
     // continuation switch
-    KxList* WriteBarrierGen;
-    KN CurrCode;
+    KxList* writeBarrierGen;
+    KN currCode;
 
     // gc root source end
     ////
 
 
     // a list of KxVector. store heap pointers
-    KxList* HeapPtrSegs;
-    KxVector* SegmentMaxSizeVec;    // buffsize of each ptr segment
-    unsigned long MaxObjCntLimit;    // how many objs can be stored in ptr seg
-    unsigned long GcThreshold;  // trigger gc when obj count bigger than this number
-    bool NeedGc;
+    KxList* heapPtrSegs;
+    KxVector* segmentMaxSizeVec;    // buffsize of each ptr segment
+    unsigned long maxObjCntLimit;    // how many objs can be stored in ptr seg
+    unsigned long gcThreshold;  // trigger gc when obj count bigger than this number
+    bool needGc;
 
     // mark task queue. mark the value grey before add to this queue
-    KxList* MarkTaskQueue;
+    KxList* markTaskQueue;
     
-    tb_allocator_ref_t LargeAllocator;
-    tb_allocator_ref_t Allocator;   // default allocator
+    tb_allocator_ref_t largeAllocator;
+    tb_allocator_ref_t allocator;   // default allocator
 
     // how dispatch a message
-    KxVector* MsgDispatchers;
-    unsigned int NextMsgDispatcherId;
+    KxVector* msgDispatchers;
+    unsigned int nextMsgDispatcherId;
 };
 
 struct KonFlonum {
-    KonBase Base;
-    double Flonum;
+    KonBase base;
+    double flonum;
 };
 
 // TODO replace to kon string impl
 struct KonString {
-    KonBase Base;
-    KxStringBuffer* String;
+    KonBase base;
+    KxStringBuffer* string;
 };
 
 struct KonVector {
-    KonBase Base;
-    KxVector* Vector;
+    KonBase base;
+    KxVector* vector;
 };
 
 struct KonTable {
-    KonBase Base;
-    KxHashTable* Table;
+    KonBase base;
+    KxHashTable* table;
 };
 
 struct KonParam {
-    KonBase Base;
-    KxHashTable* Table;
+    KonBase base;
+    KxHashTable* table;
 };
 
 union _Kon {
-    KonBase KonBase;
-    KonState KonState;
-    KonSymbol KonSymbol;
-    KonSyntaxMarker KonSyntaxMarker;
-    KonString KonString;
-    KonTable KonTable;
-    KonVector KonVector;
-    KonPair KonPair;
-    KonMap KonMap;
-    KonCell KonCell;
-    KonQuote KonQuote;
-    KonQuasiquote KonQuasiquote;
-    KonExpand KonExpand;
-    KonMsgDispatcher KonMsgDispatcher;
-    KonEnv KonEnv;
-    KonAccessor KonAccessor;
-    KonProcedure KonProcedure;
-    KonCpointer KonCpointer;
-    KonContinuation KonContinuation;
+    KonBase konBase;
+    KonState konState;
+    KonSymbol konSymbol;
+    KonSyntaxMarker konSyntaxMarker;
+    KonString konString;
+    KonTable konTable;
+    KonVector konVector;
+    KonPair konPair;
+    KonMap konMap;
+    KonCell konCell;
+    KonQuote konQuote;
+    KonQuasiquote konQuasiquote;
+    KonExpand konExpand;
+    KonMsgDispatcher konMsgDispatcher;
+    KonEnv konEnv;
+    KonAccessor konAccessor;
+    KonProcedure konProcedure;
+    KonCpointer konCpointer;
+    KonContinuation konContinuation;
 };
 
 
@@ -552,7 +552,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 // {
 //   KN res = (KN) KN_GC_MALLOC(size);
 //   if (res && ! KN_IS_EXCEPTION(res)) {
-//     ((KonBase*)res)->Tag = tag;
+//     ((KonBase*)res)->tag = tag;
 //   }
 //   return res;
 // }
@@ -566,7 +566,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 // #define KonDef(t)          struct Kon##t *
 #define CAST_Kon(t, v)          ((struct Kon##t *)v)
-#define KN_PTR_TYPE(x)     (((KonBase*)(x))->Tag)
+#define KN_PTR_TYPE(x)     (((KonBase*)(x))->tag)
 
 
 
@@ -574,7 +574,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_FALSE(x)      ((x) == KN_FALSE)
 #define KN_IS_UKN(x)    ((x) == KN_UKN)
 #define KN_IS_UNDEF(x)    ((x) == KN_UNDEF)
-#define KN_IS_NIL(x)    ((x) == KN_NIL || (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && ((KonQuote*)x)->Inner == KN_NIL))
+#define KN_IS_NIL(x)    ((x) == KN_NIL || (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && ((KonQuote*)x)->inner == KN_NIL))
 #define KN_IS_POINTER(x) (((kon_uint_t)(size_t)(x) & KN_POINTER_MASK) == KN_POINTER_TAG)
 #define KN_IS_FIXNUM(x)  (((kon_uint_t)(x) & KN_FIXNUM_MASK) == KN_FIXNUM_TAG)
 
@@ -582,26 +582,26 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_CHAR(x)    (((kon_uint_t)(x) & KN_EXTENDED_MASK) == KN_CHAR_TAG)
 #define KN_IS_BOOLEAN(x) (((x) == KN_TRUE) || ((x) == KN_FALSE))
 
-#define KN_GET_PTR_TAG(x)      (((KonBase*)x)->Tag)
+#define KN_GET_PTR_TAG(x)      (((KonBase*)x)->tag)
 
 #define KN_CHECK_TAG(x,t)  (KN_IS_POINTER(x) && (KN_PTR_TYPE(x) == (t)))
 
-// #define kon_slot_ref(x,i)   (((KN)&((x)->Value))[i])
-// #define kon_slot_set(x,i,v) (((KN)&((x)->Value))[i] = (v))
+// #define kon_slot_ref(x,i)   (((KN)&((x)->value))[i])
+// #define kon_slot_set(x,i,v) (((KN)&((x)->value))[i] = (v))
 
 #define KN_IS_FLONUM(x)      (KN_CHECK_TAG(x, KN_T_FLONUM))
-#define KN_FLONUM_VALUE(f) (((KonFlonum*)f)->Flonum)
-#define KN_FLONUM_VALUE_SET(f, x) (((KonFlonum*)f)->Flonum = x)
+#define KN_FLONUM_VALUE(f) (((KonFlonum*)f)->flonum)
+#define KN_FLONUM_VALUE_SET(f, x) (((KonFlonum*)f)->flonum = x)
 
 #define KN_IS_BYTES(x)         (KN_CHECK_TAG(x, KN_T_BYTES))
 #define KN_IS_STRING(x)        (KN_CHECK_TAG(x, KN_T_STRING))
 #define KN_IS_SYMBOL(x)        (KN_CHECK_TAG(x, KN_T_SYMBOL))
-#define KN_IS_VARIABLE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->Type == KN_SYM_VARIABLE)
-#define KN_IS_IDENTIFIER(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->Type == KN_SYM_IDENTIFIER)
-#define KN_IS_WORD(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->Type == KN_SYM_WORD)
+#define KN_IS_VARIABLE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->type == KN_SYM_VARIABLE)
+#define KN_IS_IDENTIFIER(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->type == KN_SYM_IDENTIFIER)
+#define KN_IS_WORD(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->type == KN_SYM_WORD)
 // is a variable like @abc or a word like abc
-#define KN_IS_REFERENCE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && (((KonSymbol*)x)->Type == KN_SYM_WORD || ((KonSymbol*)x)->Type == KN_SYM_VARIABLE || ((KonSymbol*)x)->Type == KN_SYM_PREFIX_WORD))
-#define KN_IS_PREFIX_MARCRO(x) (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->Type == KN_SYM_PREFIX_WORD)
+#define KN_IS_REFERENCE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && (((KonSymbol*)x)->type == KN_SYM_WORD || ((KonSymbol*)x)->type == KN_SYM_VARIABLE || ((KonSymbol*)x)->type == KN_SYM_PREFIX_WORD))
+#define KN_IS_PREFIX_MARCRO(x) (KN_CHECK_TAG(x, KN_T_SYMBOL) && ((KonSymbol*)x)->type == KN_SYM_PREFIX_WORD)
 #define KN_IS_SYNTAX_MARKER(x) (KN_CHECK_TAG(x, KN_T_SYNTAX_MARKER))
 
 #define KN_IS_ACCESSOR(x) (KN_CHECK_TAG(x, KN_T_ACCESSOR))
@@ -616,12 +616,12 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 #define KN_IS_QUOTE(x)    (KN_CHECK_TAG(x, KN_T_QUOTE))
 #define KN_IS_QUOTE_LIST(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST)
-#define KN_IS_QUOTE_NIL(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && ((KonQuote*)x)->Inner == KN_NIL)
-#define KN_IS_QUOTE_PAIR(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && ((KonQuote*)x)->Inner != KN_NIL)
+#define KN_IS_QUOTE_NIL(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && ((KonQuote*)x)->inner == KN_NIL)
+#define KN_IS_QUOTE_PAIR(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && ((KonQuote*)x)->inner != KN_NIL)
 #define KN_IS_QUOTE_CELL(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_CELL)
 #define KN_IS_QUOTE_STR(x)    (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_SYM_STRING)
 #define KN_IS_QUASIQUOTE(x)    (KN_CHECK_TAG(x, KN_T_QUASIQUOTE))
-#define KN_IS_QUASI_PAIR(x)    (KN_CHECK_TAG(x, KN_T_QUASIQUOTE) && KN_QUASI_TYPE(x) == KN_QUASI_LIST && ((KonQuasiquote*)x)->Inner != KN_NIL)
+#define KN_IS_QUASI_PAIR(x)    (KN_CHECK_TAG(x, KN_T_QUASIQUOTE) && KN_QUASI_TYPE(x) == KN_QUASI_LIST && ((KonQuasiquote*)x)->inner != KN_NIL)
 #define KN_IS_EXPAND(x)    (KN_CHECK_TAG(x, KN_T_EXPAND))
 #define KN_IS_UNQUOTE(x)    (KN_CHECK_TAG(x, KN_T_UNQUOTE))
 
@@ -656,38 +656,38 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 static inline KN KN_MAKE_FLONUM(KonState* kstate, double num) {
   KonFlonum* result = (KonFlonum*)KN_AllocTagged(kstate, sizeof(KonFlonum), KN_T_FLONUM);
-  result->Flonum = num;
+  result->flonum = num;
   return (KN)(result);
 }
-#define KN_UNBOX_FLONUM(n) ((KonFlonum*)n)->Flonum
+#define KN_UNBOX_FLONUM(n) ((KonFlonum*)n)->flonum
 
 #define KN_FIELD(x, type, field) (((type *)(void*)x)->field)
 
 #define kon_make_character(n)  ((KN) ((((kon_int_t)(n))<<KN_EXTENDED_BITS) + KN_CHAR_TAG))
 #define KN_UNBOX_CHAR(n) ((int) (((kon_int_t)(n))>>KN_EXTENDED_BITS))
 
-#define KN_UNBOX_STRING(x) (((KonString*)x)->String)
+#define KN_UNBOX_STRING(x) (((KonString*)x)->string)
 
-#define KN_UNBOX_VECTOR(x) (((KonVector*)x)->Vector)
+#define KN_UNBOX_VECTOR(x) (((KonVector*)x)->vector)
 
-#define KN_UNBOX_TABLE(x) (((KonTable*)x)->Table)
+#define KN_UNBOX_TABLE(x) (((KonTable*)x)->table)
 
-#define KN_UNBOX_SYMBOL(x) (((KonSymbol*)x)->Data)
+#define KN_UNBOX_SYMBOL(x) (((KonSymbol*)x)->data)
 
-#define KN_UNBOX_QUOTE(x) (((KonQuote*)x)->Inner)
-#define KN_QUOTE_TYPE(x) (((KonQuote*)x)->Type)
+#define KN_UNBOX_QUOTE(x) (((KonQuote*)x)->inner)
+#define KN_QUOTE_TYPE(x) (((KonQuote*)x)->type)
 
-#define KN_UNBOX_QUASI(x) (((KonQuasiquote*)x)->Inner)
-#define KN_QUASI_TYPE(x) (((KonQuasiquote*)x)->Type)
+#define KN_UNBOX_QUASI(x) (((KonQuasiquote*)x)->inner)
+#define KN_QUASI_TYPE(x) (((KonQuasiquote*)x)->type)
 
-#define KN_UNBOX_UNQUOTE(x) (((KonUnquote*)x)->Inner)
+#define KN_UNBOX_UNQUOTE(x) (((KonUnquote*)x)->inner)
 
-#define KN_UNBOX_CPOINTER(x) (((KonCpointer*)x)->Pointer)
+#define KN_UNBOX_CPOINTER(x) (((KonCpointer*)x)->pointer)
 
 // list
 #define KN_CONS(kstate, a, b) KN_Cons(kstate, a, b)
-#define KN_CAR(x)         (KN_FIELD(x, KonPair, Body))
-#define KN_CDR(x)         (KN_FIELD(x, KonPair, Next))
+#define KN_CAR(x)         (KN_FIELD(x, KonPair, body))
+#define KN_CDR(x)         (KN_FIELD(x, KonPair, next))
 
 #define KN_CAAR(x)      (KN_CAR(KN_CAR(x)))
 #define KN_CADR(x)      (KN_CAR(KN_CDR(x)))
@@ -707,15 +707,15 @@ static inline KN KN_MAKE_FLONUM(KonState* kstate, double num) {
 #define KN_LIST1(kstate,a)        KN_CONS((kstate), (a), KN_NIL)
 
 // cell core, similar to car
-#define KN_DCR(x)         ((KN)KN_FIELD(x, KonCell, Core))
+#define KN_DCR(x)         ((KN)KN_FIELD(x, KonCell, core))
 // cell next, similar to cdr
-#define KN_DNR(x)         ((KN)KN_FIELD(x, KonCell, Next))
+#define KN_DNR(x)         ((KN)KN_FIELD(x, KonCell, next))
 // cell prev
-#define KN_DPR(x)         ((KN)KN_FIELD(x, KonCell, Prev))
+#define KN_DPR(x)         ((KN)KN_FIELD(x, KonCell, prev))
 // cell list
-#define KN_DLR(x)         ((KN)KN_FIELD(x, KonCell, List))
+#define KN_DLR(x)         ((KN)KN_FIELD(x, KonCell, list))
 // cell table
-#define KN_DTR(x)         ((KN)KN_FIELD(x, KonCell, Table))
+#define KN_DTR(x)         ((KN)KN_FIELD(x, KonCell, table))
 // alias
 #define KN_DCNR(x)      (KN_DCR(KN_DNR(x)))
 #define KN_DTNR(x)      (KN_DTR(KN_DNR(x)))

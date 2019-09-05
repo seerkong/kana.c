@@ -22,42 +22,42 @@ typedef enum {
 } KonBuilderType;
 
 typedef struct {
-    KN Core;
-    KN Table;
-    KN Map;
-    KN List; // vector of KN
+    KN core;
+    KN table;
+    KN map;
+    KN list; // vector of KN
 } CellBuilderItem;
 
 typedef struct {
-    KonBuilderType Type;
+    KonBuilderType type;
     union {
-        KxVector* Vector; // vector of KN
-        KxVector* List; // vector of KN
-        KxVector* Block;
-        KxHashTable* Param;
-        KxHashTable* Table;
+        KxVector* vector; // vector of KN
+        KxVector* list; // vector of KN
+        KxVector* block;
+        KxHashTable* param;
+        KxHashTable* table;
         struct {
-            KxStringBuffer* Key;
-            KN Value;
-        } KvPair;
+            KxStringBuffer* key;
+            KN value;
+        } kvPair;
 
-        KxVector* Cell; // vector of CellBuilderItem*
+        KxVector* cell; // vector of CellBuilderItem*
 
         struct {
-            KN Inner;
-            KonTokenKind TokenKind;
-        } Wrapper;
+            KN inner;
+            KonTokenKind tokenKind;
+        } wrapper;
     };
 } KonBuilder;
 
 typedef struct _BuilderStackNode {
-    KonBuilder* Data;
-    struct _BuilderStackNode *Next;
+    KonBuilder* data;
+    struct _BuilderStackNode *next;
 } BuilderStackNode;
 
 typedef struct _BuilderStack {
-    long Length;
-    BuilderStackNode* Top;
+    long length;
+    BuilderStackNode* top;
 } BuilderStack;
 
 // create xxx builder

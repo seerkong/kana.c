@@ -329,8 +329,8 @@ KN KN_PrimaryVarFromSym(KonState* kstate, KN item)
         return KN_UKN;
     }
     KonSymbol* value = KN_ALLOC_TYPE_TAG(kstate, KonSymbol, KN_T_SYMBOL);
-    value->Type = KN_SYM_VARIABLE;
-    value->Data = utf8dup(symCstr);
+    value->type = KN_SYM_VARIABLE;
+    value->data = utf8dup(symCstr);
     return value;
 }
 
@@ -347,8 +347,8 @@ KN KN_PrimaryToIdentifier(KonState* kstate, KN item)
         return KN_UKN;
     }
     KonSymbol* value = KN_ALLOC_TYPE_TAG(kstate, KonSymbol, KN_T_SYMBOL);
-    value->Type = KN_SYM_IDENTIFIER;
-    value->Data = utf8dup(symCstr);
+    value->type = KN_SYM_IDENTIFIER;
+    value->data = utf8dup(symCstr);
     return value;
 }
 
@@ -365,24 +365,24 @@ KN KN_PrimaryToSymString(KonState* kstate, KN item)
         return KN_UKN;
     }
     KonSymbol* value = KN_ALLOC_TYPE_TAG(kstate, KonSymbol, KN_T_SYMBOL);
-    value->Type = KN_SYM_STRING;
-    value->Data = utf8dup(symCstr);
+    value->type = KN_SYM_STRING;
+    value->data = utf8dup(symCstr);
     return value;
 }
 
 KN KN_PrimaryUnboxQuote(KonState* kstate, KN obj)
 {
     if (KN_IS_QUOTE(obj)) {
-        return ((KonQuote*)obj)->Inner;
+        return ((KonQuote*)obj)->inner;
     }
     else if (KN_IS_QUASIQUOTE(obj)) {
-        return ((KonQuasiquote*)obj)->Inner;
+        return ((KonQuasiquote*)obj)->inner;
     }
     else if (KN_IS_EXPAND(obj)) {
-        return ((KonExpand*)obj)->Inner;
+        return ((KonExpand*)obj)->inner;
     }
     else if (KN_IS_UNQUOTE(obj)) {
-        return ((KonUnquote*)obj)->Inner;
+        return ((KonUnquote*)obj)->inner;
     }
     return obj;
 }
@@ -396,7 +396,7 @@ KN KN_PrimarySetDispatcherId(KonState* kstate, KN obj, KN boxedId)
 {
     unsigned int dispatcherId = KN_UNBOX_FIXNUM(boxedId);
     if (KN_IS_POINTER(obj)) {
-        ((KonBase*)obj)->MsgDispatcherId = dispatcherId;
+        ((KonBase*)obj)->msgDispatcherId = dispatcherId;
     }
     return KN_TRUE;
 }

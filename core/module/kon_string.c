@@ -4,7 +4,7 @@
 KN KonString_Init(KonState* kstate)
 {
     KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    value->String = KxStringBuffer_New();
+    value->string = KxStringBuffer_New();
     return value;
 }
 
@@ -37,7 +37,7 @@ KN KonString_SubStr(KonState* kstate, KN self, KN start, KN end)
     int len = KxStringBuffer_Length(value);
 
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
-    result->String = KxStringBuffer_New();
+    result->string = KxStringBuffer_New();
 
     if (startNum < 0 || endNum < 0
         || startNum > len - 1 || endNum > len - 1
@@ -47,7 +47,7 @@ KN KonString_SubStr(KonState* kstate, KN self, KN start, KN end)
     }
 
     const char* startPtr = KxStringBuffer_OffsetPtr(value, startNum);
-    KxStringBuffer_NAppendCstr(result->String, startPtr, (endNum - startNum));
+    KxStringBuffer_NAppendCstr(result->string, startPtr, (endNum - startNum));
     return result;
 }
 

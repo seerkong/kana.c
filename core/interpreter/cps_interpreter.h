@@ -43,19 +43,19 @@ static inline KN KN_CellToWordList(KonState* kstate, KN source)
     KonCell* iter = head;
     KN result = KN_NIL;
     while ((KN)iter != KN_NIL) {
-        KN core = iter->Core;
+        KN core = iter->core;
         result = KN_CONS(kstate, core, result);
-        iter = iter->Next;
+        iter = iter->next;
     }
     return KN_PairListRevert(kstate, result);
 }
 
 // apply argument list to a native function
 static inline KN KN_ApplyArgsToNativeFunc(KonState* kstate, KonProcedure* proc, KN argList) {
-    int paramLen = proc->ParamNum;
-    int hasVAList = proc->HasVAList;
-    int hasVAMap = proc->HasVAMap;
-    KonNativeFuncRef funcRef = proc->NativeFuncRef;
+    int paramLen = proc->paramNum;
+    int hasVAList = proc->hasVAList;
+    int hasVAMap = proc->hasVAMap;
+    KonNativeFuncRef funcRef = proc->nativeFuncRef;
 
     KN args[12] = { KN_UNDEF };
 

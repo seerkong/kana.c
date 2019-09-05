@@ -39,22 +39,22 @@ KN SplitIfClauses(KonState* kstate, KN sentenceRestWords)
 
 KonTrampoline* AfterIfConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KonEnv* env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
+    KonEnv* env = contBeingInvoked->env;
+    KxHashTable* memo = contBeingInvoked->native.memoTable;
     KN trueClause = KxHashTable_AtKey(memo, "TrueClause");
     KN falseClause = KxHashTable_AtKey(memo, "FalseClause");
 
     KonTrampoline* bounce;
     if (KN_IS_TRUE(evaledValue)) {
-        bounce = KN_EvalSentences(kstate, trueClause, env, contBeingInvoked->Cont);
+        bounce = KN_EvalSentences(kstate, trueClause, env, contBeingInvoked->cont);
     }
     else if (KN_IS_FALSE(evaledValue) && falseClause != KN_NIL) {
-        bounce = KN_EvalSentences(kstate, falseClause, env, contBeingInvoked->Cont);
+        bounce = KN_EvalSentences(kstate, falseClause, env, contBeingInvoked->cont);
     }
     else {
         bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
-        bounce->Cont = contBeingInvoked->Cont;
-        bounce->Run.Value = KN_FALSE;
+        bounce->cont = contBeingInvoked->cont;
+        bounce->run.value = KN_FALSE;
     }
 
     return bounce;
@@ -76,14 +76,14 @@ KonTrampoline* KN_EvalPrefixIf(KonState* kstate, KN expression, KonEnv* env, Kon
     // KN_DEBUG("falseClause %s", KN_StringToCstr(KN_ToFormatString(kstate, falseClause, true, 0, "  ")));
 
     KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
-    k->Cont = cont;
-    k->Env = env;
+    k->cont = cont;
+    k->env = env;
 
     KxHashTable* memo = KxHashTable_Init(4);
     KxHashTable_PutKv(memo, "TrueClause", trueClause);
     KxHashTable_PutKv(memo, "FalseClause", falseClause);
-    k->Native.MemoTable = memo;
-    k->Native.Callback = AfterIfConditionEvaled;
+    k->native.memoTable = memo;
+    k->native.callback = AfterIfConditionEvaled;
     
     KonTrampoline* bounce;
     bounce = KN_EvalExpression(kstate, condition, env, k);

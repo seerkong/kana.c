@@ -11,29 +11,29 @@ KonTrampoline* ApplyProcArguments(KonState* kstate, KonProcedure* proc, KN argLi
 {
     KonTrampoline* bounce;
     // TODO assert subj is a procedure
-    if (proc->Type == KN_NATIVE_FUNC) {
-        KonNativeFuncRef funcRef = proc->NativeFuncRef;
+    if (proc->type == KN_NATIVE_FUNC) {
+        KonNativeFuncRef funcRef = proc->nativeFuncRef;
         KN applyResult = (*funcRef)(kstate, argList);
         bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
-        bounce->Run.Value = applyResult;
-        bounce->Cont = cont;
+        bounce->run.value = applyResult;
+        bounce->cont = cont;
     }
-    else if (proc->Type == KN_NATIVE_OBJ_METHOD) {
+    else if (proc->type == KN_NATIVE_OBJ_METHOD) {
         // treat as plain procedure when apply arg list
         // the first item in arg list is the object
-        KonNativeFuncRef funcRef = proc->NativeFuncRef;
+        KonNativeFuncRef funcRef = proc->nativeFuncRef;
         KN applyResult = (*funcRef)(kstate, argList);
         bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
-        bounce->Run.Value = applyResult;
-        bounce->Cont = cont;
+        bounce->run.value = applyResult;
+        bounce->cont = cont;
     }
-    else if (proc->Type == KN_COMPOSITE_LAMBDA) {
+    else if (proc->type == KN_COMPOSITE_LAMBDA) {
         bounce = KN_ApplyCompositeLambda(kstate, proc, argList, env, cont);
     }
-    else if (proc->Type == KN_COMPOSITE_FUNC) {
+    else if (proc->type == KN_COMPOSITE_FUNC) {
         bounce = KN_ApplyCompositeFunc(kstate, proc, argList, env, cont);
     }
-    else if (proc->Type == KN_COMPOSITE_OBJ_METHOD) {
+    else if (proc->type == KN_COMPOSITE_OBJ_METHOD) {
         // treat as plain procedure when apply arg list
         // the first item in arg list is the object
         bounce = KN_ApplyCompositeLambda(kstate, proc, argList, env, cont);
@@ -43,9 +43,9 @@ KonTrampoline* ApplyProcArguments(KonState* kstate, KonProcedure* proc, KN argLi
 
 KonTrampoline* AfterApplyArgsExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KonEnv* env = contBeingInvoked->Env;
-    KonContinuation* cont = contBeingInvoked->Cont;
-    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
+    KonEnv* env = contBeingInvoked->env;
+    KonContinuation* cont = contBeingInvoked->cont;
+    KxHashTable* memo = contBeingInvoked->native.memoTable;
     KN applySym = KxHashTable_AtKey(memo, "ApplySym");
 
     KN_DEBUG("applySym %s", KN_StringToCstr(KN_ToFormatString(kstate, applySym, true, 0, "  ")));
@@ -73,19 +73,19 @@ KonTrampoline* AfterApplyArgsExprEvaled(KonState* kstate, KN evaledValue, KonCon
 
 KonTrampoline* AfterApplySymExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KonEnv* env = contBeingInvoked->Env;
-    KxHashTable* memo =  KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
+    KonEnv* env = contBeingInvoked->env;
+    KxHashTable* memo =  KxHashTable_ShadowClone(contBeingInvoked->native.memoTable);
     KN applyArgsExpr = KxHashTable_AtKey(memo, "ApplyArgsExpr");
 
     KonTrampoline* bounce;
     KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
-    k->Cont = contBeingInvoked->Cont;
-    k->Env = env;
+    k->cont = contBeingInvoked->cont;
+    k->env = env;
 
     KxHashTable_PutKv(memo, "ApplySym", evaledValue);
 
-    k->Native.MemoTable = memo;
-    k->Native.Callback = AfterApplyArgsExprEvaled;
+    k->native.memoTable = memo;
+    k->native.callback = AfterApplyArgsExprEvaled;
 
     bounce = KN_EvalExpression(kstate, applyArgsExpr, env, k);
 
@@ -109,14 +109,14 @@ KonTrampoline* KN_EvalPrefixApply(KonState* kstate, KN expression, KonEnv* env, 
 
 
     KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
-    k->Cont = cont;
-    k->Env = env;
+    k->cont = cont;
+    k->env = env;
 
     KxHashTable* memo = KxHashTable_Init(4);
     KxHashTable_PutKv(memo, "ApplyArgsExpr", applyArgsExpr);
 
-    k->Native.MemoTable = memo;
-    k->Native.Callback = AfterApplySymExprEvaled;
+    k->native.memoTable = memo;
+    k->native.callback = AfterApplySymExprEvaled;
     KN_DEBUG("before KN_EvalExpression");
     KonTrampoline* bounce = KN_EvalExpression(kstate, applySymExpr, env, k);
 

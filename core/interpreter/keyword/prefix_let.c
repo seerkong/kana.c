@@ -6,8 +6,8 @@
 
 KonTrampoline* AfterLetValExprEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KonEnv* env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
+    KonEnv* env = contBeingInvoked->env;
+    KxHashTable* memo = contBeingInvoked->native.memoTable;
     char* varName = KxHashTable_AtKey(memo, "VarName");
 
     KN_EnvDefine(kstate, env, varName, evaledValue);
@@ -15,8 +15,8 @@ KonTrampoline* AfterLetValExprEvaled(KonState* kstate, KN evaledValue, KonContin
     KonTrampoline* bounce;
 
     bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
-    bounce->Cont = contBeingInvoked->Cont;
-    bounce->Run.Value = KN_TRUE;
+    bounce->cont = contBeingInvoked->cont;
+    bounce->run.value = KN_TRUE;
 
     return bounce;
 }
@@ -36,22 +36,22 @@ KonTrampoline* KN_EvalPrefixLet(KonState* kstate, KN expression, KonEnv* env, Ko
     if ((KN)KN_DNR(expression) == KN_NIL) {
         KN_EnvDefine(kstate, env, varNameCstr, KN_UKN);
         bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
-        bounce->Run.Value = KN_TRUE;
-        bounce->Cont = cont;
+        bounce->run.value = KN_TRUE;
+        bounce->cont = cont;
     }
     else {
         KN initVal = KN_DCNR(expression);
         KN_DEBUG("initVal %s", KN_StringToCstr(KN_ToFormatString(kstate, initVal, true, 0, "  ")));
 
         KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
-        k->Cont = cont;
-        k->Env = env;
+        k->cont = cont;
+        k->env = env;
 
         KxHashTable* memo = KxHashTable_Init(4);
         
         KxHashTable_PutKv(memo, "VarName", varNameCstr);
-        k->Native.MemoTable = memo;
-        k->Native.Callback = AfterLetValExprEvaled;
+        k->native.memoTable = memo;
+        k->native.callback = AfterLetValExprEvaled;
 
         bounce = KN_EvalExpression(kstate, initVal, env, k);
     }

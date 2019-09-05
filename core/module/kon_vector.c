@@ -4,7 +4,7 @@
 KN KonVector_Init(KonState* kstate)
 {
     KonVector* value = KN_ALLOC_TYPE_TAG(kstate, KonVector, KN_T_VECTOR);
-    value->Vector = KxVector_Init();
+    value->vector = KxVector_Init();
     return value;
 }
 
@@ -13,7 +13,7 @@ KN KonVector_InitWithCapacity(KonState* kstate, KN capacity)
 {
     int capacityNum = KN_UNBOX_FIXNUM(capacity);
     KonVector* value = KN_ALLOC_TYPE_TAG(kstate, KonVector, KN_T_VECTOR);
-    value->Vector = KxVector_InitWithCapacity(capacityNum);
+    value->vector = KxVector_InitWithCapacity(capacityNum);
     return value;
 }
 
@@ -22,7 +22,7 @@ KN KonVector_InitWithSize(KonState* kstate, KN size)
 {
     int sizeNum = KN_UNBOX_FIXNUM(size);
     KonVector* value = KN_ALLOC_TYPE_TAG(kstate, KonVector, KN_T_VECTOR);
-    value->Vector = KxVector_InitWithSize(sizeNum);
+    value->vector = KxVector_InitWithSize(sizeNum);
     return value;
 }
 

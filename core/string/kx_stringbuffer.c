@@ -19,10 +19,10 @@
     } \
 
 struct KxStringBuffer {
-    int32_t Length;
-    int32_t HeadOffset; 
-    int32_t BuffSize;   // include last \0
-    char* BuffStart;
+    int32_t length;
+    int32_t headOffset; 
+    int32_t buffSize;   // include last \0
+    char* buffStart;
 };
  
 static int32_t KxStringBuffer_Expand(KxStringBuffer* self, int32_t min)
@@ -30,22 +30,22 @@ static int32_t KxStringBuffer_Expand(KxStringBuffer* self, int32_t min)
     char* newBuf = NULL;
     int32_t newBuffSize = 0;
  
-    min = min + 1 - (self->BuffSize - self->HeadOffset - self->Length);
+    min = min + 1 - (self->buffSize - self->headOffset - self->length);
     if (min <= 0) {
         return 0;
     }
     int32_t stepLen = STEP_LENGTH;
-    if (self->BuffSize < FIRST_STEP_LENGTH
-        && (min + self->BuffSize) < FIRST_STEP_LENGTH
+    if (self->buffSize < FIRST_STEP_LENGTH
+        && (min + self->buffSize) < FIRST_STEP_LENGTH
     ) {
         stepLen = FIRST_STEP_LENGTH;
     }
-    newBuffSize = self->BuffSize + (min / stepLen + 1) * stepLen;
-    newBuf = tb_ralloc(self->BuffStart, newBuffSize);
+    newBuffSize = self->buffSize + (min / stepLen + 1) * stepLen;
+    newBuf = tb_ralloc(self->buffStart, newBuffSize);
     if (newBuf != NULL) {
-        self->BuffStart = newBuf;
-        memset(self->BuffStart + self->HeadOffset + self->BuffSize, 0, newBuffSize - self->BuffSize);
-        self->BuffSize = newBuffSize;
+        self->buffStart = newBuf;
+        memset(self->buffStart + self->headOffset + self->buffSize, 0, newBuffSize - self->buffSize);
+        self->buffSize = newBuffSize;
         return 0;
     }
     else {
@@ -59,11 +59,11 @@ KxStringBuffer* KxStringBuffer_New()
  
     self = tb_nalloc0(1, sizeof(KxStringBuffer));
     if (self != NULL) {
-        self->BuffStart = tb_nalloc0(DEFAULT_CAPACITY, sizeof(char));
-        if (self->BuffStart != NULL) {
-            self->Length = 0;
-            self->HeadOffset = INIT_LEFT_RESERVE;
-            self->BuffSize = DEFAULT_CAPACITY;
+        self->buffStart = tb_nalloc0(DEFAULT_CAPACITY, sizeof(char));
+        if (self->buffStart != NULL) {
+            self->length = 0;
+            self->headOffset = INIT_LEFT_RESERVE;
+            self->buffSize = DEFAULT_CAPACITY;
         }
         else {
             tb_free(self);
@@ -76,8 +76,8 @@ KxStringBuffer* KxStringBuffer_New()
 void KxStringBuffer_Destroy(KxStringBuffer* self)
 {
     if (self) {
-        if (self->BuffStart) {
-            tb_free(self->BuffStart);
+        if (self->buffStart) {
+            tb_free(self->buffStart);
         }
         tb_free(self);
     }
@@ -85,35 +85,35 @@ void KxStringBuffer_Destroy(KxStringBuffer* self)
 
 int32_t KxStringBuffer_Length(KxStringBuffer* self)
 {
-    return self ? self->Length : 0;
+    return self ? self->length : 0;
 }
 
 int32_t KxStringBuffer_BuffSize(KxStringBuffer* self)
 {
-    return self ? (self->BuffSize - 1) : 0;
+    return self ? (self->buffSize - 1) : 0;
 }
 
 extern const char* KxStringBuffer_Cstr(KxStringBuffer* self)
 {
-    return self ? (self->BuffStart + self->HeadOffset) : NULL;
+    return self ? (self->buffStart + self->headOffset) : NULL;
 }
 
 const char KxStringBuffer_CharAt(KxStringBuffer* self, int index)
 {
-    if (index >= self->Length) {
+    if (index >= self->length) {
         return '\0';
     }
     else {
-        return *(self->BuffStart + self->HeadOffset + index);
+        return *(self->buffStart + self->headOffset + index);
     }
 }
 
 void KxStringBuffer_Clear(KxStringBuffer* self)
 {
     if (self != NULL) {
-        memset(self->BuffStart, 0, self->BuffSize);
-        self->Length = 0;
-        self->HeadOffset = 0;
+        memset(self->buffStart, 0, self->buffSize);
+        self->length = 0;
+        self->headOffset = 0;
     }
 }
 
@@ -124,9 +124,9 @@ int32_t KxStringBuffer_NAppendCstr(KxStringBuffer* self, const char* str, int32_
     }
  
     EXPAND_BUFFER(self, n);
-    memcpy(self->BuffStart + self->HeadOffset + self->Length, str, n);
-    self->Length += n;
-    *(self->BuffStart + self->HeadOffset + self->Length) = '\0';
+    memcpy(self->buffStart + self->headOffset + self->length, str, n);
+    self->length += n;
+    *(self->buffStart + self->headOffset + self->length) = '\0';
     return n;
 }
 
@@ -142,13 +142,13 @@ int32_t KxStringBuffer_AppendCstrWithFormat(KxStringBuffer* self, const char* fo
  
     
     while (1) {
-        n = self->BuffSize - self->Length;
+        n = self->buffSize - self->length;
         va_start(args, format);
-        ret = vsnprintf(self->BuffStart + self->HeadOffset + self->Length, n, format, args);
+        ret = vsnprintf(self->buffStart + self->headOffset + self->length, n, format, args);
         va_end(args);
  
         if (ret >= 0 && ret < n) {
-            self->Length += ret;
+            self->length += ret;
             break;
         } else if (ret < 0) {
             // error
@@ -174,9 +174,9 @@ int32_t KxStringBuffer_NAppendChar(KxStringBuffer* self, char value, int32_t num
  
     EXPAND_BUFFER(self, num);
  
-    memset(self->BuffStart + self->HeadOffset + self->Length, value, num);
-    self->Length += num;
-    *(self->BuffStart + self->HeadOffset + self->Length) = '\0';
+    memset(self->buffStart + self->headOffset + self->length, value, num);
+    self->length += num;
+    *(self->buffStart + self->headOffset + self->length) = '\0';
     return num;
 }
 
@@ -199,30 +199,30 @@ int32_t KxStringBuffer_NPrependCstr(KxStringBuffer* self, const char *str, int32
     }
 
     // if have slots at head
-    if (self->HeadOffset >= n) {
-        char* startPtr = self->BuffStart + self->HeadOffset - n;
+    if (self->headOffset >= n) {
+        char* startPtr = self->buffStart + self->headOffset - n;
         for (int i = 0; i < n; i++) {
             *(startPtr + i) = str[i];
         }
         
-        self->HeadOffset -= n;
-        self->Length += n;
+        self->headOffset -= n;
+        self->length += n;
         return n;
     }
  
     char* newBuf = NULL;
-    int32_t newBuffSize = self->BuffSize;
+    int32_t newBuffSize = self->buffSize;
  
-    int min = n + 1 - (self->BuffSize - self->HeadOffset - self->Length);
+    int min = n + 1 - (self->buffSize - self->headOffset - self->length);
 
     if (min > 0) {
-        if (self->BuffSize < FIRST_STEP_LENGTH
-            && (min + self->BuffSize) < FIRST_STEP_LENGTH
+        if (self->buffSize < FIRST_STEP_LENGTH
+            && (min + self->buffSize) < FIRST_STEP_LENGTH
         ) {
-            newBuffSize = self->BuffSize + FIRST_STEP_LENGTH;
+            newBuffSize = self->buffSize + FIRST_STEP_LENGTH;
         }
         else {
-            newBuffSize = self->BuffSize + (min / STEP_LENGTH + 1) * STEP_LENGTH;
+            newBuffSize = self->buffSize + (min / STEP_LENGTH + 1) * STEP_LENGTH;
         }
     }
 
@@ -230,11 +230,11 @@ int32_t KxStringBuffer_NPrependCstr(KxStringBuffer* self, const char *str, int32
 
     if (newBuf != NULL) {
         utf8ncat(newBuf, str, n);
-        utf8ncat(newBuf, (self->BuffStart + self->HeadOffset), self->Length);
-        self->BuffStart = newBuf;
-        self->HeadOffset = 0;
-        self->BuffSize = newBuffSize;
-        self->Length += n;
+        utf8ncat(newBuf, (self->buffStart + self->headOffset), self->length);
+        self->buffStart = newBuf;
+        self->headOffset = 0;
+        self->buffSize = newBuffSize;
+        self->length += n;
         return n;
     }
     else {
@@ -250,5 +250,5 @@ int32_t KxStringBuffer_PrependCstr(KxStringBuffer* self, const char *str)
 
 const char* KxStringBuffer_OffsetPtr(KxStringBuffer* self, int startOffset)
 {
-    return (self->BuffStart + self->HeadOffset + startOffset);
+    return (self->buffStart + self->headOffset + startOffset);
 }

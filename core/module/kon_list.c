@@ -31,11 +31,11 @@ KN KonList_Push(KonState* kstate, KN self, KN other)
         if ((KN)next == KN_NIL) {
             // append
             KonPair* node = KN_ALLOC_TYPE_TAG(kstate, KonPair, KN_T_PAIR);
-            node->Body = other;
-            node->Next = KN_NIL;
-            node->Prev = iter;
+            node->body = other;
+            node->next = KN_NIL;
+            node->prev = iter;
             
-            iter->Next = node;
+            iter->next = node;
 
             break;
         }
@@ -53,9 +53,9 @@ KN KonList_Unshift(KonState* kstate, KN self, KN other)
     }
 
     KonPair* node = KN_ALLOC_TYPE_TAG(kstate, KonPair, KN_T_PAIR);
-    node->Body = other;
-    node->Next = self;
-    node->Prev = KN_NIL;
+    node->body = other;
+    node->next = self;
+    node->prev = KN_NIL;
 
     
     return (KN)node;

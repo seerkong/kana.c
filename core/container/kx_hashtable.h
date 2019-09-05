@@ -34,31 +34,31 @@ typedef long int ktable_val_t;
 
 
 struct _KxHashTable {
-    uint32_t HashSize;  // hash vector size 2**n
-    uint32_t HashMask;  // size - 1
-    uint32_t PowerOfTwo;  // 2**n = HashSize, the n
+    uint32_t hashSize;  // hash vector size 2**n
+    uint32_t hashMask;  // size - 1
+    uint32_t powerOfTwo;  // 2**n = HashSize, the n
 
-    uint32_t BucketUsed;   // BucketVector used
-    uint32_t ItemNum;  // how many items stored
-    KxHashTableKeyEntry** Buckets;
-    KxHashTableValEntry* ValListHead;
-    KxHashTableValEntry* ValListTail;
+    uint32_t bucketUsed;   // BucketVector used
+    uint32_t itemNum;  // how many items stored
+    KxHashTableKeyEntry** buckets;
+    KxHashTableValEntry* valListHead;
+    KxHashTableValEntry* valListTail;
 };
 
 struct _KxHashTableKeyEntry {
-    KxHashTableKeyEntry* Prev;
-    KxHashTableKeyEntry* Next;
-    KxHashTableValEntry* ValEntry;
-    uint32_t HashCode;      // hash(Key)
-    uint32_t KeyLen;
-    uint32_t VerifyCode;    // hash(Key+KeyLen+ HashCode)
+    KxHashTableKeyEntry* prev;
+    KxHashTableKeyEntry* next;
+    KxHashTableValEntry* valEntry;
+    uint32_t hashCode;      // hash(Key)
+    uint32_t keyLen;
+    uint32_t verifyCode;    // hash(Key+KeyLen+ HashCode)
 };
 
 struct _KxHashTableValEntry {
-    KxHashTableValEntry* Prev;
-    KxHashTableValEntry* Next;
-    char* Key;
-    ktable_val_t Val;
+    KxHashTableValEntry* prev;
+    KxHashTableValEntry* next;
+    char* key;
+    ktable_val_t val;
 };
 
 // the n of 2**n

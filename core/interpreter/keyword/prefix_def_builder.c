@@ -6,21 +6,21 @@
 KN AfterBuilderDispatcherIdEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
     unsigned int dispatcherId = KN_UNBOX_FIXNUM(evaledValue);
-    KonEnv* env = contBeingInvoked->Env;
-    KxHashTable* memo = contBeingInvoked->Native.MemoTable;
+    KonEnv* env = contBeingInvoked->env;
+    KxHashTable* memo = contBeingInvoked->native.memoTable;
     KonCell* sourceCode = (KonCell*)KxHashTable_AtKey(memo, "BuilderSourceCode");
     KN className = (KonCell*)KxHashTable_AtKey(memo, "BuilderName");
     const char* classNameCstr = KN_UNBOX_SYMBOL(className);
     KN_DEBUG("dispatcherId %d classNameCstr %s", dispatcherId, classNameCstr);
-    ((KonBase*)sourceCode)->MsgDispatcherId = dispatcherId;
+    ((KonBase*)sourceCode)->msgDispatcherId = dispatcherId;
 
     KonTrampoline* bounce;
 
     KN_EnvDefine(kstate, env, classNameCstr, sourceCode);
     bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
 
-    bounce->Run.Value = sourceCode;
-    bounce->Cont = contBeingInvoked->Cont;
+    bounce->run.value = sourceCode;
+    bounce->cont = contBeingInvoked->cont;
 
     return bounce;
 }
@@ -37,14 +37,14 @@ KonTrampoline* KN_EvalPrefixDefBuilder(KonState* kstate, KN expression, KonEnv* 
 
 
     KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
-    k->Cont = cont;
-    k->Env = env;
+    k->cont = cont;
+    k->env = env;
 
     KxHashTable* memo = KxHashTable_Init(2);
     KxHashTable_PutKv(memo, "BuilderSourceCode", config);
     KxHashTable_PutKv(memo, "BuilderName", builderName);
-    k->Native.MemoTable = memo;
-    k->Native.Callback = AfterBuilderDispatcherIdEvaled;
+    k->native.memoTable = memo;
+    k->native.callback = AfterBuilderDispatcherIdEvaled;
     
     KonTrampoline* bounce;
     bounce = KN_EvalExpression(kstate, dispatcherIdExpr, env, k);

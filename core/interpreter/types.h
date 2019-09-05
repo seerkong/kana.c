@@ -33,28 +33,28 @@ typedef enum {
 } KonBounceType;
 
 struct _KonTrampoline {
-    KonBounceType Type;
+    KonBounceType type;
     // cont is empty when is a land trampoline
-    KonContinuation* Cont;
+    KonContinuation* cont;
 
     union {
         struct {
-            KN Value;
-        } Land;
+            KN value;
+        } land;
 
         struct {
-            KN Value;
-        } Run;
+            KN value;
+        } run;
 
         struct {
-            KN Value;
-            KonEnv* Env;
-        } Bounce;
+            KN value;
+            KonEnv* env;
+        } bounce;
     };
 };
 
-#define kon_bounce_type(x)      ((x)->Type)
-#define kon_continuation_type(x)      ((x)->Type)
+#define kon_bounce_type(x)      ((x)->type)
+#define kon_continuation_type(x)      ((x)->type)
 
 
 #ifdef __cplusplus

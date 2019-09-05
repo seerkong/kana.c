@@ -16,26 +16,26 @@ KonState* KN_Init()
     if (kstate == NULL) {
         return NULL;
     }
-    kstate->Base.Tag = KN_T_STATE;
+    kstate->base.tag = KN_T_STATE;
 
-    kstate->NextMsgDispatcherId = 100;
+    kstate->nextMsgDispatcherId = 100;
 
     // init root env
     // KN env = KN_MakeRootEnv(kstate);
     // KN_DEBUG("root env addr %x", env);     
-    // kstate->Value.Context.RootEnv = env;
+    // kstate->value.Context.rootEnv = env;
 
-    kstate->LargeAllocator = tb_large_allocator_init(tb_null, 0);
-    kstate->Allocator = tb_default_allocator_init(kstate->LargeAllocator);
+    kstate->largeAllocator = tb_large_allocator_init(tb_null, 0);
+    kstate->allocator = tb_default_allocator_init(kstate->largeAllocator);
     
-    if (!tb_init(tb_null, kstate->Allocator)) {
+    if (!tb_init(tb_null, kstate->allocator)) {
         printf("tb_init failed\n");
         return NULL;
     }
 
     KN_InitGc(kstate);
 
-    kstate->MsgDispatchers = KxVector_InitWithSize(200);
+    kstate->msgDispatchers = KxVector_InitWithSize(200);
 
     return kstate;
 }
@@ -44,15 +44,15 @@ KonState* KN_Init()
 int KN_Finish(KonState* kstate)
 {
     // exit allocator
-    if (kstate->Allocator) {
-        tb_allocator_exit(kstate->Allocator);
+    if (kstate->allocator) {
+        tb_allocator_exit(kstate->allocator);
     }
-    kstate->Allocator = tb_null;
+    kstate->allocator = tb_null;
 
-    if (kstate->LargeAllocator) {
-        tb_allocator_exit(kstate->LargeAllocator);
+    if (kstate->largeAllocator) {
+        tb_allocator_exit(kstate->largeAllocator);
     }
-    kstate->LargeAllocator = tb_null;
+    kstate->largeAllocator = tb_null;
 
 
     KN_DestroyGc(kstate);
@@ -89,7 +89,7 @@ KN KN_EvalFile(KonState* kstate, char* filePath)
 
             // DefineReservedDispatcher(kstate, env);
 
-            // KN result = KN_ProcessSentences(kstate, root, kstate->Value.Context.RootEnv);
+            // KN result = KN_ProcessSentences(kstate, root, kstate->value.Context.rootEnv);
             KN processEnv = KN_MakeChildEnv(kstate, rootEnv);
             result = KN_ProcessSentences(kstate, root, processEnv);
             

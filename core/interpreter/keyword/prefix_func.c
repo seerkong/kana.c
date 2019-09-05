@@ -7,10 +7,10 @@
 KonTrampoline* KN_ApplyCompositeFunc(KonState* kstate, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* cont)
 {
     KonEnv* parentEnv = env;
-    KN param = proc->Composite.ArgList;
-    KN body = proc->Composite.Body;
-    KN captureList = proc->Composite.CaptureList;
-    KonEnv* lexicalEnv = proc->Composite.LexicalEnv;
+    KN param = proc->composite.argList;
+    KN body = proc->composite.body;
+    KN captureList = proc->composite.captureList;
+    KonEnv* lexicalEnv = proc->composite.lexicalEnv;
 
     KN_DEBUG("param def %s", KN_StringToCstr(KN_ToFormatString(kstate, param, true, 0, "  ")));
     KN_DEBUG("argList %s", KN_StringToCstr(KN_ToFormatString(kstate, argList, true, 0, "  ")));
@@ -76,16 +76,16 @@ KonTrampoline* KN_EvalPrefixFunc(KonState* kstate, KN expression, KonEnv* env, K
         param = KN_DTNR(expression);
         body = KN_DLNR(expression);
         KonCell* nextCell = (KonCell*)KN_DNR(expression);
-        if (nextCell->Map != KN_UNDEF) {
-            KxHashTable* unboxedMap = nextCell->Map->Map;
+        if (nextCell->map != KN_UNDEF) {
+            KxHashTable* unboxedMap = nextCell->map->map;
             captureList = KxHashTable_AtKey(unboxedMap, "capture");
         }
     }
     else {
         body = KN_DLR(expression);
         KonCell* currCell = CAST_Kon(Cell, expression);
-        if ((KN)currCell->Map != KN_UNDEF) {
-            KxHashTable* unboxedMap = currCell->Map->Map;
+        if ((KN)currCell->map != KN_UNDEF) {
+            KxHashTable* unboxedMap = currCell->map->map;
             captureList = KxHashTable_AtKey(unboxedMap, "capture");
         }
     }
@@ -98,11 +98,11 @@ KonTrampoline* KN_EvalPrefixFunc(KonState* kstate, KN expression, KonEnv* env, K
     KN_DEBUG("body %s", KN_StringToCstr(KN_ToFormatString(kstate, body, true, 0, "  ")));
     
     KonProcedure* proc = KN_ALLOC_TYPE_TAG(kstate, KonProcedure, KN_T_PROCEDURE);
-    proc->Type = KN_COMPOSITE_FUNC;
-    proc->Composite.LexicalEnv = env;
-    proc->Composite.ArgList = param;
-    proc->Composite.Body = body;
-    proc->Composite.CaptureList = captureList;
+    proc->type = KN_COMPOSITE_FUNC;
+    proc->composite.lexicalEnv = env;
+    proc->composite.argList = param;
+    proc->composite.body = body;
+    proc->composite.captureList = captureList;
 
     if (KN_IS_WORD(funcName)) {
         const char* varNameCstr = KN_UNBOX_SYMBOL(funcName);
@@ -110,7 +110,7 @@ KonTrampoline* KN_EvalPrefixFunc(KonState* kstate, KN expression, KonEnv* env, K
     }
 
     KonTrampoline* bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
-    bounce->Run.Value = proc;
-    bounce->Cont = cont;
+    bounce->run.value = proc;
+    bounce->cont = cont;
     return bounce;
 }

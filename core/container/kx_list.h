@@ -29,15 +29,15 @@ typedef long int klist_val_t;
 #define KX_LIST_UNBOX_UINT(n)   (((klist_val_t)((klist_val_t)(n) & ~KX_LIST_FIXNUM_TAG))/(klist_val_t)((klist_val_t)1<<KX_LIST_FIXNUM_BITS))
 
 struct _KxList {
-    uint32_t Length;  // how many items stored
-    KxListNode* Head;
-    KxListNode* Tail;
+    uint32_t length;  // how many items stored
+    KxListNode* head;
+    KxListNode* tail;
 };
 
 struct _KxListNode {
-    KxListNode* Prev;
-    KxListNode* Next;
-    klist_val_t Val;
+    KxListNode* prev;
+    KxListNode* next;
+    klist_val_t val;
 };
 
 KxList* KxList_Init();

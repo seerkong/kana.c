@@ -5,34 +5,34 @@
 
 KonTrampoline* AfterOrConditionEvaled(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked)
 {
-    KonEnv* env = contBeingInvoked->Env;
-    KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->Native.MemoTable);
+    KonEnv* env = contBeingInvoked->env;
+    KxHashTable* memo = KxHashTable_ShadowClone(contBeingInvoked->native.memoTable);
     KN restConditon = KxHashTable_AtKey(memo, "RestCondition");
 
     KonTrampoline* bounce;
     if (KN_IS_TRUE(evaledValue)) {
         KN_DEBUG("break or");
         bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
-        bounce->Cont = contBeingInvoked->Cont;
-        bounce->Run.Value = KN_TRUE;
+        bounce->cont = contBeingInvoked->cont;
+        bounce->run.value = KN_TRUE;
     }
     else if (restConditon == KN_NIL) {
         KN_DEBUG("all or condition fail, return false");
         bounce = AllocBounceWithType(kstate, KN_TRAMPOLINE_RUN);
-        bounce->Cont = contBeingInvoked->Cont;
-        bounce->Run.Value = KN_FALSE;
+        bounce->cont = contBeingInvoked->cont;
+        bounce->run.value = KN_FALSE;
     }
     else {
         // next condition
         KN nextExpr = KN_CAR(restConditon);
         KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
-        k->Cont = contBeingInvoked->Cont;
-        k->Env = env;
+        k->cont = contBeingInvoked->cont;
+        k->env = env;
 
         KxHashTable* memo = KxHashTable_Init(4);
         KxHashTable_PutKv(memo, "RestCondition", KN_CDR(restConditon));
-        k->Native.MemoTable = memo;
-        k->Native.Callback = AfterOrConditionEvaled;
+        k->native.memoTable = memo;
+        k->native.callback = AfterOrConditionEvaled;
 
         bounce = KN_EvalExpression(kstate, nextExpr, env, k);
         return bounce;
@@ -48,13 +48,13 @@ KonTrampoline* KN_EvalPrefixOr(KonState* kstate, KN expression, KonEnv* env, Kon
     KN arguments = KN_CellCoresToList(kstate, expression);
 
     KonContinuation* k = AllocContinuationWithType(kstate, KN_CONT_NATIVE_CALLBACK);
-    k->Cont = cont;
-    k->Env = env;
+    k->cont = cont;
+    k->env = env;
 
     KxHashTable* memo = KxHashTable_Init(4);
     KxHashTable_PutKv(memo, "RestCondition", KN_CDR(arguments));
-    k->Native.MemoTable = memo;
-    k->Native.Callback = AfterOrConditionEvaled;
+    k->native.memoTable = memo;
+    k->native.callback = AfterOrConditionEvaled;
     
     KonTrampoline* bounce;
     bounce = KN_EvalExpression(kstate, KN_CAR(arguments), env, k);

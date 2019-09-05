@@ -12,19 +12,19 @@
 
 typedef struct
 {
-    KonState* Kstate;
+    KonState* kstate;
     // the reader stream
-    KxStringBuffer* ReadStream;
-    bool IsOwnedStream;
-    StateStack* StateStack;
-    BuilderStack * BuilderStack;
+    KxStringBuffer* readStream;
+    bool isOwnedStream;
+    StateStack* stateStack;
+    BuilderStack* builderStack;
 
     // convert word to identifer when in quote and quasiquote scope
-    bool WordAsIdentifier;
+    bool wordAsIdentifier;
 
-    KonTokenizer* Tokenizer;
+    KonTokenizer* tokenizer;
 
-    KN Root;
+    KN root;
 } KonReader;
 
 
