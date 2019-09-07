@@ -302,6 +302,7 @@ struct KonBlock {
 };
 
 struct KonMap {
+    KonBase base;
     KxHashTable* map;
 };
 
@@ -671,6 +672,7 @@ static inline KN KN_MAKE_FLONUM(KonState* kstate, double num) {
 #define KN_UNBOX_VECTOR(x) (((KonVector*)x)->vector)
 
 #define KN_UNBOX_TABLE(x) (((KonTable*)x)->table)
+#define KN_UNBOX_MAP(x) (((KonMap*)x)->map)
 
 #define KN_UNBOX_SYMBOL(x) (((KonSymbol*)x)->data)
 
@@ -785,6 +787,8 @@ KN KN_ParamStringify(KonState* kstate, KN source, bool newLine, int depth, char*
 
 KN KN_ParamTableToList(KonState* kstate, KN source);
 
+// map
+KN KN_MapStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
 // cell
 KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);

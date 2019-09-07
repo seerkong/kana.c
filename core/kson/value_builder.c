@@ -16,6 +16,9 @@ const char* BuilderTypeToCStr(KonBuilderType type)
         case KN_BUILDER_KV_PAIR: {
             return "KN_BUILDER_KV_PAIR";
         }
+        case KN_BUILDER_MAP: {
+            return "KN_BUILDER_MAP";
+        }
         case KN_BUILDER_CELL: {
             return "KN_BUILDER_CELL";
         }
@@ -231,6 +234,34 @@ KonBuilder* MakeKvPairBuilder(KonBuilder* builder, KN value)
 {
     builder->kvPair.value = value;
     return builder;
+}
+
+KonBuilder* CreateMapBuilder()
+{
+    KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
+    if (builder == NULL) {
+        return NULL;
+    }
+    builder->type = KN_BUILDER_MAP;
+    builder->map = KxHashTable_Init(10);;
+    return builder;
+}
+
+void MapBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair)
+{
+    char* key = KxStringBuffer_Cstr(pair->kvPair.key);
+    KxHashTable* unboxedMap = builder->map;
+    KxHashTable_PutKv(unboxedMap, key, pair->kvPair.value);
+    KN_DEBUG("MapBuilderAddPair before free pair builder key %s", key);
+    tb_free(pair);
+}
+
+KN MakeMapByBuilder(KonState* kstate, KonBuilder* builder)
+{
+    KonMap* value = KN_ALLOC_TYPE_TAG(kstate, KonMap, KN_T_MAP);
+    value->map = builder->map;
+    tb_free(builder);
+    return value;
 }
 
 CellBuilderItem* CreateCellBuilderItem()

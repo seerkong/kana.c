@@ -26,7 +26,8 @@ typedef enum
     // need map key :a 1 :b
     // or param, block
     // or next
-    KN_READER_PARSE_CELL_MAP,
+    KN_READER_PARSE_CELL_MAP_PAIR,
+    
     KN_READER_PARSE_MAP_PAIR_KEY,
 
     // need a '=' or ':'

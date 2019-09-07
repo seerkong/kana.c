@@ -63,6 +63,7 @@ bool IsContainerStartToken(int event)
         || event == KN_TOKEN_TABLE_START
         || event == KN_TOKEN_PARAM_START
         || event == KN_TOKEN_BLOCK_START
+        || event == KN_TOKEN_MAP_START
         || event == KN_TOKEN_CELL_START
     ) {
         return true;
@@ -426,13 +427,23 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
             KonBuilder* pairBuilder = BuilderStackPop(reader->builderStack);
             KonBuilder* mapBuilder = BuilderStackTop(reader->builderStack);
 
-            CellBuilderAddPair(reader->kstate, mapBuilder, pairBuilder);
-            StateStackPop(reader->stateStack);
+            // in cell mode, reset to wait map pair|param|block|nextcore state
+            if (mapBuilder->type == KN_BUILDER_CELL) {
+                CellBuilderAddPair(reader->kstate, mapBuilder, pairBuilder);
+                StateStackPop(reader->stateStack);
 
-            StateStackSetTopValue(
-                reader->stateStack,
-                KN_READER_PARSE_CELL_MAP
-            );
+                StateStackSetTopValue(
+                    reader->stateStack,
+                    KN_READER_PARSE_CELL_MAP_PAIR
+                );
+            }
+            else {
+                MapBuilderAddPair(reader->kstate, mapBuilder, pairBuilder);
+                StateStackSetTopValue(
+                    reader->stateStack,
+                    KN_READER_PARSE_MAP_PAIR_KEY
+                );
+            }
         }
         else {
             // TODO exception
@@ -509,6 +520,9 @@ void ExitTopBuilder(KonReader* reader)
     }
     else if (builderType == KN_BUILDER_TABLE) {
         value = MakeTableByBuilder(reader->kstate, topBuilder);
+    }
+    else if (builderType == KN_BUILDER_MAP) {
+        value = MakeMapByBuilder(reader->kstate, topBuilder);
     }
     else if (builderType == KN_BUILDER_CELL) {
         value = MakeCellByBuilder(reader->kstate, topBuilder);
@@ -596,6 +610,10 @@ KN KSON_Parse(KonReader* reader)
                 StateStackPush(reader->stateStack, KN_READER_PARSE_PARAM);
                 builder = CreateParamBuilder();
             }
+            else if (event == KN_TOKEN_MAP_START) {
+                StateStackPush(reader->stateStack, KN_READER_PARSE_MAP_PAIR_KEY);
+                builder = CreateMapBuilder();
+            }
             else if (event == KN_TOKEN_CELL_START) {
                 StateStackPush(reader->stateStack, KN_READER_PARSE_CELL_CORE);
                 builder = CreateCellBuilder();
@@ -645,7 +663,7 @@ KN KSON_Parse(KonReader* reader)
             continue;
         }
 
-        else if (event == KN_TOKEN_TABLE_TAG) {
+        else if (event == KN_TOKEN_KV_PAIR_TAG) {
             if (currentState == KN_READER_PARSE_TABLE
                 || currentState == KN_READER_PARSE_PARAM
             ) {
@@ -653,17 +671,20 @@ KN KSON_Parse(KonReader* reader)
                 KonBuilder* builder = CreateKvPairBuilder();
                 BuilderStackPush(reader->builderStack, builder);
             }
+            // #{:}
+            else if (currentState == KN_READER_PARSE_MAP_PAIR_KEY) {
+                KonBuilder* builder = CreateKvPairBuilder();
+                BuilderStackPush(reader->builderStack, builder);
+            }
             else if (currentState == KN_READER_PARSE_CELL_CORE
-                || currentState == KN_READER_PARSE_CELL_MAP
+                || currentState == KN_READER_PARSE_CELL_MAP_PAIR
             ) {
                 StateStackPush(reader->stateStack, KN_READER_PARSE_MAP_PAIR_KEY);
                 KonBuilder* builder = CreateKvPairBuilder();
                 BuilderStackPush(reader->builderStack, builder);
             }
             // (: : )
-            else if (currentState == KN_READER_PARSE_TABLE_PAIR_KEY
-                || currentState == KN_READER_PARSE_MAP_PAIR_KEY
-            ) {
+            else if (currentState == KN_READER_PARSE_TABLE_PAIR_KEY) {
                 // ignore do nothing
             }
             // (:a = :b 1) bad case, at the ':' before b
@@ -743,6 +764,15 @@ KN KSON_Parse(KonReader* reader)
                 && topBuilder->type != KN_BUILDER_VECTOR) {
                 KN symbol = MakeSymbol(reader, KN_TOKEN_SYM_WORD);
                 AddValueToTopBuilder(reader, symbol);
+            }
+            // the state after parsed kv pair key
+            else if (event == KN_TOKEN_CELL_END) {
+                if (currentState == KN_READER_PARSE_MAP_PAIR_EQ_OR_TAG
+                    || currentState == KN_READER_PARSE_MAP_PAIR_VAL
+                ) {
+                    AddValueToTopBuilder(reader, KN_UKN);
+                }
+                ExitTopBuilder(reader);
             }
             else {
                 ExitTopBuilder(reader);

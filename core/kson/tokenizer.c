@@ -37,11 +37,14 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
         case KN_TOKEN_CELL_START:
             KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_CELL_START");
             break;
+        case KN_TOKEN_MAP_START:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_MAP_START");
+            break;
         case KN_TOKEN_CELL_END:
             KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_CELL_END");
             break;
-        case KN_TOKEN_TABLE_TAG:
-            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_TABLE_TAG");
+        case KN_TOKEN_KV_PAIR_TAG:
+            KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_KV_PAIR_TAG");
             break;
         case KN_TOKEN_APPLY:
             KxStringBuffer_AppendCstr(tokenKind, "KN_TOKEN_APPLY");
@@ -683,6 +686,11 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 ForwardToken(tokenizer, 2);
                 tokenizer->tokenKind = KN_TOKEN_TABLE_START;
             }
+            else if (nextChars[1] == '{') {
+                UpdateTokenContent(tokenizer, "#{");
+                ForwardToken(tokenizer, 2);
+                tokenizer->tokenKind = KN_TOKEN_MAP_START;
+            }
             
             // TODO other immediate atom builders
             else if (nextChars[1] == 'n' && nextChars[2] == 'i') {
@@ -729,7 +737,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             else {
                 UpdateTokenContent(tokenizer, ":");
                 ForwardToken(tokenizer, 1);
-                tokenizer->tokenKind = KN_TOKEN_TABLE_TAG;
+                tokenizer->tokenKind = KN_TOKEN_KV_PAIR_TAG;
             }
         }
         else if (pc[0] == '%') {

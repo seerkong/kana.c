@@ -20,6 +20,7 @@ bool IsSelfEvaluated(KN source)
         || KN_IS_QUOTE(source)
         || KN_IS_VECTOR(source)
         || KN_IS_TABLE(source)
+        || KN_IS_MAP(source)
         || source == KN_TRUE
         || source == KN_FALSE
         || source == KN_NIL
@@ -364,6 +365,8 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
             }
             else if (KN_IS_VECTOR(item)
                 || KN_IS_TABLE(item)
+                || KN_IS_PARAM(item)
+                || KN_IS_MAP(item)
                 || KN_IsPairList(item)
                 || KN_IsBlock(item)
                 || KN_IS_CELL(item)

@@ -3,6 +3,7 @@
 #include "kon_list.h"
 #include "kon_vector.h"
 #include "kon_table.h"
+#include "kon_map.h"
 #include "kon_cell.h"
 #include "kon_accessor.h"
 #include "kon_file.h"
@@ -47,6 +48,13 @@ KN KonModule_Export(KonState* kstate, KonEnv* env)
         (KN)module,
         "table",
         (KN)KonTable_Export(kstate, env)
+    );
+
+    KN_DirAccessorPutKeyProperty(
+        kstate,
+        (KN)module,
+        "map",
+        (KN)KonMap_Export(kstate, env)
     );
 
     KN_DirAccessorPutKeyProperty(

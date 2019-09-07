@@ -25,6 +25,7 @@ typedef enum
     KN_TOKEN_PARAM_START,    // (
     KN_TOKEN_TABLE_END,      // )
     KN_TOKEN_CELL_START,   // {
+    KN_TOKEN_MAP_START,   // #{
     KN_TOKEN_CELL_END,     // }
 
     KN_TOKEN_KEYWORD_NIL,  //  #nil;   list end
@@ -62,7 +63,7 @@ typedef enum
     KN_TOKEN_UNQUOTE_KV,        // $%.abc
     KN_TOKEN_UNQUOTE_SEQ,        // $~.abc
 
-    KN_TOKEN_TABLE_TAG,    // :
+    KN_TOKEN_KV_PAIR_TAG,    // :
     
     KN_TOKEN_APPLY,        // %
     KN_TOKEN_REST,     // ... like scheme . eg [func [a ... b]]

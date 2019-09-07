@@ -13,6 +13,7 @@ typedef enum {
     KN_BUILDER_KV_PAIR,
     KN_BUILDER_PARAM,
     KN_BUILDER_BLOCK,
+    KN_BUILDER_MAP,
     KN_BUILDER_CELL,
 
     KN_BUILDER_QUOTE,
@@ -36,6 +37,7 @@ typedef struct {
         KxVector* block;
         KxHashTable* param;
         KxHashTable* table;
+        KxHashTable* map;
         struct {
             KxStringBuffer* key;
             KN value;
@@ -94,6 +96,10 @@ KonBuilder* CreateKvPairBuilder();
 void KvPairSetKey(KonBuilder* builder, char* key);
 void KvPairSetValue(KonBuilder* builder, KN value);
 void KvPairDestroy(KonBuilder* builder);
+
+KonBuilder* CreateMapBuilder();
+void MapBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair);
+KN MakeMapByBuilder(KonState* kstate, KonBuilder* builder);
 
 KonBuilder* CreateCellBuilder();
 void CellBuilderSetCore(KonBuilder* builder, KN name);

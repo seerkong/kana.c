@@ -1,0 +1,5 @@
+{let a #{:a 'ttf' :b=#{:c = #{:e = #()}} :e  = "abc" :f } }
+[writeln a]
+[writeln {kn/map/at-key % a 'a'} ]
+{let map-get {kn/map/at-key} }
+[writeln [map-get a 'b'] ]

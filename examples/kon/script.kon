@@ -1,0 +1,4 @@
+#!/usr/bin/env kli
+[writeln [+ 1 2 3] ]
+[writeln 5 ]
+{sh ls -al}
