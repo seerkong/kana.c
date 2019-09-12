@@ -181,28 +181,6 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             bounce = ApplyProcedureArguments(kstate, pipeProc, argList, env, cont);
 
         }
-
-        // send msg like . add 1 2;
-        else if (CAST_Kon(SyntaxMarker, firstObj)->type == KN_SYNTAX_MARKER_MSG_SIGNAL) {
-            KN signalSym = KN_CADR(argList);
-
-            unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
-            KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
-
-            KonProcedure* procedure = dispatcher->onSymbol;
-
-            // dispatcher functions should receive 3 arg
-            // 1st is the object
-            // 2nd is the symbol
-            KN dispatchArgList = KN_NIL;
-            dispatchArgList = KN_CONS(kstate, signalSym, dispatchArgList);
-            dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
-
-            // call method
-            bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
-
-            
-        }
         else if (CAST_Kon(SyntaxMarker, firstObj)->type == KN_SYNTAX_MARKER_GET_SLOT) {
             KN signalSym = KN_CADR(argList);
             // argList = KN_CDDR(argList);
@@ -213,30 +191,50 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
             bounce->run.value = slotValue;
             bounce->cont = cont;
         }
+        // send msg like . add 1 2;
+        else if (CAST_Kon(SyntaxMarker, firstObj)->type == KN_SYNTAX_MARKER_MSG_SIGNAL) {
+            KN signalSym = KN_CADR(argList);
+            
+            argList = KN_CDDR(argList);
+
+            // get dispatcher and eval OnMethodCall
+            // this dispatcherId is unboxed
+            unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
+            KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
+
+            KonProcedure* procedure = dispatcher->onMethodCall;
+
+            // dispatcher functions should receive 3 arg
+            // 1st is the object
+            // 2nd is the message symbol
+            // 3rd is the argument list
+            KN dispatchArgList = KN_NIL;
+            dispatchArgList = KN_CONS(kstate, argList, dispatchArgList);
+            dispatchArgList = KN_CONS(kstate, signalSym, dispatchArgList);
+            dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
+
+            bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
+        }
     }
-    // send msg like {123 $+ 5}
+    // send msg like {"abc" length}
     else if (KN_IS_SYMBOL(firstObj)) {
         KN signalSym = firstObj;
 
-        argList = KN_CDR(argList);
-
-        // get dispatcher and eval OnMethodCall
-        // this dispatcherId is unboxed
         unsigned int dispatcherId = KN_NodeDispacherId(kstate, subj);
         KonMsgDispatcher* dispatcher = KN_GetMsgDispatcher(kstate, dispatcherId);
 
-        KonProcedure* procedure = dispatcher->onMethodCall;
+        KonProcedure* procedure = dispatcher->onSymbol;
 
         // dispatcher functions should receive 3 arg
         // 1st is the object
-        // 2nd is the message symbol
-        // 3rd is the argument list
+        // 2nd is the symbol
         KN dispatchArgList = KN_NIL;
-        dispatchArgList = KN_CONS(kstate, argList, dispatchArgList);
         dispatchArgList = KN_CONS(kstate, signalSym, dispatchArgList);
         dispatchArgList = KN_CONS(kstate, subj, dispatchArgList);
 
+        // call method
         bounce = ApplyProcedureArguments(kstate, procedure, dispatchArgList, env, cont);
+
     }
     else if (KN_IS_VECTOR(firstObj)) {
         // get dispatcher and eval OnVisitVector
@@ -315,20 +313,17 @@ KonTrampoline* ApplySubjVerbAndObjects(KonState* kstate, KN subj, KN argList, Ko
 // convert word to identifier
 // xxx / abc / efg
 // xxx / @var-a / @var-b
-// xxx . $abc . $efg
-// xxx . abc . efg
+// xxx $abc $efg
+// xxx abc efg
 // 3 need semicolon to seperate next clause
 // xxx % arg1 arg2 arg3 ...;
 // xxx | proc arg2 arg3 ...;
 // 4 need semicolon to seperate next clause
 // convert word to identifier
-// xxx abc arg1 arg2 ...;
-// xxx @var-a arg1 arg2 ...;
+// xxx .abc arg1 arg2 ...;
+// xxx .@var-a arg1 arg2 ...;
 KN SplitClauses(KonState* kstate, KN sentenceRestWords)
 {
-    // TODO parse symbol type verb
-    
-    
     KxVector* clauseListVec = KxVector_Init();
     
     KxVector* clauseVec = KxVector_Init();
@@ -343,24 +338,22 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
             if (KN_IS_SYNTAX_MARKER(item)
                 && (
                     CAST_Kon(SyntaxMarker, item)->type == KN_SYNTAX_MARKER_APPLY
-                    
+                    || CAST_Kon(SyntaxMarker, item)->type == KN_SYNTAX_MARKER_MSG_SIGNAL
                     || CAST_Kon(SyntaxMarker, item)->type == KN_SYNTAX_MARKER_PROC_PIPE
+                    || CAST_Kon(SyntaxMarker, item)->type == KN_SYNTAX_MARKER_ASSIGN
                 )
             ) {
-                // meet % |
+                // meet . % | :=
                 KxVector_Push(clauseVec, item);
                 state = 2;
             }
-            // meet . / := eg: .name /name := 5 only need one object
+            // meet  / := eg:  /name := 5 only need one object
             else if (KN_IS_SYNTAX_MARKER(item)
                 && (
                     CAST_Kon(SyntaxMarker, item)->type == KN_SYNTAX_MARKER_GET_SLOT
-                    || CAST_Kon(SyntaxMarker, item)->type == KN_SYNTAX_MARKER_MSG_SIGNAL
-                    || CAST_Kon(SyntaxMarker, item)->type == KN_SYNTAX_MARKER_ASSIGN
+                    
                 )) {
-                
                 KxVector_Push(clauseVec, item);
-                
                 state = 3;
             }
             else if (KN_IS_VECTOR(item)
@@ -373,6 +366,7 @@ KN SplitClauses(KonState* kstate, KN sentenceRestWords)
                 || KN_IS_QUOTE(item)
                 || KN_IS_QUASIQUOTE(item)
                 || KN_IS_EXPAND(item)
+                || KN_IS_SYMBOL(item)
             ) {
                 KxVector* singleItemClause = KxVector_Init();
                 KxVector_Push(clauseListVec, singleItemClause);
@@ -991,7 +985,7 @@ KN KN_ProcessSentences(KonState* kstate, KN sentences, KonEnv* rootEnv)
                 
                 // syntax sugar.
                 // 1 the first word symbol arg after . marker, don't need to eval
-                //   eg: "zhangsan" . length
+                //   eg: "zhangsan" . append "abc"
                 // 2 the first word symbol arg after / maker, don't need eval
                 if ((CAST_Kon(SyntaxMarker, firstArg)->type == KN_SYNTAX_MARKER_MSG_SIGNAL
                         || CAST_Kon(SyntaxMarker, firstArg)->type == KN_SYNTAX_MARKER_GET_SLOT

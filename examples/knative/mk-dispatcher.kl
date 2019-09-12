@@ -60,13 +60,13 @@
 
 
 ``[writeln [get-dispatcher-id 5] ]
-
-``[writeln {5 + 2 3 4; + 6} ]
+``[writeln {5 .+ 2 3 4} ]
+[writeln {5 .+ 2 3 4; .+ 6} ]
 
 ``{#<"a" "b" "c"> #<2> }
 
 ``[writeln {#<"a" "b" "c"> #(2) } ]
-[writeln {#<"a" "b" "c">[0] } ]
+``[writeln {#<"a" "b" "c">[0] } ]
 ``[writeln {#<"a" "b" #<"e" "f" "g">>[2][1] } ]
 ``{#<"a" "b" "c"> [2] }
 ``{#<"a" "b" "c"> {abc} }
