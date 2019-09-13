@@ -158,9 +158,6 @@ unsigned int KN_NodeDispacherId(KonState* kstate, KN obj)
     else if (KN_IS_FIXNUM(obj)) {
         return KN_T_NUMBER;
     }
-    else if (KN_IS_IMDT_SYMBOL(obj)) {
-        return KN_T_SYMBOL;
-    }
     else if (KN_IS_CHAR(obj)) {
         return KN_T_CHAR;
     }
@@ -245,8 +242,8 @@ KN KN_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char*
     else if (KN_IS_PROCEDURE(source)) {
         return KN_MakeString(kstate, "#{procedure}");
     }
-    else if (KN_IS_CPOINTER(source)) {
-        return KN_MakeString(kstate, "#{cpointer}");
+    else if (KN_IS_EXT_POINTER(source)) {
+        return KN_MakeString(kstate, "#{extpointer}");
     }
     else if (KN_IS_ACCESSOR(source)) {
         return KN_AccessorStringify(kstate, source, newLine, depth, padding);
@@ -1301,13 +1298,6 @@ KonMsgDispatcher* KN_GetMsgDispatcher(KonState* kstate, unsigned int dispatcherI
     else {
         return (KonMsgDispatcher*)dispatcher;
     }
-}
-
-KonCpointer* KN_MakeCpointer(KonState* kstate, void* pointer)
-{
-    KonCpointer* result = KN_ALLOC_TYPE_TAG(kstate, KonCpointer, KN_T_CPOINTER);
-    result->pointer = pointer;
-    return result;
 }
 
 KonAccessor* KN_InitAccessorWithMod(KonState* kstate, char* mod)

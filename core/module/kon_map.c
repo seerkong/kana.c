@@ -59,7 +59,7 @@ KN KonMap_IterHead(KonState* kstate, KN self)
     KxHashTable* table = KN_UNBOX_MAP(self);
     
     KxHashTableIter iter = KxHashTable_IterHead(table);
-    return KN_MakeCpointer(kstate, iter);
+    return KN_MAKE_EXT_POINTER(iter);
 }
 
 KN KonMap_IterTail(KonState* kstate, KN self)
@@ -67,16 +67,16 @@ KN KonMap_IterTail(KonState* kstate, KN self)
     KxHashTable* table = KN_UNBOX_MAP(self);
     
     KxHashTableIter iter = KxHashTable_IterTail(table);
-    return KN_MakeCpointer(kstate, iter);
+    return KN_MAKE_EXT_POINTER(iter);
 }
 
 KN KonMap_IterPrev(KonState* kstate, KN self, KN iter)
 {
     KxHashTable* table = KN_UNBOX_MAP(self);
     
-    KxHashTableIter prev = KxHashTable_IterPrev(table, KN_UNBOX_CPOINTER(iter));
+    KxHashTableIter prev = KxHashTable_IterPrev(table, KN_UNBOX_EXT_POINTER(iter));
     if ((KN)prev != KN_NIL) {
-        return (KN)KN_MakeCpointer(kstate, prev);
+        return KN_MAKE_EXT_POINTER(prev);
     }
     else {
         return KN_NIL;
@@ -87,9 +87,9 @@ KN KonMap_IterNext(KonState* kstate, KN self, KN iter)
 {
     KxHashTable* table = KN_UNBOX_MAP(self);
     
-    KxHashTableIter next = KxHashTable_IterNext(table, KN_UNBOX_CPOINTER(iter));
+    KxHashTableIter next = KxHashTable_IterNext(table, KN_UNBOX_EXT_POINTER(iter));
     if ((KN)next != KN_NIL) {
-        return (KN)KN_MakeCpointer(kstate, next);
+        return KN_MAKE_EXT_POINTER(next);
     }
     else {
         return KN_NIL;
@@ -100,7 +100,7 @@ KN KonMap_IterGetKey(KonState* kstate, KN self, KN iter)
 {
     KxHashTable* table = KN_UNBOX_MAP(self);
     
-    const char* key = KxHashTable_IterGetKey(table, KN_UNBOX_CPOINTER(iter));
+    const char* key = KxHashTable_IterGetKey(table, KN_UNBOX_EXT_POINTER(iter));
     KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
     value->string = KxStringBuffer_New();
     KxStringBuffer_AppendCstr(value->string, key);
@@ -111,7 +111,7 @@ KN KonMap_IterGetVal(KonState* kstate, KN self, KN iter)
 {
     KxHashTable* table = KN_UNBOX_MAP(self);
     
-    return KxHashTable_IterGetVal(table, KN_UNBOX_CPOINTER(iter));
+    return KxHashTable_IterGetVal(table, KN_UNBOX_EXT_POINTER(iter));
 }
 
 KonAccessor* KonMap_Export(KonState* kstate, KonEnv* env)

@@ -207,12 +207,6 @@ KN KN_PrimaryIsFlonum(KonState* kstate, KN item)
     return (KN_IS_FLONUM(item)) ? KN_TRUE : KN_FALSE;
 }
 
-
-KN KN_PrimaryIsImdtSymbol(KonState* kstate, KN item)
-{
-    return (KN_IS_IMDT_SYMBOL(item)) ? KN_TRUE : KN_FALSE;
-}
-
 KN KN_PrimaryIsChar(KonState* kstate, KN item)
 {
     return (KN_IS_CHAR(item)) ? KN_TRUE : KN_FALSE;
@@ -306,9 +300,9 @@ KN KN_PrimaryIsContinuation(KonState* kstate, KN item)
     return (KN_IS_CONTINUATION(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsCpointer(KonState* kstate, KN item)
+KN KN_PrimaryIsExtPointer(KonState* kstate, KN item)
 {
-    return (KN_IS_CPOINTER(item)) ? KN_TRUE : KN_FALSE;
+    return (KN_IS_EXT_POINTER(item)) ? KN_TRUE : KN_FALSE;
 }
 
 KN KN_PrimaryIsException(KonState* kstate, KN item)
@@ -669,9 +663,6 @@ KN KN_PrimaryOpExport(KonState* kstate, KonEnv* env)
     KN_EnvDefine(kstate, env, "is-flonum",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsFlonum, 1, 0, 0)
     );
-    KN_EnvDefine(kstate, env, "is-imdt-symbol",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsImdtSymbol, 1, 0, 0)
-    );
     KN_EnvDefine(kstate, env, "is-char",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsChar, 1, 0, 0)
     );
@@ -723,8 +714,8 @@ KN KN_PrimaryOpExport(KonState* kstate, KonEnv* env)
     KN_EnvDefine(kstate, env, "is-continuation",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsContinuation, 1, 0, 0)
     );
-    KN_EnvDefine(kstate, env, "is-cpointer",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsCpointer, 1, 0, 0)
+    KN_EnvDefine(kstate, env, "is-ext-pointer",
+        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsExtPointer, 1, 0, 0)
     );
     KN_EnvDefine(kstate, env, "is-exception",
         MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsException, 1, 0, 0)

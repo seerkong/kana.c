@@ -126,7 +126,7 @@ KN KonAccessor_IterHead(KonState* kstate, KN self)
     KxHashTable* dir = accessor->dir;
     
     KxHashTableIter iter = KxHashTable_IterHead(dir);
-    return (KN)KN_MakeCpointer(kstate, iter);
+    return KN_MAKE_EXT_POINTER(iter);
 }
 
 KN KonAccessor_IterTail(KonState* kstate, KN self)
@@ -135,7 +135,7 @@ KN KonAccessor_IterTail(KonState* kstate, KN self)
     KxHashTable* dir = accessor->dir;
     
     KxHashTableIter iter = KxHashTable_IterTail(dir);
-    return (KN)KN_MakeCpointer(kstate, iter);
+    return KN_MAKE_EXT_POINTER(iter);
 }
 
 KN KonAccessor_IterPrev(KonState* kstate, KN self, KN iter)
@@ -143,9 +143,9 @@ KN KonAccessor_IterPrev(KonState* kstate, KN self, KN iter)
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     KxHashTable* dir = accessor->dir;
     
-    KxHashTableIter prev = KxHashTable_IterPrev(dir, KN_UNBOX_CPOINTER(iter));
+    KxHashTableIter prev = KxHashTable_IterPrev(dir, KN_UNBOX_EXT_POINTER(iter));
     if ((KN)prev != KN_NIL) {
-        return (KN)KN_MakeCpointer(kstate, prev);
+        return KN_MAKE_EXT_POINTER(prev);
     }
     else {
         return KN_NIL;
@@ -157,9 +157,9 @@ KN KonAccessor_IterNext(KonState* kstate, KN self, KN iter)
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     KxHashTable* dir = accessor->dir;
     
-    KxHashTableIter next = KxHashTable_IterNext(dir, KN_UNBOX_CPOINTER(iter));
+    KxHashTableIter next = KxHashTable_IterNext(dir, KN_UNBOX_EXT_POINTER(iter));
     if ((KN)next != KN_NIL) {
-        return (KN)KN_MakeCpointer(kstate, next);
+        return KN_MAKE_EXT_POINTER(next);
     }
     else {
         return KN_NIL;
@@ -171,7 +171,7 @@ KN KonAccessor_IterGetKey(KonState* kstate, KN self, KN iter)
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     KxHashTable* dir = accessor->dir;
     
-    const char* key = KxHashTable_IterGetKey(dir, KN_UNBOX_CPOINTER(iter));
+    const char* key = KxHashTable_IterGetKey(dir, KN_UNBOX_EXT_POINTER(iter));
     KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
     value->string = KxStringBuffer_New();
     KxStringBuffer_AppendCstr(value->string, key);
@@ -183,7 +183,7 @@ KN KonAccessor_IterGetVal(KonState* kstate, KN self, KN iter)
     KonAccessor* accessor = CAST_Kon(Accessor, self);
     KxHashTable* dir = accessor->dir;
     
-    return KxHashTable_IterGetVal(dir, KN_UNBOX_CPOINTER(iter));
+    return KxHashTable_IterGetVal(dir, KN_UNBOX_EXT_POINTER(iter));
 }
 
 KonAccessor* KonAccessor_Export(KonState* kstate, KonEnv* env)

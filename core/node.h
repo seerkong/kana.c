@@ -37,8 +37,8 @@ typedef int kon_int32_t;
 
 // tagging system
 //   bits end in     1:  fixnum
-//                  00:  pointer
-//                 010:  immediate symbol
+//                  00:  KN pointer
+//                 010:  c extension pointer
 //                0110:  reserved as 8bit tag flag
 //                1110:  unique label (NIL,NULL,TRUE,FALSE, etc.)
 //            00010110:  char
@@ -48,19 +48,19 @@ typedef int kon_int32_t;
 
 #define KN_FIXNUM_BITS 1
 #define KN_POINTER_BITS 2
-#define KN_IMDT_SYMBOL_BITS 3
+#define KN_EXT_POINTER_BITS 3
 #define KN_UNIQUE_LABEL_BITS 4
 #define KN_EXTENDED_BITS 8
 
 #define KN_FIXNUM_MASK ((1<<KN_FIXNUM_BITS)-1)
 #define KN_POINTER_MASK ((1<<KN_POINTER_BITS)-1)
-#define KN_IMDT_SYMBOL_MASK ((1<<KN_IMDT_SYMBOL_BITS)-1)
+#define KN_EXT_POINTER_MASK ((1<<KN_EXT_POINTER_BITS)-1)
 #define KN_UNIQUE_LABEL_MASK ((1<<KN_UNIQUE_LABEL_BITS)-1)
 #define KN_EXTENDED_MASK ((1<<KN_EXTENDED_BITS)-1)
 
 #define KN_POINTER_TAG 0
 #define KN_FIXNUM_TAG 1
-#define KN_IMDT_SYMBOL_TAG 2
+#define KN_EXT_POINTER_TAG 2
 #define KN_UNIQUE_LABEL_TAG 14
 
 #define KN_CHAR_TAG 22
@@ -157,7 +157,6 @@ typedef struct KonEnv KonEnv;
 typedef struct KonAccessor KonAccessor;
 typedef struct KonMsgDispatcher KonMsgDispatcher;
 typedef struct KonProcedure KonProcedure;
-typedef struct KonCpointer KonCpointer;
 typedef struct KonContinuation KonContinuation;
 
 union _KNValue {
@@ -183,7 +182,6 @@ union _KNValue {
     KonEnv* konEnv;
     KonAccessor* konAccessor;
     KonProcedure* konProcedure;
-    KonCpointer* konCpointer;
     KonContinuation* konContinuation;
 };
 
@@ -390,13 +388,6 @@ struct KonProcedure {
     };
 };
 
-struct KonCpointer {
-    KonBase base;
-    void* pointer;
-};
-
-
-
 typedef enum {
     // should be the first continuation created
     KN_CONT_RETURN,
@@ -533,7 +524,6 @@ union _Kon {
     KonEnv konEnv;
     KonAccessor konAccessor;
     KonProcedure konProcedure;
-    KonCpointer konCpointer;
     KonContinuation konContinuation;
 };
 
@@ -579,7 +569,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_POINTER(x) (((kon_uint_t)(size_t)(x) & KN_POINTER_MASK) == KN_POINTER_TAG)
 #define KN_IS_FIXNUM(x)  (((kon_uint_t)(x) & KN_FIXNUM_MASK) == KN_FIXNUM_TAG)
 
-#define KN_IS_IMDT_SYMBOL(x) (((kon_uint_t)(x) & KN_IMDT_SYMBOL_BITS) == KN_IMDT_SYMBOL_TAG)
+#define KN_IS_EXT_POINTER(x) (((kon_uint_t)(x) & KN_EXT_POINTER_BITS) == KN_EXT_POINTER_TAG)
 #define KN_IS_CHAR(x)    (((kon_uint_t)(x) & KN_EXTENDED_MASK) == KN_CHAR_TAG)
 #define KN_IS_BOOLEAN(x) (((x) == KN_TRUE) || ((x) == KN_FALSE))
 
@@ -629,7 +619,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_ENV(x)        (KN_CHECK_TAG(x, KN_T_ENV))
 #define KN_IS_PROCEDURE(x)        (KN_CHECK_TAG(x, KN_T_PROCEDURE))
 #define KN_IS_CONTINUATION(x)        (KN_CHECK_TAG(x, KN_T_CONTINUATION))
-#define KN_IS_CPOINTER(x)   (KN_CHECK_TAG(x, KN_T_CPOINTER))
+// #define KN_IS_CPOINTER(x)   (KN_CHECK_TAG(x, KN_T_CPOINTER))
 #define KN_IS_EXCEPTION(x)  (KN_CHECK_TAG(x, KN_T_EXCEPTION))
 
 // predicates end
@@ -654,6 +644,11 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 #define KN_MAKE_FIXNUM(n)    ((KN) ((((kon_int_t)(n))*(kon_int_t)((kon_int_t)1<<KN_FIXNUM_BITS)) | KN_FIXNUM_TAG))
 #define KN_UNBOX_FIXNUM(n)   (((kon_int_t)((kon_uint_t)(n) & ~KN_FIXNUM_TAG))/(kon_int_t)((kon_int_t)1<<KN_FIXNUM_BITS))
+
+#define KN_MAKE_EXT_POINTER(n)  ((KN) ((kon_uint_t)(n) + KN_EXT_POINTER_TAG) )
+#define KN_UNBOX_EXT_POINTER(n)  ((KN) ((kon_uint_t)(n) & ~((kon_uint_t)KN_EXT_POINTER_MASK) ) )
+
+
 
 static inline KN KN_MAKE_FLONUM(KonState* kstate, double num) {
   KonFlonum* result = (KonFlonum*)KN_AllocTagged(kstate, sizeof(KonFlonum), KN_T_FLONUM);
@@ -684,7 +679,6 @@ static inline KN KN_MAKE_FLONUM(KonState* kstate, double num) {
 
 #define KN_UNBOX_UNQUOTE(x) (((KonUnquote*)x)->inner)
 
-#define KN_UNBOX_CPOINTER(x) (((KonCpointer*)x)->pointer)
 
 // list
 #define KN_CONS(kstate, a, b) KN_Cons(kstate, a, b)
@@ -816,8 +810,6 @@ KonMsgDispatcher* MakeMsgDispatcher(KonState* kstate);
 int KN_SetMsgDispatcher(KonState* kstate, unsigned int dispatcherId, KonMsgDispatcher* dispatcher);
 unsigned int KN_SetNextMsgDispatcher(KonState* kstate, KonMsgDispatcher* dispatcher);
 KonMsgDispatcher* KN_GetMsgDispatcher(KonState* kstate, unsigned int dispatcherId);
-
-KonCpointer* KN_MakeCpointer(KonState* kstate, void* pointer);
 
 KonAccessor* KN_InitAccessorWithMod(KonState* kstate, char* mod);
 KN KN_MakePropertyAccessor(KonState* kstate, KN value, char* mod, KonProcedure* setter);
