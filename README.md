@@ -1,7 +1,7 @@
-# Kunu
-Kunu is a programming language. Heavily inspired by Scheme, _why's Potion language, JSON, XML.
+# Kana
+Kana is a programming language. Heavily inspired by Scheme, _why's Potion language, JSON, XML.
 
-Note: Kunu isn’t done yet. The implement may make breaking changes and produce new bugs at anytime. Just play it for fun.
+Note: Kana isn’t done yet. The implement may make breaking changes and produce new bugs at anytime. Just play it for fun.
 
 # DONE list
 - [x] a CPS (Continuation Passing Style) tree-walking interpreter
@@ -51,8 +51,8 @@ source ~/.xmake/profile
 
 ## clone code and build
 ```
-git clone https://github.com/seerkong/kunu.c.git
-cd kunu.c
+git clone https://github.com/seerkong/kana.c.git
+cd kana.c
 xmake
 ```
 use `xmake --root` if is root
@@ -83,8 +83,8 @@ if xcode warns missing 'tbox.config.h', copy it to lib/tbox/ and add to xcode ma
 cp ./build/macosx/x86_64/release/tbox.config.h ./lib/tbox/
 ```
 
-# A pamphlet about Kunu
-Well, here we go. You want to learn Kunu? Sure, okay. But first, bear in mind that Kunu isn’t done yet. And it does very little.
+# A pamphlet about Kana
+Well, here we go. You want to learn Kana? Sure, okay. But first, bear in mind that Kana isn’t done yet. And it does very little.
 
 The examples can be found in ./examples folder
 
@@ -93,7 +93,7 @@ There are two expression syntax.
 One uses list, like Lisp, eg: `[+ 1 2]`
 The other uses cell structure.
 
-### Kunu's cell structure
+### Kana's cell structure
 Every cell structure can have a core data, a map of attributes, a sequence of items stored in tuple, a list of children, and a reference to next cell.
 
 eg:
@@ -198,11 +198,11 @@ A sentence is seperated to a subject and clause list
 eg:
 ```
 {kn/str/length % "abc"; | + 4 5 6}
-{Person clone}
-{p .name := "Loki"}
-{p set-sex $male}
+{Person .clone}
+{p name := "Loki"}
+{p .set-sex $male}
 ```
-in Kunu internal, the sentences above will splited as below:
+in Kana internal, the sentences above will splited as below:
 
 ```
 [kn [
@@ -213,16 +213,16 @@ in Kunu internal, the sentences above will splited as below:
 ] ]
 
 [Person [
-  [clone]
+  [. clone]
 ] ]
 
 [p [
-  [. name]
+  [name]
   [:= "Loki"]
 ] ]
 
 [p [
-  [set-sex $male]
+  [. set-sex $male]
 ] ]
 ```
 
@@ -231,11 +231,11 @@ in message passing style expression:
 `/` is a infix means 'get the left value'.
 `%` is a infix means 'apply arguments to the object'.
 `|` is a infix means 'pipe the object to the next function's first argument', just like the pipe symbol in shell cmd: 'ls |grep '.
-`.` is a infix means 'send a signal the object'.
+`.` is a infix means 'do method call to an object' .
 `:=` is a infix means 'assign a value to a left value'.
 `;` is a syntax marker, means 'the end of arguments'.
 
-if the first word in a clause is a word, means 'do method call to an object', eg: `{p set-sex $male}`
+if the first word in a clause is a word, means 'send a signal the object'
 
 ## Comments
 
@@ -390,7 +390,7 @@ the '%' meas apply arguments to the object
 ```
 
 ## do and blk
-use Kunu's `do` and `blk` keyword execute a code block.
+use Kana's `do` and `blk` keyword execute a code block.
 the code block using `blk` have a private env
 
 ```
@@ -590,7 +590,7 @@ receive ast tree. should add a `!` before macro function
 
 
 ## accessor
-Kunu's accessor is similar to file system which can store directory and file
+Kana's accessor is similar to file system which can store directory and file
 ```
 {let a 1}
 {let b {kn/accessor/init-prop % a} }
@@ -640,4 +640,4 @@ Kunu's accessor is similar to file system which can store directory and file
 ```
 
 ## make a tiny prototype-based inheritance example
-[examples/knative/proto-obj.kl](https://github.com/seerkong/kunu.c/blob/master/examples/knative/proto-obj.kl)
+[examples/knative/proto-obj.kl](https://github.com/seerkong/kana.c/blob/master/examples/knative/proto-obj.kl)

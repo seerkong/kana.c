@@ -12,7 +12,7 @@ SUITE(suite);
 
 TEST Native_And(void) {
     char* path = "../../../../examples/knative/and.kl";
-    // char* path = "~/lang/kunuscript/kunu-c/examples/knative/and.kl";
+    // char* path = "~/lang/kanascript/kana-c/examples/knative/and.kl";
     KN_EvalFile(kstate, path);
     PASS();
 }
@@ -110,14 +110,14 @@ TEST Native_Accessor(void) {
 
 TEST Native_MkDispatcher(void) {
    char* path = "../../../../examples/knative/mk-dispatcher.kl";
-    // char* path = "~/lang/kunuscript/kunu-c/examples/knative/mk-dispatcher.kl";
+    // char* path = "~/lang/kanascript/kana-c/examples/knative/mk-dispatcher.kl";
     KN_EvalFile(kstate, path);
     PASS();
 }
 
 TEST Native_ProtoObj(void) {
 //   char* path = "../../../../examples/knative/proto-obj.kl";
-     char* path = "~/lang/kunuscript/kunu-c/examples/knative/proto-obj.kl";
+     char* path = "~/lang/kanascript/kana-c/examples/knative/proto-obj.kl";
     KN_EvalFile(kstate, path);
     PASS();
 }

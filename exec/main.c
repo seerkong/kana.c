@@ -71,7 +71,7 @@ int RunMain(int argc, char **argv)
 
 int LoadInitScript()
 {
-    const char* initScriptPath = "/usr/local/etc/kunu/init.kl";
+    const char* initScriptPath = "/usr/local/etc/kana/init.kl";
     if ((access(initScriptPath, F_OK)) != -1) {
         if (access(initScriptPath, R_OK) != -1) {
             KN_EvalFile(kstate, initScriptPath);
@@ -98,9 +98,9 @@ int main(int argc, char const* argv[])
     if (ExecMode == 1 && argc > 1) {
         KN_EvalFile(kstate, argv[1]);
     }
-    // else {
-    //      KN_EvalFile(kstate, "/Users/kongweixian/lang/kunu/kunu.c/examples/knative/mk-dispatcher.kl");
-    // }
+    //  else {
+    //       KN_EvalFile(kstate, "/Users/kongweixian/lang/kana/kana.c/examples/knative/for-loop-accessor.kl");
+    //  }
     
     return 0;
 }

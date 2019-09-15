@@ -11,7 +11,7 @@ KonState* kstate;
 SUITE(suite);
 
 TEST Reader_Cell(void) {
-    char* filePathOrigin = "~/lang/kunu/kunu.c/examples/kon/cell.kon";
+    char* filePathOrigin = "~/lang/kana/kana.c/examples/kon/cell.kon";
 
     KonReader* reader = KSON_ReaderInit(kstate);
     if (!reader) {
@@ -40,7 +40,7 @@ TEST Reader_Cell(void) {
 }
 
 TEST Reader_Map(void) {
-    char* filePathOrigin = "~/lang/kunu/kunu.c/examples/kon/map.kon";
+    char* filePathOrigin = "~/lang/kana/kana.c/examples/kon/map.kon";
     
     KonReader* reader = KSON_ReaderInit(kstate);
     if (!reader) {
