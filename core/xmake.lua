@@ -1,5 +1,5 @@
 -- add target
-target("kon")
+target("kana")
     -- make as a static library
     set_kind("static")
 
@@ -9,9 +9,6 @@ target("kon")
 
     add_deps("tbox")
     add_deps("sregex")
-    
-    -- add defines
-    add_defines("__kon_prefix__=\"kon\"")
 
     -- add include directories
     add_includedirs("..", {public = true})
@@ -30,6 +27,8 @@ target("kon")
     add_files("string/**.c")
     add_files("container/**.c")
     add_files("module/**.c")
-    add_files("kson/**.c")
-    add_files("interpreter/**.c")  
+    add_files("kon/**.c")
+    add_files("gc/**.c")
+    add_files("interp/**.c")
+    -- add_files("interpreter/**.c")  
 

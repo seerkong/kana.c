@@ -18,64 +18,12 @@ add_linkdirs("/usr/local/lib", "/usr/lib")
 add_cxflags("-stdnolib", "-fno-strict-aliasing")
 add_ldflags("-L/usr/local/lib", "-lpthread", {force = true})
 
-target("test_tokenizer")
-    -- add the dependent target
-    -- add_deps("tbox")
-    add_deps("kon")
 
-    add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
-    add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
-
-    set_optimize("none")
-    set_symbols("debug")
-    add_defines("DEBUG")
-
-    -- make as a binary
-    set_kind("binary")
-
-    -- add the source files
-    add_files("kson/test_tokenizer.c")
-
-target("test_reader")
-    -- add the dependent target
-    -- add_deps("tbox")
-    add_deps("kon")
-
-    add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
-    add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
-
-    set_optimize("none")
-    set_symbols("debug")
-    add_defines("DEBUG")
-
-    -- make as a binary
-    set_kind("binary")
-
-    -- add the source files
-    add_files("kson/test_reader.c")
-
-target("test_eval")
-    -- add the dependent target
-    -- add_deps("tbox")
-    add_deps("kon")
-
-    add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
-    add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
-
-    set_optimize("none")
-    set_symbols("debug")
-    add_defines("DEBUG")
-
-    -- make as a binary
-    set_kind("binary")
-
-    -- add the source files
-    add_files("klang/test_eval.c")
 
 target("test_table")
     -- add the dependent target
     -- add_deps("tbox")
-    add_deps("kon")
+    add_deps("kana")
 
     add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
     add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
@@ -96,7 +44,7 @@ target("test_table")
 target("test_list")
     -- add the dependent target
     -- add_deps("tbox")
-    add_deps("kon")
+    add_deps("kana")
 
     add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
     add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
@@ -114,7 +62,7 @@ target("test_list")
 target("test_string")
     -- add the dependent target
     -- add_deps("tbox")
-    add_deps("kon")
+    add_deps("kana")
 
     add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
     add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
@@ -128,3 +76,58 @@ target("test_string")
 
     -- add the source files
     add_files("string/test_string.c")
+
+
+target("test_tokenizer")
+    -- add the dependent target
+    -- add_deps("tbox")
+    add_deps("kana")
+
+    add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+    add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+
+    set_optimize("none")
+    set_symbols("debug")
+    add_defines("DEBUG")
+
+    -- make as a binary
+    set_kind("binary")
+
+    -- add the source files
+    add_files("kson/test_tokenizer.c")
+
+target("test_reader")
+    -- add the dependent target
+    -- add_deps("tbox")
+    add_deps("kana")
+
+    add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+    add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+
+    set_optimize("none")
+    set_symbols("debug")
+    add_defines("DEBUG")
+
+    -- make as a binary
+    set_kind("binary")
+
+    -- add the source files
+    add_files("kson/test_reader.c")
+
+-- target("test_eval")
+--     -- add the dependent target
+--     -- add_deps("tbox")
+--     add_deps("kana")
+
+--     add_cflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+--     add_cxflags("-Wno-unused-variable", "-Wno-unused-function", "-fno-strict-aliasing")
+
+--     set_optimize("none")
+--     set_symbols("debug")
+--     add_defines("DEBUG")
+
+--     -- make as a binary
+--     set_kind("binary")
+
+--     -- add the source files
+--     add_files("klang/test_eval.c")

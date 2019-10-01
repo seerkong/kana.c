@@ -3,6 +3,8 @@
 
 extern int ENABLE_DEBUG;
 
+#include <stdio.h>
+
 #if 0
 #define KN_VERBOSE(msg, ...) _kon_log->verbose(NULL, _kon_context->get_id(), msg, ##__VA_ARGS__)
 #define KN_INFO(msg, ...)    _kon_log->info(NULL, _kon_context->get_id(), msg, ##__VA_ARGS__)

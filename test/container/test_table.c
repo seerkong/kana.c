@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include "../greatest.h"
-#include "../../lib/tbox/tbox.h"
+#include "core/kana.h"
 
 extern SUITE(test_hashtable);
 

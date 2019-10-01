@@ -5,14 +5,14 @@
 #include <stdint.h>
 #include <assert.h>
 #include "../greatest.h"
-#include "core/kon.h"
+#include "core/kana.h"
 
 KonState* kstate;
 SUITE(suite);
 
 TEST Tokenize_Cell(void) {
         
-    char* filePathOrigin = "~/lang/konscript/kon-c/examples/kon/cell.kon";
+    char* filePathOrigin = "~/lang/kana/kana.c/examples/kon/cell.kon";
     KxStringBuffer* sb = KN_ReadFileContent(filePathOrigin);
     printf("%s\n", KxStringBuffer_Cstr(sb));
     KxStringBuffer_Clear(sb);

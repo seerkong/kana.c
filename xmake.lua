@@ -200,5 +200,5 @@ end
 includes("lib")
 -- includes("src")
 includes(format("core/%s.lua", "xmake")) 
-includes(format("exec/%s.lua", "xmake"))
+-- includes(format("exec/%s.lua", "xmake"))
 includes("test")

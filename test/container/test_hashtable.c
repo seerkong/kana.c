@@ -4,9 +4,9 @@
 #include <sys/time.h>
 #include <string.h>
 #include <stdint.h>
-#include "../../core/container/kx_hashtable.h"
 #include <assert.h>
 #include "../greatest.h"
+#include "core/kana.h"
 
 SUITE(test_hashtable);
 
