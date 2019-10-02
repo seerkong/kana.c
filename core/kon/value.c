@@ -116,30 +116,7 @@ const char* KN_HumanFormatTime()
 }
 
 
-KN KN_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
-{
-    KN res = (KN)tb_allocator_malloc0(kstate->allocator, size);
 
-    // add to heap ptr store
-    KN_RecordNewKonNode(kstate, res);
-
-    if (res.asU64) {
-        KN_OBJ_PTR_TYPE(res) = tag;
-        // set dispatcher id
-        if (tag == KN_T_FIXNUM || tag == KN_T_FLONUM || tag == KN_T_BIGNUM) {
-            KN_FIELD(res, Base, msgDispatcherId) = KN_T_NUMBER;
-        }
-        else if (tag == KN_T_NIL || tag == KN_T_PAIR) {
-            KN_FIELD(res, Base, msgDispatcherId) = KN_T_PAIRLIST;
-        }
-        else {
-            KN_FIELD(res, Base, msgDispatcherId) = tag;
-        }
-        
-    }
-
-    return res;
-}
 
 unsigned int KN_NodeDispacherId(KonState* kstate, KN obj)
 {

@@ -1,5 +1,5 @@
+#include "tina.h"
 
-#include "gc.h"
 
 #define FIRST_HEAP_PTR_SEG_SIZE 512
 // #define FIRST_HEAP_PTR_SEG_SIZE 1024 * 8
@@ -7,6 +7,15 @@
 // 7 ~= 22052
 #define MAX_SEGMENT_CNT 7
 // #define MAX_SEGMENT_CNT 2
+
+void KN_MarkPhase(KonState* knState);
+void KN_Mark(KonState* knState, KxList* taskQueue, char color);
+void KN_SweepPhase();
+void KN_ResetAndCopyPtrSegList(KonState* knState);
+void KN_MarkNode(struct _KonBase* item, KxList* markTaskQueue, char color);
+void KN_DestroyNode(KonState* knState, struct _KonBase* item);
+
+
 
 KxList* KN_CreateHeapPtrSegList(KonState* knState)
 {
@@ -50,13 +59,6 @@ void KN_InitGc(KonState* knState)
     knState->needGc = false;
 }
 
-void KN_ShowGcStatics(KonState* knState)
-{
-    int barrierObjLength = KxList_Length(knState->writeBarrierGen);
-
-    long long totalObjCnt = KN_CurrentObjCount(knState);
-    KN_DEBUG("HeapPtrSegs count : %d, totalObjCnt %lld, barrierObjLength %d\n", KxList_Length(knState->heapPtrSegs), totalObjCnt, barrierObjLength);
-}
 
 void KN_DestroyGc(KonState* knState)
 {
@@ -74,6 +76,40 @@ void KN_DestroyGc(KonState* knState)
 
     KN_ShowGcStatics(knState);
 }
+
+KN KN_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
+{
+    KN res = (KN)tb_allocator_malloc0(kstate->allocator, size);
+
+    // add to heap ptr store
+    KN_RecordNewKonNode(kstate, res);
+
+    if (res.asU64) {
+        KN_OBJ_PTR_TYPE(res) = tag;
+        // set dispatcher id
+        if (tag == KN_T_FIXNUM || tag == KN_T_FLONUM || tag == KN_T_BIGNUM) {
+            KN_FIELD(res, Base, msgDispatcherId) = KN_T_NUMBER;
+        }
+        else if (tag == KN_T_NIL || tag == KN_T_PAIR) {
+            KN_FIELD(res, Base, msgDispatcherId) = KN_T_PAIRLIST;
+        }
+        else {
+            KN_FIELD(res, Base, msgDispatcherId) = tag;
+        }
+        
+    }
+
+    return res;
+}
+
+void KN_ShowGcStatics(KonState* knState)
+{
+    int barrierObjLength = KxList_Length(knState->writeBarrierGen);
+
+    long long totalObjCnt = KN_CurrentObjCount(knState);
+    KN_DEBUG("HeapPtrSegs count : %d, totalObjCnt %lld, barrierObjLength %d\n", KxList_Length(knState->heapPtrSegs), totalObjCnt, barrierObjLength);
+}
+
 
 int KN_PushToHeapPtrSeg(KonState* knState, KxList* heapPtrSegs, KN ptr)
 {

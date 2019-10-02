@@ -46,7 +46,7 @@ union _KN {
 
 #define NUNBOX_OBJ_PTR_TYPE KN
 #include "../box/box.h"
-// #include "../gc/gc.h"
+#include "../gc/gc.h"
 
 typedef enum {
     // determined by tagging system
@@ -478,7 +478,7 @@ struct _KonState {
 // types end
 ////
 
-KN_API KN KN_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag);
+
 KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 #define KN_ALLOC_TYPE_TAG(kstate,t,tag)  ((t *)(KN_AllocTagged(kstate, sizeof(t), tag).asKon))
