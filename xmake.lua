@@ -32,11 +32,11 @@ add_defines("DEBUG")
 
 
 -- add include search directories
-add_includedirs("/usr/include", "/usr/local/include")
+add_includedirs("/usr/local/include", "/usr/include", "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include")
 
 -- add link libraries and search directories
 -- add_links("tbox", "pthread")
-add_linkdirs("/usr/local/lib", "/usr/lib")
+add_linkdirs("/usr/local/lib", "/usr/lib", "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib")
 
 -- add compilation and link flags
 add_cxflags("-stdnolib", "-fno-strict-aliasing")
@@ -200,5 +200,5 @@ end
 includes("lib")
 -- includes("src")
 includes(format("core/%s.lua", "xmake")) 
--- includes(format("exec/%s.lua", "xmake"))
+includes(format("exec/%s.lua", "xmake"))
 includes("test")
