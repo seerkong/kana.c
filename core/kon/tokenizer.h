@@ -45,11 +45,11 @@ typedef enum
     
     KN_TOKEN_SYM_STRING, // $''
     KN_TOKEN_SYM_VARIABLE, // @.abc
-    KN_TOKEN_SYM_IDENTIFIER,  // $.abc
+    KN_TOKEN_SYM_IDENTIFIER,  // $abc $>=
 
-    KN_TOKEN_QUOTE,   // $.[] $.{} $[] ${}
+    KN_TOKEN_QUOTE,   // $.[] $.{} $.<> $.()
 
-    KN_TOKEN_QUASI,   // @.[] @.{} @[] @{}
+    KN_TOKEN_QUASI,   // @.[] @xx.{} @[] @{}
 
     KN_TOKEN_UNQUOTE_REPLACE,  // $%abc $%{+ a 2}
     KN_TOKEN_UNQUOTE_SEQ,        // $^abc

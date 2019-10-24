@@ -368,7 +368,7 @@ KN KN_SymbolStringify(KonState* kstate, KN source)
             break;
         }
         case KN_SYM_IDENTIFIER: {
-            KxStringBuffer_AppendCstr(result->string, "$.");
+            KxStringBuffer_AppendCstr(result->string, "$");
             KxStringBuffer_AppendCstr(result->string, data);
             break;
         }
@@ -435,14 +435,14 @@ KN KN_QuoteStringify(KonState* kstate, KN source, bool newLine, int depth, char*
 {
     KonQuoteType type = KN_FIELD(source, Quote, type);
     KN inner = KN_FIELD(source, Quote, inner);
-    KN name = KN_FIELD(source, Quote, name);
-    const char* nameCstr = KN_UNBOX_STR(name);
+    // KN name = KN_FIELD(source, Quote, name);
+    // const char* nameCstr = KN_UNBOX_STR(name);
 
     KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KxStringBuffer_AppendCstr(result->string, "$");
-    KxStringBuffer_AppendCstr(result->string, nameCstr);
+    // KxStringBuffer_AppendCstr(result->string, nameCstr);
     KxStringBuffer_AppendCstr(result->string, ".");
 
     KN innerToKonStr = KN_ToFormatString(kstate, inner, newLine, depth, padding);
@@ -952,7 +952,6 @@ KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* 
                  KN innerListToKonStr = KN_PairListStringify(kstate, KON_2_KN(innerList), true, depth + 1, padding);
                  KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerListToKonStr));
             }
-
             iter = iter->next;
         }
 
