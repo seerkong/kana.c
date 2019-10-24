@@ -28,7 +28,7 @@ target("kana")
     add_files("container/**.c")
     add_files("module/**.c")
     add_files("kon/**.c")
-    add_files("gc/**.c")
+    add_files("gc/kikumaru.c")
     add_files("interp/**.c")
     -- add_files("interpreter/**.c")  
 

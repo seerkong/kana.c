@@ -51,6 +51,9 @@ typedef enum
     KN_READER_PARSE_EXPAND_SEQ,
     // parse tpl expand to k v pair, need table or table var $%.
     KN_READER_PARSE_EXPAND_KV,
+
+    KN_READER_PARSE_PREFIX_WRAPPER,
+    KN_READER_PARSE_SUFFIX_WRAPPER,
     
 
     // parse tpl expr var slot, need identifier or list

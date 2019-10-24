@@ -412,34 +412,30 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
     if (type == KN_BUILDER_QUOTE) {
         KonQuote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuote, KN_T_QUOTE);
         tmp->inner = inner;
-        switch (tokenKind) {
-            case KN_TOKEN_SYM_STRING: {
-                tmp->type = KN_SYM_STRING;
-                break;
-            }
-            case KN_TOKEN_QUOTE_LIST: {
-                tmp->type = KN_QUOTE_LIST;
-                break;
-            }
-            case KN_TOKEN_QUOTE_CELL: {
-                tmp->type = KN_QUOTE_CELL;
-                break;
-            }
+        if (KN_IS_CELL(inner)) {
+            tmp->type = KN_QUOTE_CELL;
+        }
+        else if (KN_IsPairList(inner)) {
+             tmp->type = KN_QUOTE_LIST;
+        }
+        else {
+            // TODO
+            tmp->type = KN_SYM_STRING;
         }
         result = KON_2_KN(tmp);
     }
     else if (type == KN_BUILDER_QUASIQUOTE) {
         KonQuasiquote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuasiquote, KN_T_QUASIQUOTE);
         tmp->inner = inner;
-        switch (tokenKind) {
-            case KN_TOKEN_QUASI_LIST: {
-                tmp->type = KN_QUASI_LIST;
-                break;
-            }
-            case KN_TOKEN_QUASI_CELL: {
-                tmp->type = KN_QUASI_CELL;
-                break;
-            }
+        if (KN_IS_CELL(inner)) {
+            tmp->type = KN_QUASI_CELL;
+        }
+        else if (KN_IsPairList(inner)) {
+             tmp->type = KN_QUASI_LIST;
+        }
+        else {
+            // TODO
+            tmp->type = KN_SYM_STRING;
         }
         result = KON_2_KN(tmp);
     }
@@ -479,6 +475,16 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
                 break;
             }
         }
+        result = KON_2_KN(tmp);
+    }
+    else if (type == KN_BUILDER_PREFIX) {
+        KonPrefix* tmp = KN_ALLOC_TYPE_TAG(kstate, KonPrefix, KN_T_PREFIX);
+        tmp->inner = inner;
+        result = KON_2_KN(tmp);
+    }
+    else if (type == KN_BUILDER_SUFFIX) {
+        KonSuffix* tmp = KN_ALLOC_TYPE_TAG(kstate, KonSuffix, KN_T_SUFFIX);
+        tmp->inner = inner;
         result = KON_2_KN(tmp);
     }
     tb_free(builder);

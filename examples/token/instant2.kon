@@ -1,0 +1,15 @@
+true false ukn nil undefined tt
+\a \:a
+each!
+!abc
+~ef
+%c,A;
+%ruby.'puts("abc")'
+$'abc'
+@.abc
+@ss.[1]
+@.{ff}
+@^abc
+@%abc
+@~abc
+@ass.[1]

@@ -6,3 +6,10 @@ vendor/
 thoughts.txt
 lib/tbox/tbox.config.h
 CMakeLists.txt
+scm/
+examples/sicp/
+.DS_Store
+examples/abc.txt
+xcode/
+ideas/
+/kni

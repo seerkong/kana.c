@@ -20,6 +20,8 @@ typedef struct _KonMap KonMap;
 typedef struct _KonCell KonCell;
 typedef struct _KonParam KonParam;
 typedef struct _KonBlock KonBlock;
+typedef struct _KonPrefix KonPrefix;
+typedef struct _KonSuffix KonSuffix;
 typedef struct _KonQuote KonQuote;
 typedef struct _KonQuasiquote KonQuasiquote;
 typedef struct _KonExpand KonExpand;
@@ -79,6 +81,8 @@ typedef enum {
     KN_T_CELL,
     KN_T_PARAM,
     KN_T_BLOCK,
+    KN_T_PREFIX,
+    KN_T_SUFFIX,
     KN_T_QUOTE,
     KN_T_QUASIQUOTE,
     KN_T_EXPAND,
@@ -104,16 +108,17 @@ typedef enum {
 
 struct _KonBase {
     KonType tag;
-    
     // unboxed fixnum
     unsigned int msgDispatcherId;
     char gcMarkColor;
+    KN prefix;
+    KN suffix;
 };
 
 
 typedef enum {
-    KN_SYM_PREFIX_WORD, // !ass
-    KN_SYM_SUFFIX_WORD, // ^ass
+    KN_SYM_MARCRO, // ass!
+    KN_SYM_CELL_SEG_END, // ^ass
     KN_SYM_WORD,  // abc
     KN_SYM_VARIABLE,    // @abc
     KN_SYM_IDENTIFIER, // $abc
@@ -126,30 +131,40 @@ struct _KonSymbol {
     KonSymbolType type;
 };
 
+struct _KonPrefix {
+    KonBase base;
+    KN inner;
+};
+
+struct _KonSuffix {
+    KonBase base;
+    KN inner;
+};
 
 typedef enum {
-    KN_QUOTE_LIST,         // $[1 2 3]
-    KN_QUOTE_CELL          // ${ojb (:a 1 :b 2)}
+    KN_QUOTE_LIST,         // $.[1 2 3]
+    KN_QUOTE_CELL          // $.{ojb (:a 1 :b 2)}
 } KonQuoteType;
 
 struct _KonQuote {
     KonBase base;
     KN inner;
+    KN name;
     KonQuoteType type;
 };
 
 
 typedef enum {
-    KN_QUASI_LIST,         // @{1 2 3}
-    KN_QUASI_CELL          // @<ojb (:a 1 :b 2)>
+    KN_QUASI_LIST,         // @.[1 2 3] @xx.[1 2 3]
+    KN_QUASI_CELL          // @.{ojb (:a 1 :b 2)} @fa.{ff}
 } KonQuasiquoteType;
 
 struct _KonQuasiquote {
     KonBase base;
     KN inner;
+    KN name;
     KonQuasiquoteType type;
 };
-
 
 typedef enum {
     KN_EXPAND_REPLACE,          // @.abc
@@ -182,7 +197,8 @@ typedef enum {
     KN_SYNTAX_MARKER_EQUAL,        // =
     KN_SYNTAX_MARKER_ASSIGN,        // :=
     KN_SYNTAX_MARKER_MSG_SIGNAL,   // .
-    KN_SYNTAX_MARKER_GET_SLOT,        // / /. /.. /ABC /~
+    KN_SYNTAX_MARKER_GET_LVALUE,        // \:abc
+    KN_SYNTAX_MARKER_GET_RVALUE,        // \abc
     KN_SYNTAX_MARKER_PROC_PIPE,         // |
     KN_SYNTAX_MARKER_CLAUSE_END    // ;
 } KonSyntaxMarkerType;
@@ -398,6 +414,8 @@ union _KonValue {
     struct _KonPair konPair;
     struct _KonMap konMap;
     struct _KonCell konCell;
+    struct _KonPrefix konPrefix;
+    struct _KonSuffix konSuffix;
     struct _KonQuote konQuote;
     struct _KonQuasiquote konQuasiquote;
     struct _KonExpand konExpand;
@@ -498,7 +516,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_EMPTY(x)    ((x.asU64) != KNBOX_EMPTY)
 #define KN_IS_FALSE(x)      ((x.asU64) == KNBOX_FALSE)
 #define KN_IS_TRUE(x)    ((x.asU64) != KNBOX_TRUE)
-#define KN_IS_NIL(x)    ((x.asU64) == KNBOX_NIL || (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && (((KonQuote*)x)->inner).asU64 == KNBOX_NIL))
+#define KN_IS_NIL(x)    ((x.asU64) == KNBOX_NIL || (KN_CHECK_TAG(x, KN_T_QUOTE) && KN_QUOTE_TYPE(x) == KN_QUOTE_LIST && (KN_FIELD(x, Quote, inner) ).asU64 == KNBOX_NIL))
 #define KN_IS_UNDEF(x)    ((x.asU64) == KNBOX_UNDEF)
 #define KN_IS_UKN(x)    ((x.asU64) == KNBOX_UKN)
 #define KN_IS_DELETED(x)    ((x.asU64) == KNBOX_DELETED)
@@ -585,9 +603,9 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_WORD(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_WORD)
 
 // is a variable like @abc or a word like abc
-#define KN_IS_REFERENCE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_WORD || ((KonSymbol*)x)->type == KN_SYM_VARIABLE || ((KonSymbol*)x)->type == KN_SYM_PREFIX_WORD))
+#define KN_IS_REFERENCE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_WORD || ((KonSymbol*)x)->type == KN_SYM_VARIABLE || ((KonSymbol*)x)->type == KN_SYM_MARCRO))
 
-#define KN_IS_PREFIX_MARCRO(x) (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_PREFIX_WORD)
+#define KN_IS_PREFIX_MARCRO(x) (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_MARCRO)
 
 #define KN_IS_SYNTAX_MARKER(x) (KN_CHECK_TAG(x, KN_T_SYNTAX_MARKER))
 
@@ -628,6 +646,12 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 #define KN_IS_UNQUOTE(x)    (KN_CHECK_TAG(x, KN_T_UNQUOTE))
 #define KN_UNBOX_UNQUOTE(x) KN_FIELD(x, Unquote, inner)
+
+#define KN_IS_PREFIX(x)    (KN_CHECK_TAG(x, KN_T_PREFIX))
+#define KN_UNBOX_PREFIX(x) KN_FIELD(x, Prefix, inner)
+
+#define KN_IS_SUFFIX(x)    (KN_CHECK_TAG(x, KN_T_SUFFIX))
+#define KN_UNBOX_SUFFIX(x) KN_FIELD(x, Suffix, inner)
 
 #define KN_IS_ENV(x)        (KN_CHECK_TAG(x, KN_T_ENV))
 
@@ -763,6 +787,8 @@ KN KN_ExpandStringify(KonState* kstate, KN source, bool newLine, int depth, char
 // eg $[]e.
 KN KN_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
+KN KN_PrefixStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_SuffixStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
 KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef, int paramNum, int hasVAList, int hasVAMap);
 KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KonEnv* env);

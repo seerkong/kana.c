@@ -93,16 +93,16 @@ bool IsContainerEndToken(int event)
 // @.abc @.[5 .+ $.a] @%.abc  @~.abc
 bool IsWrapperToken(int event)
 {
-    if (event == KN_TOKEN_QUOTE_LIST
-        || event == KN_TOKEN_QUOTE_CELL
-        || event == KN_TOKEN_QUASI_LIST
-        || event == KN_TOKEN_QUASI_CELL
+    if (event == KN_TOKEN_QUOTE
+        || event == KN_TOKEN_QUASI
         || event == KN_TOKEN_EXPAND_REPLACE
         || event == KN_TOKEN_EXPAND_KV
         || event == KN_TOKEN_EXPAND_SEQ
         || event == KN_TOKEN_UNQUOTE_REPLACE
         || event == KN_TOKEN_UNQUOTE_KV
         || event == KN_TOKEN_UNQUOTE_SEQ
+        || event == KN_TOKEN_PREFIX_WRAPPER
+        || event == KN_TOKEN_SUFFIX_WRAPPER
     ) {
         return true;
     }
@@ -139,7 +139,8 @@ bool IsSyntaxToken(int event)
         || event == KN_TOKEN_ASSIGN
         || event == KN_TOKEN_PROC_PIPE
         || event == KN_TOKEN_MSG_SIGNAL
-        || event == KN_TOKEN_GET_SLOT
+        || event == KN_TOKEN_GET_LVALUE
+        || event == KN_TOKEN_GET_RVALUE
         || event == KN_TOKEN_CLAUSE_END
     ) {
         return true;
@@ -179,8 +180,12 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
             value->type = KN_SYNTAX_MARKER_MSG_SIGNAL;
             break;
         }
-        case KN_TOKEN_GET_SLOT: {
-            value->type = KN_SYNTAX_MARKER_GET_SLOT;
+        case KN_TOKEN_GET_LVALUE: {
+            value->type = KN_SYNTAX_MARKER_GET_LVALUE;
+            break;
+        }
+        case KN_TOKEN_GET_RVALUE: {
+            value->type = KN_SYNTAX_MARKER_GET_RVALUE;
             break;
         }
         default: {
@@ -193,11 +198,11 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
 KN MakeSymbol(KonReader* reader, KonTokenKind event)
 {
     KonSymbol* value = KN_ALLOC_TYPE_TAG(reader->kstate, KonSymbol, KN_T_SYMBOL);
-    if (event == KN_TOKEN_SYM_PREFIX_WORD) {
-        value->type = KN_SYM_PREFIX_WORD;
+    if (event == KN_TOKEN_SYM_MARCRO) {
+        value->type = KN_SYM_MARCRO;
     }
-    else if (event == KN_TOKEN_SYM_SUFFIX_WORD) {
-        value->type = KN_SYM_SUFFIX_WORD;
+    else if (event == KN_TOKEN_SYM_CELL_SEG_END) {
+        value->type = KN_SYM_CELL_SEG_END;
     }
     
     else if (event == KN_TOKEN_SYM_WORD) {
@@ -380,7 +385,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         if (currentState == KN_READER_PARSE_TABLE_PAIR_KEY) {
             assert(KN_IS_SYMBOL(value));
             KonSymbolType symbolType = KN_FIELD(value, Symbol, type);
-            assert(symbolType != KN_SYM_VARIABLE && symbolType != KN_SYM_PREFIX_WORD);
+            assert(symbolType != KN_SYM_VARIABLE && symbolType != KN_SYM_MARCRO);
             // table tag key should not be NULL
             char* tableKey = KN_UNBOX_SYMBOL(value);
             assert(tableKey);
@@ -394,7 +399,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         else if (currentState == KN_READER_PARSE_MAP_PAIR_KEY) {
             assert(KN_IS_SYMBOL(value));
             KonSymbolType symbolType = KN_FIELD(value, Symbol, type);
-            assert(symbolType != KN_SYM_VARIABLE && symbolType != KN_SYM_PREFIX_WORD);
+            assert(symbolType != KN_SYM_VARIABLE && symbolType != KN_SYM_MARCRO);
             // table tag key should not be NULL
             char* tableKey = KN_UNBOX_SYMBOL(value);
             assert(tableKey);
@@ -474,6 +479,8 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         || builderType == KN_BUILDER_QUASIQUOTE
         || builderType == KN_BUILDER_EXPAND
         || builderType == KN_BUILDER_UNQUOTE
+        || builderType == KN_BUILDER_PREFIX
+        || builderType == KN_BUILDER_SUFFIX
     ) {
         WrapperSetInner(reader->kstate, topBuilder, value);
         ExitTopBuilder(reader);
@@ -531,6 +538,8 @@ void ExitTopBuilder(KonReader* reader)
         || builderType == KN_BUILDER_QUASIQUOTE
         || builderType == KN_BUILDER_EXPAND
         || builderType == KN_BUILDER_UNQUOTE
+        || builderType == KN_BUILDER_PREFIX
+        || builderType == KN_BUILDER_SUFFIX
     ) {
         value = MakeWrapperByBuilder(reader->kstate, topBuilder);
         if (builderType == KN_BUILDER_QUOTE || builderType == KN_BUILDER_QUASIQUOTE) {
@@ -620,9 +629,7 @@ KN KSON_Parse(KonReader* reader)
             }
             else {
                 // wrapper types
-                if (event == KN_TOKEN_QUOTE_LIST
-                    || event == KN_TOKEN_QUOTE_CELL
-                ) {
+                if (event == KN_TOKEN_QUOTE) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_QUOTE);
                     builder = CreateWrapperBuilder(KN_BUILDER_QUOTE, event);
 
@@ -630,9 +637,7 @@ KN KSON_Parse(KonReader* reader)
                     reader->wordAsIdentifier = true;
     
                 }
-                else if (event == KN_TOKEN_QUASI_LIST
-                    || event == KN_TOKEN_QUASI_CELL
-                ) {
+                else if (event == KN_TOKEN_QUASI) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_QUASIQUOTE);
                     builder = CreateWrapperBuilder(KN_BUILDER_QUASIQUOTE, event);
 
@@ -657,6 +662,15 @@ KN KSON_Parse(KonReader* reader)
                 else if (event == KN_TOKEN_EXPAND_SEQ) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_EXPAND_SEQ);
                     builder = CreateWrapperBuilder(KN_BUILDER_EXPAND, event);
+                }
+
+                else if (event == KN_TOKEN_PREFIX_WRAPPER) {
+                    StateStackPush(reader->stateStack, KN_READER_PARSE_PREFIX_WRAPPER);
+                    builder = CreateWrapperBuilder(KN_BUILDER_PREFIX, event);
+                }
+                else if (event == KN_TOKEN_SUFFIX_WRAPPER) {
+                    StateStackPush(reader->stateStack, KN_READER_PARSE_SUFFIX_WRAPPER);
+                    builder = CreateWrapperBuilder(KN_BUILDER_SUFFIX, event);
                 }
             }
             BuilderStackPush(reader->builderStack, builder);
@@ -746,14 +760,14 @@ KN KSON_Parse(KonReader* reader)
             KN marker = MakeSyntaxMarker(reader->kstate, event);
             AddValueToTopBuilder(reader, marker);
         }
-        else if (event == KN_TOKEN_SYM_PREFIX_WORD) {
-            // prefix marcro eg !abc
+        else if (event == KN_TOKEN_SYM_MARCRO) {
+            // prefix marcro eg abc!
             // top builder should be a list
             // don't need update state
             KN symbol = MakeSymbol(reader, event);
             AddValueToTopBuilder(reader, symbol);
         }
-        else if (event == KN_TOKEN_SYM_SUFFIX_WORD) {
+        else if (event == KN_TOKEN_SYM_CELL_SEG_END) {
             // suffix marcro eg ^abc
             // TODO
         }

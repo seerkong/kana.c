@@ -180,6 +180,12 @@ KN KN_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char*
     else if (KN_IS_UNQUOTE(source)) {
         return KN_UnquoteStringify(kstate, source, newLine, depth, padding);
     }
+    else if (KN_IS_PREFIX(source)) {
+        return KN_PrefixStringify(kstate, source, newLine, depth, padding);
+    }
+    else if (KN_IS_SUFFIX(source)) {
+        return KN_SuffixStringify(kstate, source, newLine, depth, padding);
+    }
     else if (KN_IS_VECTOR(source)) {
         return KN_VectorStringify(kstate, source, newLine, depth, padding);
     }
@@ -202,16 +208,16 @@ KN KN_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char*
         return KN_CellStringify(kstate, source, newLine, depth, padding);
     }
     else if (source.asU64 == KNBOX_UKN) {
-        return KN_MakeString(kstate, "#ukn;");
+        return KN_MakeString(kstate, "ukn");
     }
     else if (source.asU64 == KNBOX_TRUE) {
-        return KN_MakeString(kstate, "#t;");
+        return KN_MakeString(kstate, "true");
     }
     else if (source.asU64 == KNBOX_FALSE) {
-        return KN_MakeString(kstate, "#f;");
+        return KN_MakeString(kstate, "false");
     }
     else if (source.asU64 == KNBOX_UNDEF) {
-        return KN_MakeString(kstate, "#undef;");
+        return KN_MakeString(kstate, "undefined");
     }
     else if (KN_IS_CONTINUATION(source)) {
         return KN_MakeString(kstate, "#{continuation}");
@@ -346,12 +352,11 @@ KN KN_SymbolStringify(KonState* kstate, KN source)
     result->string = KxStringBuffer_New();
 
     switch (type) {
-        case KN_SYM_PREFIX_WORD: {
-            KxStringBuffer_AppendCstr(result->string, "!");
+        case KN_SYM_MARCRO: {
             KxStringBuffer_AppendCstr(result->string, data);
             break;
         }
-        case KN_SYM_SUFFIX_WORD: {
+        case KN_SYM_CELL_SEG_END: {
             KxStringBuffer_AppendCstr(result->string, "^");
             KxStringBuffer_AppendCstr(result->string, data);
             break;
@@ -410,8 +415,12 @@ KN KN_SyntaxMarkerStringify(KonState* kstate, KN source)
             KxStringBuffer_AppendCstr(result->string, ".");
             break;
         }
-        case KN_SYNTAX_MARKER_GET_SLOT: {
-            KxStringBuffer_AppendCstr(result->string, "/");
+        case KN_SYNTAX_MARKER_GET_LVALUE: {
+            KxStringBuffer_AppendCstr(result->string, "\\:");
+            break;
+        }
+        case KN_SYNTAX_MARKER_GET_RVALUE: {
+            KxStringBuffer_AppendCstr(result->string, "\\");
             break;
         }
         case KN_SYNTAX_MARKER_PROC_PIPE: {
@@ -522,6 +531,39 @@ KN KN_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, cha
     return KON_2_KN(result);
 }
 
+
+
+KN KN_PrefixStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
+{
+    KN inner = KN_UNBOX_PREFIX(source);
+    printf("KN_PrefixStringify\n");
+
+    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    result->string = KxStringBuffer_New();
+
+    KxStringBuffer_AppendCstr(result->string, "!");
+
+    KN innerToKonStr = KN_ToFormatString(kstate, inner, newLine, depth, padding);
+    KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerToKonStr));
+
+    return KON_2_KN(result);
+}
+
+KN KN_SuffixStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
+{
+    KN inner = KN_UNBOX_SUFFIX(source);
+
+    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    result->string = KxStringBuffer_New();
+
+    KxStringBuffer_AppendCstr(result->string, "!");
+
+    KN innerToKonStr = KN_ToFormatString(kstate, inner, newLine, depth, padding);
+    KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerToKonStr));
+
+    return KON_2_KN(result);
+}
+
 ////
 // the parent node add the first left padding
 // don't add newline when stringify sub container types.
@@ -610,7 +652,7 @@ KN KN_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, ch
     result->string = KxStringBuffer_New();
 
     if (source.asU64 == KNBOX_NIL) {
-        KxStringBuffer_AppendCstr(result->string, "#nil;");
+        KxStringBuffer_AppendCstr(result->string, "nil");
         return KON_2_KN(result);
     }
     

@@ -10,6 +10,7 @@
 #include "string/string.h"
 #include "kon/kon.h"
 #include "gc/gc.h"
+#include "interp/interp.h"
 
 KN_API KonState* KN_Init();
 KN_API int KN_Finish(KonState* kstate);

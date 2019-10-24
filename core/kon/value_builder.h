@@ -20,6 +20,9 @@ typedef enum {
     KN_BUILDER_QUASIQUOTE,
     KN_BUILDER_EXPAND,
     KN_BUILDER_UNQUOTE,
+
+    KN_BUILDER_PREFIX,
+    KN_BUILDER_SUFFIX,
 } KonBuilderType;
 
 typedef struct {
@@ -46,6 +49,7 @@ typedef struct {
         KxVector* cell; // vector of CellBuilderItem*
 
         struct {
+            KN name;
             KN inner;
             KonTokenKind tokenKind;
         } wrapper;
