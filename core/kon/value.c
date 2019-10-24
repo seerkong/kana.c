@@ -363,12 +363,12 @@ KN KN_SymbolStringify(KonState* kstate, KN source)
             break;
         }
         case KN_SYM_VARIABLE: {
-            KxStringBuffer_AppendCstr(result->string, "@");
+            KxStringBuffer_AppendCstr(result->string, "@.");
             KxStringBuffer_AppendCstr(result->string, data);
             break;
         }
         case KN_SYM_IDENTIFIER: {
-            KxStringBuffer_AppendCstr(result->string, "$");
+            KxStringBuffer_AppendCstr(result->string, "$.");
             KxStringBuffer_AppendCstr(result->string, data);
             break;
         }
@@ -567,8 +567,10 @@ KN KN_ObjBuilderStringify(KonState* kstate, KN source, bool newLine, int depth, 
     result->string = KxStringBuffer_New();
 
     KxStringBuffer_AppendCstr(result->string, "#");
-    KxStringBuffer_AppendCstr(result->string, nameCstr);
-    KxStringBuffer_AppendCstr(result->string, ".");
+    if (strlen(nameCstr) > 0) {
+        KxStringBuffer_AppendCstr(result->string, nameCstr);
+        KxStringBuffer_AppendCstr(result->string, ".");
+    }
 
     KN innerToKonStr = KN_ToFormatString(kstate, inner, newLine, depth, padding);
     KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerToKonStr));
@@ -877,6 +879,8 @@ KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* 
             KonMap* innerMap = iter->map;
             KonTable* innerTable = iter->table;
             KonPair* innerList = iter->list;
+            KonVector* innerVector = iter->vector;
+            KonSuffix* innerSuffix = iter->suffix;
             
             
             if (core.asU64 != KNBOX_UNDEF) {
@@ -912,6 +916,24 @@ KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* 
                     mapIter = mapIterNext;
                 }
             }
+
+            if (innerSuffix != KNBOX_UNDEF) {
+                KxStringBuffer_AppendCstr(result->string, "\n");
+                AddLeftPadding(result->string, depth, padding);
+                KxStringBuffer_AppendCstr(result->string, padding);
+
+                KN innerSuffixToKonStr = KN_SuffixStringify(kstate, KON_2_KN(innerSuffix), true, depth + 1, padding);
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerSuffixToKonStr));
+            }
+
+            if (innerVector != KNBOX_UNDEF) {
+                KxStringBuffer_AppendCstr(result->string, "\n");
+                AddLeftPadding(result->string, depth, padding);
+                KxStringBuffer_AppendCstr(result->string, padding);
+
+                KN innerVectorToKonStr = KN_VectorStringify(kstate, KON_2_KN(innerVector), true, depth + 1, padding);
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerVectorToKonStr));
+            }
             
             if (innerTable != KNBOX_UNDEF) {
                 KxStringBuffer_AppendCstr(result->string, "\n");
@@ -929,8 +951,8 @@ KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* 
 
                  KN innerListToKonStr = KN_PairListStringify(kstate, KON_2_KN(innerList), true, depth + 1, padding);
                  KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerListToKonStr));
-             }
-            
+            }
+
             iter = iter->next;
         }
 
@@ -953,6 +975,8 @@ KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* 
             KonMap* innerMap = iter->map;
             KonTable* innerTable = iter->table;
             KonPair* innerList = iter->list;
+            KonVector* innerVector = iter->vector;
+            KonSuffix* innerSuffix = iter->suffix;
 
             if (core.asU64 != KNBOX_UNDEF) {
                 KN coreToKonStr = KN_ToFormatString(kstate, core, false, 0, "  ");
@@ -985,6 +1009,23 @@ KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* 
                 }
             }
             
+            if (innerSuffix != KNBOX_UNDEF) {
+                KxStringBuffer_AppendCstr(result->string, " ");
+                AddLeftPadding(result->string, depth, padding);
+                KxStringBuffer_AppendCstr(result->string, padding);
+
+                KN innerSuffixToKonStr = KN_SuffixStringify(kstate, KON_2_KN(innerSuffix), false, depth + 1, padding);
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerSuffixToKonStr));
+            }
+
+            if (innerVector != KNBOX_UNDEF) {
+                KxStringBuffer_AppendCstr(result->string, " ");
+                AddLeftPadding(result->string, depth, padding);
+                KxStringBuffer_AppendCstr(result->string, padding);
+
+                KN innerVectorToKonStr = KN_VectorStringify(kstate, KON_2_KN(innerVector), false, depth + 1, padding);
+                KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerVectorToKonStr));
+            }
             
             if (innerTable != KNBOX_UNDEF) {
                 KxStringBuffer_AppendCstr(result->string, " ");

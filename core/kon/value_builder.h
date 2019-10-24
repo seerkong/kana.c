@@ -29,6 +29,8 @@ typedef enum {
 
 typedef struct {
     KN core;
+    KN suffix;
+    KN vector;
     KN table;
     KN map;
     KN list; // vector of KN

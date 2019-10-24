@@ -453,13 +453,19 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         // 1 core is set, meet next core
         // 2 table is set, meet next core or table
         // 3 list is set, meet next core or table or list
-        if (KN_IS_PARAM(value)) {
+        if (KN_IS_TABLE(value)) {
             CellBuilderSetTable(topBuilder, value);
         }
-        else if (KN_IS_BLOCK(value)) {
+        else if (KN_IS_PAIR(value)) {
             CellBuilderSetList(topBuilder, value);
         }
-        // #nil; a core value
+        else if (KN_IS_VECTOR(value)) {
+            CellBuilderSetVector(topBuilder, value);
+        }
+        else if (KN_IS_SUFFIX(value)) {
+            CellBuilderSetSuffix(topBuilder, value);
+        }
+        // treat nil a core value
         else if (value.asU64 == KNBOX_NIL) {
             CellBuilderSetCore(topBuilder, value);
         }

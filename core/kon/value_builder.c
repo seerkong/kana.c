@@ -269,6 +269,8 @@ CellBuilderItem* CreateCellBuilderItem()
     cellItem->table = (KN)KN_UNDEF;
     cellItem->list = (KN)KN_UNDEF;
     cellItem->map = (KN)KN_UNDEF;
+    cellItem->vector = (KN)KN_UNDEF;
+    cellItem->suffix = (KN)KN_UNDEF;
     return cellItem;
 }
 
@@ -301,6 +303,8 @@ void CellBuilderSetCore(KonBuilder* builder, KN name)
     if (cellItem->core.asU64 != KNBOX_UNDEF
         || cellItem->table.asU64 != KNBOX_UNDEF
         || cellItem->list.asU64 != KNBOX_UNDEF
+        || cellItem->vector.asU64 != KNBOX_UNDEF
+        || cellItem->suffix.asU64 != KNBOX_UNDEF
     ) {
         CellBuilderItem* newCellItem = CreateCellBuilderItem();
         KxVector_Push(builder->cell, newCellItem);
@@ -333,6 +337,33 @@ void CellBuilderSetTable(KonBuilder* builder, KN table)
     cellItem->table = table;
 }
 
+void CellBuilderSetVector(KonBuilder* builder, KN vector)
+{
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    if (cellItem->vector.asU64 != KNBOX_UNDEF
+        || cellItem->vector.asU64 != KNBOX_UNDEF
+    ) {
+        CellBuilderItem* newCellItem = CreateCellBuilderItem();
+        KxVector_Push(builder->cell, newCellItem);
+        cellItem = newCellItem;
+    }
+    cellItem->vector = vector;
+}
+
+
+void CellBuilderSetSuffix(KonBuilder* builder, KN suffix)
+{
+    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    if (cellItem->suffix.asU64 != KNBOX_UNDEF
+        || cellItem->suffix.asU64 != KNBOX_UNDEF
+    ) {
+        CellBuilderItem* newCellItem = CreateCellBuilderItem();
+        KxVector_Push(builder->cell, newCellItem);
+        cellItem = newCellItem;
+    }
+    cellItem->suffix = suffix;
+}
+
 void CellBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair)
 {
     CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
@@ -356,6 +387,8 @@ KonCell* CreateNewKonCellNode(KonState* kstate, CellBuilderItem* cellItem)
     value->table = KN_2_KON(cellItem->table, Table);
     value->list = KN_2_KON(cellItem->list, Pair);
     value->map = KN_2_KON(cellItem->map, Map);
+    value->vector = KN_2_KON(cellItem->vector, Vector);
+    value->suffix = KN_2_KON(cellItem->suffix, Suffix);
     value->next = KN_2_KON(KN_NIL, Cell);
     value->prev = KN_2_KON(KN_NIL, Cell);
     return value;

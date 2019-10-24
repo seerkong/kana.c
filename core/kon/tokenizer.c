@@ -297,9 +297,21 @@ bool IsSpace(char ch)
     return isspace(ch);
 }
 
-bool IsStopWord(char ch)
+bool IsIdentifierStopWord(char ch)
 {
-    char dest[] = " =:%./\\|#$@<>[](){};";
+    char dest[] = " =:.,;/\\|@#$%~^*&<>[](){}";
+    if (strchr(dest, ch) > 0) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+// $.>= $.<=
+bool IsQuoteSymStopWord(char ch)
+{
+    char dest[] = " :.,;/\\|@#$%~^*&[](){}";
     if (strchr(dest, ch) > 0) {
         return true;
     }
@@ -331,7 +343,29 @@ void ParseIdentifier(KonTokenizer* tokenizer)
 
     const char* pc = NULL;
     while ((pc = PeekChars(tokenizer, 1)) && pc) {
-        if (IsSpace(pc[0]) || IsStopWord(pc[0])) {
+        if (IsSpace(pc[0]) || IsIdentifierStopWord(pc[0])) {
+            break;
+        }
+        ch = ForwardChar(tokenizer);
+        KxStringBuffer_NAppendChar(tokenizer->content, ch, 1);
+    }
+    tokenizer->rowEnd = tokenizer->currRow;
+    tokenizer->colEnd = tokenizer->currCol;
+}
+
+void ParseQuoteSym(KonTokenizer* tokenizer)
+{
+    tokenizer->rowStart = tokenizer->currRow;
+    tokenizer->colStart = tokenizer->currCol;
+    KxStringBuffer_Clear(tokenizer->content);
+
+    char ch = ForwardChar(tokenizer);
+    // add identifier first char
+    KxStringBuffer_NAppendChar(tokenizer->content, ch, 1);
+
+    const char* pc = NULL;
+    while ((pc = PeekChars(tokenizer, 1)) && pc) {
+        if (IsSpace(pc[0]) || IsQuoteSymStopWord(pc[0])) {
             break;
         }
         ch = ForwardChar(tokenizer);
@@ -600,10 +634,10 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             //     ForwardToken(tokenizer, 2);
             //     tokenizer->tokenKind = KN_TOKEN_SYM_WORD;
             // }
-            // else if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
+            // else if (IsSpace(nextChars[1]) || IsIdentifierStopWord(nextChars[1])) {
                 UpdateTokenContent(tokenizer, "<");
                 ForwardToken(tokenizer, 1);
-                tokenizer->tokenKind = KN_TOKEN_SYM_WORD;
+                tokenizer->tokenKind = KN_TOKEN_VECTOR_START;
                 // tokenizer->tokenKind = KN_TOKEN_VECTOR_START;
             // }
             break;
@@ -615,7 +649,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
             //     ForwardToken(tokenizer, 2);
             //     tokenizer->tokenKind = KN_TOKEN_SYM_WORD;
             // }
-            // else if (IsSpace(nextChars[1]) || IsStopWord(nextChars[1])) {
+            // else if (IsSpace(nextChars[1]) || IsIdentifierStopWord(nextChars[1])) {
                 UpdateTokenContent(tokenizer, ">");
                 ForwardToken(tokenizer, 1);
                 tokenizer->tokenKind = KN_TOKEN_VECTOR_END;
@@ -799,7 +833,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 break;
             }
             else if (nextChars[1] == '\'') {
-                UpdateTokenContent(tokenizer, "$");
+                UpdateTokenContent(tokenizer, "");
                 ForwardToken(tokenizer, 1);
                 ParseRawString(tokenizer);
                 tokenizer->tokenKind = KN_TOKEN_SYM_STRING;
@@ -819,7 +853,14 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 ForwardToken(tokenizer, 2);
                 tokenizer->tokenKind = KN_TOKEN_UNQUOTE_KV;
             }
-            
+            else if (nextChars[1] == '{'
+                || nextChars[1] == '['
+            ) {
+                UpdateTokenContent(tokenizer, "");
+                ForwardToken(tokenizer, 1);
+                tokenizer->tokenKind = KN_TOKEN_QUOTE;
+                break;
+            }
             else if (nextChars[1] == '.') {
                 if (nextChars[2] == '{' || nextChars[2] == '[') {
                     UpdateTokenContent(tokenizer, "");
@@ -828,7 +869,7 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
                 }
                 else {
                     ForwardToken(tokenizer, 2);
-                    ParseIdentifier(tokenizer);
+                    ParseQuoteSym(tokenizer);
                     tokenizer->tokenKind = KN_TOKEN_SYM_IDENTIFIER;
                 }
             }
@@ -843,6 +884,14 @@ KonTokenKind KSON_TokenizerNext(KonTokenizer* tokenizer)
         else if (pc[0] == '@') {
             const char* nextChars = PeekChars(tokenizer, 3);
             if (nextChars == NULL) {
+                break;
+            }
+            if (nextChars[1] == '{'
+                || nextChars[1] == '['
+            ) {
+                UpdateTokenContent(tokenizer, "");
+                ForwardToken(tokenizer, 1);
+                tokenizer->tokenKind = KN_TOKEN_QUASI;
                 break;
             }
             else if (nextChars[1] == '.') {

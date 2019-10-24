@@ -249,6 +249,8 @@ struct _KonMap {
 struct _KonCell {
     KonBase base;
     KN core;
+    KonSuffix* suffix;
+    KonVector* vector;
     KonMap* map;
     KonTable* table;
     KonPair* list;
