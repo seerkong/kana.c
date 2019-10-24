@@ -53,15 +53,21 @@ NUNBOX_NAME(_ShortStrCreate)(const char *chars, unsigned int length) {
 }
 
 
-static inline char* NUNBOX_NAME(_ShortStrChars)(NUNBOX_T* val) {
-    assert(NUNBOX_NAME(_IsShortStr)(*val));
+// static inline char* NUNBOX_NAME(_ShortStrChars)(NUNBOX_T val) {
+//     assert(NUNBOX_NAME(_IsShortStr)(val));
+// #ifdef NUNBOX_BIG_ENDIAN
+//     return (char*)(val.asBytes) + 2;
+// #else
+//     int start = 0;
+//     return (char*)(val.asBytes);
+// #endif
+// }
+
 #ifdef NUNBOX_BIG_ENDIAN
-    return (char*)(val) + 2;
+#define KnBox_ShortStrChars(val) ((char*)(val.asBytes + 2))
 #else
-    return (char*)(val);
+#define KnBox_ShortStrChars(val) ((char*)(val.asBytes))
 #endif
-    
-}
 
 static inline unsigned NUNBOX_NAME(_ShortStrLength)(NUNBOX_T val) {
     assert(NUNBOX_NAME(_IsShortStr)(val));

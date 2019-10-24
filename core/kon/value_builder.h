@@ -18,11 +18,13 @@ typedef enum {
 
     KN_BUILDER_QUOTE,
     KN_BUILDER_QUASIQUOTE,
-    KN_BUILDER_EXPAND,
     KN_BUILDER_UNQUOTE,
 
     KN_BUILDER_PREFIX,
     KN_BUILDER_SUFFIX,
+
+    KN_BUILDER_TXT_MARCRO,
+    KN_BUILDER_OBJ_BUILDER,
 } KonBuilderType;
 
 typedef struct {
@@ -112,7 +114,7 @@ void CellBuilderSetTable(KonBuilder* builder, KN table);
 void CellBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair);
 KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder);
 
-KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind);
+KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenizer* tokenizer, KonState* kstate);
 void WrapperSetInner(KonState* kstate, KonBuilder* builder, KN inner);
 KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder);
 

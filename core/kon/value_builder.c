@@ -28,9 +28,6 @@ const char* BuilderTypeToCStr(KonBuilderType type)
         case KN_BUILDER_QUASIQUOTE: {
             return "KN_BUILDER_QUASIQUOTE";
         }
-        case KN_BUILDER_EXPAND: {
-            return "KN_BUILDER_EXPAND";
-        }
         case KN_BUILDER_UNQUOTE: {
             return "KN_BUILDER_UNQUOTE";
         }
@@ -386,8 +383,9 @@ KN MakeCellByBuilder(KonState* kstate, KonBuilder* builder)
     return KON_2_KN(currentHead);
 }
 
-KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind)
+KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenizer* tokenizer, KonState* kstate)
 {
+    KonTokenKind tokenKind = tokenizer->tokenKind;
     KonBuilder* builder = (KonBuilder*)tb_malloc(sizeof(KonBuilder));
     if (builder == NULL) {
         return NULL;
@@ -395,6 +393,19 @@ KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenKind tokenKind)
     builder->type = type;
     builder->wrapper.inner = KN_UNDEF;
     builder->wrapper.tokenKind = tokenKind;
+    KN name;
+    if (KxStringBuffer_Length(tokenizer->content) <= 5) {
+        const char* nameCstr = KxStringBuffer_Cstr(tokenizer->content);
+        name = KN_BOX_SHORT_STR(nameCstr);
+    }
+    else {
+        KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+        value->string = KxStringBuffer_New();
+        KxStringBuffer_AppendCstr(value->string, KxStringBuffer_Cstr(tokenizer->content));
+        name = KON_2_KN(value);
+    }
+    
+    builder->wrapper.name = name;
     return builder;
 }
 
@@ -422,6 +433,7 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
             // TODO
             tmp->type = KN_SYM_STRING;
         }
+        tmp->name = builder->wrapper.name;
         result = KON_2_KN(tmp);
     }
     else if (type == KN_BUILDER_QUASIQUOTE) {
@@ -437,25 +449,7 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
             // TODO
             tmp->type = KN_SYM_STRING;
         }
-        result = KON_2_KN(tmp);
-    }
-    else if (type == KN_BUILDER_EXPAND) {
-        KonExpand* tmp = KN_ALLOC_TYPE_TAG(kstate, KonExpand, KN_T_EXPAND);
-        tmp->inner = inner;
-        switch (tokenKind) {
-            case KN_TOKEN_EXPAND_REPLACE: {
-                tmp->type = KN_EXPAND_REPLACE;
-                break;
-            }
-            case KN_TOKEN_EXPAND_KV: {
-                tmp->type = KN_EXPAND_KV;
-                break;
-            }
-            case KN_TOKEN_EXPAND_SEQ: {
-                tmp->type = KN_EXPAND_SEQ;
-                break;
-            }
-        }
+        tmp->name = builder->wrapper.name;
         result = KON_2_KN(tmp);
     }
     else if (type == KN_BUILDER_UNQUOTE) {
@@ -485,6 +479,18 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
     else if (type == KN_BUILDER_SUFFIX) {
         KonSuffix* tmp = KN_ALLOC_TYPE_TAG(kstate, KonSuffix, KN_T_SUFFIX);
         tmp->inner = inner;
+        result = KON_2_KN(tmp);
+    }
+    else if (type == KN_BUILDER_TXT_MARCRO) {
+        KonTxtMarcro* tmp = KN_ALLOC_TYPE_TAG(kstate, KonTxtMarcro, KN_T_TXT_MARCRO);
+        tmp->inner = inner;
+        tmp->name = builder->wrapper.name;
+        result = KON_2_KN(tmp);
+    }
+    else if (type == KN_BUILDER_OBJ_BUILDER) {
+        KonObjBuilder* tmp = KN_ALLOC_TYPE_TAG(kstate, KonObjBuilder, KN_T_OBJ_BUILDER);
+        tmp->inner = inner;
+        tmp->name = builder->wrapper.name;
         result = KON_2_KN(tmp);
     }
     tb_free(builder);

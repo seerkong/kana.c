@@ -180,6 +180,7 @@ union NUNBOX_NAME(_u) {
 //    unsigned long long asLLU;
     double asF64;
     void* asPointer;
+    unsigned char* asStr;
     
 #if defined(NUNBOX_64)
     NUNBOX_OBJ_PTR_TYPE asObjPtr;

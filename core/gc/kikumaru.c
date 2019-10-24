@@ -218,11 +218,6 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             KxList_Push(markTaskQueue, quasi->inner.asU64);
             break;
         }
-        case KN_T_EXPAND: {
-            KonExpand* expand = (KonExpand*)node;
-            KxList_Push(markTaskQueue, expand->inner.asU64);
-            break;
-        }
         case KN_T_UNQUOTE: {
             KonUnquote* unquote = (KonUnquote*)node;
             KxList_Push(markTaskQueue, unquote->inner.asU64);
@@ -415,9 +410,6 @@ void KN_DestroyNode(KonState* knState, KonBase* node)
             break;
         }
         case KN_T_QUASIQUOTE: {
-            break;
-        }
-        case KN_T_EXPAND: {
             break;
         }
         case KN_T_UNQUOTE: {

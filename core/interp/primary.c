@@ -372,11 +372,14 @@ KN KN_PrimaryUnboxQuote(KonState* kstate, KN obj)
     else if (KN_IS_QUASIQUOTE(obj)) {
         return KN_FIELD(obj, Quasiquote, inner);
     }
-    else if (KN_IS_EXPAND(obj)) {
-        return KN_FIELD(obj, Expand, inner);
-    }
     else if (KN_IS_UNQUOTE(obj)) {
         return KN_FIELD(obj, Unquote, inner);
+    }
+    else if (KN_IS_PREFIX(obj)) {
+        return KN_FIELD(obj, Prefix, inner);
+    }
+    else if (KN_IS_SUFFIX(obj)) {
+        return KN_FIELD(obj, Suffix, inner);
     }
     return obj;
 }

@@ -20,6 +20,8 @@ typedef struct _KonMap KonMap;
 typedef struct _KonCell KonCell;
 typedef struct _KonParam KonParam;
 typedef struct _KonBlock KonBlock;
+typedef struct _KonTxtMarcro KonTxtMarcro;
+typedef struct _KonObjBuilder KonObjBuilder;
 typedef struct _KonPrefix KonPrefix;
 typedef struct _KonSuffix KonSuffix;
 typedef struct _KonQuote KonQuote;
@@ -81,6 +83,8 @@ typedef enum {
     KN_T_CELL,
     KN_T_PARAM,
     KN_T_BLOCK,
+    KN_T_TXT_MARCRO,
+    KN_T_OBJ_BUILDER,
     KN_T_PREFIX,
     KN_T_SUFFIX,
     KN_T_QUOTE,
@@ -129,6 +133,18 @@ struct _KonSymbol {
     KonBase base;
     const char* data;
     KonSymbolType type;
+};
+
+struct _KonObjBuilder {
+    KonBase base;
+    KN inner;
+    KN name;
+};
+
+struct _KonTxtMarcro {
+    KonBase base;
+    KN inner;
+    KN name;
 };
 
 struct _KonPrefix {
@@ -414,6 +430,8 @@ union _KonValue {
     struct _KonPair konPair;
     struct _KonMap konMap;
     struct _KonCell konCell;
+    struct _KonTxtMarcro konTxtMarcro;
+    struct _KonObjBuilder konObjBuilder;
     struct _KonPrefix konPrefix;
     struct _KonSuffix konSuffix;
     struct _KonQuote konQuote;
@@ -590,8 +608,23 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 #define KN_IS_BYTES(x)          (KN_CHECK_TAG(x, KN_T_BYTES))
 
+// is KonString
 #define KN_IS_STRING(x)         (KN_CHECK_TAG(x, KN_T_STRING))
 #define KN_UNBOX_STRING(x)      KN_FIELD(x, String, string)
+#define KN_STRING_2_CSTR(x)      KxStringBuffer_Cstr(KN_FIELD(x, String, string))
+
+#define KN_IS_SHORT_STR(x)    KnBox_IsShortStr(KN_2_KNBOX(x))
+#define KN_BOX_SHORT_STR(n)  (KN)(KnBox_ShortStrCreate(n, strlen(n)).asF64)
+// #define KN_UNBOX_SHORT_STR(n) KnBox_ShortStrChars((KnBox)n.asF64)
+#ifdef NUNBOX_BIG_ENDIAN
+#define KN_UNBOX_SHORT_STR(val) ((char*)(val.asBytes + 2))
+#else
+#define KN_UNBOX_SHORT_STR(val) ((char*)(val.asBytes))
+#endif
+
+// unbox short string or string object
+#define KN_UNBOX_STR(val) (KN_IS_SHORT_STR(val) ? KN_UNBOX_SHORT_STR(val) : KN_STRING_2_CSTR(val))
+
 
 #define KN_IS_SYMBOL(x)         (KN_CHECK_TAG(x, KN_T_SYMBOL))
 #define KN_UNBOX_SYMBOL(x)      KN_FIELD(x, Symbol, data)
@@ -605,7 +638,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 // is a variable like @abc or a word like abc
 #define KN_IS_REFERENCE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_WORD || ((KonSymbol*)x)->type == KN_SYM_VARIABLE || ((KonSymbol*)x)->type == KN_SYM_MARCRO))
 
-#define KN_IS_PREFIX_MARCRO(x) (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_MARCRO)
+#define KN_IS_SYM_MARCRO(x) (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_MARCRO)
 
 #define KN_IS_SYNTAX_MARKER(x) (KN_CHECK_TAG(x, KN_T_SYNTAX_MARKER))
 
@@ -652,6 +685,12 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 #define KN_IS_SUFFIX(x)    (KN_CHECK_TAG(x, KN_T_SUFFIX))
 #define KN_UNBOX_SUFFIX(x) KN_FIELD(x, Suffix, inner)
+
+#define KN_IS_TXT_MARCRO(x)    (KN_CHECK_TAG(x, KN_T_TXT_MARCRO))
+#define KN_UNBOX_TXT_MARCRO(x) KN_FIELD(x, TxtMarcro, inner)
+
+#define KN_IS_OBJ_BUILDER(x)    (KN_CHECK_TAG(x, KN_T_OBJ_BUILDER))
+#define KN_UNBOX_OBJ_BUILDER(x) KN_FIELD(x, ObjBuilder, inner)
 
 #define KN_IS_ENV(x)        (KN_CHECK_TAG(x, KN_T_ENV))
 
@@ -758,16 +797,6 @@ KN KN_PairListLength(KonState* kstate, KN source);
 // table
 KN KN_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 
-// block
-KN KN_BlockStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
-// param table
-KN KN_ParamStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
-
-KN KN_ParamTableToList(KonState* kstate, KN source);
-
-// map
-KN KN_MapStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
-
 // cell
 KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 // eg: {sh ls -al} => [sh ls -al]
@@ -789,6 +818,11 @@ KN KN_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, cha
 
 KN KN_PrefixStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
 KN KN_SuffixStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+// ^xx.""
+KN KN_TxtMarcroStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+// #[] #hashmap.(:a xx)
+KN KN_ObjBuilderStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+
 
 KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef, int paramNum, int hasVAList, int hasVAMap);
 KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KonEnv* env);

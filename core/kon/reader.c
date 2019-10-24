@@ -27,8 +27,8 @@ bool KSON_ReaderFromFile(KonReader* reader, const char* sourceFilePath)
 {
     KxStringBuffer* sb = KN_ReadFileContent(sourceFilePath);
     // prepend '[' at head, append ']' at tail
-    KxStringBuffer_NPrependCstr(sb, "[\n", 1);
-    KxStringBuffer_AppendCstr(sb, "\n]");
+    KxStringBuffer_NPrependCstr(sb, "{\n", 1);
+    KxStringBuffer_AppendCstr(sb, "\n}");
     bool res = KSON_ReaderFromCstr(reader, KxStringBuffer_Cstr(sb));
     KxStringBuffer_Clear(sb);
     return res;
@@ -61,9 +61,6 @@ bool IsContainerStartToken(int event)
     if (event == KN_TOKEN_LIST_START
         || event == KN_TOKEN_VECTOR_START
         || event == KN_TOKEN_TABLE_START
-        || event == KN_TOKEN_PARAM_START
-        || event == KN_TOKEN_BLOCK_START
-        || event == KN_TOKEN_MAP_START
         || event == KN_TOKEN_CELL_START
     ) {
         return true;
@@ -91,18 +88,18 @@ bool IsContainerEndToken(int event)
 // $[] $() $<> ${}
 // $.abc $%.abc $~.abc
 // @.abc @.[5 .+ $.a] @%.abc  @~.abc
+// ^ss.''
 bool IsWrapperToken(int event)
 {
     if (event == KN_TOKEN_QUOTE
         || event == KN_TOKEN_QUASI
-        || event == KN_TOKEN_EXPAND_REPLACE
-        || event == KN_TOKEN_EXPAND_KV
-        || event == KN_TOKEN_EXPAND_SEQ
         || event == KN_TOKEN_UNQUOTE_REPLACE
         || event == KN_TOKEN_UNQUOTE_KV
         || event == KN_TOKEN_UNQUOTE_SEQ
         || event == KN_TOKEN_PREFIX_WRAPPER
         || event == KN_TOKEN_SUFFIX_WRAPPER
+        || event == KN_TOKEN_TXT_MARCRO
+        || event == KN_TOKEN_OBJ_BUILDER
     ) {
         return true;
     }
@@ -118,11 +115,10 @@ bool IsLiteralToken(int event)
         || event == KN_TOKEN_KEYWORD_UKN
         || event == KN_TOKEN_KEYWORD_TRUE
         || event == KN_TOKEN_KEYWORD_FALSE
-        || event == KN_TOKEN_KEYWORD_EITHER
-        || event == KN_TOKEN_KEYWORD_BOTH
         || event == KN_TOKEN_LITERAL_NUMBER
         || event == KN_TOKEN_LITERAL_STRING
         || event == KN_TOKEN_LITERAL_RAW_STRING
+        || event == KN_TOKEN_CHAR
     ) {
         return true;
     }
@@ -332,12 +328,6 @@ KN MakeLiteral(KonReader* reader, KonTokenKind event)
     else if (event == KN_TOKEN_KEYWORD_FALSE) {
         value = (KN)KN_FALSE;
     }
-    else if (event == KN_TOKEN_KEYWORD_EITHER) {
-        // TODO
-    }
-    else if (event == KN_TOKEN_KEYWORD_BOTH) {
-        // TODO
-    }
     else if (event == KN_TOKEN_LITERAL_NUMBER) {
         value = MakeNumber(reader);
     }
@@ -347,7 +337,11 @@ KN MakeLiteral(KonReader* reader, KonTokenKind event)
     else if (event == KN_TOKEN_LITERAL_RAW_STRING) {
         value = MakeRawString(reader);
     }
-    
+    else if (event == KN_TOKEN_CHAR) {
+        const char* content = KxStringBuffer_Cstr(reader->tokenizer->content);
+        value = KN_BOX_CHAR(content[0]);
+    }
+
     return value;
 }
 
@@ -365,7 +359,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
     
     
     KonBuilderType builderType = topBuilder->type;
-    // KN_DEBUG("AddValueToTopBuilder builder type %d", (int)builderType);
+    KN_DEBUG("AddValueToTopBuilder top builder type %d", (int)builderType);
     if (builderType == KN_BUILDER_VECTOR) {
         VectorBuilderAddItem(topBuilder, value);
     }
@@ -477,10 +471,11 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
     // after set wrapper inner value
     else if (builderType == KN_BUILDER_QUOTE
         || builderType == KN_BUILDER_QUASIQUOTE
-        || builderType == KN_BUILDER_EXPAND
         || builderType == KN_BUILDER_UNQUOTE
         || builderType == KN_BUILDER_PREFIX
         || builderType == KN_BUILDER_SUFFIX
+        || builderType == KN_BUILDER_TXT_MARCRO
+        || builderType == KN_BUILDER_OBJ_BUILDER
     ) {
         WrapperSetInner(reader->kstate, topBuilder, value);
         ExitTopBuilder(reader);
@@ -536,10 +531,11 @@ void ExitTopBuilder(KonReader* reader)
     }
     else if (builderType == KN_BUILDER_QUOTE
         || builderType == KN_BUILDER_QUASIQUOTE
-        || builderType == KN_BUILDER_EXPAND
         || builderType == KN_BUILDER_UNQUOTE
         || builderType == KN_BUILDER_PREFIX
         || builderType == KN_BUILDER_SUFFIX
+        || builderType == KN_BUILDER_TXT_MARCRO
+        || builderType == KN_BUILDER_OBJ_BUILDER
     ) {
         value = MakeWrapperByBuilder(reader->kstate, topBuilder);
         if (builderType == KN_BUILDER_QUOTE || builderType == KN_BUILDER_QUASIQUOTE) {
@@ -601,10 +597,6 @@ KN KSON_Parse(KonReader* reader)
                 StateStackPush(reader->stateStack, KN_READER_PARSE_LIST);
                 builder = CreateListBuilder();
             }
-            else if (event == KN_TOKEN_BLOCK_START) {
-                StateStackPush(reader->stateStack, KN_READER_PARSE_BLOCK);
-                builder = CreateBlockBuilder();
-            }
             else if (event == KN_TOKEN_VECTOR_START) {
                 StateStackPush(reader->stateStack, KN_READER_PARSE_VECTOR);
                 KonBuilder* builder2 = CreateVectorBuilder();
@@ -615,23 +607,15 @@ KN KSON_Parse(KonReader* reader)
                 StateStackPush(reader->stateStack, KN_READER_PARSE_TABLE);
                 builder = CreateTableBuilder();
             }
-            else if (event == KN_TOKEN_PARAM_START) {
-                StateStackPush(reader->stateStack, KN_READER_PARSE_PARAM);
-                builder = CreateParamBuilder();
-            }
-            else if (event == KN_TOKEN_MAP_START) {
-                StateStackPush(reader->stateStack, KN_READER_PARSE_MAP_PAIR_KEY);
-                builder = CreateMapBuilder();
-            }
             else if (event == KN_TOKEN_CELL_START) {
                 StateStackPush(reader->stateStack, KN_READER_PARSE_CELL_CORE);
                 builder = CreateCellBuilder();
             }
+            // wrapper types
             else {
-                // wrapper types
                 if (event == KN_TOKEN_QUOTE) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_QUOTE);
-                    builder = CreateWrapperBuilder(KN_BUILDER_QUOTE, event);
+                    builder = CreateWrapperBuilder(KN_BUILDER_QUOTE, reader->tokenizer, reader->kstate);
 
                     // open word to identifier mode ( abc to $abc)
                     reader->wordAsIdentifier = true;
@@ -639,7 +623,7 @@ KN KSON_Parse(KonReader* reader)
                 }
                 else if (event == KN_TOKEN_QUASI) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_QUASIQUOTE);
-                    builder = CreateWrapperBuilder(KN_BUILDER_QUASIQUOTE, event);
+                    builder = CreateWrapperBuilder(KN_BUILDER_QUASIQUOTE, reader->tokenizer, reader->kstate);
 
                     // open word to identifier mode ( abc to $abc)
                     reader->wordAsIdentifier = true;
@@ -649,28 +633,23 @@ KN KSON_Parse(KonReader* reader)
                     || event == KN_TOKEN_UNQUOTE_SEQ
                 ) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_UNQUOTE);
-                    builder = CreateWrapperBuilder(KN_BUILDER_UNQUOTE, event);
+                    builder = CreateWrapperBuilder(KN_BUILDER_UNQUOTE, reader->tokenizer, reader->kstate);
                 }
-                else if (event == KN_TOKEN_EXPAND_REPLACE) {
-                    StateStackPush(reader->stateStack, KN_READER_PARSE_EXPAND_REPLACE);
-                    builder = CreateWrapperBuilder(KN_BUILDER_EXPAND, event);
-                }
-                else if (event == KN_TOKEN_EXPAND_KV) {
-                    StateStackPush(reader->stateStack, KN_READER_PARSE_EXPAND_KV);
-                    builder = CreateWrapperBuilder(KN_BUILDER_EXPAND, event);
-                }
-                else if (event == KN_TOKEN_EXPAND_SEQ) {
-                    StateStackPush(reader->stateStack, KN_READER_PARSE_EXPAND_SEQ);
-                    builder = CreateWrapperBuilder(KN_BUILDER_EXPAND, event);
-                }
-
                 else if (event == KN_TOKEN_PREFIX_WRAPPER) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_PREFIX_WRAPPER);
-                    builder = CreateWrapperBuilder(KN_BUILDER_PREFIX, event);
+                    builder = CreateWrapperBuilder(KN_BUILDER_PREFIX, reader->tokenizer, reader->kstate);
                 }
                 else if (event == KN_TOKEN_SUFFIX_WRAPPER) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_SUFFIX_WRAPPER);
-                    builder = CreateWrapperBuilder(KN_BUILDER_SUFFIX, event);
+                    builder = CreateWrapperBuilder(KN_BUILDER_SUFFIX, reader->tokenizer, reader->kstate);
+                }
+                else if (event == KN_TOKEN_TXT_MARCRO) {
+                    StateStackPush(reader->stateStack, KN_READER_PARSE_TXT_MARCRO);
+                    builder = CreateWrapperBuilder(KN_BUILDER_TXT_MARCRO, reader->tokenizer, reader->kstate);
+                }
+                else if (event == KN_TOKEN_OBJ_BUILDER) {
+                    StateStackPush(reader->stateStack, KN_READER_PARSE_OBJ_BUILDER);
+                    builder = CreateWrapperBuilder(KN_BUILDER_OBJ_BUILDER, reader->tokenizer, reader->kstate);
                 }
             }
             BuilderStackPush(reader->builderStack, builder);
@@ -768,7 +747,6 @@ KN KSON_Parse(KonReader* reader)
             AddValueToTopBuilder(reader, symbol);
         }
         else if (event == KN_TOKEN_SYM_CELL_SEG_END) {
-            // suffix marcro eg ^abc
             // TODO
         }
         else if (IsContainerEndToken(event)) {
