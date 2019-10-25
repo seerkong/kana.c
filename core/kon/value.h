@@ -507,8 +507,10 @@ struct _KonState {
     // mark task queue. mark the value grey before add to this queue
     KxList* markTaskQueue;
     
+    tb_allocator_ref_t largeConstAllocator;
+    tb_allocator_ref_t constAllocator;
     tb_allocator_ref_t largeAllocator;
-    tb_allocator_ref_t allocator;   // default allocator
+    tb_allocator_ref_t dynamicAllocator;   // default allocator
 
 
 };
@@ -519,7 +521,8 @@ struct _KonState {
 
 KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
-#define KN_ALLOC_TYPE_TAG(kstate,t,tag)  ((t *)(KN_AllocTagged(kstate, sizeof(t), tag).asKon))
+#define KN_NEW_CONST_OBJ(kstate,t,tag)  ((t *)(KN_NewConstMemObj(kstate, sizeof(t), tag).asKon))
+#define KN_NEW_DYNAMIC_OBJ(kstate,t,tag)  ((t *)(KN_NewDynamicMemObj(kstate, sizeof(t), tag).asKon))
 #define KN_FREE(kstate, ptr) KN_GC_FREE(ptr)
 
 

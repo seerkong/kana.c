@@ -150,7 +150,7 @@ bool IsSyntaxToken(int event)
 
 KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
 {
-    KonSyntaxMarker* value = KN_ALLOC_TYPE_TAG(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
+    KonSyntaxMarker* value = KN_NEW_CONST_OBJ(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
     switch (tokenKind) {
         case KN_TOKEN_APPLY: {
             value->type = KN_SYNTAX_MARKER_APPLY;
@@ -193,7 +193,7 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
 
 KN MakeSymbol(KonReader* reader, KonTokenKind event)
 {
-    KonSymbol* value = KN_ALLOC_TYPE_TAG(reader->kstate, KonSymbol, KN_T_SYMBOL);
+    KonSymbol* value = KN_NEW_CONST_OBJ(reader->kstate, KonSymbol, KN_T_SYMBOL);
     if (event == KN_TOKEN_SYM_MARCRO) {
         value->type = KN_SYM_MARCRO;
     }
@@ -303,7 +303,7 @@ KN MakeString(KonReader* reader)
         KxStringBuffer_NAppendChar(sb, *index, 1);
         index += 1;
     }
-    KonString* value = KN_ALLOC_TYPE_TAG(reader->kstate, KonString, KN_T_STRING);
+    KonString* value = KN_NEW_CONST_OBJ(reader->kstate, KonString, KN_T_STRING);
     value->string = sb;
 
     return KON_2_KN(value);

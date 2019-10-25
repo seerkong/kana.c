@@ -55,7 +55,7 @@ void VectorBuilderAddItem(KonBuilder* builder, KN item)
 
 KN MakeVectorByBuilder(KonState* kstate, KonBuilder* builder)
 {
-    KonVector* value = KN_ALLOC_TYPE_TAG(kstate, KonVector, KN_T_VECTOR);
+    KonVector* value = KN_NEW_CONST_OBJ(kstate, KonVector, KN_T_VECTOR);
     value->vector = builder->vector;
     tb_free(builder);
 
@@ -158,7 +158,7 @@ void ParamBuilderAddValue(KonBuilder* builder, KN value)
 
 KN MakeParamByBuilder(KonState* kstate, KonBuilder* builder)
 {
-    KonParam* value = KN_ALLOC_TYPE_TAG(kstate, KonTable, KN_T_PARAM);
+    KonParam* value = KN_NEW_CONST_OBJ(kstate, KonTable, KN_T_PARAM);
     value->table = builder->param;
     tb_free(builder);
     return KON_2_KN(value);
@@ -192,7 +192,7 @@ void TableBuilderAddValue(KonBuilder* builder, KN value)
 
 KN MakeTableByBuilder(KonState* kstate, KonBuilder* builder)
 {
-    KonTable* value = KN_ALLOC_TYPE_TAG(kstate, KonTable, KN_T_TABLE);
+    KonTable* value = KN_NEW_CONST_OBJ(kstate, KonTable, KN_T_TABLE);
     value->table = builder->table;
     tb_free(builder);
     return KON_2_KN(value);
@@ -255,7 +255,7 @@ void MapBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair)
 
 KN MakeMapByBuilder(KonState* kstate, KonBuilder* builder)
 {
-    KonMap* value = KN_ALLOC_TYPE_TAG(kstate, KonMap, KN_T_MAP);
+    KonMap* value = KN_NEW_CONST_OBJ(kstate, KonMap, KN_T_MAP);
     value->map = builder->map;
     tb_free(builder);
     return KON_2_KN(value);
@@ -368,7 +368,7 @@ void CellBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair)
 {
     CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
     if (cellItem->map.asU64 == KNBOX_UNDEF) {
-        KonMap* newMap = KN_ALLOC_TYPE_TAG(kstate, KonMap, KN_T_MAP);
+        KonMap* newMap = KN_NEW_CONST_OBJ(kstate, KonMap, KN_T_MAP);
         newMap->map = KxHashTable_Init(4);
         cellItem->map = KON_2_KN(newMap);
     }
@@ -382,7 +382,7 @@ void CellBuilderAddPair(KonState* kstate, KonBuilder* builder, KonBuilder* pair)
 
 KonCell* CreateNewKonCellNode(KonState* kstate, CellBuilderItem* cellItem)
 {
-    KonCell* value = KN_ALLOC_TYPE_TAG(kstate, KonCell, KN_T_CELL);
+    KonCell* value = KN_NEW_CONST_OBJ(kstate, KonCell, KN_T_CELL);
     value->core = cellItem->core;
     value->table = KN_2_KON(cellItem->table, Table);
     value->list = KN_2_KON(cellItem->list, Pair);
@@ -432,7 +432,7 @@ KonBuilder* CreateWrapperBuilder(KonBuilderType type, KonTokenizer* tokenizer, K
         name = KN_BOX_SHORT_STR(nameCstr);
     }
     else {
-        KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+        KonString* value = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
         value->string = KxStringBuffer_New();
         KxStringBuffer_AppendCstr(value->string, KxStringBuffer_Cstr(tokenizer->content));
         name = KON_2_KN(value);
@@ -454,7 +454,7 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
     KonTokenKind tokenKind = builder->wrapper.tokenKind;
     KN result = KN_UNDEF;
     if (type == KN_BUILDER_QUOTE) {
-        KonQuote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuote, KN_T_QUOTE);
+        KonQuote* tmp = KN_NEW_CONST_OBJ(kstate, KonQuote, KN_T_QUOTE);
         tmp->inner = inner;
         if (KN_IS_CELL(inner)) {
             tmp->type = KN_QUOTE_CELL;
@@ -470,7 +470,7 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
         result = KON_2_KN(tmp);
     }
     else if (type == KN_BUILDER_QUASIQUOTE) {
-        KonQuasiquote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonQuasiquote, KN_T_QUASIQUOTE);
+        KonQuasiquote* tmp = KN_NEW_CONST_OBJ(kstate, KonQuasiquote, KN_T_QUASIQUOTE);
         tmp->inner = inner;
         if (KN_IS_CELL(inner)) {
             tmp->type = KN_QUASI_CELL;
@@ -486,7 +486,7 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
         result = KON_2_KN(tmp);
     }
     else if (type == KN_BUILDER_UNQUOTE) {
-        KonUnquote* tmp = KN_ALLOC_TYPE_TAG(kstate, KonUnquote, KN_T_UNQUOTE);
+        KonUnquote* tmp = KN_NEW_CONST_OBJ(kstate, KonUnquote, KN_T_UNQUOTE);
         tmp->inner = inner;
         switch (tokenKind) {
             case KN_TOKEN_UNQUOTE_REPLACE: {
@@ -505,23 +505,23 @@ KN MakeWrapperByBuilder(KonState* kstate, KonBuilder* builder)
         result = KON_2_KN(tmp);
     }
     else if (type == KN_BUILDER_PREFIX) {
-        KonPrefix* tmp = KN_ALLOC_TYPE_TAG(kstate, KonPrefix, KN_T_PREFIX);
+        KonPrefix* tmp = KN_NEW_CONST_OBJ(kstate, KonPrefix, KN_T_PREFIX);
         tmp->inner = inner;
         result = KON_2_KN(tmp);
     }
     else if (type == KN_BUILDER_SUFFIX) {
-        KonSuffix* tmp = KN_ALLOC_TYPE_TAG(kstate, KonSuffix, KN_T_SUFFIX);
+        KonSuffix* tmp = KN_NEW_CONST_OBJ(kstate, KonSuffix, KN_T_SUFFIX);
         tmp->inner = inner;
         result = KON_2_KN(tmp);
     }
     else if (type == KN_BUILDER_TXT_MARCRO) {
-        KonTxtMarcro* tmp = KN_ALLOC_TYPE_TAG(kstate, KonTxtMarcro, KN_T_TXT_MARCRO);
+        KonTxtMarcro* tmp = KN_NEW_CONST_OBJ(kstate, KonTxtMarcro, KN_T_TXT_MARCRO);
         tmp->inner = inner;
         tmp->name = builder->wrapper.name;
         result = KON_2_KN(tmp);
     }
     else if (type == KN_BUILDER_OBJ_BUILDER) {
-        KonObjBuilder* tmp = KN_ALLOC_TYPE_TAG(kstate, KonObjBuilder, KN_T_OBJ_BUILDER);
+        KonObjBuilder* tmp = KN_NEW_CONST_OBJ(kstate, KonObjBuilder, KN_T_OBJ_BUILDER);
         tmp->inner = inner;
         tmp->name = builder->wrapper.name;
         result = KON_2_KN(tmp);

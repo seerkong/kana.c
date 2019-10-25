@@ -14,11 +14,12 @@ void KN_DestroyNode(KonState* knState, struct _KonBase* item);
 
 void KN_InitGc(KonState* knState)
 {
-
+    knState->largeConstAllocator = tb_large_allocator_init(tb_null, 0);
+    knState->constAllocator = tb_default_allocator_init(knState->largeConstAllocator);
     knState->largeAllocator = tb_large_allocator_init(tb_null, 0);
-    knState->allocator = tb_default_allocator_init(knState->largeAllocator);
+    knState->dynamicAllocator = tb_default_allocator_init(knState->largeAllocator);
     
-    if (!tb_init(tb_null, knState->allocator)) {
+    if (!tb_init(tb_null, knState->dynamicAllocator)) {
         printf("tb_init failed\n");
         return;
     }
@@ -30,21 +31,31 @@ void KN_InitGc(KonState* knState)
 void KN_DestroyGc(KonState* knState)
 {
     // exit allocator
-    if (knState->allocator) {
-        tb_allocator_exit(knState->allocator);
+    if (knState->constAllocator) {
+        tb_allocator_exit(knState->constAllocator);
     }
-    knState->allocator = tb_null;
+    knState->constAllocator = tb_null;
+
+    if (knState->dynamicAllocator) {
+        tb_allocator_exit(knState->dynamicAllocator);
+    }
+    knState->dynamicAllocator = tb_null;
 
     if (knState->largeAllocator) {
         tb_allocator_exit(knState->largeAllocator);
     }
     knState->largeAllocator = tb_null;
 
+    if (knState->largeConstAllocator) {
+        tb_allocator_exit(knState->largeConstAllocator);
+    }
+    knState->largeConstAllocator = tb_null;
+
 }
 
-KN KN_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
+KN KN_NewConstMemObj(KonState* kstate, size_t size, kon_uint_t tag)
 {
-    KN res = (KN)tb_allocator_malloc0(kstate->allocator, size);
+    KN res = (KN)tb_allocator_malloc0(kstate->constAllocator, size);
 
     // add to heap ptr store
     KN_RecordNewKonNode(kstate, res);
@@ -67,6 +78,30 @@ KN KN_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
     return res;
 }
 
+KN KN_NewDynamicMemObj(KonState* kstate, size_t size, kon_uint_t tag)
+{
+    KN res = (KN)tb_allocator_malloc0(kstate->dynamicAllocator, size);
+
+    // add to heap ptr store
+    KN_RecordNewKonNode(kstate, res);
+
+    if (res.asU64) {
+        KN_OBJ_PTR_TYPE(res) = tag;
+        // set dispatcher id
+        if (tag == KN_T_FIXNUM || tag == KN_T_FLONUM || tag == KN_T_BIGNUM) {
+            KN_FIELD(res, Base, msgDispatcherId) = KN_T_NUMBER;
+        }
+        else if (tag == KN_T_NIL || tag == KN_T_PAIR) {
+            KN_FIELD(res, Base, msgDispatcherId) = KN_T_PAIRLIST;
+        }
+        else {
+            KN_FIELD(res, Base, msgDispatcherId) = tag;
+        }
+        
+    }
+
+    return res;
+}
 
 void KN_Gc(KonState* knState)
 {

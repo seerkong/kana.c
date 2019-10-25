@@ -4,7 +4,7 @@
 
 KonEnv* KN_MakeRootEnv(KonState* kstate)
 {
-    KonEnv* env = KN_ALLOC_TYPE_TAG(kstate, KonEnv, KN_T_ENV);
+    KonEnv* env = KN_NEW_DYNAMIC_OBJ(kstate, KonEnv, KN_T_ENV);
     env->parent = (KonEnv*)KNBOX_NIL;
     env->bindings = KxHashTable_Init(4);
 
@@ -20,7 +20,7 @@ KonEnv* KN_MakeRootEnv(KonState* kstate)
 
 KonEnv* KN_MakeChildEnv(KonState* kstate, KonEnv* parentEnv)
 {
-    KonEnv* env = KN_ALLOC_TYPE_TAG(kstate, KonEnv, KN_T_ENV);
+    KonEnv* env = KN_NEW_DYNAMIC_OBJ(kstate, KonEnv, KN_T_ENV);
     env->parent = parentEnv;
     env->bindings = KxHashTable_Init(4);
     return env;

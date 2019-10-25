@@ -322,7 +322,7 @@ KN KN_PrimaryVarFromSym(KonState* kstate, KN item)
     else {
         return KN_UKN;
     }
-    KonSymbol* value = KN_ALLOC_TYPE_TAG(kstate, KonSymbol, KN_T_SYMBOL);
+    KonSymbol* value = KN_NEW_CONST_OBJ(kstate, KonSymbol, KN_T_SYMBOL);
     value->type = KN_SYM_VARIABLE;
     value->data = utf8dup(symCstr);
     return KON_2_KN(value);
@@ -340,7 +340,7 @@ KN KN_PrimaryToIdentifier(KonState* kstate, KN item)
     else {
         return KN_UKN;
     }
-    KonSymbol* value = KN_ALLOC_TYPE_TAG(kstate, KonSymbol, KN_T_SYMBOL);
+    KonSymbol* value = KN_NEW_CONST_OBJ(kstate, KonSymbol, KN_T_SYMBOL);
     value->type = KN_SYM_IDENTIFIER;
     value->data = utf8dup(symCstr);
     return KON_2_KN(value);
@@ -358,7 +358,7 @@ KN KN_PrimaryToSymString(KonState* kstate, KN item)
     else {
         return KN_UKN;
     }
-    KonSymbol* value = KN_ALLOC_TYPE_TAG(kstate, KonSymbol, KN_T_SYMBOL);
+    KonSymbol* value = KN_NEW_CONST_OBJ(kstate, KonSymbol, KN_T_SYMBOL);
     value->type = KN_SYM_STRING;
     value->data = utf8dup(symCstr);
     return KON_2_KN(value);

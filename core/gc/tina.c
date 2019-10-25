@@ -77,7 +77,7 @@ void KN_DestroyGc(KonState* knState)
     KN_ShowGcStatics(knState);
 }
 
-KN KN_AllocTagged(KonState* kstate, size_t size, kon_uint_t tag)
+KN KN_NewDynamicMemObj(KonState* kstate, size_t size, kon_uint_t tag)
 {
     KN res = (KN)tb_allocator_malloc0(kstate->allocator, size);
 

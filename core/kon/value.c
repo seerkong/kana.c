@@ -254,7 +254,7 @@ KN KN_FixnumStringify(KonState* kstate, KN source)
     kon_int_t num = KN_UNBOX_FIXNUM(source);
     itoa(num, buf, 10);
 
-    KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* value = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     value->string = KxStringBuffer_New();
     KxStringBuffer_AppendCstr(value->string, buf);
 
@@ -275,7 +275,7 @@ KN KN_FlonumStringify(KonState* kstate, KN source)
     double num = KN_UNBOX_DOUBLE(source);
     double_to_str(num, 2, buf);
 
-    KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* value = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     value->string = KxStringBuffer_New();
     KxStringBuffer_AppendCstr(value->string, buf);
     return KON_2_KN(value);
@@ -288,7 +288,7 @@ KN KN_CharStringify(KonState* kstate, KN source)
         return KN_MakeEmptyString(kstate);
     }
 
-    KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* value = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     value->string = KxStringBuffer_New();
     KxStringBuffer_AppendCstr(value->string, "^c,");
     int charcode = KN_UNBOX_CHAR(source);
@@ -301,7 +301,7 @@ KN KN_CharStringify(KonState* kstate, KN source)
 
 KN KN_StringStringify(KonState* kstate, KN source)
 {
-    KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* value = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     value->string = KxStringBuffer_New();
     KxStringBuffer_AppendCstr(value->string, "\"");
     KxStringBuffer_AppendStringBuffer(value->string, KN_UNBOX_STRING(source));
@@ -311,7 +311,7 @@ KN KN_StringStringify(KonState* kstate, KN source)
 
 KN KN_MakeString(KonState* kstate, const char* str)
 {
-    KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* value = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     value->string = KxStringBuffer_New();
     KxStringBuffer_AppendCstr(value->string, str);
     return KON_2_KN(value);
@@ -319,7 +319,7 @@ KN KN_MakeString(KonState* kstate, const char* str)
 
 KN KN_MakeEmptyString(KonState* kstate)
 {
-    KonString* value = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* value = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     value->string = KxStringBuffer_New();
     return KON_2_KN(value);
 }
@@ -344,7 +344,7 @@ KN KN_SymbolStringify(KonState* kstate, KN source)
     KonSymbolType type = KN_FIELD(source, Symbol, type);
     const char* data = KN_UNBOX_SYMBOL(source);
 
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     switch (type) {
@@ -391,7 +391,7 @@ KN KN_SyntaxMarkerStringify(KonState* kstate, KN source)
 {
     KonSyntaxMarkerType type = KN_FIELD(source, SyntaxMarker, type);
 
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     switch (type) {
@@ -438,7 +438,7 @@ KN KN_QuoteStringify(KonState* kstate, KN source, bool newLine, int depth, char*
     // KN name = KN_FIELD(source, Quote, name);
     // const char* nameCstr = KN_UNBOX_STR(name);
 
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KxStringBuffer_AppendCstr(result->string, "$");
@@ -458,7 +458,7 @@ KN KN_QuasiquoteStringify(KonState* kstate, KN source, bool newLine, int depth, 
     KN name = KN_FIELD(source, Quote, name);
     const char* nameCstr = KN_UNBOX_STR(name);
 
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KxStringBuffer_AppendCstr(result->string, "@");
@@ -476,7 +476,7 @@ KN KN_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, cha
     KonUnquoteType type = KN_FIELD(source, Unquote, type);
     KN inner = KN_FIELD(source, Unquote, inner);
 
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KxStringBuffer_AppendCstr(result->string, "$");
@@ -510,7 +510,7 @@ KN KN_PrefixStringify(KonState* kstate, KN source, bool newLine, int depth, char
     KN inner = KN_UNBOX_PREFIX(source);
     printf("KN_PrefixStringify\n");
 
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KxStringBuffer_AppendCstr(result->string, "!");
@@ -525,7 +525,7 @@ KN KN_SuffixStringify(KonState* kstate, KN source, bool newLine, int depth, char
 {
     KN inner = KN_UNBOX_SUFFIX(source);
 
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KxStringBuffer_AppendCstr(result->string, "~");
@@ -543,7 +543,7 @@ KN KN_TxtMarcroStringify(KonState* kstate, KN source, bool newLine, int depth, c
     KN name = KN_FIELD(source, TxtMarcro, name);
     const char* nameCstr = KN_UNBOX_STR(name);
 
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KxStringBuffer_AppendCstr(result->string, "^");
@@ -563,7 +563,7 @@ KN KN_ObjBuilderStringify(KonState* kstate, KN source, bool newLine, int depth, 
     KN name = KN_FIELD(source, ObjBuilder, name);
     const char* nameCstr = KN_UNBOX_STR(name);
 
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KxStringBuffer_AppendCstr(result->string, "#");
@@ -586,7 +586,7 @@ KN KN_ObjBuilderStringify(KonState* kstate, KN source, bool newLine, int depth, 
 
 KN KN_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KxVector* items = KN_FIELD(source, Vector, vector);
@@ -662,7 +662,7 @@ bool KN_IsBlock(KN source)
 KN KN_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
     assert(KN_IsPairList(source));
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     if (source.asU64 == KNBOX_NIL) {
@@ -756,7 +756,7 @@ KN KN_PairListLength(KonState* kstate, KN source)
 
 KN KN_Cons(KonState* kstate, KN head, KN tail)
 {
-  KonPair* node = KN_ALLOC_TYPE_TAG(kstate, KonPair, KN_T_PAIR);
+  KonPair* node = KN_NEW_CONST_OBJ(kstate, KonPair, KN_T_PAIR);
   node->prev = KN_NIL;
   KN result = KON_2_KN(node);
   if (KN_IS_PAIR(tail)) {
@@ -784,7 +784,7 @@ KN KN_PairList3(KonState* kstate, KN a, KN b, KN c)
 
 KN KN_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KxHashTable* hashTable = KN_FIELD(source, Table, table);
@@ -865,7 +865,7 @@ KN KN_ParamTableToList(KonState* kstate, KN source)
 
 KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KonCell* head = KN_2_KON(source, Cell);
@@ -1062,7 +1062,7 @@ KN KN_CellCoresToList(KonState* kstate, KN source)
 
 KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding)
 {
-    KonString* result = KN_ALLOC_TYPE_TAG(kstate, KonString, KN_T_STRING);
+    KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
     KonAccessor* accessor = KN_2_KON(source, Accessor);
@@ -1136,7 +1136,7 @@ KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, ch
 
 KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef, int paramNum, int hasVAList, int hasVAMap)
 {
-    KonProcedure* result = KN_ALLOC_TYPE_TAG(kstate, KonProcedure, KN_T_PROCEDURE);
+    KonProcedure* result = KN_NEW_CONST_OBJ(kstate, KonProcedure, KN_T_PROCEDURE);
     result->type = type;
     result->nativeFuncRef = funcRef;
     result->paramNum = paramNum;
@@ -1150,7 +1150,7 @@ KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KonEnv* env)
     if (procAst.asU64 == KNBOX_NIL || procAst.asU64 == KNBOX_UNDEF|| procAst.asU64 == KNBOX_UKN) {
         return NULL;
     }
-    KonProcedure* proc = KN_ALLOC_TYPE_TAG(kstate, KonProcedure, KN_T_PROCEDURE);
+    KonProcedure* proc = KN_NEW_CONST_OBJ(kstate, KonProcedure, KN_T_PROCEDURE);
     
     
     KN param = (KN)KN_DTR(procAst);
@@ -1179,7 +1179,7 @@ KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KonEnv* env)
 
 KonMsgDispatcher* MakeMsgDispatcher(KonState* kstate)
 {
-    KonMsgDispatcher* result = KN_ALLOC_TYPE_TAG(kstate, KonMsgDispatcher, KN_T_MSG_DISPATCHER);
+    KonMsgDispatcher* result = KN_NEW_CONST_OBJ(kstate, KonMsgDispatcher, KN_T_MSG_DISPATCHER);
     result->onSymbol = (KonProcedure*)KNBOX_UNDEF;
     result->onSyntaxMarker = (KonProcedure*)KNBOX_UNDEF;
     result->onMethodCall = (KonProcedure*)KNBOX_UNDEF;
@@ -1217,7 +1217,7 @@ KonMsgDispatcher* KN_GetMsgDispatcher(KonState* kstate, unsigned int dispatcherI
 
 KonAccessor* KN_InitAccessorWithMod(KonState* kstate, char* mod)
 {
-    KonAccessor* result = KN_ALLOC_TYPE_TAG(kstate, KonAccessor, KN_T_ACCESSOR);
+    KonAccessor* result = KN_NEW_CONST_OBJ(kstate, KonAccessor, KN_T_ACCESSOR);
     result->isDir = false;
     result->openToRef = false;
     result->openToChildren = false;
