@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "core/kana.h"
+#include "core/interp/interp.h"
 #include "commander.h"
 
 
@@ -84,8 +85,8 @@ int main(int argc, char const* argv[])
     ExecMode = 1;
     KonState* knState = InitKonState();
     
-    ENABLE_DEBUG = 0;
-    // ENABLE_DEBUG = 1;
+    // ENABLE_DEBUG = 0;
+    ENABLE_DEBUG = 1;
     // if (RunMain(argc, argv)) {
     //     ExitFailure(knState);
     // }
@@ -95,26 +96,24 @@ int main(int argc, char const* argv[])
 
     // LoadInitScript();
 
-    // if (ExecMode == 1 && argc > 1) {
-    //     KN_EvalFile(knState, argv[1]);
-    // }
-    //  else {
-    //       KN_EvalFile(knState, "/Users/kongweixian/lang/kana/kana.c/examples/knative/for-loop-accessor.kl");
-    //  }
+    if (ExecMode == 1 && argc > 1) {
+        KN_EvalFile(knState, argv[1]);
+    }
+    else {
+        KN_EvalFile(knState, "/Users/peacock/lang/kana/kana_nunbox/examples/knative/hello.kl");
+    }
 
-    KonEnv* rootEnv = KN_MakeRootEnv(knState);
-    int codeLen = 2;
-    KN_OP codeBlock[2] = {
-        {.code=OP_ADD, .a=1, .b=2},
-        {.code=OP_LAND}
-    };
+    // KonEnv* rootEnv = KN_MakeRootEnv(knState);
+    // int codeLen = 2;
+    // KN_OP codeBlock[2] = {
+    //     {.code=OP_ADD, .a=1, .b=2},
+    //     {.code=OP_LAND}
+    // };
 
-    KN result = ExecByteCode(knState, rootEnv, codeBlock, codeLen);
+    // KN result = ExecByteCode(knState, rootEnv, codeBlock, codeLen);
     // KN result = ExecByteCode2(knState, rootEnv, codeBlock, codeLen);
-    
-
-    KN formated = KN_ToFormatString(knState, result, true, 0, "  ");
-    printf("%s\n", KN_StringToCstr(formated));
+    // KN formated = KN_ToFormatString(knState, result, true, 0, "  ");
+    // printf("%s\n", KN_StringToCstr(formated));
 
     return 0;
 }

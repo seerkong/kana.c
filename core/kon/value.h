@@ -341,20 +341,22 @@ struct _KonProcedure {
 typedef enum {
     // should be the first continuation created
     KN_CONT_RETURN,
-    // sentences like {{1 + 2} {2 + 3}}
-    KN_CONT_EVAL_SENTENCE_LIST,
-    // sentence like {"Abc" + "Efg" | to-upcase; | Length; | + 2}
-    KN_CONT_EVAL_SENTENCE,
-    // subject is the first item of a sentence, like the 'abc' in {abc + 2}
-    KN_CONT_EVAL_SUBJ,
-    KN_CONT_EVAL_CLAUSE_LIST,
-    KN_CONT_EVAL_CLAUSE_ARGS,
-
-    KN_CONT_EVAL_QUASI_LIST_ITEMS,
-
-    // native callback, use a MemoTable to store info
-    KN_CONT_NATIVE_CALLBACK
-
+    KN_CONT_SENTENCES,      // {[5 +(2) -(1)] [+(2 3)] {- 6 3}}
+    KN_CONT_LIST_SENTENCE,  //                         {- 6 3}
+    KN_CONT_CELL_SENTENCE,  //  [5 +(2) -(1)],[+(2 3)]
+    KN_CONT_CELL_CLAUSE,    //   5,+(2),-(1) , +(2 3)
+    KN_CONT_CLAUSE_CORE,    //   5,+,  ,-    , +      , -
+    KN_CONT_CLAUSE_ARGS,    //      (2)  (1)    (2 3)    (6 3)
+    
+    // all values will be evaluated
+    KN_CONT_EXPOSED_LIST,   // #{}  #xxx.{}
+    KN_CONT_EXPOSED_CELL,   // #[]  #xxx.[]
+    // only eval unquoted items
+    KN_CONT_QUASI_LIST,     // @.{1 $%ab}
+    KN_CONT_QUASI_CELL,     // @.[$%ab 1]
+    // leave inner as it is, no eval
+    KN_CONT_SEALED_LIST,    // $.{+ 1 2}
+    KN_CONT_SEALED_CELL,    // $.[+ (1 2)]
 } KonContinuationType;
 
 typedef KN (*KonContFuncRef)(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
@@ -362,36 +364,15 @@ typedef KN (*KonContFuncRef)(KonState* kstate, KN evaledValue, KonContinuation* 
 struct _KonContinuation {
     KonBase base;
     KonContinuationType type;
-    KonEnv* env;
     // a Return continuation's Cont is empty
-    KonContinuation* cont;
-    union {
-        // most continuations use this store rest jobs to do
-        KN restJobs;
+    KonContinuation* next;
 
-        struct {
-            KN restList;
-            KN evaledList;
-        } evalListItems;
-        
-        // for continuations need sentence subject
-        struct {
-            KN subj;
-            KN restArgList;
-            KN evaledArgList;
-        } evalClauseArgs;
+    // use which function to run this continuation
+    KonContFuncRef callback;
 
-        struct {
-            KN subj;
-            KN restClauses;
-        } evalClauseList;
-
-        struct {
-            KonContFuncRef callback;
-            // used for native marcros, save more custom info
-            KxHashTable* memoTable;
-        } native;
-    };
+    KonEnv* env;
+    KxList* pendingJobs;
+    KxList* finishedJobs;
 };
 
 
@@ -851,6 +832,8 @@ KN_API const char* KN_HumanFormatTime();
 KN KN_VectorToKonPairList(KonState* kstate, KxVector* vector);
 
 // common utils end
+
+KonContinuation* AllocContinuationWithType(KonState* kstate, KonContinuationType type, KonEnv* env, KonContinuation* nextCont);
 
 
 #endif

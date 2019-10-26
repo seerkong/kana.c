@@ -2,87 +2,44 @@
 #ifndef KN_INTERP_OPCODES_H
 #define KN_INTERP_OPCODES_H 1
 
-enum KN_OPCODE {
-  OP_NONE = 0,
-  OP_LAND,
-//   OP_MOVE,
-//   OP_LOADK,
-//   OP_LOADPN,
-//   OP_SELF,
-//   OP_NEWTUPLE,
-//   OP_GETTUPLE,
-//   OP_SETTUPLE,
-//   OP_GETLOCAL,
-//   OP_SETLOCAL,
-//   OP_GETUPVAL,
-//   OP_SETUPVAL,
-//   OP_GLOBAL,
-//   OP_GETTABLE,
-//   OP_SETTABLE,
-//   OP_NEWLICK,
-//   OP_GETPATH,
-//   OP_SETPATH,
-  OP_ADD,
-//   OP_SUB,
-//   OP_MULT,
-//   OP_DIV,
-//   OP_REM,
-//   OP_POW,
-//   OP_NOT,
-//   OP_CMP,
-//   OP_EQ,
-//   OP_NEQ,
-//   OP_LT,
-//   OP_LTE,
-//   OP_GT,
-//   OP_GTE,
-//   OP_BITN,
-//   OP_BITL,
-//   OP_BITR,
-//   OP_DEF,
-//   OP_BIND,
-//   OP_MSG,
-//   OP_JMP,
-//   OP_TEST,
-//   OP_TESTJMP,
-//   OP_NOTJMP,
-//   OP_NAMED,
-//   OP_CALL,
-//   OP_CALLSET,
-//   OP_TAILCALL, /* TODO */
-//   OP_RETURN,
-//   OP_PROTO,  /* define a method */
-//   OP_CLASS,
-//   OP_DEBUG
-};
+#define OPC_LAND				          0
+#define OPC_NOP                   1
+#define OPC_HELLOWORLD            2
 
-#if defined(__GNUC__)
-#pragma pack(1)
-#else
-#pragma pack(push, 1)
-#endif
+#define OPC_EVAL_EXPR_BY_TYPE     3
+#define OPC_EVAL_SENTENCES        4
+#define OPC_EVAL_LIST_SENTENCE    5
+#define OPC_EVAL_CELL_SENTENCE    6
+#define OPC_EVAL_CELL_CLAUSE      7
+#define OPC_EVAL_CLAUSE_CORE      8
+#define OPC_EVAL_CLAUSE_ARGS      9
+
+#define OPC_ENV_LOOKUP            10
+
+
+
+#define OPC_EVAL_EXPOSED_LIST     110
+#define OPC_EVAL_EXPOSED_CELL     111
+#define OPC_EVAL_EXPOSED_TABLE    112
+#define OPC_EVAL_EXPOSED_VECTOR   113
+
+#define OPC_EVAL_QUASI_LIST       114
+#define OPC_EVAL_QUASI_CELL       115
+#define OPC_EVAL_QUASI_TABLE      116
+#define OPC_EVAL_QUASI_VECTOR     117
+
+#define OPC_EVAL_SEALED_LIST      118
+#define OPC_EVAL_SEALED_CELL      119
+#define OPC_EVAL_SEALED_TABLE     120
+#define OPC_EVAL_SEALED_VECTOR    121
+
 
 /// KN_OP - a compressed three-address op (as 32bit int bitfield)
-/// TODO: expand to 64bit, check jit then
-// typedef struct {
-//   enum KN_OPCODE code:8; ///< the op. See vm.c http://www.lua.org/doc/jucs05.pdf
-//   int a:12;  ///< the data (i.e the register)
-//   int b:12;  ///< optional arg, the message
-// } KN_OP;
-
 typedef struct {
-  enum KN_OPCODE code:8; ///< the op. See vm.c http://www.lua.org/doc/jucs05.pdf
-  int a:12;  ///< the data (i.e the register)
-  int b:12;  ///< optional arg, the message
+  int code:8;
+  int a:8;
+  int b:8;
+  int c:8;
 } KN_OP;
-
-#if defined(__GNUC__)
-#pragma pack()
-#else
-#pragma pack(pop)
-#endif
-
-#define KN_OP_AT(asmb, n) ((KN_OP *)((PNFlex *)asmb)->ptr)[n]
-#define KN_OP_LEN(asmb)   (KN_FLEX_SIZE(asmb) / sizeof(KN_OP))
 
 #endif

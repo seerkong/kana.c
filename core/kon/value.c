@@ -1313,3 +1313,17 @@ KN KN_VectorToKonPairList(KonState* kstate, KxVector* vector)
 
     return list;
 }
+
+KonContinuation* AllocContinuationWithType(KonState* kstate, KonContinuationType type, KonEnv* env, KonContinuation* nextCont)
+{
+    KonContinuation* cont = (KonContinuation*)tb_allocator_malloc0(kstate->dynamicAllocator, sizeof(KonContinuation));
+    assert(cont);
+    cont->base.tag = KN_T_CONTINUATION;
+    cont->type = type;
+    cont->env = env;
+    cont->next = nextCont;
+    cont->pendingJobs = KxList_Init();
+    cont->finishedJobs = KxList_Init();
+
+    return cont;
+}

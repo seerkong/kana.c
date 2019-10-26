@@ -39,7 +39,7 @@ OpHandlerRef opHandlers[] = {
 //   OP_NEWLICK,
 //   OP_GETPATH,
 //   OP_SETPATH,
-    OpHandler_ADD,  //   OP_ADD,
+    // OpHandler_ADD,  //   OP_ADD,
 //   OP_SUB,
 //   OP_MULT,
 //   OP_DIV,
@@ -77,17 +77,17 @@ KN ExecByteCode(KonState* knState, KonEnv* env, KN_OP codeBlock[], int codeLen)
 {
     KN regLastVal = KN_NIL;
 
-    int pc = 0;
-    int contRun = true;
-    while (contRun && pc < codeLen) {
-        switch (codeBlock[pc].code) {
-            CASE_OP(ADD, (knState, env, &regLastVal, codeBlock[pc]))
-            case OP_LAND: {
-                contRun = false;
-                break;
-            }
-        }
-    }
+    // int pc = 0;
+    // int contRun = true;
+    // while (contRun && pc < codeLen) {
+    //     switch (codeBlock[pc].code) {
+    //         CASE_OP(ADD, (knState, env, &regLastVal, codeBlock[pc]))
+    //         case OPC_LAND: {
+    //             contRun = false;
+    //             break;
+    //         }
+    //     }
+    // }
 
     int d = 1;
     static const void* array[] = {

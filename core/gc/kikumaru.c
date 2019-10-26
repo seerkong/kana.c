@@ -309,32 +309,11 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             break;
         }
         case KN_T_CONTINUATION: {
-            KonContinuation* cont = (KonContinuation*)node;
+            // TODO
+            // KonContinuation* cont = (KonContinuation*)node;
 
-            if (cont->type == KN_CONT_NATIVE_CALLBACK) {
-                KxHashTable* table = cont->native.memoTable;
-                KxHashTableIter iter = KxHashTable_IterHead(table);
-                while (iter != KNBOX_NIL) {
-                    KxHashTableIter next = KxHashTable_IterNext(table, iter);
-                    KxList_Push(markTaskQueue, KxHashTable_IterGetVal(table, iter));
-                    iter = next;
-                }
-            }
-            else if (cont->type == KN_CONT_EVAL_CLAUSE_LIST) {
-                KxList_Push(markTaskQueue, cont->evalClauseList.subj.asU64);
-                KxList_Push(markTaskQueue, cont->evalClauseList.restClauses.asU64);
-            }
-            else if (cont->type == KN_CONT_EVAL_CLAUSE_ARGS) {
-                KxList_Push(markTaskQueue, cont->evalClauseArgs.subj.asU64);
-                KxList_Push(markTaskQueue, cont->evalClauseArgs.restArgList.asU64);
-                KxList_Push(markTaskQueue, cont->evalClauseArgs.evaledArgList.asU64);
-            }
-            else {
-                KxList_Push(markTaskQueue, cont->restJobs.asU64);
-            }
-
-            KxList_Push(markTaskQueue, cont->env);
-            KxList_Push(markTaskQueue, cont->cont);
+            // KxList_Push(markTaskQueue, cont->env);
+            // KxList_Push(markTaskQueue, cont->cont);
             break;
         }
         case KN_T_PROCEDURE: {
@@ -477,14 +456,15 @@ void KN_DestroyNode(KonState* knState, KonBase* node)
             break;
         }
         case KN_T_CONTINUATION: {
-            KonContinuation* cont = (KonContinuation*)node;
-            if (cont->type == KN_CONT_NATIVE_CALLBACK && cont->native.memoTable) {
-                KxHashTable* table = cont->native.memoTable;
-                KN_DEBUG("destroy memo table, table addr %x", table);
-                KxHashTable_PrintKeys(table);
-                KxHashTable_Destroy(table);
-                cont->native.memoTable = NULL;
-            }
+            // TODO
+            // KonContinuation* cont = (KonContinuation*)node;
+            // if (cont->type == KN_CONT_NATIVE_CALLBACK && cont->native.memoTable) {
+            //     KxHashTable* table = cont->native.memoTable;
+            //     KN_DEBUG("destroy memo table, table addr %x", table);
+            //     KxHashTable_PrintKeys(table);
+            //     KxHashTable_Destroy(table);
+            //     cont->native.memoTable = NULL;
+            // }
 
             break;
         }

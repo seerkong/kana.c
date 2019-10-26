@@ -63,8 +63,8 @@ opc##x:
 
 // #define CASE_OP(name, args) case OP_##name: opHandlers[OP_##name]args; break;
 
-#define CASE_OP(name, args) case OP_##name: {       \
-    opHandlers[OP_##name]args;                      \
+#define CASE_OP(name, args) case OPC_##name: {       \
+    opHandlers[OPC_##name]args;                      \
     pc++;                                           \
     break;                                          \
 }

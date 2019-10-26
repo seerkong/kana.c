@@ -6,8 +6,8 @@
 #include "apply.h"
 #include "eval.h"
 #include "opcodes.h"
-#include "vm.h"
-
+// #include "vm.h"
+#include "cps_treewalk.h"
 
 
 
