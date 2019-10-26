@@ -10,12 +10,15 @@
 #define OPC_EVAL_SENTENCES        4
 #define OPC_EVAL_LIST_SENTENCE    5
 #define OPC_EVAL_CELL_SENTENCE    6
+
 #define OPC_EVAL_CELL_CLAUSE      7
 #define OPC_EVAL_CLAUSE_CORE      8
 #define OPC_EVAL_CLAUSE_ARGS      9
 
-#define OPC_ENV_LOOKUP            10
-
+#define OPC_LOAD_CONT_RUN_NEXT_NODE   10
+#define OPC_RUN_NEXT_CONT             11
+#define OPC_RUN_CURRENT_CONT          12
+#define OPC_ENV_LOOKUP                13
 
 
 #define OPC_EVAL_EXPOSED_LIST     110
@@ -33,13 +36,5 @@
 #define OPC_EVAL_SEALED_TABLE     120
 #define OPC_EVAL_SEALED_VECTOR    121
 
-
-/// KN_OP - a compressed three-address op (as 32bit int bitfield)
-typedef struct {
-  int code:8;
-  int a:8;
-  int b:8;
-  int c:8;
-} KN_OP;
 
 #endif

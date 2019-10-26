@@ -347,6 +347,8 @@ typedef enum {
     KN_CONT_CELL_CLAUSE,    //   5,+(2),-(1) , +(2 3)
     KN_CONT_CLAUSE_CORE,    //   5,+,  ,-    , +      , -
     KN_CONT_CLAUSE_ARGS,    //      (2)  (1)    (2 3)    (6 3)
+
+    KN_CONT_NATIVE_MARCRO,
     
     // all values will be evaluated
     KN_CONT_EXPOSED_LIST,   // #{}  #xxx.{}
@@ -359,7 +361,16 @@ typedef enum {
     KN_CONT_SEALED_CELL,    // $.[+ (1 2)]
 } KonContinuationType;
 
-typedef KN (*KonContFuncRef)(KonState* kstate, KN evaledValue, KonContinuation* contBeingInvoked);
+
+/// KN_OP - a compressed three-address op (as 32bit int bitfield)
+typedef struct {
+  int code:8;
+  int a:8;
+  int b:8;
+  int c:8;
+} KN_OP;
+
+typedef KN_OP (*KonContFuncRef)(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
 
 struct _KonContinuation {
     KonBase base;
@@ -368,7 +379,7 @@ struct _KonContinuation {
     KonContinuation* next;
 
     // use which function to run this continuation
-    KonContFuncRef callback;
+    KonContFuncRef contHandler;
 
     KonEnv* env;
     KxList* pendingJobs;
@@ -622,7 +633,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_IS_WORD(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_WORD)
 
 // is a variable like @abc or a word like abc
-#define KN_IS_REFERENCE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_WORD || ((KonSymbol*)x)->type == KN_SYM_VARIABLE || ((KonSymbol*)x)->type == KN_SYM_MARCRO))
+#define KN_IS_REFERENCE(x)      (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_WORD || KN_FIELD(x, Symbol, type) == KN_SYM_VARIABLE || KN_FIELD(x, Symbol, type) == KN_SYM_MARCRO)
 
 #define KN_IS_SYM_MARCRO(x) (KN_CHECK_TAG(x, KN_T_SYMBOL) && KN_FIELD(x, Symbol, type) == KN_SYM_MARCRO)
 

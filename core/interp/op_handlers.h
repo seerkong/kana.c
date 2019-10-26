@@ -2,7 +2,7 @@
 #define kn_interp_op_handlers_h 1
 
 #include "prefix.h"
-
+#include "env.h"
 #include "opcodes.h"
 
 /* Two levels of macros are needed to correctly produce the label
@@ -44,8 +44,8 @@ opc##x:
 // TODO knstate global states
 // #define GS_OP          ((KN_OP)globalRegs32[0])
 #define GS_LAST_VAL     (globalKonRegs[0])
-#define GS_NEXT_CODE    (globalKonRegs[1])
-// #define GS_OP     ((KN_OP*)globalPtrRegs[0])
+#define GS_NODE_TO_RUN    (globalKonRegs[1])
+#define GS_NEW_CONT    (globalKonRegs[2])
 
 // TODO continuation states
 #define CS_PENDING      (curCont->pendingJobs)
@@ -54,8 +54,14 @@ opc##x:
 
 typedef void (*OpHandlerRef)(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
 
+KN_OP ContHandler_Return(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
 
 void OpHandler_NONE(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
 void OpHandler_HELLOWORLD(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
+
+void OpHandler_EVAL_SENTENCES(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
+void OpHandler_EVAL_LIST_SENTENCE(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
+void OpHandler_EVAL_CELL_SENTENCE(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
+
 
 #endif
