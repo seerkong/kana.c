@@ -233,6 +233,12 @@ KN KN_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char*
     }
 }
 
+void KN_PrintNodeToStdio(KonState* kstate, KN source)
+{
+    KN formated = KN_ToFormatString(kstate, source, false, 0, "  ");
+    printf("%s\n", KN_StringToCstr(formated));
+}
+
 KN KN_Stringify(KonState* kstate, KN source)
 {
     return KN_ToFormatString(kstate, source, false, 0, " ");

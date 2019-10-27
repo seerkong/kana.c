@@ -600,259 +600,103 @@ KN KN_PrimaryExportDispacherId(KonState* kstate, KonEnv* env)
 
 KN KN_PrimaryOpExport(KonState* kstate, KonEnv* env)
 {
-    KN_EnvDefine(kstate, env, "not",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryNot, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "equal",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryEqual, 2, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "eqv",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryEqv, 2, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "eq",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryEq, 2, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "neq",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryNeq, 2, 0, 0)
-    );
-
-    // IO
-    KN_EnvDefine(kstate, env, "newline",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryNewline, 0, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "display",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryDisplay, 0, 1, 0)
-    );
-    KN_EnvDefine(kstate, env, "displayln",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryDisplayln, 0, 1, 0)
-    );
-    KN_EnvDefine(kstate, env, "write",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryWrite, 0, 1, 0)
-    );
-    KN_EnvDefine(kstate, env, "writeln",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryWriteln, 0, 1, 0)
-    );
-
-    KN_EnvDefine(kstate, env, "stringify",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryStringify, 1, 0, 0)
-    );
-
-    KN_EnvDefine(kstate, env, "kon-from-str",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryParse, 1, 0, 0)
-    );
-
-    // predict
-    KN_EnvDefine(kstate, env, "is-true",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsTrue, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-false",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsFalse, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-nil",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsNil, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-null",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsNull, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-null",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsUkn, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-pointer",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsPointer, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-fixnum",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsFixnum, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-flonum",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsFlonum, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-char",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsChar, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-boolean",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsBoolean, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-bytes",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsBytes, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-string",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsString, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-symbol",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsSymbol, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-variable",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsVariable, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-identifier",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsIdentifier, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-word",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsWord, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-attr-slot",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsAttrSlot, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-pair",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsPair, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-list",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsPairList, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-vector",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsVector, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-table",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsTable, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-cell",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsCell, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-env",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsEnv, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-procedure",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsProcedure, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-continuation",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsContinuation, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-ext-pointer",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsExtPointer, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "is-exception",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryIsException, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "unbox-quote",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryUnboxQuote, 1, 0, 0)
-    );
-
-    KN_EnvDefine(kstate, env, "get-dispatcher-id",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryGetDispatcherId, 1, 0, 0)
-    );
-
-    KN_EnvDefine(kstate, env, "set-dispatcher-id",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimarySetDispatcherId, 2, 0, 0)
-    );
-
-    KN_EnvDefine(kstate, env, "var-from-sym",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryVarFromSym, 1, 0, 0)
-    );
-
-    KN_EnvDefine(kstate, env, "to-identifier",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryToIdentifier, 1, 0, 0)
-    );
-
-    KN_EnvDefine(kstate, env, "to-sym-string",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KN_PrimaryToSymString, 1, 0, 0)
-    );
-
     KN_EnvDefine(kstate, env, "get-env", env);
 
     KN_PrimaryExportDispacherId(kstate, env);
 
-    KN_EnvDefine(kstate, env, "cons",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CONS, 2, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "car",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CAR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cdr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "caar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CAAR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cadr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CADR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cdar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDAR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cddr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDDR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "caaar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CAAAR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "caadr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CAADR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cadar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CADAR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "caddr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CADDR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cdaar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDAAR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cdadr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDADR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cddar",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDDAR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cdddr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDDDR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cadddr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CADDDR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "cddddr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonList_CDDDDR, 1, 0, 0)
-    );
+    NativeProcedureConf defaultFnArr[] = {
+        { KN_NATIVE_FUNC, "not", KN_PrimaryNot, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "equal", KN_PrimaryEqual, 2, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "eqv", KN_PrimaryEqv, 2, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "eq", KN_PrimaryEq, 2, 0, 0 },
+        { KN_NATIVE_FUNC, "neq", KN_PrimaryNeq, 2, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "newline", KN_PrimaryNewline, 0, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "display", KN_PrimaryDisplay, 0, 1, 0, 0 },
+        { KN_NATIVE_FUNC, "displayln", KN_PrimaryDisplayln, 0, 1, 0, 0 },
+        { KN_NATIVE_FUNC, "write", KN_PrimaryWrite, 0, 1, 0, 0 },
+        { KN_NATIVE_FUNC, "writeln", KN_PrimaryWriteln, 0, 1, 0, 0 },
+        { KN_NATIVE_FUNC, "stringify", KN_PrimaryStringify, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "kon-from-str", KN_PrimaryParse, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-true", KN_PrimaryIsTrue, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-false", KN_PrimaryIsFalse, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-nil", KN_PrimaryIsNil, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-null", KN_PrimaryIsNull, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-ukn", KN_PrimaryIsUkn, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-pointer", KN_PrimaryIsPointer, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-fixnum", KN_PrimaryIsFixnum, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-flonum", KN_PrimaryIsFlonum, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-char", KN_PrimaryIsChar, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-boolean", KN_PrimaryIsBoolean, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-bytes", KN_PrimaryIsBytes, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-string", KN_PrimaryIsString, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-symbol", KN_PrimaryIsSymbol, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-variable", KN_PrimaryIsVariable, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-identifier", KN_PrimaryIsIdentifier, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-word", KN_PrimaryIsWord, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-attr-slot", KN_PrimaryIsAttrSlot, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-pair", KN_PrimaryIsPair, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-list", KN_PrimaryIsPairList, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-vector", KN_PrimaryIsVector, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-table", KN_PrimaryIsTable, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-cell", KN_PrimaryIsCell, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-env", KN_PrimaryIsEnv, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-procedure", KN_PrimaryIsProcedure, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-continuation", KN_PrimaryIsContinuation, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-ext-pointer", KN_PrimaryIsExtPointer, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "is-exception", KN_PrimaryIsException, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "unbox-quote", KN_PrimaryUnboxQuote, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "get-dispatcher-id", KN_PrimaryGetDispatcherId, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "set-dispatcher-id", KN_PrimarySetDispatcherId, 2, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "var-from-sym", KN_PrimaryVarFromSym, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "to-identifier", KN_PrimaryToIdentifier, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "to-sym-string", KN_PrimaryToSymString, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cons", KonList_CONS, 2, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "car", KonList_CAR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cdr", KonList_CDR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "caar", KonList_CAAR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cadr", KonList_CADR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cdar", KonList_CDAR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cddr", KonList_CDDR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "caaar", KonList_CAAAR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "caadr", KonList_CAADR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cadar", KonList_CADAR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "caddr", KonList_CADDR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cdaar", KonList_CDAAR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cdadr", KonList_CDADR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cddar", KonList_CDDAR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cdddr", KonList_CDDDR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cadddr", KonList_CADDDR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "cddddr", KonList_CDDDDR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dcr", KonCell_DCR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dnr", KonCell_DNR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dpr", KonCell_DPR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dlr", KonCell_DLR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dtr", KonCell_DTR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dcnr", KonCell_DCNR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dtnr", KonCell_DTNR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dlnr", KonCell_DLNR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dccr", KonCell_DCCR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dtcr", KonCell_DTCR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dlcr", KonCell_DLCR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dcnnr", KonCell_DCNNR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dtnnr", KonCell_DTNNR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dlnnr", KonCell_DLNNR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dccnr", KonCell_DCCNR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dtcnr", KonCell_DTCNR, 1, 0, 0, 0 },
+        { KN_NATIVE_FUNC, "dlcnr", KonCell_DLCNR, 1, 0, 0, 0 },
+    };
 
-    KN_EnvDefine(kstate, env, "dcr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DCR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dnr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DNR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dpr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DPR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dlr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DLR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dtr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DTR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dcnr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DCNR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dtnr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DTNR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dlnr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DLNR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dccr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DCCR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dtcr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DTCR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dlcr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DLCR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dcnnr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DCNNR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dtnnr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DTNNR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dlnnr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DLNNR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dccnr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DCCNR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dtcnr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DTCNR, 1, 0, 0)
-    );
-    KN_EnvDefine(kstate, env, "dlcnr",
-        MakeNativeProcedure(kstate, KN_NATIVE_FUNC, KonCell_DLCNR, 1, 0, 0)
-    );
-
+    int fnCnt = 79;
+    for (int i = 0; i < fnCnt; i++) {
+        KN_EnvDefine(kstate, env, defaultFnArr[i].name,
+            MakeNativeProcedure(
+                kstate,
+                defaultFnArr[i].type,
+                defaultFnArr[i].funcRef,
+                defaultFnArr[i].paramNum,
+                defaultFnArr[i].hasVAList,
+                defaultFnArr[i].hasVAMap
+            )
+        );
+    }
 }

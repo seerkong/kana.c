@@ -94,6 +94,45 @@ KN UnBoxAccessorValue(KN konValue)
     return value;
 }
 
+KN_OP ApplyProcedureArguments(KonState* kstate, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* curCont, KN* globalKonRegs)
+{
+    KN_OP nextOp;
+    // TODO assert if is a procedure
+    if (proc->type == KN_NATIVE_FUNC
+        || proc->type == KN_NATIVE_OBJ_METHOD
+    ) {
+        KonNativeFuncRef funcRef = proc->nativeFuncRef;
+        GS_LAST_VAL = KN_ApplyArgsToNativeFunc(kstate, proc, argList);
+        nextOp.code = OPC_RUN_NEXT_CONT;
+    }
+    // else if (proc->type == KN_COMPOSITE_LAMBDA) {
+    //     return KN_ApplyCompositeLambda(kstate, proc, argList, env, cont);
+    // }
+    // else if (proc->type == KN_COMPOSITE_FUNC) {
+    //     return KN_ApplyCompositeFunc(kstate, proc, argList, env, cont);
+    // }
+    // NOTE! the arguments are quoted before, unbox here
+    // else if (proc->type == KN_COMPOSITE_MACRO_LAMBDA) {
+    //     KN unboxed = KN_UNBOX_QUOTE(KN_CAR(argList));
+    //     argList = unboxed;
+    //     return KN_ApplyCompositeLambda(kstate, proc, argList, env, cont);
+    // }
+    // else if (proc->type == KN_COMPOSITE_MACRO_FUNC) {
+    //     KN unboxed = KN_UNBOX_QUOTE(KN_CAR(argList));
+    //     argList = unboxed;
+    //     return KN_ApplyCompositeFunc(kstate, proc, argList, env, cont);
+    // }
+    // else if (proc->type == KN_COMPOSITE_OBJ_METHOD) {
+    //     // treat as plain procedure when apply arg list
+    //     // the first item in arg list is the object
+    //     return KN_ApplyCompositeLambda(kstate, proc, argList, env, cont);
+    // }
+    // else {
+    //     // TODO throw exception
+    // }
+    return nextOp;
+}
+
 // OpHandlerRef opHandlers[] = {
 //     OpHandler_NONE,                 // OPC_LAND
 //     OpHandler_NONE,                 // OPC_NOP
@@ -106,7 +145,7 @@ KN KN_ExecAst(KonState* knstate, KN sourceCodeAst, KonEnv* rootEnv)
     KonContinuation* curCont = AllocContinuationWithType(knstate, KN_CONT_RETURN, curEnv, NULL);
     curCont->contHandler = ContHandler_Return;
 
-    KN* globalKonRegs = (KN*)tb_nalloc0(5, sizeof(KN));
+    KN* globalKonRegs = (KN*)tb_nalloc0(10, sizeof(KN));
     // void** globalPtrRegs = (void**)tb_nalloc0(2, sizeof(void*));
     // int32_t* globalRegs32 = (int32_t*)tb_nalloc0(2, sizeof(int32_t));
     KN_OP* nextOp = (KN_OP*)tb_nalloc0(1, sizeof(KN_OP));
@@ -121,7 +160,7 @@ KN KN_ExecAst(KonState* knstate, KN sourceCodeAst, KonEnv* rootEnv)
 
     static const void* opLabels[] = {
         &&opc0, &&opc1, &&opc2, &&opc3, &&opc4, &&opc5, &&opc6, &&opc7, &&opc8, &&opc9, &&opc10,
-        &&opc11, &&opc12, &&opc13, //&&opc14, &&opc15, &&opc16, &&opc17, &&opc18, &&opc19, &&opc20,
+        &&opc11, &&opc12, &&opc13, &&opc14, //&&opc15, &&opc16, &&opc17, &&opc18, &&opc19, &&opc20,
         // &&opc21, &&opc22, &&opc23, &&opc24, &&opc25, &&opc26, &&opc27, &&opc28, &&opc29, &&opc30,
         // &&opc31, &&opc32, &&opc33, &&opc34, &&opc35, &&opc36, &&opc37, &&opc38, &&opc39, &&opc40,
         // &&unused,
@@ -181,6 +220,7 @@ KN KN_ExecAst(KonState* knstate, KN sourceCodeAst, KonEnv* rootEnv)
     }
     DEF_OPC(OPC_EVAL_LIST_SENTENCE)
     {
+        KN_DEBUG("OPC_EVAL_LIST_SENTENCE");
         // receive a list, treat it as a expression
         OpHandler_EVAL_LIST_SENTENCE(knstate, curEnv, curCont, globalKonRegs, nextOp);
         DISPATCH(nextOp->code);
@@ -229,16 +269,33 @@ KN KN_ExecAst(KonState* knstate, KN sourceCodeAst, KonEnv* rootEnv)
         // no need to modify cont chain
         KonContFuncRef contHander = curCont->contHandler;
         KN_OP resNextOp = contHander(knstate, curCont, globalKonRegs);
-        nextOp = &resNextOp;
+        nextOp->code = resNextOp.code;
+
+        KN_DEBUG("OPC_RUN_CURRENT_CONT next code %d", resNextOp.code);
+
         DISPATCH(nextOp->code);
     }
 
     DEF_OPC(OPC_ENV_LOOKUP)
     {
+        KN_DEBUG("OPC_ENV_LOOKUP");
         KN val = KN_EnvLookup(knstate, curEnv, KN_SymbolToCstr(GS_NODE_TO_RUN));
         assert(val.asU64 != KNBOX_UNDEF);
         GS_LAST_VAL = val;
         nextOp->code = OPC_RUN_CURRENT_CONT;
+        DISPATCH(nextOp->code);
+    }
+    DEF_OPC(OPC_APPLY_PROCEDURE)
+    {
+        KN_OP resOp = ApplyProcedureArguments(
+            knstate, KN_2_KON(GS_PROCEDURE_FUNC, Procedure), 
+            GS_PROCEDURE_ARGS, 
+            curEnv, curCont->next,
+            globalKonRegs
+        );
+
+        nextOp->code = resOp.code;
+        KN_DEBUG("OPC_APPLY_PROCEDURE next code %d", resOp.code);
         DISPATCH(nextOp->code);
     }
 

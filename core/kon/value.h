@@ -384,6 +384,11 @@ struct _KonContinuation {
     KonEnv* env;
     KxList* pendingJobs;
     KxList* finishedJobs;
+    // KN memo1;
+    // KN memo2;
+    // KN memo3;
+    // KN memo4;
+    KN memo[4];
 };
 
 
@@ -756,6 +761,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 KN_API KN KN_Stringify(KonState* kstate, KN source);
 KN KN_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+void KN_PrintNodeToStdio(KonState* kstate, KN source);
 
 // number
 KN_API KN KN_FixnumStringify(KonState* kstate, KN source);

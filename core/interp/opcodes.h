@@ -19,7 +19,7 @@
 #define OPC_RUN_NEXT_CONT             11
 #define OPC_RUN_CURRENT_CONT          12
 #define OPC_ENV_LOOKUP                13
-
+#define OPC_APPLY_PROCEDURE           14
 
 #define OPC_EVAL_EXPOSED_LIST     110
 #define OPC_EVAL_EXPOSED_CELL     111

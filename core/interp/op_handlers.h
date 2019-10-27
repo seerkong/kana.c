@@ -46,15 +46,28 @@ opc##x:
 #define GS_LAST_VAL     (globalKonRegs[0])
 #define GS_NODE_TO_RUN    (globalKonRegs[1])
 #define GS_NEW_CONT    (globalKonRegs[2])
+#define GS_CELL_SUBJ    (globalKonRegs[3])
+#define GS_PROCEDURE_FUNC    (globalKonRegs[4])
+#define GS_PROCEDURE_ARGS    (globalKonRegs[5])
+#define GS_PROCEDURE_BLOCK    (globalKonRegs[6])
 
 // TODO continuation states
 #define CS_PENDING      (curCont->pendingJobs)
 #define CS_FINISHED     (curCont->finishedJobs)
-
+// #define CS_MEMO1     (curCont->memo1)
+// #define CS_MEMO2     (curCont->memo2)
+// #define CS_MEMO3     (curCont->memo3)
+#define CS_MEMO(n)     (curCont->memo[n])
 
 typedef void (*OpHandlerRef)(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
 
 KN_OP ContHandler_Return(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
+KN_OP ContHandler_Sentences(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
+KN_OP ContHandler_ListSentence(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
+KN_OP ContHandler_CellSentence(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
+KN_OP ContHandler_CellClause(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
+KN_OP ContHandler_ClauseCore(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
+KN_OP ContHandler_ClauseArgs(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
 
 void OpHandler_NONE(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
 void OpHandler_HELLOWORLD(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);

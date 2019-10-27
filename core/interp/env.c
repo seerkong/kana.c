@@ -13,7 +13,7 @@ KonEnv* KN_MakeRootEnv(KonState* kstate)
     //     KonModule_Export(kstate, env)
     // );
 
-    // KN_PrimaryOpExport(kstate, env);
+    KN_PrimaryOpExport(kstate, env);
 
     return env;
 }

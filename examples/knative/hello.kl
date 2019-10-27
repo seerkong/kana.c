@@ -1,1 +1,4 @@
-233223
+``{newline}
+{writeln "abc" "efg"}
+``[displayln ("abc" "efg") ]
+``[displayln% "abc" "efg"]

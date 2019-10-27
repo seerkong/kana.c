@@ -96,6 +96,9 @@ bool KxList_IterHasNext(KxListNode* iter);
 
 KxListNode* KxList_IterNext(KxListNode* iter);
 
+bool KxList_IterHasPrev(KxListNode* iter);
+KxListNode* KxList_IterPrev(KxListNode* iter);
+
 klist_val_t KxList_IterVal(KxListNode* iter);
 
 

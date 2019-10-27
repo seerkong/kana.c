@@ -366,6 +366,19 @@ KxListNode* KxList_IterNext(KxListNode* iter)
     return iter->next;
 }
 
+bool KxList_IterHasPrev(KxListNode* iter)
+{
+    if (iter == NULL || (klist_val_t)iter == KX_LIST_NIL) {
+        return false;
+    }
+    return ((klist_val_t)iter->prev == KX_LIST_NIL) ? false : true;
+}
+
+KxListNode* KxList_IterPrev(KxListNode* iter)
+{
+    return iter->prev;
+}
+
 klist_val_t KxList_IterVal(KxListNode* iter)
 {
     if ((klist_val_t)iter != KX_LIST_NIL) {
