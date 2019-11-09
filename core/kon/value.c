@@ -287,7 +287,7 @@ KN KN_FlonumStringify(KonState* kstate, KN source)
     return KON_2_KN(value);
 }
 
-// stringify char to ^c,X;
+// stringify char to &c,X;
 KN KN_CharStringify(KonState* kstate, KN source)
 {
     if (!KN_IS_CHAR(source)) {
@@ -296,7 +296,7 @@ KN KN_CharStringify(KonState* kstate, KN source)
 
     KonString* value = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     value->string = KxStringBuffer_New();
-    KxStringBuffer_AppendCstr(value->string, "^c,");
+    KxStringBuffer_AppendCstr(value->string, "&c,");
     int charcode = KN_UNBOX_CHAR(source);
     char buf[10] = {'\0'};
     snprintf(buf, 10, "%c", charcode);
@@ -369,7 +369,7 @@ KN KN_SymbolStringify(KonState* kstate, KN source)
             break;
         }
         case KN_SYM_VARIABLE: {
-            KxStringBuffer_AppendCstr(result->string, "@.");
+            KxStringBuffer_AppendCstr(result->string, "%");
             KxStringBuffer_AppendCstr(result->string, data);
             break;
         }
@@ -467,7 +467,7 @@ KN KN_QuasiquoteStringify(KonState* kstate, KN source, bool newLine, int depth, 
     KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
-    KxStringBuffer_AppendCstr(result->string, "@");
+    KxStringBuffer_AppendCstr(result->string, "!");
     KxStringBuffer_AppendCstr(result->string, nameCstr);
     KxStringBuffer_AppendCstr(result->string, ".");
 
@@ -493,15 +493,14 @@ KN KN_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, cha
             break;
         }
         case KN_UNQUOTE_KV: {
-            KxStringBuffer_AppendCstr(result->string, "%");
+            KxStringBuffer_AppendCstr(result->string, "@");
             break;
         }
         case KN_UNQUOTE_REPLACE: {
+            KxStringBuffer_AppendCstr(result->string, "%");
             break;
         }
     }
-
-    KxStringBuffer_AppendCstr(result->string, ".");
 
     KN innerToKonStr = KN_ToFormatString(kstate, inner, newLine, depth, padding);
     KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerToKonStr));
@@ -519,7 +518,7 @@ KN KN_PrefixStringify(KonState* kstate, KN source, bool newLine, int depth, char
     KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
-    KxStringBuffer_AppendCstr(result->string, "!");
+    KxStringBuffer_AppendCstr(result->string, "@");
 
     KN innerToKonStr = KN_ToFormatString(kstate, inner, newLine, depth, padding);
     KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(innerToKonStr));
@@ -552,7 +551,7 @@ KN KN_TxtMarcroStringify(KonState* kstate, KN source, bool newLine, int depth, c
     KonString* result = KN_NEW_CONST_OBJ(kstate, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
-    KxStringBuffer_AppendCstr(result->string, "^");
+    KxStringBuffer_AppendCstr(result->string, "&");
     KxStringBuffer_AppendCstr(result->string, nameCstr);
     KxStringBuffer_AppendCstr(result->string, ".");
 

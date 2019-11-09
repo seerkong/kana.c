@@ -34,30 +34,30 @@ typedef enum
     KN_TOKEN_LITERAL_STRING,   // "abc"
     KN_TOKEN_LITERAL_RAW_STRING,       // 'abc'
 
-    KN_TOKEN_PREFIX_WRAPPER, // !await
-    KN_TOKEN_SUFFIX_WRAPPER, // ~await
-    KN_TOKEN_TXT_MARCRO,   // ^xxx.'abc'
+    KN_TOKEN_PREFIX_WRAPPER, // @await; @{xxx} @[]
+    KN_TOKEN_SUFFIX_WRAPPER, // 5 ~int
+    KN_TOKEN_TXT_MARCRO,   // &xxx.'abc'
     KN_TOKEN_OBJ_BUILDER,       // #[] #{} #<> #() #xx.[]
 
     KN_TOKEN_SYM_MARCRO, // each!
-    KN_TOKEN_SYM_CELL_SEG_END, // {text %text}
     KN_TOKEN_SYM_WORD,   // abC
-    
+    KN_TOKEN_SYM_CELL_SEG_END, // ^
+
     KN_TOKEN_SYM_STRING, // $''
-    KN_TOKEN_SYM_VARIABLE, // @.abc
+    KN_TOKEN_SYM_VARIABLE, // %abc
     KN_TOKEN_SYM_IDENTIFIER,  // $abc $>=
 
-    KN_TOKEN_QUOTE,   // $.[] $.{} $.<> $.()
+    KN_TOKEN_QUOTE,   // $.[] $.{} $.<> $.() or $[] ${}
 
-    KN_TOKEN_QUASI,   // @.[] @xx.{} @[] @{}
+    KN_TOKEN_QUASI,   // !.[] !xx.{} or ![] !{}
 
     KN_TOKEN_UNQUOTE_REPLACE,  // $%abc $%{+ a 2}
-    KN_TOKEN_UNQUOTE_SEQ,        // $^abc
-    KN_TOKEN_UNQUOTE_KV,        // $~abc
+    KN_TOKEN_UNQUOTE_SEQ,        // $~abc
+    KN_TOKEN_UNQUOTE_KV,        // $@abc
     
     KN_TOKEN_KV_PAIR_TAG,    // :
     
-    KN_TOKEN_CHAR,          // ^c,xxx;
+    KN_TOKEN_CHAR,          // &c,A;
     
     KN_TOKEN_APPLY,        // % [write % 1 2 3]
     KN_TOKEN_REST,     // ... eg [func (a ... b) { }]

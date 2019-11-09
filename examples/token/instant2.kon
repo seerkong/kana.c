@@ -1,14 +1,15 @@
 true false ukn nil undefined tt
 \a \:a
 each!
-!abc
+@abc `` a prefix, with a symbol('abc') inner
 ~ef
-^c,A;
-^ruby.'puts("abc")'
+&c,A;
+&ruby.'puts("abc")'
+%abc
 $'abc'
 $.abc
-$ss.[1]
-$abcdefghigkl.[1]
-@.{ff}
-@ass.[1]
+$abc
+$.[aff]
+!.{ff}
+!ass.[1]
 #[t~int#<1 2>#<1 2>t<a b>]
