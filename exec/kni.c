@@ -6,28 +6,28 @@
 #include "commander.h"
 
 
-KonState* knState;
+Kana* kana;
 int ExecMode;   // 1 file mode, 2 repl mode
 
-KonState* InitKonState()
+Kana* InitKana()
 {
-    knState = KN_Init();
-    if (knState == NULL) {
+    kana = KN_Init();
+    if (kana == NULL) {
         fprintf(stderr, "initialize konstate failed!\n");
         exit(1);
     }
 
-    return knState;
+    return kana;
 }
 
-// void ExitFailure(KonState* knState)
+// void ExitFailure(Kana* kana)
 // {
-//     KN_Finish(knState);
+//     KN_Finish(kana);
 // }
 
-// void ExitSuccess(KonState* knState)
+// void ExitSuccess(Kana* kana)
 // {
-//     KN_Finish(knState);
+//     KN_Finish(kana);
 // }
 
 // static void Repl(command_t *self) {
@@ -42,7 +42,7 @@ KonState* InitKonState()
 // static void EvalFile(command_t *self) {
 //     ExecMode = 1;
 //     KN_DEBUG("eval file: %s\n", self->arg);
-//     KN_EvalFile(knState, self->arg);
+//     KN_EvalFile(kana, self->arg);
 // }
 
 // static void PrintHelp(command_t *self)
@@ -75,7 +75,7 @@ KonState* InitKonState()
 //     const char* initScriptPath = "/usr/local/etc/kana/init.kl";
 //     if ((access(initScriptPath, F_OK)) != -1) {
 //         if (access(initScriptPath, R_OK) != -1) {
-//             KN_EvalFile(knState, initScriptPath);
+//             KN_EvalFile(kana, initScriptPath);
 //         }
 //     }
 // }
@@ -83,36 +83,36 @@ KonState* InitKonState()
 int main(int argc, char const* argv[])
 {
     ExecMode = 1;
-    KonState* knState = InitKonState();
+    Kana* kana = InitKana();
     
     // ENABLE_DEBUG = 0;
     ENABLE_DEBUG = 1;
     // if (RunMain(argc, argv)) {
-    //     ExitFailure(knState);
+    //     ExitFailure(kana);
     // }
     // else {
-    //     ExitSuccess(knState);
+    //     ExitSuccess(kana);
     // }
 
     // LoadInitScript();
 
     if (ExecMode == 1 && argc > 1) {
-        KN_EvalFile(knState, argv[1]);
+        KN_EvalFile(kana, argv[1]);
     }
     else {
-        KN_EvalFile(knState, "/Users/peacock/lang/kana/kana_nunbox/examples/knative/hello.kl");
+        KN_EvalFile(kana, "/Users/peacock/lang/kana/kana_nunbox/examples/knative/hello.kl");
     }
 
-    // KonEnv* rootEnv = KN_MakeRootEnv(knState);
+    // KonEnv* rootEnv = KN_MakeRootEnv(kana);
     // int codeLen = 2;
-    // KN_OP codeBlock[2] = {
+    // KnOp codeBlock[2] = {
     //     {.code=OP_ADD, .a=1, .b=2},
     //     {.code=OP_LAND}
     // };
 
-    // KN result = ExecByteCode(knState, rootEnv, codeBlock, codeLen);
-    // KN result = ExecByteCode2(knState, rootEnv, codeBlock, codeLen);
-    // KN formated = KN_ToFormatString(knState, result, true, 0, "  ");
+    // KN result = ExecByteCode(kana, rootEnv, codeBlock, codeLen);
+    // KN result = ExecByteCode2(kana, rootEnv, codeBlock, codeLen);
+    // KN formated = KN_ToFormatString(kana, result, true, 0, "  ");
     // printf("%s\n", KN_StringToCstr(formated));
 
     return 0;

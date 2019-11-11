@@ -12,7 +12,7 @@
 #include "gc/gc.h"
 #include "interp/interp.h"
 
-KN_API KonState* KN_Init();
-KN_API int KN_Finish(KonState* kstate);
+KN_API Kana* KN_Init();
+KN_API int KN_Finish(Kana* kana);
 
 #endif

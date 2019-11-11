@@ -14,19 +14,19 @@ typedef struct _GcState
 
 } GcState;
 
-void KN_InitGc(KonState* knState);
-void KN_DestroyGc(KonState* knState);
+void KN_InitGc(Kana* kana);
+void KN_DestroyGc(Kana* kana);
 
-KN_API KN KN_NewDynamicMemObj(KonState* kstate, size_t size, kon_uint_t tag);
+KN_API KN KN_NewDynamicMemObj(Kana* kana, size_t size, kon_uint_t tag);
 
 
-void KN_ShowGcStatics(KonState* knState);
-long long KN_CurrentObjCount(KonState* knState);
-void KN_SwitchContinuation(KonState* knState, struct _KonContinuation* cont);
-void KN_RecordNewKonNode(KonState* knState, KN newVal);
+void KN_ShowGcStatics(Kana* kana);
+long long KN_CurrentObjCount(Kana* kana);
+void KN_SwitchContinuation(Kana* kana, struct _KonContinuation* cont);
+void KN_RecordNewKonNode(Kana* kana, KN newVal);
 
-void KN_EnterGcSafepoint(KonState* knState);
-void KN_Gc(KonState* knState);
+void KN_EnterGcSafepoint(Kana* kana);
+void KN_Gc(Kana* kana);
 
 
 

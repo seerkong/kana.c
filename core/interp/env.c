@@ -2,37 +2,37 @@
 
 #include "env.h"
 
-KonEnv* KN_MakeRootEnv(KonState* kstate)
+KonEnv* KN_MakeRootEnv(Kana* kana)
 {
-    KonEnv* env = KN_NEW_DYNAMIC_OBJ(kstate, KonEnv, KN_T_ENV);
+    KonEnv* env = KN_NEW_DYNAMIC_OBJ(kana, KonEnv, KN_T_ENV);
     env->parent = (KonEnv*)KNBOX_NIL;
     env->bindings = KxHashTable_Init(4);
 
     // kon module
-    // KN_EnvDefine(kstate, env, "kn",
-    //     KonModule_Export(kstate, env)
+    // KN_EnvDefine(kana, env, "kn",
+    //     KonModule_Export(kana, env)
     // );
 
-    KN_PrimaryOpExport(kstate, env);
+    KN_PrimaryOpExport(kana, env);
 
     return env;
 }
 
-KonEnv* KN_MakeChildEnv(KonState* kstate, KonEnv* parentEnv)
+KonEnv* KN_MakeChildEnv(Kana* kana, KonEnv* parentEnv)
 {
-    KonEnv* env = KN_NEW_DYNAMIC_OBJ(kstate, KonEnv, KN_T_ENV);
+    KonEnv* env = KN_NEW_DYNAMIC_OBJ(kana, KonEnv, KN_T_ENV);
     env->parent = parentEnv;
     env->bindings = KxHashTable_Init(4);
     return env;
 }
 
-KN KN_EnvDefine(KonState* kstate, KonEnv* env, const char* key, KN value)
+KN KN_EnvDefine(Kana* kana, KonEnv* env, const char* key, KN value)
 {
     KxHashTable_PutKv(env->bindings, key, value.asU64);
     return KN_TRUE;
 }
 
-KN KN_EnvLookup(KonState* kstate, KonEnv* env, const char* key)
+KN KN_EnvLookup(Kana* kana, KonEnv* env, const char* key)
 {
     KN value = (KN)KxHashTable_AtKey(env->bindings, key);
     if (value.asU64 && value.asU64 != KNBOX_UNDEF) {
@@ -42,11 +42,11 @@ KN KN_EnvLookup(KonState* kstate, KonEnv* env, const char* key)
         return KN_UKN;
     }
     else {
-        return KN_EnvLookup(kstate, env->parent, key);
+        return KN_EnvLookup(kana, env->parent, key);
     }
 }
 
-KN KN_EnvLookupSet(KonState* kstate, KonEnv* env, const char* key, KN value)
+KN KN_EnvLookupSet(Kana* kana, KonEnv* env, const char* key, KN value)
 {
     KN slot = (KN)KxHashTable_AtKey(env->bindings, key);
     if (slot.asU64) {
@@ -57,6 +57,6 @@ KN KN_EnvLookupSet(KonState* kstate, KonEnv* env, const char* key, KN value)
         return KN_FALSE;
     }
     else {
-        return KN_EnvLookupSet(kstate, env->parent, key, value);
+        return KN_EnvLookupSet(kana, env->parent, key, value);
     }
 }

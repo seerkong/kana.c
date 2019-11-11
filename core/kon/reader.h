@@ -11,7 +11,7 @@
 
 typedef struct
 {
-    KonState* kstate;
+    Kana* kana;
     // the reader stream
     KxStringBuffer* readStream;
     bool isOwnedStream;
@@ -27,7 +27,7 @@ typedef struct
 } KonReader;
 
 
-KonReader* KSON_ReaderInit(KonState* kstate);
+KonReader* KSON_ReaderInit(Kana* kana);
 
 bool KSON_ReaderFromFile(KonReader* reader, const char* sourceFilePath);
 bool KSON_ReaderFromCstr(KonReader* reader, const char* sourceCstr);

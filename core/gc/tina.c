@@ -8,16 +8,16 @@
 #define MAX_SEGMENT_CNT 7
 // #define MAX_SEGMENT_CNT 2
 
-void KN_MarkPhase(KonState* knState);
-void KN_Mark(KonState* knState, KxList* taskQueue, char color);
+void KN_MarkPhase(Kana* kana);
+void KN_Mark(Kana* kana, KxList* taskQueue, char color);
 void KN_SweepPhase();
-void KN_ResetAndCopyPtrSegList(KonState* knState);
+void KN_ResetAndCopyPtrSegList(Kana* kana);
 void KN_MarkNode(struct _KonBase* item, KxList* markTaskQueue, char color);
-void KN_DestroyNode(KonState* knState, struct _KonBase* item);
+void KN_DestroyNode(Kana* kana, struct _KonBase* item);
 
 
 
-KxList* KN_CreateHeapPtrSegList(KonState* knState)
+KxList* KN_CreateHeapPtrSegList(Kana* kana)
 {
     KxVector* firstSeg = KxVector_InitWithCapacity(FIRST_HEAP_PTR_SEG_SIZE);
     KxList* segList = KxList_Init();
@@ -25,21 +25,21 @@ KxList* KN_CreateHeapPtrSegList(KonState* knState)
     return segList;
 }
 
-void KN_InitGc(KonState* knState)
+void KN_InitGc(Kana* kana)
 {
 
-    knState->largeAllocator = tb_large_allocator_init(tb_null, 0);
-    knState->allocator = tb_default_allocator_init(knState->largeAllocator);
+    kana->largeAllocator = tb_large_allocator_init(tb_null, 0);
+    kana->allocator = tb_default_allocator_init(kana->largeAllocator);
     
-    if (!tb_init(tb_null, knState->allocator)) {
+    if (!tb_init(tb_null, kana->allocator)) {
         printf("tb_init failed\n");
         return;
     }
 
-    knState->writeBarrierGen = KxList_Init();
-    knState->heapPtrSegs = KN_CreateHeapPtrSegList(knState);
-    knState->markTaskQueue = KxList_Init();
-    knState->segmentMaxSizeVec = KxVector_InitWithSize(MAX_SEGMENT_CNT);
+    kana->writeBarrierGen = KxList_Init();
+    kana->heapPtrSegs = KN_CreateHeapPtrSegList(kana);
+    kana->markTaskQueue = KxList_Init();
+    kana->segmentMaxSizeVec = KxVector_InitWithSize(MAX_SEGMENT_CNT);
 
     unsigned long nextSize = FIRST_HEAP_PTR_SEG_SIZE;
     unsigned long maxObjCnt = 0;
@@ -47,42 +47,42 @@ void KN_InitGc(KonState* knState)
     for (int i = 0; i < MAX_SEGMENT_CNT; i++) {
         maxObjCnt += nextSize;
         // KN_DEBUG("seg vec index %d, size %d\n", i, nextSize);
-        KxVector_SetIndex(knState->segmentMaxSizeVec, i, KX_VEC_BOX_UINT(nextSize));
+        KxVector_SetIndex(kana->segmentMaxSizeVec, i, KX_VEC_BOX_UINT(nextSize));
         
         // align to n *4
         int notAligned = nextSize * 1.618;
         nextSize = notAligned + 4 - (notAligned % 4);
     }
     // KN_DEBUG("MaxObjCntLimit %d\n", maxObjCnt);
-    knState->maxObjCntLimit = maxObjCnt;
-    knState->gcThreshold = maxObjCnt - nextSize / 4;
-    knState->needGc = false;
+    kana->maxObjCntLimit = maxObjCnt;
+    kana->gcThreshold = maxObjCnt - nextSize / 4;
+    kana->needGc = false;
 }
 
 
-void KN_DestroyGc(KonState* knState)
+void KN_DestroyGc(Kana* kana)
 {
     // exit allocator
-    if (knState->allocator) {
-        tb_allocator_exit(knState->allocator);
+    if (kana->allocator) {
+        tb_allocator_exit(kana->allocator);
     }
-    knState->allocator = tb_null;
+    kana->allocator = tb_null;
 
-    if (knState->largeAllocator) {
-        tb_allocator_exit(knState->largeAllocator);
+    if (kana->largeAllocator) {
+        tb_allocator_exit(kana->largeAllocator);
     }
-    knState->largeAllocator = tb_null;
+    kana->largeAllocator = tb_null;
 
 
-    KN_ShowGcStatics(knState);
+    KN_ShowGcStatics(kana);
 }
 
-KN KN_NewDynamicMemObj(KonState* kstate, size_t size, kon_uint_t tag)
+KN KN_NewDynamicMemObj(Kana* kana, size_t size, kon_uint_t tag)
 {
-    KN res = (KN)tb_allocator_malloc0(kstate->allocator, size);
+    KN res = (KN)tb_allocator_malloc0(kana->allocator, size);
 
     // add to heap ptr store
-    KN_RecordNewKonNode(kstate, res);
+    KN_RecordNewKonNode(kana, res);
 
     if (res.asU64) {
         KN_OBJ_PTR_TYPE(res) = tag;
@@ -102,16 +102,16 @@ KN KN_NewDynamicMemObj(KonState* kstate, size_t size, kon_uint_t tag)
     return res;
 }
 
-void KN_ShowGcStatics(KonState* knState)
+void KN_ShowGcStatics(Kana* kana)
 {
-    int barrierObjLength = KxList_Length(knState->writeBarrierGen);
+    int barrierObjLength = KxList_Length(kana->writeBarrierGen);
 
-    long long totalObjCnt = KN_CurrentObjCount(knState);
-    KN_DEBUG("HeapPtrSegs count : %d, totalObjCnt %lld, barrierObjLength %d\n", KxList_Length(knState->heapPtrSegs), totalObjCnt, barrierObjLength);
+    long long totalObjCnt = KN_CurrentObjCount(kana);
+    KN_DEBUG("HeapPtrSegs count : %d, totalObjCnt %lld, barrierObjLength %d\n", KxList_Length(kana->heapPtrSegs), totalObjCnt, barrierObjLength);
 }
 
 
-int KN_PushToHeapPtrSeg(KonState* knState, KxList* heapPtrSegs, KN ptr)
+int KN_PushToHeapPtrSeg(Kana* kana, KxList* heapPtrSegs, KN ptr)
 {
     KxListNode* iter = KxList_IterHead(heapPtrSegs);
     // KN_DEBUG("KxList_IterHead(heapPtrSegs) addr %x\n", iter);
@@ -137,7 +137,7 @@ int KN_PushToHeapPtrSeg(KonState* knState, KxList* heapPtrSegs, KN ptr)
     }
     // create a new segment
     segIndex += 1;
-    int nextSize = KX_VEC_UNBOX_UINT(KxVector_AtIndex(knState->segmentMaxSizeVec, segIndex));
+    int nextSize = KX_VEC_UNBOX_UINT(KxVector_AtIndex(kana->segmentMaxSizeVec, segIndex));
     KxVector* nextSeg = KxVector_InitWithCapacity(nextSize);
     KxVector_Push(nextSeg, ptr.asU64);
     KN_DEBUG("\n**create a new segment, seg index %d , new seg size %d\n", segIndex, nextSize);
@@ -148,9 +148,9 @@ int KN_PushToHeapPtrSeg(KonState* knState, KxList* heapPtrSegs, KN ptr)
     return 1;
 }
 
-long long KN_CurrentObjCount(KonState* knState)
+long long KN_CurrentObjCount(Kana* kana)
 {
-    KxListNode* iter = KxList_IterHead(knState->heapPtrSegs);
+    KxListNode* iter = KxList_IterHead(kana->heapPtrSegs);
     long long count = 0;
     while (iter != KNBOX_NIL) {
         KxListNode* next = KxList_IterNext(iter);
@@ -163,68 +163,68 @@ long long KN_CurrentObjCount(KonState* knState)
     return count;
 }
 
-bool KN_HasEnoughSegSpace(KonState* knState, int requireSize)
+bool KN_HasEnoughSegSpace(Kana* kana, int requireSize)
 {
     if (requireSize == 0) {
         return true;
     }
-    long long totalObjCnt = KN_CurrentObjCount(knState);
-    long long limit = knState->gcThreshold;
+    long long totalObjCnt = KN_CurrentObjCount(kana);
+    long long limit = kana->gcThreshold;
     
     bool needGc = (limit - totalObjCnt - requireSize) >= 0;
     if (!needGc) {
         KN_DEBUG("requireSize %d, current totalObjCnt %d, max limit %d\n", requireSize, totalObjCnt, limit);
-        knState->needGc = true;
+        kana->needGc = true;
     }
     
     return needGc;
 }
 
 
-void KN_PushWriteBarrierObjsToHeapPtrSeg(KonState* knState)
+void KN_PushWriteBarrierObjsToHeapPtrSeg(Kana* kana)
 {
-    klist_val_t konPtr = KxList_Shift(knState->writeBarrierGen);
+    klist_val_t konPtr = KxList_Shift(kana->writeBarrierGen);
 
     while (konPtr != KX_LIST_UNDEF) {
         ((KonBase*)konPtr)->gcMarkColor = KN_GC_MARK_WHITE;
         // add to segment
-        KN_PushToHeapPtrSeg(knState, knState->heapPtrSegs, (KN)konPtr);
+        KN_PushToHeapPtrSeg(kana, kana->heapPtrSegs, (KN)konPtr);
 
-        konPtr = KxList_Shift(knState->writeBarrierGen);
+        konPtr = KxList_Shift(kana->writeBarrierGen);
     }
 }
 
-void KN_SwitchContinuation(KonState* knState, KonContinuation* cont)
+void KN_SwitchContinuation(Kana* kana, KonContinuation* cont)
 {
 #if KN_DISABLE_GC
     return;
 #endif
-    knState->currCont = cont;
+    kana->currCont = cont;
     
     // write barrier list size
-    int barrierObjLength = KxList_Length(knState->writeBarrierGen);
-    bool firstTry = KN_HasEnoughSegSpace(knState, barrierObjLength);
+    int barrierObjLength = KxList_Length(kana->writeBarrierGen);
+    bool firstTry = KN_HasEnoughSegSpace(kana, barrierObjLength);
     if (!firstTry) {
-        long long totalObjCnt = KN_CurrentObjCount(knState);
-        long long limit = knState->maxObjCntLimit;
+        long long totalObjCnt = KN_CurrentObjCount(kana);
+        long long limit = kana->maxObjCntLimit;
         KN_DEBUG("no EnoughSegSpace requireSize %d, current totalObjCnt %lld, max limit %lld\n", barrierObjLength, totalObjCnt, limit);
 
         // don't trigger gc at this time
 
-        // KN_Gc(knState);
-        // bool secondTry = KN_HasEnoughSegSpace(knState, barrierObjLength);
+        // KN_Gc(kana);
+        // bool secondTry = KN_HasEnoughSegSpace(kana, barrierObjLength);
 
         // if (!secondTry) {
         //     KN_DEBUG("gc failed, reach ptr count limit\n");
-        //     KN_ShowGcStatics(knState);
+        //     KN_ShowGcStatics(kana);
         //     exit(1);
         // }
     }
     
-    KN_PushWriteBarrierObjsToHeapPtrSeg(knState);
+    KN_PushWriteBarrierObjsToHeapPtrSeg(kana);
 }
 
-void KN_RecordNewKonNode(KonState* knState, KN newVal)
+void KN_RecordNewKonNode(Kana* kana, KN newVal)
 {
 #if KN_DISABLE_GC
     return;
@@ -232,88 +232,88 @@ void KN_RecordNewKonNode(KonState* knState, KN newVal)
     // add the pointers created between two continuation switch
     // to a temp list
     KN_FIELD(newVal, Base, gcMarkColor) = KN_GC_MARK_GRAY;
-    KxList_Push(knState->writeBarrierGen, newVal.asU64);
+    KxList_Push(kana->writeBarrierGen, newVal.asU64);
 }
 
 // safepoint:
 // after function finished
 // after a loop body finished
-void KN_EnterGcSafepoint(KonState* knState)
+void KN_EnterGcSafepoint(Kana* kana)
 {
-    if (knState->needGc) {
+    if (kana->needGc) {
         KN_DEBUG("KN_EnterGcSafepoint");
-        KN_Gc(knState);
-        knState->needGc = false;
+        KN_Gc(kana);
+        kana->needGc = false;
     }
 }
 
-void KN_Gc(KonState* knState)
+void KN_Gc(Kana* kana)
 {
     KN_DEBUG("\n**trigger gc, before gc, statics:\n");
-    KN_ShowGcStatics(knState);
-    KN_MarkPhase(knState);
-    KN_SweepPhase(knState);
+    KN_ShowGcStatics(kana);
+    KN_MarkPhase(kana);
+    KN_SweepPhase(kana);
 }
 
-void KN_MarkPhase(KonState* knState)
+void KN_MarkPhase(Kana* kana)
 {
     // code pointers should be reserved
-    if (knState->currCode.asU64 != NULL) {
-        KxList_Push(knState->markTaskQueue, knState->currCode.asU64);
+    if (kana->currCode.asU64 != NULL) {
+        KxList_Push(kana->markTaskQueue, kana->currCode.asU64);
     }
 
     // pointers which are not set to pointer addr segments should be reserved
-    KxListNode* iter = KxList_IterHead(knState->writeBarrierGen);
+    KxListNode* iter = KxList_IterHead(kana->writeBarrierGen);
     while (iter != KNBOX_NIL) {
         KxListNode* next = KxList_IterNext(iter);
 
         KN ptr = (KN)KxList_IterVal(iter);
 
         // add to MarkTaskQueue
-        KxList_Push(knState->markTaskQueue, ptr.asU64);
+        KxList_Push(kana->markTaskQueue, ptr.asU64);
 
         iter = next;
     }
 
     // msg dispatchers should be reserved
-    int vecLen = KxVector_Length(knState->msgDispatchers);
+    int vecLen = KxVector_Length(kana->msgDispatchers);
     for (int i = 0; i < vecLen; i++) {
-        KN dispatcherPtr = (KN)KxVector_AtIndex(knState->msgDispatchers, i);
-        KxList_Push(knState->markTaskQueue, dispatcherPtr.asU64);
+        KN dispatcherPtr = (KN)KxVector_AtIndex(kana->msgDispatchers, i);
+        KxList_Push(kana->markTaskQueue, dispatcherPtr.asU64);
     }
 
-    if (knState->currCont != NULL) {
-        KxList_Push(knState->markTaskQueue, knState->currCont);
+    if (kana->currCont != NULL) {
+        KxList_Push(kana->markTaskQueue, kana->currCont);
     }
 
-    KN_Mark(knState, knState->markTaskQueue, KN_GC_MARK_BLACK);
+    KN_Mark(kana, kana->markTaskQueue, KN_GC_MARK_BLACK);
 
     // FIXME: this is a workaround
     // to avoid free AST nodes
     // reserve code pointers
     // KxList* astTaskQueue = KxList_Init();
-    // KxList_Push(astTaskQueue, knState->currCode);
-    // KN_Mark(knState, astTaskQueue, KN_GC_MARK_BLACK);
+    // KxList_Push(astTaskQueue, kana->currCode);
+    // KN_Mark(kana, astTaskQueue, KN_GC_MARK_BLACK);
     // KxList_Destroy(astTaskQueue);
 }
 
 // 1. shift a KonValue
 // 2. mark this value to black
 // 3. add all children to this queue
-void KN_Mark(KonState* knState, KxList* taskQueue, char color)
+void KN_Mark(Kana* kana, KxList* taskQueue, char color)
 {
-    while (KxList_Length(knState->markTaskQueue) > 0) {
+    while (KxList_Length(kana->markTaskQueue) > 0) {
         KonBase* konPtr = KxList_Shift(taskQueue);
         KN_MarkNode(konPtr, taskQueue, color);
         
     }
 }
 
-void KN_SweepPhase(KonState* knState)
+void KN_SweepPhase(Kana* kana)
 {
 
-    // mark knState->writeBarrierGen objs to gray
-    KxListNode* iter = KxList_IterHead(knState->writeBarrierGen);
+    // mark kana->writeBarrierGen objs to gray
+    KxListNode* iter = KxList_IterHead(kana->writeBarrierGen);
     while (iter != KNBOX_NIL) {
         KxListNode* next = KxList_IterNext(iter);
 
@@ -324,20 +324,20 @@ void KN_SweepPhase(KonState* knState)
         iter = next;
     }
     
-    // mark knState->heapPtrSegs objs to white
+    // mark kana->heapPtrSegs objs to white
     // and copy to a new segment
 
-    KN_ResetAndCopyPtrSegList(knState);
+    KN_ResetAndCopyPtrSegList(kana);
 }
 
 
-void KN_ResetAndCopyPtrSegList(KonState* knState)
+void KN_ResetAndCopyPtrSegList(Kana* kana)
 {
     KN_DEBUG("KN_ResetAndCopyPtrSegList\n");
     // shink the segment list
-    KxList* newPtrSegList = KN_CreateHeapPtrSegList(knState);
+    KxList* newPtrSegList = KN_CreateHeapPtrSegList(kana);
     
-    KxListNode* iter = KxList_IterHead(knState->heapPtrSegs);
+    KxListNode* iter = KxList_IterHead(kana->heapPtrSegs);
     
     unsigned long whiteCnt = 0;
     unsigned long grayCnt = 0;
@@ -354,7 +354,7 @@ void KN_ResetAndCopyPtrSegList(KonState* knState)
             KonBase* konPtr = (KonBase*)KxVector_AtIndex(segment, i);
             if (konPtr->gcMarkColor == KN_GC_MARK_WHITE) {
                 whiteCnt += 1;
-                KN_DestroyNode(knState, konPtr);
+                KN_DestroyNode(kana, konPtr);
                 continue;
             }
             else if (konPtr->gcMarkColor == KN_GC_MARK_GRAY) {
@@ -368,21 +368,21 @@ void KN_ResetAndCopyPtrSegList(KonState* knState)
             }
             // reset black node to white
             konPtr->gcMarkColor = KN_GC_MARK_WHITE;
-            KN_PushToHeapPtrSeg(knState, newPtrSegList, KON_2_KN(konPtr));
+            KN_PushToHeapPtrSeg(kana, newPtrSegList, KON_2_KN(konPtr));
         }
 
         KxVector_Destroy(segment);
-        KxList_DelNode(knState->heapPtrSegs, iter);
+        KxList_DelNode(kana->heapPtrSegs, iter);
 
         iter = next;
     }
     
     KN_DEBUG("ptr color cnt : white %ld, gray %ld, red %ld, black %ld\n", whiteCnt, grayCnt, redCnt, blackCnt);
     
-    // free old knState->heapPtrSegs
-    KxList_Destroy(knState->heapPtrSegs);
+    // free old kana->heapPtrSegs
+    KxList_Destroy(kana->heapPtrSegs);
 
-    knState->heapPtrSegs = newPtrSegList;
+    kana->heapPtrSegs = newPtrSegList;
 }
 
 
@@ -603,7 +603,7 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
 
 
 // free children and free node
-void KN_DestroyNode(KonState* knState, KonBase* node)
+void KN_DestroyNode(Kana* kana, KonBase* node)
 {
     if (node == NULL || !KN_IS_POINTER(KON_2_KN(node))) {
         return;

@@ -1,25 +1,25 @@
 #include "kikumaru.h"
 
-void KN_MarkPhase(KonState* knState);
-void KN_Mark(KonState* knState, KxList* taskQueue, char color);
+void KN_MarkPhase(Kana* kana);
+void KN_Mark(Kana* kana, KxList* taskQueue, char color);
 void KN_SweepPhase();
-void KN_ResetAndCopyPtrSegList(KonState* knState);
+void KN_ResetAndCopyPtrSegList(Kana* kana);
 
-void KN_ShowGcStatics(KonState* knState);
+void KN_ShowGcStatics(Kana* kana);
 
-void KN_RecordNewKonNode(KonState* knState, KN newVal);
+void KN_RecordNewKonNode(Kana* kana, KN newVal);
 
 void KN_MarkNode(struct _KonBase* item, KxList* markTaskQueue, char color);
-void KN_DestroyNode(KonState* knState, struct _KonBase* item);
+void KN_DestroyNode(Kana* kana, struct _KonBase* item);
 
-void KN_InitGc(KonState* knState)
+void KN_InitGc(Kana* kana)
 {
-    knState->largeConstAllocator = tb_large_allocator_init(tb_null, 0);
-    knState->constAllocator = tb_default_allocator_init(knState->largeConstAllocator);
-    knState->largeAllocator = tb_large_allocator_init(tb_null, 0);
-    knState->dynamicAllocator = tb_default_allocator_init(knState->largeAllocator);
+    kana->largeConstAllocator = tb_large_allocator_init(tb_null, 0);
+    kana->constAllocator = tb_default_allocator_init(kana->largeConstAllocator);
+    kana->largeAllocator = tb_large_allocator_init(tb_null, 0);
+    kana->dynamicAllocator = tb_default_allocator_init(kana->largeAllocator);
     
-    if (!tb_init(tb_null, knState->dynamicAllocator)) {
+    if (!tb_init(tb_null, kana->dynamicAllocator)) {
         printf("tb_init failed\n");
         return;
     }
@@ -28,37 +28,37 @@ void KN_InitGc(KonState* knState)
 }
 
 
-void KN_DestroyGc(KonState* knState)
+void KN_DestroyGc(Kana* kana)
 {
     // exit allocator
-    if (knState->constAllocator) {
-        tb_allocator_exit(knState->constAllocator);
+    if (kana->constAllocator) {
+        tb_allocator_exit(kana->constAllocator);
     }
-    knState->constAllocator = tb_null;
+    kana->constAllocator = tb_null;
 
-    if (knState->dynamicAllocator) {
-        tb_allocator_exit(knState->dynamicAllocator);
+    if (kana->dynamicAllocator) {
+        tb_allocator_exit(kana->dynamicAllocator);
     }
-    knState->dynamicAllocator = tb_null;
+    kana->dynamicAllocator = tb_null;
 
-    if (knState->largeAllocator) {
-        tb_allocator_exit(knState->largeAllocator);
+    if (kana->largeAllocator) {
+        tb_allocator_exit(kana->largeAllocator);
     }
-    knState->largeAllocator = tb_null;
+    kana->largeAllocator = tb_null;
 
-    if (knState->largeConstAllocator) {
-        tb_allocator_exit(knState->largeConstAllocator);
+    if (kana->largeConstAllocator) {
+        tb_allocator_exit(kana->largeConstAllocator);
     }
-    knState->largeConstAllocator = tb_null;
+    kana->largeConstAllocator = tb_null;
 
 }
 
-KN KN_NewConstMemObj(KonState* kstate, size_t size, kon_uint_t tag)
+KN KN_NewConstMemObj(Kana* kana, size_t size, kon_uint_t tag)
 {
-    KN res = (KN)tb_allocator_malloc0(kstate->constAllocator, size);
+    KN res = (KN)tb_allocator_malloc0(kana->constAllocator, size);
 
     // add to heap ptr store
-    KN_RecordNewKonNode(kstate, res);
+    KN_RecordNewKonNode(kana, res);
 
     if (res.asU64) {
         KN_OBJ_PTR_TYPE(res) = tag;
@@ -78,12 +78,12 @@ KN KN_NewConstMemObj(KonState* kstate, size_t size, kon_uint_t tag)
     return res;
 }
 
-KN KN_NewDynamicMemObj(KonState* kstate, size_t size, kon_uint_t tag)
+KN KN_NewDynamicMemObj(Kana* kana, size_t size, kon_uint_t tag)
 {
-    KN res = (KN)tb_allocator_malloc0(kstate->dynamicAllocator, size);
+    KN res = (KN)tb_allocator_malloc0(kana->dynamicAllocator, size);
 
     // add to heap ptr store
-    KN_RecordNewKonNode(kstate, res);
+    KN_RecordNewKonNode(kana, res);
 
     if (res.asU64) {
         KN_OBJ_PTR_TYPE(res) = tag;
@@ -103,20 +103,20 @@ KN KN_NewDynamicMemObj(KonState* kstate, size_t size, kon_uint_t tag)
     return res;
 }
 
-void KN_Gc(KonState* knState)
+void KN_Gc(Kana* kana)
 {
     KN_DEBUG("\n**trigger gc, before gc, statics:\n");
-    KN_ShowGcStatics(knState);
-    KN_MarkPhase(knState);
-    KN_SweepPhase(knState);
+    KN_ShowGcStatics(kana);
+    KN_MarkPhase(kana);
+    KN_SweepPhase(kana);
 }
 
 
-void KN_MarkPhase(KonState* knState)
+void KN_MarkPhase(Kana* kana)
 {
 
 }
-void KN_Mark(KonState* knState, KxList* taskQueue, char color)
+void KN_Mark(Kana* kana, KxList* taskQueue, char color)
 {
 
 }
@@ -125,16 +125,16 @@ void KN_SweepPhase()
 
 }
 
-void KN_ShowGcStatics(KonState* knState)
+void KN_ShowGcStatics(Kana* kana)
 {
-    // int barrierObjLength = KxList_Length(knState->writeBarrierGen);
+    // int barrierObjLength = KxList_Length(kana->writeBarrierGen);
 
-    // long long totalObjCnt = KN_CurrentObjCount(knState);
-    // KN_DEBUG("HeapPtrSegs count : %d, totalObjCnt %lld, barrierObjLength %d\n", KxList_Length(knState->heapPtrSegs), totalObjCnt, barrierObjLength);
+    // long long totalObjCnt = KN_CurrentObjCount(kana);
+    // KN_DEBUG("HeapPtrSegs count : %d, totalObjCnt %lld, barrierObjLength %d\n", KxList_Length(kana->heapPtrSegs), totalObjCnt, barrierObjLength);
 }
 
 
-void KN_RecordNewKonNode(KonState* knState, KN newVal)
+void KN_RecordNewKonNode(Kana* kana, KN newVal)
 {
 // #if KN_DISABLE_GC
 //     return;
@@ -142,7 +142,7 @@ void KN_RecordNewKonNode(KonState* knState, KN newVal)
 //     // add the pointers created between two continuation switch
 //     // to a temp list
 //     KN_FIELD(newVal, Base, gcMarkColor) = KN_GC_MARK_GRAY;
-//     KxList_Push(knState->writeBarrierGen, newVal.asU64);
+//     KxList_Push(kana->writeBarrierGen, newVal.asU64);
 }
 
 void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
@@ -341,7 +341,7 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
 
 
 // free children and free node
-void KN_DestroyNode(KonState* knState, KonBase* node)
+void KN_DestroyNode(Kana* kana, KonBase* node)
 {
     if (node == NULL || !KN_IS_POINTER(KON_2_KN(node))) {
         return;

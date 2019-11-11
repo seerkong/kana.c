@@ -151,7 +151,7 @@ void KSON_TokenToString(KonTokenizer* tokenizer)
     KN_DEBUG("<%s (:row %d, :col %d) [%s]>", KxStringBuffer_Cstr(tokenKind), tokenizer->rowStart, tokenizer->colStart, KxStringBuffer_Cstr(tokenizer->content));
 }
 
-KonTokenizer* KSON_TokenizerInit(KonState* kstate)
+KonTokenizer* KSON_TokenizerInit(Kana* kana)
 {
     // init
     KonTokenizer* tokenizer = (KonTokenizer*)tb_malloc(sizeof(KonTokenizer));

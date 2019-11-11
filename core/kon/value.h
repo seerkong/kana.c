@@ -6,7 +6,7 @@
 
 ////
 // types start
-typedef struct _KonState KonState;
+typedef struct _Kana Kana;
 
 typedef struct _KonBase KonBase;
 typedef struct _KonFlonum KonFlonum;
@@ -315,7 +315,7 @@ typedef enum {
     KN_COMPOSITE_MACRO_LAMBDA,
 } KonProcedureType;
 
-typedef KN (*KonNativeFuncRef)(KonState* kstate, ...);
+typedef KN (*KonNativeFuncRef)(Kana* kana, ...);
 
 
 
@@ -361,16 +361,14 @@ typedef enum {
     KN_CONT_SEALED_CELL,    // $.[+ (1 2)]
 } KonContinuationType;
 
-
-/// KN_OP - a compressed three-address op (as 32bit int bitfield)
 typedef struct {
   int code:8;
   int a:8;
   int b:8;
   int c:8;
-} KN_OP;
+} KnOp;
 
-typedef KN_OP (*KonContFuncRef)(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
+typedef KnOp (*KonContFuncRef)(Kana* kana, KonContinuation* curCont);
 
 struct _KonContinuation {
     KonBase base;
@@ -384,10 +382,6 @@ struct _KonContinuation {
     KonEnv* env;
     KxList* pendingJobs;
     KxList* finishedJobs;
-    // KN memo1;
-    // KN memo2;
-    // KN memo3;
-    // KN memo4;
     KN memo[4];
 };
 
@@ -473,7 +467,7 @@ union _KonValue {
 
 struct _GcState;
 
-struct _KonState {
+struct _Kana {
     // KonBase base;
     KonEnv* rootEnv;
 
@@ -492,6 +486,9 @@ struct _KonState {
 
     // gc root source end
     ////
+
+    KN* knRegs;
+
     struct _GcState* gcState;
 
     // a list of KxVector. store heap pointers
@@ -516,11 +513,11 @@ struct _KonState {
 ////
 
 
-KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
+KN_API unsigned int KN_NodeDispacherId(Kana* kana, KN obj);
 
-#define KN_NEW_CONST_OBJ(kstate,t,tag)  ((t *)(KN_NewConstMemObj(kstate, sizeof(t), tag).asKon))
-#define KN_NEW_DYNAMIC_OBJ(kstate,t,tag)  ((t *)(KN_NewDynamicMemObj(kstate, sizeof(t), tag).asKon))
-#define KN_FREE(kstate, ptr) KN_GC_FREE(ptr)
+#define KN_NEW_CONST_OBJ(kana,t,tag)  ((t *)(KN_NewConstMemObj(kana, sizeof(t), tag).asKon))
+#define KN_NEW_DYNAMIC_OBJ(kana,t,tag)  ((t *)(KN_NewDynamicMemObj(kana, sizeof(t), tag).asKon))
+#define KN_FREE(kana, ptr) KN_GC_FREE(ptr)
 
 
 #define KON_2_KN(v)  ((KN)(KonValue*)v)
@@ -707,7 +704,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 
 // list
-#define KN_CONS(kstate, a, b) KN_Cons(kstate, a, b)
+#define KN_CONS(kana, a, b) KN_Cons(kana, a, b)
 #define KN_CAR(x)         (KN_FIELD(x, Pair, body))
 #define KN_CDR(x)         (KN_FIELD(x, Pair, next))
 
@@ -726,7 +723,7 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 #define KN_CADDDR(x)    (KN_CADR(KN_CDDR(x))) /* just these two */
 #define KN_CDDDDR(x)    (KN_CDDR(KN_CDDR(x)))
 
-#define KN_LIST1(kstate,a)        KN_CONS((kstate), (a), KN_NIL)
+#define KN_LIST1(kana,a)        KN_CONS((kana), (a), KN_NIL)
 
 // cell core, similar to car
 #define KN_DCR(x)         (KN_FIELD(x, Cell, core))
@@ -759,86 +756,86 @@ KN_API unsigned int KN_NodeDispacherId(KonState* kstate, KN obj);
 
 // data structure apis start
 
-KN_API KN KN_Stringify(KonState* kstate, KN source);
-KN KN_ToFormatString(KonState* kstate, KN source, bool newLine, int depth, char* padding);
-void KN_PrintNodeToStdio(KonState* kstate, KN source);
+KN_API KN KN_Stringify(Kana* kana, KN source);
+KN KN_ToFormatString(Kana* kana, KN source, bool newLine, int depth, char* padding);
+void KN_PrintNodeToStdio(Kana* kana, KN source);
 
 // number
-KN_API KN KN_FixnumStringify(KonState* kstate, KN source);
+KN_API KN KN_FixnumStringify(Kana* kana, KN source);
 
-KN_API KN KN_MakeFlonum(KonState* kstate, double f);
-KN_API KN KN_FlonumStringify(KonState* kstate, KN source);
+KN_API KN KN_MakeFlonum(Kana* kana, double f);
+KN_API KN KN_FlonumStringify(Kana* kana, KN source);
 
 // char
-KN_API KN KN_CharStringify(KonState* kstate, KN source);
+KN_API KN KN_CharStringify(Kana* kana, KN source);
 
 // string
-KN_API KN KN_MakeString(KonState* kstate, const char* str);
-KN_API KN KN_MakeEmptyString(KonState* kstate);
+KN_API KN KN_MakeString(Kana* kana, const char* str);
+KN_API KN KN_MakeEmptyString(Kana* kana);
 KN_API const char* KN_StringToCstr(KN str);
-KN_API KN KN_StringStringify(KonState* kstate, KN source);
+KN_API KN KN_StringStringify(Kana* kana, KN source);
 
-KN_API KN KN_VectorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN_API KN KN_VectorStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 
 // symbol
-KN_API KN KN_SymbolStringify(KonState* kstate, KN source);
+KN_API KN KN_SymbolStringify(Kana* kana, KN source);
 KN_API const char* KN_SymbolToCstr(KN sym);
 
 // list
-// KN_API KN KN_MakePairList(KonState* kstate, ...);
-KN_API KN KN_Cons(KonState* kstate, KN head, KN tail);
-KN_API KN KN_PairList2(KonState* kstate, KN a, KN b);
-KN_API KN KN_PairList3(KonState* kstate, KN a, KN b, KN c);
+// KN_API KN KN_MakePairList(Kana* kana, ...);
+KN_API KN KN_Cons(Kana* kana, KN head, KN tail);
+KN_API KN KN_PairList2(Kana* kana, KN a, KN b);
+KN_API KN KN_PairList3(Kana* kana, KN a, KN b, KN c);
 
 KN_API bool KN_IsPairList(KN source);
 KN_API bool KN_IsBlock(KN source);
 
-KN KN_PairListStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
-KN KN_PairListRevert(KonState* kstate, KN source);
-KN KN_PairListLength(KonState* kstate, KN source);
+KN KN_PairListStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
+KN KN_PairListRevert(Kana* kana, KN source);
+KN KN_PairListLength(Kana* kana, KN source);
 
 // table
-KN KN_TableStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_TableStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 
 // cell
-KN KN_CellStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_CellStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 // eg: {sh ls -al} => [sh ls -al]
-KN KN_CellCoresToList(KonState* kstate, KN source);
+KN KN_CellCoresToList(Kana* kana, KN source);
 
 // attribute accessor
-KN KN_AccessorStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_AccessorStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 
-KN KN_SyntaxMarkerStringify(KonState* kstate, KN source);
+KN KN_SyntaxMarkerStringify(Kana* kana, KN source);
 
 // @
-KN KN_QuoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_QuoteStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 // $
-KN KN_QuasiquoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_QuasiquoteStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 // eg $[].
-KN KN_ExpandStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_ExpandStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 // eg $[]e.
-KN KN_UnquoteStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_UnquoteStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 
-KN KN_PrefixStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
-KN KN_SuffixStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_PrefixStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
+KN KN_SuffixStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 // ^xx.""
-KN KN_TxtMarcroStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_TxtMarcroStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 // #[] #hashmap.(:a xx)
-KN KN_ObjBuilderStringify(KonState* kstate, KN source, bool newLine, int depth, char* padding);
+KN KN_ObjBuilderStringify(Kana* kana, KN source, bool newLine, int depth, char* padding);
 
 
-KN MakeNativeProcedure(KonState* kstate, KonProcedureType type, KonNativeFuncRef funcRef, int paramNum, int hasVAList, int hasVAMap);
-KonProcedure* MakeDispatchProc(KonState* kstate, KN procAst, KonEnv* env);
-KonMsgDispatcher* MakeMsgDispatcher(KonState* kstate);
-int KN_SetMsgDispatcher(KonState* kstate, unsigned int dispatcherId, KonMsgDispatcher* dispatcher);
-unsigned int KN_SetNextMsgDispatcher(KonState* kstate, KonMsgDispatcher* dispatcher);
-KonMsgDispatcher* KN_GetMsgDispatcher(KonState* kstate, unsigned int dispatcherId);
+KN MakeNativeProcedure(Kana* kana, KonProcedureType type, KonNativeFuncRef funcRef, int paramNum, int hasVAList, int hasVAMap);
+KonProcedure* MakeDispatchProc(Kana* kana, KN procAst, KonEnv* env);
+KonMsgDispatcher* MakeMsgDispatcher(Kana* kana);
+int KN_SetMsgDispatcher(Kana* kana, unsigned int dispatcherId, KonMsgDispatcher* dispatcher);
+unsigned int KN_SetNextMsgDispatcher(Kana* kana, KonMsgDispatcher* dispatcher);
+KonMsgDispatcher* KN_GetMsgDispatcher(Kana* kana, unsigned int dispatcherId);
 
-KonAccessor* KN_InitAccessorWithMod(KonState* kstate, char* mod);
-KN KN_MakePropertyAccessor(KonState* kstate, KN value, char* mod, KonProcedure* setter);
-KN KN_MakeDirAccessor(KonState* kstate, char* mod, KonProcedure* setter);
-bool KN_DirAccessorPutKeyProperty(KonState* kstate, KN dir, char* key, KN property);
-bool KN_DirAccessorPutKeyValue(KonState* kstate, KN dir, char* key, KN value, char* mod, KonProcedure* setter);
+KonAccessor* KN_InitAccessorWithMod(Kana* kana, char* mod);
+KN KN_MakePropertyAccessor(Kana* kana, KN value, char* mod, KonProcedure* setter);
+KN KN_MakeDirAccessor(Kana* kana, char* mod, KonProcedure* setter);
+bool KN_DirAccessorPutKeyProperty(Kana* kana, KN dir, char* key, KN property);
+bool KN_DirAccessorPutKeyValue(Kana* kana, KN dir, char* key, KN value, char* mod, KonProcedure* setter);
 
 // data structure apis end
 
@@ -846,11 +843,11 @@ bool KN_DirAccessorPutKeyValue(KonState* kstate, KN dir, char* key, KN value, ch
 KN_API KxStringBuffer* KN_ReadFileContent(const char* filePathOrigin);
 KN_API const char* KN_HumanFormatTime();
 
-KN KN_VectorToKonPairList(KonState* kstate, KxVector* vector);
+KN KN_VectorToKonPairList(Kana* kana, KxVector* vector);
 
 // common utils end
 
-KonContinuation* AllocContinuationWithType(KonState* kstate, KonContinuationType type, KonEnv* env, KonContinuation* nextCont);
+KonContinuation* AllocContinuationWithType(Kana* kana, KonContinuationType type, KonEnv* env, KonContinuation* nextCont);
 
 
 #endif

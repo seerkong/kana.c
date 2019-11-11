@@ -7,7 +7,7 @@
 #include "../greatest.h"
 #include "core/kana.h"
 
-KonState* kstate;
+Kana* kana;
 SUITE(suite);
 
 TEST NewDelete(void) {

@@ -1,7 +1,7 @@
 #include "primary.h"
 
 // not(kon_false) => true, not(other) => false
-KN KN_PrimaryNot(KonState* kstate, KN item)
+KN KN_PrimaryNot(Kana* kana, KN item)
 {
     if (KN_IS_FALSE(item)) {
         return KN_TRUE;
@@ -12,7 +12,7 @@ KN KN_PrimaryNot(KonState* kstate, KN item)
 }
 
 // pointer check
-KN KN_PrimaryEqual(KonState* kstate, KN left, KN right)
+KN KN_PrimaryEqual(Kana* kana, KN left, KN right)
 {
     if (left.asU64 == right.asU64) {
         return KN_TRUE;
@@ -23,7 +23,7 @@ KN KN_PrimaryEqual(KonState* kstate, KN left, KN right)
 }
 
 // basic types, boolean, number, char symbol, string value check
-KN KN_PrimaryEqv(KonState* kstate, KN left, KN right)
+KN KN_PrimaryEqv(Kana* kana, KN left, KN right)
 {
     if (left.asU64 == KNBOX_UNDEF || left.asU64 == KNBOX_UKN) {
         return (left.asU64 == right.asU64) ? KN_TRUE: KN_FALSE;
@@ -60,7 +60,7 @@ KN KN_PrimaryEqv(KonState* kstate, KN left, KN right)
     }
 }
 
-KN KN_PrimaryEq(KonState* kstate, KN left, KN right)
+KN KN_PrimaryEq(Kana* kana, KN left, KN right)
 {
     if (left.asU64 == KNBOX_UNDEF || left.asU64 == KNBOX_UKN
         || KN_IS_NIL(left)
@@ -71,16 +71,16 @@ KN KN_PrimaryEq(KonState* kstate, KN left, KN right)
         || KN_IS_SYMBOL(left)
         || KN_IS_STRING(left)
     ) {
-        return KN_PrimaryEqv(kstate, left, right);
+        return KN_PrimaryEqv(kana, left, right);
     }
     else {
-        return KN_PrimaryEqual(kstate, left, right);
+        return KN_PrimaryEqual(kana, left, right);
     }
 }
 
-KN KN_PrimaryNeq(KonState* kstate, KN left, KN right)
+KN KN_PrimaryNeq(Kana* kana, KN left, KN right)
 {
-    KN result = KN_PrimaryEq(kstate, left, right);
+    KN result = KN_PrimaryEq(kana, left, right);
     if (result.asU64 == KNBOX_FALSE) {
         return KN_TRUE;
     }
@@ -89,13 +89,13 @@ KN KN_PrimaryNeq(KonState* kstate, KN left, KN right)
     }
 }
 
-KN KN_PrimaryNewline(KonState* kstate)
+KN KN_PrimaryNewline(Kana* kana)
 {
     printf("\n");
     return KN_MAKE_FIXNUM(1);
 }
 
-KN KN_PrimaryDisplay(KonState* kstate, KN args)
+KN KN_PrimaryDisplay(Kana* kana, KN args)
 {
     KN iter = args;
     KxStringBuffer* merged = KxStringBuffer_New();
@@ -104,7 +104,7 @@ KN KN_PrimaryDisplay(KonState* kstate, KN args)
     do {
         KN item = KN_CAR(iter);
 
-        KN formated = KN_ToFormatString(kstate, item, false, 0, "  ");
+        KN formated = KN_ToFormatString(kana, item, false, 0, "  ");
         KxStringBuffer_AppendStringBuffer(merged, KN_UNBOX_STRING(formated));
 
         iter = KN_CDR(iter);
@@ -114,15 +114,15 @@ KN KN_PrimaryDisplay(KonState* kstate, KN args)
     return KN_MAKE_FIXNUM(size);
 }
 
-KN KN_PrimaryDisplayln(KonState* kstate, KN args)
+KN KN_PrimaryDisplayln(Kana* kana, KN args)
 {
-    KN size = KN_PrimaryDisplay(kstate, args);
-    KN_PrimaryNewline(kstate);
+    KN size = KN_PrimaryDisplay(kana, args);
+    KN_PrimaryNewline(kana);
     return KN_MAKE_FIXNUM(KN_UNBOX_FIXNUM(size) + 1);
 }
 
 // TODO select output
-KN KN_PrimaryWrite(KonState* kstate, KN args)
+KN KN_PrimaryWrite(Kana* kana, KN args)
 {
     KN iter = args;
     KxStringBuffer* merged = KxStringBuffer_New();
@@ -135,7 +135,7 @@ KN KN_PrimaryWrite(KonState* kstate, KN args)
             KxStringBuffer_AppendStringBuffer(merged, KN_UNBOX_STRING(item));
         }
         else {
-            KN formated = KN_ToFormatString(kstate, item, false, 0, "  ");
+            KN formated = KN_ToFormatString(kana, item, false, 0, "  ");
             KxStringBuffer_AppendStringBuffer(merged, KN_UNBOX_STRING(formated));
         }
         iter = KN_CDR(iter);
@@ -146,113 +146,113 @@ KN KN_PrimaryWrite(KonState* kstate, KN args)
 }
 
 // TODO select output
-KN KN_PrimaryWriteln(KonState* kstate, KN args)
+KN KN_PrimaryWriteln(Kana* kana, KN args)
 {
-    KN size = KN_PrimaryWrite(kstate, args);
-    KN_PrimaryNewline(kstate);
+    KN size = KN_PrimaryWrite(kana, args);
+    KN_PrimaryNewline(kana);
     return KN_MAKE_FIXNUM(KN_UNBOX_FIXNUM(size) + 1);
 }
 
-KN KN_PrimaryStringify(KonState* kstate, KN item)
+KN KN_PrimaryStringify(Kana* kana, KN item)
 {
-    KN formated = KN_ToFormatString(kstate, item, false, 0, "  ");
+    KN formated = KN_ToFormatString(kana, item, false, 0, "  ");
 
     return formated;
 }
 
 // TODO
-KN KN_PrimaryParse(KonState* kstate, KN item)
+KN KN_PrimaryParse(Kana* kana, KN item)
 {
     // return item;
     return KN_UNDEF;
 }
 
-KN KN_PrimaryIsTrue(KonState* kstate, KN item)
+KN KN_PrimaryIsTrue(Kana* kana, KN item)
 {
     return (KN_IS_TRUE(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsFalse(KonState* kstate, KN item)
+KN KN_PrimaryIsFalse(Kana* kana, KN item)
 {
     return (KN_IS_FALSE(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsNil(KonState* kstate, KN item)
+KN KN_PrimaryIsNil(Kana* kana, KN item)
 {
     return (KN_IS_NIL(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsNull(KonState* kstate, KN item)
+KN KN_PrimaryIsNull(Kana* kana, KN item)
 {
     return (KN_IS_UNDEF(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsUkn(KonState* kstate, KN item)
+KN KN_PrimaryIsUkn(Kana* kana, KN item)
 {
     return (KN_IS_UKN(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsPointer(KonState* kstate, KN item)
+KN KN_PrimaryIsPointer(Kana* kana, KN item)
 {
     return (KN_IS_POINTER(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsFixnum(KonState* kstate, KN item)
+KN KN_PrimaryIsFixnum(Kana* kana, KN item)
 {
     return (KN_IS_FIXNUM(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsFlonum(KonState* kstate, KN item)
+KN KN_PrimaryIsFlonum(Kana* kana, KN item)
 {
     return (KN_IS_FLONUM(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsChar(KonState* kstate, KN item)
+KN KN_PrimaryIsChar(Kana* kana, KN item)
 {
     return (KN_IS_CHAR(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsBoolean(KonState* kstate, KN item)
+KN KN_PrimaryIsBoolean(Kana* kana, KN item)
 {
     return (KN_IS_BOOLEAN(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsBytes(KonState* kstate, KN item)
+KN KN_PrimaryIsBytes(Kana* kana, KN item)
 {
     return (KN_IS_BYTES(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsString(KonState* kstate, KN item)
+KN KN_PrimaryIsString(Kana* kana, KN item)
 {
     return (KN_IS_STRING(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsSymbol(KonState* kstate, KN item)
+KN KN_PrimaryIsSymbol(Kana* kana, KN item)
 {
     return (KN_IS_SYMBOL(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsVariable(KonState* kstate, KN item)
+KN KN_PrimaryIsVariable(Kana* kana, KN item)
 {
     return (KN_IS_VARIABLE(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsIdentifier(KonState* kstate, KN item)
+KN KN_PrimaryIsIdentifier(Kana* kana, KN item)
 {
     return (KN_IS_IDENTIFIER(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsWord(KonState* kstate, KN item)
+KN KN_PrimaryIsWord(Kana* kana, KN item)
 {
     return (KN_IS_WORD(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsAttrSlot(KonState* kstate, KN item)
+KN KN_PrimaryIsAttrSlot(Kana* kana, KN item)
 {
     return (KN_IS_ACCESSOR(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsPair(KonState* kstate, KN item)
+KN KN_PrimaryIsPair(Kana* kana, KN item)
 {
     // auto unbox QUOTE_LIST
     if (KN_IS_QUOTE_LIST(item)) {
@@ -261,7 +261,7 @@ KN KN_PrimaryIsPair(KonState* kstate, KN item)
     return (KN_IS_PAIR(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsPairList(KonState* kstate, KN item)
+KN KN_PrimaryIsPairList(Kana* kana, KN item)
 {
     // auto unbox QUOTE_LIST
     if (KN_IS_QUOTE_LIST(item)) {
@@ -270,47 +270,47 @@ KN KN_PrimaryIsPairList(KonState* kstate, KN item)
     return (KN_IsPairList(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsVector(KonState* kstate, KN item)
+KN KN_PrimaryIsVector(Kana* kana, KN item)
 {
     return (KN_IS_VECTOR(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsTable(KonState* kstate, KN item)
+KN KN_PrimaryIsTable(Kana* kana, KN item)
 {
     return (KN_IS_TABLE(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsCell(KonState* kstate, KN item)
+KN KN_PrimaryIsCell(Kana* kana, KN item)
 {
     return (KN_IS_CELL(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsEnv(KonState* kstate, KN item)
+KN KN_PrimaryIsEnv(Kana* kana, KN item)
 {
     return (KN_IS_ENV(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsProcedure(KonState* kstate, KN item)
+KN KN_PrimaryIsProcedure(Kana* kana, KN item)
 {
     return (KN_IS_PROCEDURE(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsContinuation(KonState* kstate, KN item)
+KN KN_PrimaryIsContinuation(Kana* kana, KN item)
 {
     return (KN_IS_CONTINUATION(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsExtPointer(KonState* kstate, KN item)
+KN KN_PrimaryIsExtPointer(Kana* kana, KN item)
 {
     return (KN_IS_EXT_POINTER(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryIsException(KonState* kstate, KN item)
+KN KN_PrimaryIsException(Kana* kana, KN item)
 {
     return (KN_IS_EXCEPTION(item)) ? KN_TRUE : KN_FALSE;
 }
 
-KN KN_PrimaryVarFromSym(KonState* kstate, KN item)
+KN KN_PrimaryVarFromSym(Kana* kana, KN item)
 {
     char* symCstr = NULL;
     if (KN_IS_SYMBOL(item)) {
@@ -322,13 +322,13 @@ KN KN_PrimaryVarFromSym(KonState* kstate, KN item)
     else {
         return KN_UKN;
     }
-    KonSymbol* value = KN_NEW_CONST_OBJ(kstate, KonSymbol, KN_T_SYMBOL);
+    KonSymbol* value = KN_NEW_CONST_OBJ(kana, KonSymbol, KN_T_SYMBOL);
     value->type = KN_SYM_VARIABLE;
     value->data = utf8dup(symCstr);
     return KON_2_KN(value);
 }
 
-KN KN_PrimaryToIdentifier(KonState* kstate, KN item)
+KN KN_PrimaryToIdentifier(Kana* kana, KN item)
 {
     char* symCstr = NULL;
     if (KN_IS_SYMBOL(item)) {
@@ -340,13 +340,13 @@ KN KN_PrimaryToIdentifier(KonState* kstate, KN item)
     else {
         return KN_UKN;
     }
-    KonSymbol* value = KN_NEW_CONST_OBJ(kstate, KonSymbol, KN_T_SYMBOL);
+    KonSymbol* value = KN_NEW_CONST_OBJ(kana, KonSymbol, KN_T_SYMBOL);
     value->type = KN_SYM_IDENTIFIER;
     value->data = utf8dup(symCstr);
     return KON_2_KN(value);
 }
 
-KN KN_PrimaryToSymString(KonState* kstate, KN item)
+KN KN_PrimaryToSymString(Kana* kana, KN item)
 {
     char* symCstr = NULL;
     if (KN_IS_SYMBOL(item)) {
@@ -358,13 +358,13 @@ KN KN_PrimaryToSymString(KonState* kstate, KN item)
     else {
         return KN_UKN;
     }
-    KonSymbol* value = KN_NEW_CONST_OBJ(kstate, KonSymbol, KN_T_SYMBOL);
+    KonSymbol* value = KN_NEW_CONST_OBJ(kana, KonSymbol, KN_T_SYMBOL);
     value->type = KN_SYM_STRING;
     value->data = utf8dup(symCstr);
     return KON_2_KN(value);
 }
 
-KN KN_PrimaryUnboxQuote(KonState* kstate, KN obj)
+KN KN_PrimaryUnboxQuote(Kana* kana, KN obj)
 {
     if (KN_IS_QUOTE(obj)) {
         return KN_FIELD(obj, Quote, inner);
@@ -384,12 +384,12 @@ KN KN_PrimaryUnboxQuote(KonState* kstate, KN obj)
     return obj;
 }
 
-KN KN_PrimaryGetDispatcherId(KonState* kstate, KN obj)
+KN KN_PrimaryGetDispatcherId(Kana* kana, KN obj)
 {
-    return KN_MAKE_FIXNUM(KN_NodeDispacherId(kstate, obj));
+    return KN_MAKE_FIXNUM(KN_NodeDispacherId(kana, obj));
 }
 
-KN KN_PrimarySetDispatcherId(KonState* kstate, KN obj, KN boxedId)
+KN KN_PrimarySetDispatcherId(Kana* kana, KN obj, KN boxedId)
 {
     unsigned int dispatcherId = KN_UNBOX_FIXNUM(boxedId);
     if (KN_IS_POINTER(obj)) {
@@ -400,12 +400,12 @@ KN KN_PrimarySetDispatcherId(KonState* kstate, KN obj, KN boxedId)
 
 
 
-KN KonList_CONS(KonState* kstate, KN self, KN other)
+KN KonList_CONS(Kana* kana, KN self, KN other)
 {
-    return KN_CONS(kstate, self, other);
+    return KN_CONS(kana, self, other);
 }
 
-KN KonList_CAR(KonState* kstate, KN self)
+KN KonList_CAR(Kana* kana, KN self)
 {
     // auto unbox QUOTE_LIST
     if (KN_IS_QUOTE_LIST(self)) {
@@ -414,7 +414,7 @@ KN KonList_CAR(KonState* kstate, KN self)
     return KN_CAR(self);
 }
 
-KN KonList_CDR(KonState* kstate, KN self)
+KN KonList_CDR(Kana* kana, KN self)
 {
     // auto unbox QUOTE_LIST
     if (KN_IS_QUOTE_LIST(self)) {
@@ -423,186 +423,186 @@ KN KonList_CDR(KonState* kstate, KN self)
     return KN_CDR(self);
 }
 
-KN KonList_CAAR(KonState* kstate, KN self)
+KN KonList_CAAR(Kana* kana, KN self)
 {
     return KN_CAAR(self);
 }
 
-KN KonList_CADR(KonState* kstate, KN self)
+KN KonList_CADR(Kana* kana, KN self)
 {
     return KN_CADR(self);
 }
 
-KN KonList_CDAR(KonState* kstate, KN self)
+KN KonList_CDAR(Kana* kana, KN self)
 {
     return KN_CDAR(self);
 }
 
-KN KonList_CDDR(KonState* kstate, KN self)
+KN KonList_CDDR(Kana* kana, KN self)
 {
     return KN_CDDR(self);
 }
 
-KN KonList_CAAAR(KonState* kstate, KN self)
+KN KonList_CAAAR(Kana* kana, KN self)
 {
     return KN_CAAAR(self);
 }
 
-KN KonList_CAADR(KonState* kstate, KN self)
+KN KonList_CAADR(Kana* kana, KN self)
 {
     return KN_CAADR(self);
 }
 
-KN KonList_CADAR(KonState* kstate, KN self)
+KN KonList_CADAR(Kana* kana, KN self)
 {
     return KN_CADAR(self);
 }
 
-KN KonList_CADDR(KonState* kstate, KN self)
+KN KonList_CADDR(Kana* kana, KN self)
 {
     return KN_CADDR(self);
 }
 
-KN KonList_CDAAR(KonState* kstate, KN self)
+KN KonList_CDAAR(Kana* kana, KN self)
 {
     return KN_CDAAR(self);
 }
 
-KN KonList_CDADR(KonState* kstate, KN self)
+KN KonList_CDADR(Kana* kana, KN self)
 {
     return KN_CDADR(self);
 }
 
-KN KonList_CDDAR(KonState* kstate, KN self)
+KN KonList_CDDAR(Kana* kana, KN self)
 {
     return KN_CDDAR(self);
 }
 
-KN KonList_CDDDR(KonState* kstate, KN self)
+KN KonList_CDDDR(Kana* kana, KN self)
 {
     return KN_CDDDR(self);
 }
 
-KN KonList_CADDDR(KonState* kstate, KN self)
+KN KonList_CADDDR(Kana* kana, KN self)
 {
     return KN_CADDDR(self);
 }
 
-KN KonList_CDDDDR(KonState* kstate, KN self)
+KN KonList_CDDDDR(Kana* kana, KN self)
 {
     return KN_CDDDDR(self);
 }
 
-KN KonCell_DCR(KonState* kstate, KN self)
+KN KonCell_DCR(Kana* kana, KN self)
 {
     return KN_DCR(self);
 }
 
-KN KonCell_DNR(KonState* kstate, KN self)
+KN KonCell_DNR(Kana* kana, KN self)
 {
     return KN_DNR(self);
 }
 
-KN KonCell_DPR(KonState* kstate, KN self)
+KN KonCell_DPR(Kana* kana, KN self)
 {
     return KN_DPR(self);
 }
 
-KN KonCell_DLR(KonState* kstate, KN self)
+KN KonCell_DLR(Kana* kana, KN self)
 {
     return KN_DLR(self);
 }
 
-KN KonCell_DTR(KonState* kstate, KN self)
+KN KonCell_DTR(Kana* kana, KN self)
 {
     return KN_DTR(self);
 }
 
-KN KonCell_DCNR(KonState* kstate, KN self)
+KN KonCell_DCNR(Kana* kana, KN self)
 {
     return KN_DCNR(self);
 }
 
-KN KonCell_DTNR(KonState* kstate, KN self)
+KN KonCell_DTNR(Kana* kana, KN self)
 {
     return KN_DTNR(self);
 }
 
-KN KonCell_DLNR(KonState* kstate, KN self)
+KN KonCell_DLNR(Kana* kana, KN self)
 {
     return KN_DLNR(self);
 }
 
-KN KonCell_DCCR(KonState* kstate, KN self)
+KN KonCell_DCCR(Kana* kana, KN self)
 {
     return KN_DCCR(self);
 }
 
-KN KonCell_DTCR(KonState* kstate, KN self)
+KN KonCell_DTCR(Kana* kana, KN self)
 {
     return KN_DTCR(self);
 }
 
-KN KonCell_DLCR(KonState* kstate, KN self)
+KN KonCell_DLCR(Kana* kana, KN self)
 {
     return KN_DLCR(self);
 }
 
-KN KonCell_DCNNR(KonState* kstate, KN self)
+KN KonCell_DCNNR(Kana* kana, KN self)
 {
     return KN_DCNNR(self);
 }
 
-KN KonCell_DTNNR(KonState* kstate, KN self)
+KN KonCell_DTNNR(Kana* kana, KN self)
 {
     return KN_DTNNR(self);
 }
 
-KN KonCell_DLNNR(KonState* kstate, KN self)
+KN KonCell_DLNNR(Kana* kana, KN self)
 {
     return KN_DLNNR(self);
 }
 
-KN KonCell_DCCNR(KonState* kstate, KN self)
+KN KonCell_DCCNR(Kana* kana, KN self)
 {
     return KN_DCCNR(self);
 }
 
-KN KonCell_DTCNR(KonState* kstate, KN self)
+KN KonCell_DTCNR(Kana* kana, KN self)
 {
     return KN_DTCNR(self);
 }
 
-KN KonCell_DLCNR(KonState* kstate, KN self)
+KN KonCell_DLCNR(Kana* kana, KN self)
 {
     return KN_DLCNR(self);
 }
 
 
 // init internal types dispatcher id
-KN KN_PrimaryExportDispacherId(KonState* kstate, KonEnv* env)
+KN KN_PrimaryExportDispacherId(Kana* kana, KonEnv* env)
 {
-    KN_EnvDefine(kstate, env, "BooleanDispacher", KN_MAKE_FIXNUM(KN_T_BOOLEAN));
-    KN_EnvDefine(kstate, env, "UnknownDispacher", KN_MAKE_FIXNUM(KN_T_UKN));
-    KN_EnvDefine(kstate, env, "UndefinedDispacher", KN_MAKE_FIXNUM(KN_T_UNDEF));
-    KN_EnvDefine(kstate, env, "SymbolDispacher", KN_MAKE_FIXNUM(KN_T_SYMBOL));
-    KN_EnvDefine(kstate, env, "CharDispacher", KN_MAKE_FIXNUM(KN_T_CHAR));
-    KN_EnvDefine(kstate, env, "NumberDispacher", KN_MAKE_FIXNUM(KN_T_NUMBER));
-    KN_EnvDefine(kstate, env, "StringDispacher", KN_MAKE_FIXNUM(KN_T_STRING));
-    KN_EnvDefine(kstate, env, "ListDispacher", KN_MAKE_FIXNUM(KN_T_PAIRLIST));
-    KN_EnvDefine(kstate, env, "VectorDispacher", KN_MAKE_FIXNUM(KN_T_VECTOR));
-    KN_EnvDefine(kstate, env, "TableDispacher", KN_MAKE_FIXNUM(KN_T_TABLE));
-    KN_EnvDefine(kstate, env, "CellDispacher", KN_MAKE_FIXNUM(KN_T_CELL));
-    KN_EnvDefine(kstate, env, "AttrSlotDispacher", KN_MAKE_FIXNUM(KN_T_ACCESSOR));
+    KN_EnvDefine(kana, env, "BooleanDispacher", KN_MAKE_FIXNUM(KN_T_BOOLEAN));
+    KN_EnvDefine(kana, env, "UnknownDispacher", KN_MAKE_FIXNUM(KN_T_UKN));
+    KN_EnvDefine(kana, env, "UndefinedDispacher", KN_MAKE_FIXNUM(KN_T_UNDEF));
+    KN_EnvDefine(kana, env, "SymbolDispacher", KN_MAKE_FIXNUM(KN_T_SYMBOL));
+    KN_EnvDefine(kana, env, "CharDispacher", KN_MAKE_FIXNUM(KN_T_CHAR));
+    KN_EnvDefine(kana, env, "NumberDispacher", KN_MAKE_FIXNUM(KN_T_NUMBER));
+    KN_EnvDefine(kana, env, "StringDispacher", KN_MAKE_FIXNUM(KN_T_STRING));
+    KN_EnvDefine(kana, env, "ListDispacher", KN_MAKE_FIXNUM(KN_T_PAIRLIST));
+    KN_EnvDefine(kana, env, "VectorDispacher", KN_MAKE_FIXNUM(KN_T_VECTOR));
+    KN_EnvDefine(kana, env, "TableDispacher", KN_MAKE_FIXNUM(KN_T_TABLE));
+    KN_EnvDefine(kana, env, "CellDispacher", KN_MAKE_FIXNUM(KN_T_CELL));
+    KN_EnvDefine(kana, env, "AttrSlotDispacher", KN_MAKE_FIXNUM(KN_T_ACCESSOR));
 
 }
 
 
-KN KN_PrimaryOpExport(KonState* kstate, KonEnv* env)
+KN KN_PrimaryOpExport(Kana* kana, KonEnv* env)
 {
-    KN_EnvDefine(kstate, env, "get-env", env);
+    KN_EnvDefine(kana, env, "get-env", env);
 
-    KN_PrimaryExportDispacherId(kstate, env);
+    KN_PrimaryExportDispacherId(kana, env);
 
     NativeProcedureConf defaultFnArr[] = {
         { KN_NATIVE_FUNC, "not", KN_PrimaryNot, 1, 0, 0, 0 },
@@ -688,9 +688,9 @@ KN KN_PrimaryOpExport(KonState* kstate, KonEnv* env)
 
     int fnCnt = 79;
     for (int i = 0; i < fnCnt; i++) {
-        KN_EnvDefine(kstate, env, defaultFnArr[i].name,
+        KN_EnvDefine(kana, env, defaultFnArr[i].name,
             MakeNativeProcedure(
-                kstate,
+                kana,
                 defaultFnArr[i].type,
                 defaultFnArr[i].funcRef,
                 defaultFnArr[i].paramNum,

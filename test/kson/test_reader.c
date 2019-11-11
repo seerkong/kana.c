@@ -7,13 +7,13 @@
 #include "../greatest.h"
 #include "core/kana.h"
 
-KonState* kstate;
+Kana* kana;
 SUITE(suite);
 
 TEST Reader_Tokens(void) {
     char* filePathOrigin = "~/lang/kana/kana_nunbox/examples/token/instant.kon";
 
-    KonReader* reader = KSON_ReaderInit(kstate);
+    KonReader* reader = KSON_ReaderInit(kana);
     if (!reader) {
         KN_DEBUG("KN_EvalFile init failed");
         exit(1);
@@ -25,7 +25,7 @@ TEST Reader_Tokens(void) {
     if (openRes) {
         KN root = KSON_Parse(reader);
         KN_DEBUG("eval sentences success");
-        KN formated = KN_ToFormatString(kstate, root, true, 0, "  ");
+        KN formated = KN_ToFormatString(kana, root, true, 0, "  ");
         KN_DEBUG("%s", KN_StringToCstr(formated));
     }
     else {
@@ -42,7 +42,7 @@ TEST Reader_Tokens(void) {
 TEST Reader_Cell(void) {
     char* filePathOrigin = "~/lang/kana/kana.c/examples/kon/cell.kon";
 
-    KonReader* reader = KSON_ReaderInit(kstate);
+    KonReader* reader = KSON_ReaderInit(kana);
     if (!reader) {
         KN_DEBUG("KN_EvalFile init failed");
         exit(1);
@@ -54,7 +54,7 @@ TEST Reader_Cell(void) {
     if (openRes) {
         KN root = KSON_Parse(reader);
         KN_DEBUG("eval sentences success");
-        KN formated = KN_ToFormatString(kstate, root, true, 0, "  ");
+        KN formated = KN_ToFormatString(kana, root, true, 0, "  ");
         KN_DEBUG("%s", KN_StringToCstr(formated));
     }
     else {
@@ -71,7 +71,7 @@ TEST Reader_Cell(void) {
 TEST Reader_Map(void) {
     char* filePathOrigin = "~/lang/kana/kana.c/examples/kon/map.kon";
     
-    KonReader* reader = KSON_ReaderInit(kstate);
+    KonReader* reader = KSON_ReaderInit(kana);
     if (!reader) {
         KN_DEBUG("KN_EvalFile init failed");
         exit(1);
@@ -83,7 +83,7 @@ TEST Reader_Map(void) {
     if (openRes) {
         KN root = KSON_Parse(reader);
         KN_DEBUG("eval sentences success");
-        KN formated = KN_ToFormatString(kstate, root, true, 0, "  ");
+        KN formated = KN_ToFormatString(kana, root, true, 0, "  ");
         KN_DEBUG("%s", KN_StringToCstr(formated));
     }
     else {
@@ -112,10 +112,10 @@ int main(int argc, char const* argv[])
     GREATEST_MAIN_BEGIN();
     greatest_set_verbosity(1);
 
-    kstate = KN_Init();
+    kana = KN_Init();
     RUN_SUITE(suite);
 
-    KN_Finish(kstate);
+    KN_Finish(kana);
 
     GREATEST_MAIN_END();
 

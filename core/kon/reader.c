@@ -4,16 +4,16 @@ void ExitTopBuilder(KonReader* reader);
 void AddValueToTopBuilder(KonReader* reader, KN value);
 
 
-KonReader* KSON_ReaderInit(KonState* kstate)
+KonReader* KSON_ReaderInit(Kana* kana)
 {
     // init reader
     KonReader* reader = (KonReader*)tb_malloc(sizeof(KonReader));
     KN_DEBUG("malloc reader %x", reader);
 
-    reader->kstate = kstate;
+    reader->kana = kana;
     
     
-    reader->tokenizer = KSON_TokenizerInit(kstate);
+    reader->tokenizer = KSON_TokenizerInit(kana);
     KN_DEBUG("after KSON_TokenizerInit");
     
     reader->builderStack = BuilderStackInit();
@@ -148,9 +148,9 @@ bool IsSyntaxToken(int event)
 
 
 
-KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
+KN MakeSyntaxMarker(Kana* kana, KonTokenKind tokenKind)
 {
-    KonSyntaxMarker* value = KN_NEW_CONST_OBJ(kstate, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
+    KonSyntaxMarker* value = KN_NEW_CONST_OBJ(kana, KonSyntaxMarker, KN_T_SYNTAX_MARKER);
     switch (tokenKind) {
         case KN_TOKEN_APPLY: {
             value->type = KN_SYNTAX_MARKER_APPLY;
@@ -193,7 +193,7 @@ KN MakeSyntaxMarker(KonState* kstate, KonTokenKind tokenKind)
 
 KN MakeSymbol(KonReader* reader, KonTokenKind event)
 {
-    KonSymbol* value = KN_NEW_CONST_OBJ(reader->kstate, KonSymbol, KN_T_SYMBOL);
+    KonSymbol* value = KN_NEW_CONST_OBJ(reader->kana, KonSymbol, KN_T_SYMBOL);
     if (event == KN_TOKEN_SYM_MARCRO) {
         value->type = KN_SYM_MARCRO;
     }
@@ -264,14 +264,14 @@ KN MakeNumber(KonReader* reader)
             numStrAfterDot++;
         }
         double num = (numBeforeDot + numAfterDot) * (isPositive ? 1 : -1);
-        value = KN_MakeFlonum(reader->kstate, num);
+        value = KN_MakeFlonum(reader->kana, num);
     }
     return value;
 }
 
 KN MakeRawString(KonReader* reader)
 {
-    KN value = KN_MakeString(reader->kstate, KxStringBuffer_Cstr(reader->tokenizer->content));
+    KN value = KN_MakeString(reader->kana, KxStringBuffer_Cstr(reader->tokenizer->content));
     return value;
 }
 
@@ -303,7 +303,7 @@ KN MakeString(KonReader* reader)
         KxStringBuffer_NAppendChar(sb, *index, 1);
         index += 1;
     }
-    KonString* value = KN_NEW_CONST_OBJ(reader->kstate, KonString, KN_T_STRING);
+    KonString* value = KN_NEW_CONST_OBJ(reader->kana, KonString, KN_T_STRING);
     value->string = sb;
 
     return KON_2_KN(value);
@@ -428,7 +428,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
 
             // in cell mode, reset to wait map pair|param|block|nextcore state
             if (mapBuilder->type == KN_BUILDER_CELL) {
-                CellBuilderAddPair(reader->kstate, mapBuilder, pairBuilder);
+                CellBuilderAddPair(reader->kana, mapBuilder, pairBuilder);
                 StateStackPop(reader->stateStack);
 
                 StateStackSetTopValue(
@@ -437,7 +437,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
                 );
             }
             else {
-                MapBuilderAddPair(reader->kstate, mapBuilder, pairBuilder);
+                MapBuilderAddPair(reader->kana, mapBuilder, pairBuilder);
                 StateStackSetTopValue(
                     reader->stateStack,
                     KN_READER_PARSE_MAP_PAIR_KEY
@@ -483,7 +483,7 @@ void AddValueToTopBuilder(KonReader* reader, KN value)
         || builderType == KN_BUILDER_TXT_MARCRO
         || builderType == KN_BUILDER_OBJ_BUILDER
     ) {
-        WrapperSetInner(reader->kstate, topBuilder, value);
+        WrapperSetInner(reader->kana, topBuilder, value);
         ExitTopBuilder(reader);
     }
 }
@@ -501,13 +501,13 @@ void ExitTopBuilder(KonReader* reader)
 
     KN value;
     if (builderType == KN_BUILDER_VECTOR) {
-        value = MakeVectorByBuilder(reader->kstate, topBuilder);
+        value = MakeVectorByBuilder(reader->kana, topBuilder);
     }
     else if (builderType == KN_BUILDER_LIST) {
-        value = MakeListByBuilder(reader->kstate, topBuilder);
+        value = MakeListByBuilder(reader->kana, topBuilder);
     }
     else if (builderType == KN_BUILDER_BLOCK) {
-        value = MakeBlockByBuilder(reader->kstate, topBuilder);
+        value = MakeBlockByBuilder(reader->kana, topBuilder);
 
         // a exceptional case, when in a cell, {abc #[]} set #[] to cell list
         // and {abc #nil;} set #nil; to 2nd cell core
@@ -524,16 +524,16 @@ void ExitTopBuilder(KonReader* reader)
 
     }
     else if (builderType == KN_BUILDER_PARAM) {
-        value = MakeParamByBuilder(reader->kstate, topBuilder);
+        value = MakeParamByBuilder(reader->kana, topBuilder);
     }
     else if (builderType == KN_BUILDER_TABLE) {
-        value = MakeTableByBuilder(reader->kstate, topBuilder);
+        value = MakeTableByBuilder(reader->kana, topBuilder);
     }
     else if (builderType == KN_BUILDER_MAP) {
-        value = MakeMapByBuilder(reader->kstate, topBuilder);
+        value = MakeMapByBuilder(reader->kana, topBuilder);
     }
     else if (builderType == KN_BUILDER_CELL) {
-        value = MakeCellByBuilder(reader->kstate, topBuilder);
+        value = MakeCellByBuilder(reader->kana, topBuilder);
     }
     else if (builderType == KN_BUILDER_QUOTE
         || builderType == KN_BUILDER_QUASIQUOTE
@@ -543,7 +543,7 @@ void ExitTopBuilder(KonReader* reader)
         || builderType == KN_BUILDER_TXT_MARCRO
         || builderType == KN_BUILDER_OBJ_BUILDER
     ) {
-        value = MakeWrapperByBuilder(reader->kstate, topBuilder);
+        value = MakeWrapperByBuilder(reader->kana, topBuilder);
         if (builderType == KN_BUILDER_QUOTE || builderType == KN_BUILDER_QUASIQUOTE) {
             // close word to identifier mode ( abc to abc)
             reader->wordAsIdentifier = false;
@@ -621,7 +621,7 @@ KN KSON_Parse(KonReader* reader)
             else {
                 if (event == KN_TOKEN_QUOTE) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_QUOTE);
-                    builder = CreateWrapperBuilder(KN_BUILDER_QUOTE, reader->tokenizer, reader->kstate);
+                    builder = CreateWrapperBuilder(KN_BUILDER_QUOTE, reader->tokenizer, reader->kana);
 
                     // open word to identifier mode ( abc to $abc)
                     reader->wordAsIdentifier = true;
@@ -629,7 +629,7 @@ KN KSON_Parse(KonReader* reader)
                 }
                 else if (event == KN_TOKEN_QUASI) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_QUASIQUOTE);
-                    builder = CreateWrapperBuilder(KN_BUILDER_QUASIQUOTE, reader->tokenizer, reader->kstate);
+                    builder = CreateWrapperBuilder(KN_BUILDER_QUASIQUOTE, reader->tokenizer, reader->kana);
 
                     // open word to identifier mode ( abc to $abc)
                     reader->wordAsIdentifier = true;
@@ -639,23 +639,23 @@ KN KSON_Parse(KonReader* reader)
                     || event == KN_TOKEN_UNQUOTE_SEQ
                 ) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_UNQUOTE);
-                    builder = CreateWrapperBuilder(KN_BUILDER_UNQUOTE, reader->tokenizer, reader->kstate);
+                    builder = CreateWrapperBuilder(KN_BUILDER_UNQUOTE, reader->tokenizer, reader->kana);
                 }
                 else if (event == KN_TOKEN_PREFIX_WRAPPER) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_PREFIX_WRAPPER);
-                    builder = CreateWrapperBuilder(KN_BUILDER_PREFIX, reader->tokenizer, reader->kstate);
+                    builder = CreateWrapperBuilder(KN_BUILDER_PREFIX, reader->tokenizer, reader->kana);
                 }
                 else if (event == KN_TOKEN_SUFFIX_WRAPPER) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_SUFFIX_WRAPPER);
-                    builder = CreateWrapperBuilder(KN_BUILDER_SUFFIX, reader->tokenizer, reader->kstate);
+                    builder = CreateWrapperBuilder(KN_BUILDER_SUFFIX, reader->tokenizer, reader->kana);
                 }
                 else if (event == KN_TOKEN_TXT_MARCRO) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_TXT_MARCRO);
-                    builder = CreateWrapperBuilder(KN_BUILDER_TXT_MARCRO, reader->tokenizer, reader->kstate);
+                    builder = CreateWrapperBuilder(KN_BUILDER_TXT_MARCRO, reader->tokenizer, reader->kana);
                 }
                 else if (event == KN_TOKEN_OBJ_BUILDER) {
                     StateStackPush(reader->stateStack, KN_READER_PARSE_OBJ_BUILDER);
-                    builder = CreateWrapperBuilder(KN_BUILDER_OBJ_BUILDER, reader->tokenizer, reader->kstate);
+                    builder = CreateWrapperBuilder(KN_BUILDER_OBJ_BUILDER, reader->tokenizer, reader->kana);
                 }
             }
             BuilderStackPush(reader->builderStack, builder);
@@ -742,7 +742,7 @@ KN KSON_Parse(KonReader* reader)
         if (IsSyntaxToken(event)) {
             // syntax markers like: % . | ;
             // don't need update state
-            KN marker = MakeSyntaxMarker(reader->kstate, event);
+            KN marker = MakeSyntaxMarker(reader->kana, event);
             AddValueToTopBuilder(reader, marker);
         }
         else if (event == KN_TOKEN_SYM_MARCRO) {

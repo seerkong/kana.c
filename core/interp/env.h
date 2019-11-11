@@ -3,10 +3,10 @@
 
 #include "prefix.h"
 
-KonEnv* KN_MakeRootEnv(KonState* kstate);
-KonEnv* KN_MakeChildEnv(KonState* kstate, KonEnv* parentEnv);
-KN KN_EnvDefine(KonState* kstate, KonEnv* env, const char* key, KN value);
-KN KN_EnvLookup(KonState* kstate, KonEnv* env, const char* key);
+KonEnv* KN_MakeRootEnv(Kana* kana);
+KonEnv* KN_MakeChildEnv(Kana* kana, KonEnv* parentEnv);
+KN KN_EnvDefine(Kana* kana, KonEnv* env, const char* key, KN value);
+KN KN_EnvLookup(Kana* kana, KonEnv* env, const char* key);
 
 
 #endif

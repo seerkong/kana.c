@@ -7,7 +7,7 @@
 #include "../greatest.h"
 #include "core/kana.h"
 
-KonState* kstate;
+Kana* kana;
 SUITE(suite);
 
 TEST Tokenize_Cell(void) {
@@ -16,7 +16,7 @@ TEST Tokenize_Cell(void) {
     KxStringBuffer* sb = KN_ReadFileContent(filePathOrigin);
     printf("%s\n", KxStringBuffer_Cstr(sb));
 
-    KonTokenizer* tokenizer = KSON_TokenizerInit(kstate);
+    KonTokenizer* tokenizer = KSON_TokenizerInit(kana);
     KSON_TokenizerBegin(tokenizer, sb);
     int event = KN_TOKEN_NONE;
     while ((event = KSON_TokenizerNext(tokenizer)) && event != KN_TOKEN_EOF) {
@@ -44,10 +44,10 @@ int main(int argc, char const* argv[])
 {
     GREATEST_MAIN_BEGIN();
     greatest_set_verbosity(1);
-    kstate = KN_Init();
+    kana = KN_Init();
     RUN_SUITE(suite);
 
-    KN_Finish(kstate);
+    KN_Finish(kana);
     GREATEST_MAIN_END();
 
     return 0;

@@ -3,11 +3,11 @@
 
 #include "prefix.h"
 
-KN KN_PrimaryNewline(KonState* kstate);
-KN KN_PrimaryDisplay(KonState* kstate, KN args);
-KN KN_PrimaryWrite(KonState* kstate, KN args);
-KN KN_PrimaryStringify(KonState* kstate, KN args);
+KN KN_PrimaryNewline(Kana* kana);
+KN KN_PrimaryDisplay(Kana* kana, KN args);
+KN KN_PrimaryWrite(Kana* kana, KN args);
+KN KN_PrimaryStringify(Kana* kana, KN args);
 
-KN KN_PrimaryOpExport(KonState* kstate, KonEnv* env);
+KN KN_PrimaryOpExport(Kana* kana, KonEnv* env);
 
 #endif

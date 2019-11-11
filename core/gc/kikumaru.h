@@ -14,16 +14,16 @@ typedef struct _GcState
 
 } GcState;
 
-void KN_InitGc(KonState* knState);
-void KN_DestroyGc(KonState* knState);
+void KN_InitGc(Kana* kana);
+void KN_DestroyGc(Kana* kana);
 
-// alloced at parsing time, readonly, free them when destroy KonState
-KN_API KN KN_NewConstMemObj(KonState* kstate, size_t size, kon_uint_t tag);
+// alloced at parsing time, readonly, free them when destroy Kana
+KN_API KN KN_NewConstMemObj(Kana* kana, size_t size, kon_uint_t tag);
 
 // alloced at exec time, can be garbage collected
-KN_API KN KN_NewDynamicMemObj(KonState* kstate, size_t size, kon_uint_t tag);
+KN_API KN KN_NewDynamicMemObj(Kana* kana, size_t size, kon_uint_t tag);
 
-void KN_Gc(KonState* knState);
+void KN_Gc(Kana* kana);
 
 
 

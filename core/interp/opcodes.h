@@ -19,7 +19,30 @@
 #define OPC_RUN_NEXT_CONT             11
 #define OPC_RUN_CURRENT_CONT          12
 #define OPC_ENV_LOOKUP                13
+// native func, composite func
 #define OPC_APPLY_PROCEDURE           14
+
+#define OPC_ENV_SET
+#define OPC_GET_LVALUE
+#define OPC_GET_RVALUE
+
+#define OPC_COMPOSITE_MACRO
+#define OPC_NATIVE_MACRO
+#define OPC_INFIX_MACRO
+#define OPC_PREFIX_MACRO
+
+#define OPC_DISPATCH_SVO
+#define OPC_DISPATCH_SV
+#define OPC_DISPATCH_SVO_BLOCK
+
+
+
+#define OPC_DISPATCH_CELL_ITEM_MACRO
+#define OPC_DISPATCH_LIST
+#define OPC_DISPATCH_CELL
+#define OPC_DISPATCH_TABLE
+#define OPC_DISPATCH_VECTOR
+
 
 #define OPC_EVAL_EXPOSED_LIST     110
 #define OPC_EVAL_EXPOSED_CELL     111
@@ -36,5 +59,54 @@
 #define OPC_EVAL_SEALED_TABLE     120
 #define OPC_EVAL_SEALED_VECTOR    121
 
+
+//   OP_MOVE,
+//   OP_LOADK,
+//   OP_LOADKN,
+//   OP_SELF,
+//   OP_NEWTUPLE,
+//   OP_GETTUPLE,
+//   OP_SETTUPLE,
+//   OP_GETLOCAL,
+//   OP_SETLOCAL,
+//   OP_GETUPVAL,
+//   OP_SETUPVAL,
+//   OP_GLOBAL,
+//   OP_GETTABLE,
+//   OP_SETTABLE,
+//   OP_NEWCELL,
+//   OP_GETPATH,
+//   OP_SETPATH,
+//   OP_SUB,
+//   OP_MULT,
+//   OP_DIV,
+//   OP_REM,
+//   OP_POW,
+//   OP_NOT,
+//   OP_CMP,
+//   OP_EQ,
+//   OP_NEQ,
+//   OP_LT,
+//   OP_LTE,
+//   OP_GT,
+//   OP_GTE,
+//   OP_BITN,
+//   OP_BITL,
+//   OP_BITR,
+//   OP_DEF,
+//   OP_BIND,
+//   OP_MSG,
+//   OP_JMP,
+//   OP_TEST,
+//   OP_TESTJMP,
+//   OP_NOTJMP,
+//   OP_NAMED,
+//   OP_CALL,
+//   OP_CALLSET,
+//   OP_TAILCALL,
+//   OP_RETURN,
+//   OP_PROTO,
+//   OP_CLASS,
+//   OP_DEBUG
 
 #endif

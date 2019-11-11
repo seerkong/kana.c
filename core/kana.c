@@ -9,36 +9,40 @@
 
 int ENABLE_DEBUG = 1;
 
-KonState* KN_Init()
+Kana* KN_Init()
 {
-    KonState* kstate = (KonState*)calloc(1, sizeof(KonState));
-    if (kstate == NULL) {
+    Kana* kana = (Kana*)calloc(1, sizeof(Kana));
+    if (kana == NULL) {
         return NULL;
     }
-    // kstate->base.tag = KN_T_STATE;
-    kstate->nextMsgDispatcherId = 100;
-    kstate->msgDispatchers = KxVector_InitWithSize(200);
+    // kana->base.tag = KN_T_STATE;
+    kana->nextMsgDispatcherId = 100;
+    kana->msgDispatchers = KxVector_InitWithSize(200);
+
 
     GcState* gcState = (GcState*)calloc(1, sizeof(GcState));
-    kstate->gcState = gcState;
+    kana->gcState = gcState;
 
     // init root env
-    // KN env = KN_MakeRootEnv(kstate);
+    // KN env = KN_MakeRootEnv(kana);
     // KN_DEBUG("root env addr %x", env);     
-    // kstate->value.Context.rootEnv = env;
+    // kana->value.Context.rootEnv = env;
 
-    KN_InitGc(kstate);
+    KN_InitGc(kana);
+    
+    kana->knRegs = (KN*)calloc(10, sizeof(KN));
 
-    return kstate;
+
+    return kana;
 }
 
 
-int KN_Finish(KonState* kstate)
+int KN_Finish(Kana* kana)
 {
-    
-    KN_DestroyGc(kstate);
+    tb_free(kana->knRegs);
+    KN_DestroyGc(kana);
 
     tb_exit();
-    free(kstate);
+    free(kana);
     return 0;
 }

@@ -104,7 +104,7 @@ typedef struct
 
 } KonTokenizer;
 
-KonTokenizer* KSON_TokenizerInit(KonState* kstate);
+KonTokenizer* KSON_TokenizerInit(Kana* kana);
 
 bool KSON_TokenizerBegin(KonTokenizer* reader, KxStringBuffer* codeString);
 

@@ -31,50 +31,36 @@ opc##x:
     goto *opLabels[opcode];
 
 // usage:
-// CASE_OP(ADD, (knState, env, &regLastVal, codeBlock[pc]))
+// CASE_OP(ADD, (kana, env, &regLastVal, codeBlock[pc]))
 #define CASE_OP(name, args) case OPC_##name: {       \
     opHandlers[OPC_##name]args;                      \
     pc++;                                           \
     break;                                          \
 }
 
-// TODO move ast cursor
-#define HANDLE_OP(name, args)   {opHandlers[OPC_##name]args;}
+#define GS_LAST_VAL     (kana->knRegs[0])
+#define GS_NODE_TO_RUN    (kana->knRegs[1])
+#define GS_NEW_CONT    (kana->knRegs[2])
+#define GS_FRAME    (kana->knRegs[3])
+#define GS_CELL_SUBJ    (kana->knRegs[4])
+#define GS_PATH_CHAIN    (kana->knRegs[5])  // a::b a\b\c a.inner.core a<i><j>
+#define GS_PROCEDURE_FUNC    (kana->knRegs[6])
+#define GS_PROCEDURE_ARGS    (kana->knRegs[7])
+#define GS_PROCEDURE_BLOCK    (kana->knRegs[8])
 
-// TODO knstate global states
-// #define GS_OP          ((KN_OP)globalRegs32[0])
-#define GS_LAST_VAL     (globalKonRegs[0])
-#define GS_NODE_TO_RUN    (globalKonRegs[1])
-#define GS_NEW_CONT    (globalKonRegs[2])
-#define GS_CELL_SUBJ    (globalKonRegs[3])
-#define GS_PROCEDURE_FUNC    (globalKonRegs[4])
-#define GS_PROCEDURE_ARGS    (globalKonRegs[5])
-#define GS_PROCEDURE_BLOCK    (globalKonRegs[6])
+KnOp ContHandler_Return(Kana* kana, KonContinuation* curCont);
+KnOp ContHandler_Sentences(Kana* kana, KonContinuation* curCont);
+KnOp ContHandler_ListSentence(Kana* kana, KonContinuation* curCont);
+KnOp ContHandler_CellSentence(Kana* kana, KonContinuation* curCont);
+KnOp ContHandler_CellClause(Kana* kana, KonContinuation* curCont);
+KnOp ContHandler_ClauseCore(Kana* kana, KonContinuation* curCont);
+KnOp ContHandler_ClauseArgs(Kana* kana, KonContinuation* curCont);
 
-// TODO continuation states
-#define CS_PENDING      (curCont->pendingJobs)
-#define CS_FINISHED     (curCont->finishedJobs)
-// #define CS_MEMO1     (curCont->memo1)
-// #define CS_MEMO2     (curCont->memo2)
-// #define CS_MEMO3     (curCont->memo3)
-#define CS_MEMO(n)     (curCont->memo[n])
+KnOp OpHandler_HELLOWORLD(Kana* kana, KonContinuation* curCont);
 
-typedef void (*OpHandlerRef)(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
-
-KN_OP ContHandler_Return(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
-KN_OP ContHandler_Sentences(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
-KN_OP ContHandler_ListSentence(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
-KN_OP ContHandler_CellSentence(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
-KN_OP ContHandler_CellClause(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
-KN_OP ContHandler_ClauseCore(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
-KN_OP ContHandler_ClauseArgs(KonState* knstate, KonContinuation* curCont, KN* globalKonRegs);
-
-void OpHandler_NONE(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
-void OpHandler_HELLOWORLD(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
-
-void OpHandler_EVAL_SENTENCES(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
-void OpHandler_EVAL_LIST_SENTENCE(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
-void OpHandler_EVAL_CELL_SENTENCE(KonState* knstate, KonEnv* curEnv, KonContinuation* curCont, KN* globalKonRegs, KN_OP* nextOp);
+KnOp OpHandler_EVAL_SENTENCES(Kana* kana, KonContinuation* curCont);
+KnOp OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont);
+KnOp OpHandler_EVAL_CELL_SENTENCE(Kana* kana, KonContinuation* curCont);
 
 
 #endif
