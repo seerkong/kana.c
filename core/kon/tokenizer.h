@@ -41,7 +41,7 @@ typedef enum
 
     KN_TOKEN_SYM_MARCRO, // each!
     KN_TOKEN_SYM_WORD,   // abC
-    KN_TOKEN_SYM_CELL_SEG_END, // ^
+    KN_TOKEN_SYM_CELL_SEG_END, // ^ eg: [if [] {} ^if] [:a :b ^ :a :b]
 
     KN_TOKEN_SYM_STRING, // $''
     KN_TOKEN_SYM_VARIABLE, // %abc

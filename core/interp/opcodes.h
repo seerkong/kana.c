@@ -2,25 +2,40 @@
 #ifndef KN_INTERP_OPCODES_H
 #define KN_INTERP_OPCODES_H 1
 
-#define OPC_LAND				          0
+#define OPC_LAND				  0
 #define OPC_NOP                   1
 #define OPC_HELLOWORLD            2
 
-#define OPC_EVAL_EXPR_BY_TYPE     3
-#define OPC_EVAL_SENTENCES        4
-#define OPC_EVAL_LIST_SENTENCE    5
-#define OPC_EVAL_CELL_SENTENCE    6
+#define OPC_ENTER_BOUNCE_MODE     3
+#define OPC_ENTER_CODE_SEG_MODE   4
 
-#define OPC_EVAL_CELL_CLAUSE      7
-#define OPC_EVAL_CLAUSE_CORE      8
-#define OPC_EVAL_CLAUSE_ARGS      9
+#define OPC_EVAL_EXPR_BY_TYPE     5
+#define OPC_EVAL_SENTENCES        6
+#define OPC_EVAL_LIST_SENTENCE    7
+#define OPC_EVAL_CELL_SENTENCE    8
 
-#define OPC_LOAD_CONT_RUN_NEXT_NODE   10
-#define OPC_RUN_NEXT_CONT             11
-#define OPC_RUN_CURRENT_CONT          12
-#define OPC_ENV_LOOKUP                13
+#define OPC_EVAL_CELL_CLAUSE      9
+#define OPC_EVAL_CLAUSE_CORE      10
+#define OPC_EVAL_CLAUSE_ARGS      11
+
+#define OPC_LOAD_CONT_RUN_NEXT_NODE   12
+#define OPC_RUN_NEXT_CONT             13
+#define OPC_RUN_CURRENT_CONT          14
+#define OPC_ENV_LOOKUP                15
+
 // native func, composite func
-#define OPC_APPLY_PROCEDURE           14
+#define OPC_APPLY_PROCEDURE           16
+
+
+// byte code instructions
+#define OPC_SET_KN_REG_FROM_AST         61
+#define OPC_SET_NEXT_OP_CODE                62
+#define OPC_SET_NEXT_OP_ONE                 63
+#define OPC_SET_NEXT_OP_TWO                 64
+#define OPC_SET_NEXT_OP_THREE               65
+#define OPC_DISPATCH_OP_CODE                     66
+#define OPC_END_CODE_SEG                    67
+
 
 #define OPC_ENV_SET
 #define OPC_GET_LVALUE

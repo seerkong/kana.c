@@ -29,17 +29,12 @@ Kana* KN_Init()
     // kana->value.Context.rootEnv = env;
 
     KN_InitGc(kana);
-    
-    kana->knRegs = (KN*)calloc(10, sizeof(KN));
-
-
     return kana;
 }
 
 
 int KN_Finish(Kana* kana)
 {
-    tb_free(kana->knRegs);
     KN_DestroyGc(kana);
 
     tb_exit();

@@ -26,9 +26,8 @@ KN KN_EvalFile(Kana* kana, char* filePath)
         if (KN_IsPairList(root)) {
             KonEnv* rootEnv = KN_MakeRootEnv(kana);
 
-        //     // DefineReservedDispatcher(kana, env);
+            // DefineReservedDispatcher(kana, env);
 
-        //     // KN result = KN_ExecAst(kana, root, kana->value.Context.rootEnv);
             KonEnv* processEnv = KN_MakeChildEnv(kana, rootEnv);
             result = KN_ExecAst(kana, root, processEnv);
             
@@ -94,7 +93,7 @@ KN UnBoxAccessorValue(KN konValue)
     return value;
 }
 
-KnOp ApplyProcedureArguments(Kana* kana, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* curCont)
+void ApplyProcedureArguments(Kana* kana, KonProcedure* proc, KN argList, KonEnv* env, KonContinuation* curCont)
 {
     KnOp nextOp;
     // TODO assert if is a procedure
@@ -130,43 +129,114 @@ KnOp ApplyProcedureArguments(Kana* kana, KonProcedure* proc, KN argList, KonEnv*
     // else {
     //     // TODO throw exception
     // }
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
+void ContHandler_QuitBounceMode(Kana* kana, KonContinuation* curCont)
+{
+    KnOp nextOp = { .code = OPC_LAND };
+    GS_NEXT_OP = nextOp;
+}
 
 KN KN_ExecAst(Kana* kana, KN sourceCodeAst, KonEnv* rootEnv)
 {
+    // TODO add step count when debug
+    KN formatedCode = KN_ToFormatString(kana, sourceCodeAst, true, 0, "  ");
+    KN_DEBUG("%s", KN_StringToCstr(formatedCode));
+
     KonEnv* curEnv = rootEnv;
     KonContinuation* curCont = AllocContinuationWithType(kana, KN_CONT_RETURN, curEnv, NULL);
     curCont->contHandler = ContHandler_Return;
 
-    // KnOp* nextOp = (KnOp*)tb_nalloc0(1, sizeof(KnOp));
-    // nextOp->code = OPC_EVAL_SENTENCES;
+    int dummyPc = 0;    // used in bounce mode
 
-    KnOp nextOp = { .code = OPC_EVAL_SENTENCES };
+    KN* astNodePool = (KN*)calloc(10, sizeof(KN));
+    astNodePool[0] = sourceCodeAst;
 
-    GS_LAST_VAL = KN_UKN;
+    KnOp* NEXT_OP_REF = &(kana->NEXT_OP);
+    
+    // bytecode to enter bounce mode
+    KnOp initCodeSeg[] = {
+        {.code = OPC_SET_KN_REG_FROM_AST, .two = {.a = REG_NODE_TO_RUN, .b = 0} },
+        {.code = OPC_SET_NEXT_OP_CODE, .one = {.a = OPC_EVAL_SENTENCES} },
+        {.code = OPC_DISPATCH_OP_CODE, .one = {.a = OPC_ENTER_BOUNCE_MODE} },
+    };
+
+
+    KnFrame* rootFrame = (KnFrame*)tb_allocator_malloc0(kana->dynamicAllocator, sizeof(KnFrame));
+    rootFrame->prev = NULL;
+    rootFrame->curCont = curCont;
+    rootFrame->curEnv = curEnv;
+    rootFrame->codeSegment = initCodeSeg;
+    rootFrame->pc = 0;
+    rootFrame->ir = rootFrame->codeSegment;
+
+    // init global register
+    GS_FRAME = rootFrame;
+    GS_PC = &(GS_FRAME->pc);
+    GS_IR = &(GS_FRAME->ir);
+    GS_CS = GS_FRAME->codeSegment;
+
     GS_NODE_TO_RUN = sourceCodeAst;
+    GS_LAST_VAL = KN_UKN;
 
-    // TODO add step count when debug
-    KN formatedCode = KN_ToFormatString(kana, GS_NODE_TO_RUN, true, 0, "  ");
-    KN_DEBUG("%s", KN_StringToCstr(formatedCode));
 
     static const void* opLabels[] = {
+        // used in bounce-trampoline mode
         &&opc0, &&opc1, &&opc2, &&opc3, &&opc4, &&opc5, &&opc6, &&opc7, &&opc8, &&opc9, &&opc10,
-        &&opc11, &&opc12, &&opc13, &&opc14, //&&opc15, &&opc16, &&opc17, &&opc18, &&opc19, &&opc20,
-        // &&opc21, &&opc22, &&opc23, &&opc24, &&opc25, &&opc26, &&opc27, &&opc28, &&opc29, &&opc30,
-        // &&opc31, &&opc32, &&opc33, &&opc34, &&opc35, &&opc36, &&opc37, &&opc38, &&opc39, &&opc40,
+        &&opc11, &&opc12, &&opc13, &&opc14, &&opc15, &&opc16, &&opc17, &&opc18, &&opc19, &&opc20,
+        &&opc21, &&opc22, &&opc23, &&opc24, &&opc25, &&opc26, &&opc27, &&opc28, &&opc29, &&opc30,
+        
+        // used in kon-array mode
+        &&opc31, &&opc32, &&opc33, &&opc34, &&opc35, &&opc36, &&opc37, &&opc38, &&opc39, &&opc40,
+        &&opc41, &&opc42, &&opc43, &&opc44, &&opc45, &&opc46, &&opc47, &&opc48, &&opc49, &&opc50,
+        &&opc51, &&opc52, &&opc53, &&opc54, &&opc55, &&opc56, &&opc57, &&opc58, &&opc59, &&opc60,
+
+        // used in bytecode mode
+        &&opc61, &&opc62, &&opc63, &&opc64, &&opc65, &&opc66, &&opc67, //&&opc68, &&opc69, &&opc70,
+        // &&opc71, &&opc72, &&opc73, &&opc74, &&opc75, &&opc76, &&opc77, &&opc78, &&opc79, &&opc80,
+        // &&opc81, &&opc82, &&opc83, &&opc84, &&opc85, &&opc86, &&opc87, &&opc88, &&opc89, &&opc90,
+        // &&opc91, &&opc92, &&opc93, &&opc94, &&opc95, &&opc96, &&opc97, &&opc98, &&opc99, &&opc100,
+        // &&opc101, &&opc102, &&opc103, &&opc104, &&opc105, &&opc106, &&opc107, &&opc108, &&opc109,
+        // &&opc110, &&opc111, &&opc112, &&opc113, &&opc114, &&opc115, &&opc116, &&opc117, &&opc118,
+        // &&opc119, &&opc120, &&opc121, &&opc122, &&opc123, &&opc124, &&opc125, &&opc126, &&opc127,
         // &&unused,
     };
+
+    // KnOp initOp = { .code = OPC_EVAL_SENTENCES };
+    // GS_NEXT_OP = initOp;
     
-    DISPATCH(nextOp.code);
+    // start in in bounce-trampoline interprete mode
+    // DISPATCH(OPC_ENTER_BOUNCE_MODE);
+    // DISPATCH(OPC_HELLOWORLD);
+
+    
+    
+    DISPATCH((*GS_IR)->code);
 
     DEF_OPC(OPC_HELLOWORLD)
     {
         KN_DEBUG("HELLO OP EXECUTED");
-        nextOp = OpHandler_HELLOWORLD(kana, curCont);
-        DISPATCH(nextOp.code);
+        GS_IR = NEXT_OP_REF;
+        OpHandler_HELLOWORLD(kana, curCont);
+        DISPATCH((*GS_IR)->code);
+    }
+
+    DEF_OPC(OPC_ENTER_BOUNCE_MODE)
+    {
+        GS_PC = &dummyPc;
+        GS_IR = &NEXT_OP_REF;
+        KonContinuation* nextCont = AllocContinuationWithType(kana, KN_CONT_QUIT_BOUNCE_MODE, curEnv, curCont);
+        nextCont->contHandler = ContHandler_QuitBounceMode;
+
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
+    }
+
+    DEF_OPC(OPC_ENTER_CODE_SEG_MODE)
+    {
+        GS_PC = &(GS_FRAME->pc);
+        GS_IR = &(GS_FRAME->ir);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
 
     DEF_OPC(OPC_EVAL_EXPR_BY_TYPE)
@@ -174,27 +244,27 @@ KN KN_ExecAst(Kana* kana, KN sourceCodeAst, KonEnv* rootEnv)
         KN_DEBUG("OPC_EVAL_EXPR_BY_TYPE");
         if (IsSelfEvaluated(GS_NODE_TO_RUN)) {
             GS_LAST_VAL = GS_NODE_TO_RUN;
-            nextOp.code = OPC_RUN_CURRENT_CONT;
+            GS_NEXT_OP.code = OPC_RUN_CURRENT_CONT;
         }
         else if (KN_IS_CELL(GS_NODE_TO_RUN)) {
             // create a new cont
-            nextOp.code = OPC_EVAL_CELL_SENTENCE;
+            GS_NEXT_OP.code = OPC_EVAL_CELL_SENTENCE;
         }
         else if (KN_IsPairList(GS_NODE_TO_RUN)) {
             // create a new cont
-            nextOp.code = OPC_EVAL_LIST_SENTENCE;
+            GS_NEXT_OP.code = OPC_EVAL_LIST_SENTENCE;
         }
         else if (KN_IS_REFERENCE(GS_NODE_TO_RUN)) {
             // a code block like { a }
             // TODO asert should be a SYM_IDENTIFIER
             // env lookup this val
-            nextOp.code = OPC_ENV_LOOKUP;
+            GS_NEXT_OP.code = OPC_ENV_LOOKUP;
         }
         else if (KN_IS_ACCESSOR(GS_NODE_TO_RUN)) {
             // unbox
             KN val = UnBoxAccessorValue(GS_NODE_TO_RUN);
             GS_LAST_VAL = val;
-            nextOp.code = OPC_RUN_CURRENT_CONT;
+            GS_NEXT_OP.code = OPC_RUN_CURRENT_CONT;
         }
         // TODO
         // else if (KN_IS_QUASI_PAIR(GS_NODE_TO_RUN)) {
@@ -203,39 +273,39 @@ KN KN_ExecAst(Kana* kana, KN sourceCodeAst, KonEnv* rootEnv)
             KN_ERROR("unhandled expression type");
             exit(1);
         }
-        DISPATCH(nextOp.code);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
     DEF_OPC(OPC_EVAL_SENTENCES)
     {
         KN_DEBUG("OPC_EVAL_SENTENCES");
         // receive a list, treat it as a code block
-        nextOp = OpHandler_EVAL_SENTENCES(kana, curCont);
-        DISPATCH(nextOp.code);
+        OpHandler_EVAL_SENTENCES(kana, curCont);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
     DEF_OPC(OPC_EVAL_LIST_SENTENCE)
     {
         KN_DEBUG("OPC_EVAL_LIST_SENTENCE");
         // receive a list, treat it as a expression
-        nextOp = OpHandler_EVAL_LIST_SENTENCE(kana, curCont);
-        DISPATCH(nextOp.code);
+        OpHandler_EVAL_LIST_SENTENCE(kana, curCont);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
     DEF_OPC(OPC_EVAL_CELL_SENTENCE)
     {
         // receive a cell, treat it as a expression
-        nextOp = OpHandler_EVAL_CELL_SENTENCE(kana, curCont);
-        DISPATCH(nextOp.code);
+        OpHandler_EVAL_CELL_SENTENCE(kana, curCont);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
     DEF_OPC(OPC_EVAL_CELL_CLAUSE)
     {
-        DISPATCH(nextOp.code);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
     DEF_OPC(OPC_EVAL_CLAUSE_CORE)
     {
-        DISPATCH(nextOp.code);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
     DEF_OPC(OPC_EVAL_CLAUSE_ARGS)
     {
-        DISPATCH(nextOp.code);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
     
     DEF_OPC(OPC_LOAD_CONT_RUN_NEXT_NODE)
@@ -244,8 +314,8 @@ KN KN_ExecAst(Kana* kana, KN sourceCodeAst, KonEnv* rootEnv)
         // append cont chain
         curCont = KN_2_KON(GS_NEW_CONT, Continuation);
         curEnv = curCont->env;
-        nextOp.code = OPC_EVAL_EXPR_BY_TYPE;
-        DISPATCH(nextOp.code);
+        GS_NEXT_OP.code = OPC_EVAL_EXPR_BY_TYPE;
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
     DEF_OPC(OPC_RUN_NEXT_CONT)
     {
@@ -254,18 +324,18 @@ KN KN_ExecAst(Kana* kana, KN sourceCodeAst, KonEnv* rootEnv)
         curCont = curCont->next;
         curEnv = curCont->env;
         KonContFuncRef contHander = curCont->contHandler;
-        nextOp = contHander(kana, curCont);
-        DISPATCH(nextOp.code);
+        contHander(kana, curCont);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
     DEF_OPC(OPC_RUN_CURRENT_CONT)
     {
         // no need to modify cont chain
         KonContFuncRef contHander = curCont->contHandler;
-        nextOp = contHander(kana, curCont);
+        contHander(kana, curCont);
 
-        KN_DEBUG("OPC_RUN_CURRENT_CONT next code %d", nextOp.code);
+        KN_DEBUG("OPC_RUN_CURRENT_CONT next code %d", GS_NEXT_OP.code);
 
-        DISPATCH(nextOp.code);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
 
     DEF_OPC(OPC_ENV_LOOKUP)
@@ -274,19 +344,68 @@ KN KN_ExecAst(Kana* kana, KN sourceCodeAst, KonEnv* rootEnv)
         KN val = KN_EnvLookup(kana, curEnv, KN_SymbolToCstr(GS_NODE_TO_RUN));
         assert(val.asU64 != KNBOX_UNDEF);
         GS_LAST_VAL = val;
-        nextOp.code = OPC_RUN_CURRENT_CONT;
-        DISPATCH(nextOp.code);
+        GS_NEXT_OP.code = OPC_RUN_CURRENT_CONT;
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
     DEF_OPC(OPC_APPLY_PROCEDURE)
     {
-        nextOp = ApplyProcedureArguments(
+        ApplyProcedureArguments(
             kana, KN_2_KON(GS_PROCEDURE_FUNC, Procedure), 
             GS_PROCEDURE_ARGS,
             curEnv, curCont->next
         );
 
-        KN_DEBUG("OPC_APPLY_PROCEDURE next code %d", nextOp.code);
-        DISPATCH(nextOp.code);
+        KN_DEBUG("OPC_APPLY_PROCEDURE next code %d", GS_NEXT_OP.code);
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
+    }
+
+    opc17: opc18: opc19: opc20:
+    opc21: opc22: opc23: opc24: opc25: opc26: opc27: opc28: opc29: opc30:
+    opc31: opc32: opc33: opc34: opc35: opc36: opc37: opc38: opc39: opc40:
+    opc41: opc42: opc43: opc44: opc45: opc46: opc47: opc48: opc49: opc50:
+    opc51: opc52: opc53: opc54: opc55: opc56: opc57: opc58: opc59: opc60:
+    opc68: opc69: opc70:
+    opc71: opc72: opc73: opc74: opc75: opc76: opc77: opc78: opc79: opc80:
+    {}
+
+    DEF_OPC(OPC_SET_KN_REG_FROM_AST)
+    {
+        int astNodeId = (*GS_IR)->two.b;
+        GS_NODE_TO_RUN = astNodePool[astNodeId];
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
+    }
+    DEF_OPC(OPC_SET_NEXT_OP_CODE)
+    {
+        GS_NEXT_OP.code = (*GS_IR)->one.a;
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
+    }
+    DEF_OPC(OPC_SET_NEXT_OP_ONE)
+    {
+        GS_NEXT_OP.one.a = (*GS_IR)->one.a;
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
+    }
+    DEF_OPC(OPC_SET_NEXT_OP_TWO)
+    {
+        GS_NEXT_OP.two.a = (*GS_IR)->two.a;
+        GS_NEXT_OP.two.b = (*GS_IR)->two.b;
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
+    }
+    DEF_OPC(OPC_SET_NEXT_OP_THREE)
+    {
+        GS_NEXT_OP.three.a = (*GS_IR)->three.a;
+        GS_NEXT_OP.three.b = (*GS_IR)->three.b;
+        GS_NEXT_OP.three.c = (*GS_IR)->three.c;
+        DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
+    }
+    DEF_OPC(OPC_DISPATCH_OP_CODE)
+    {
+        int jumpCode = (*GS_IR)->one.a;
+        DISPATCH(jumpCode);
+    }
+    DEF_OPC(OPC_END_CODE_SEG)
+    {
+        KN_DEBUG("OPC_END_CODE_SEG");
+        DISPATCH(OPC_LAND);
     }
 
     unused:

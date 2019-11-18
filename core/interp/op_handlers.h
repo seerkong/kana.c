@@ -27,6 +27,11 @@ opc##x:
 #define DEF_OPC(opcode)  \
             label(opcode)
 
+#define DISPATCH_NEXT_OP(FRAME, PC, IR)  \
+    *PC += 1;                            \
+    FRAME->ir = FRAME->codeSegment + FRAME->pc;     \
+    DISPATCH((*IR)->code)
+
 #define DISPATCH(opcode)     \
     goto *opLabels[opcode];
 
@@ -38,29 +43,48 @@ opc##x:
     break;                                          \
 }
 
+
+#define REG_NEXT_OP                 -1
+#define REG_LAST_VAL             0
+#define REG_NODE_TO_RUN          1
+#define REG_NEW_CONT             2
+#define REG_NEW_FRAME            3
+#define REG_CELL_SUBJ            4
+#define REG_PATH_CHAIN           5
+#define REG_PROCEDURE_FUNC       6
+#define REG_PROCEDURE_ARGS       7
+#define REG_PROCEDURE_BLOCK      8
+
+#define GS_CS    (kana->CS)
+#define GS_PC    (kana->PC)
+#define GS_NEXT_OP    (kana->NEXT_OP)
+#define GS_IR    (kana->IR)
+#define GS_FRAME    (kana->FRAME)
+
 #define GS_LAST_VAL     (kana->knRegs[0])
 #define GS_NODE_TO_RUN    (kana->knRegs[1])
 #define GS_NEW_CONT    (kana->knRegs[2])
-#define GS_FRAME    (kana->knRegs[3])
+#define GS_NEW_FRAME    (kana->knRegs[3])
 #define GS_CELL_SUBJ    (kana->knRegs[4])
 #define GS_PATH_CHAIN    (kana->knRegs[5])  // a::b a\b\c a.inner.core a<i><j>
 #define GS_PROCEDURE_FUNC    (kana->knRegs[6])
 #define GS_PROCEDURE_ARGS    (kana->knRegs[7])
 #define GS_PROCEDURE_BLOCK    (kana->knRegs[8])
 
-KnOp ContHandler_Return(Kana* kana, KonContinuation* curCont);
-KnOp ContHandler_Sentences(Kana* kana, KonContinuation* curCont);
-KnOp ContHandler_ListSentence(Kana* kana, KonContinuation* curCont);
-KnOp ContHandler_CellSentence(Kana* kana, KonContinuation* curCont);
-KnOp ContHandler_CellClause(Kana* kana, KonContinuation* curCont);
-KnOp ContHandler_ClauseCore(Kana* kana, KonContinuation* curCont);
-KnOp ContHandler_ClauseArgs(Kana* kana, KonContinuation* curCont);
 
-KnOp OpHandler_HELLOWORLD(Kana* kana, KonContinuation* curCont);
+void ContHandler_Return(Kana* kana, KonContinuation* curCont);
+void ContHandler_Sentences(Kana* kana, KonContinuation* curCont);
+void ContHandler_ListSentence(Kana* kana, KonContinuation* curCont);
+void ContHandler_CellSentence(Kana* kana, KonContinuation* curCont);
+void ContHandler_CellClause(Kana* kana, KonContinuation* curCont);
+void ContHandler_ClauseCore(Kana* kana, KonContinuation* curCont);
+void ContHandler_ClauseArgs(Kana* kana, KonContinuation* curCont);
 
-KnOp OpHandler_EVAL_SENTENCES(Kana* kana, KonContinuation* curCont);
-KnOp OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont);
-KnOp OpHandler_EVAL_CELL_SENTENCE(Kana* kana, KonContinuation* curCont);
+void OpHandler_HELLOWORLD(Kana* kana, KonContinuation* curCont);
+
+void OpHandler_EVAL_SENTENCES(Kana* kana, KonContinuation* curCont);
+void OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont);
+void OpHandler_EVAL_CELL_SENTENCE(Kana* kana, KonContinuation* curCont);
 
 
 #endif

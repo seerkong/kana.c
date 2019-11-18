@@ -337,10 +337,45 @@ struct _KonProcedure {
     };
 };
 
+struct _KnOp {
+    uint8_t code;
+
+    union {
+        struct {
+            int a:24;
+        } one;
+
+        struct {
+            int a:8;
+            int b:16;
+        } two;
+        struct {
+            int a:6;
+            int b:6;
+            int c:12;
+        } three;
+    };
+
+};
+
+typedef struct _KnOp KnOp;
+
+
+struct _KnFrame {
+    KonContinuation* curCont;
+    KonEnv* curEnv;
+    KnOp* codeSegment;
+    int pc; // program counter, offset of codesegment
+    KnOp* ir;   // instructinon register
+    struct _KnFrame* prev;
+};
+typedef struct _KnFrame KnFrame;
 
 typedef enum {
     // should be the first continuation created
     KN_CONT_RETURN,
+    KN_CONT_QUIT_BOUNCE_MODE,
+
     KN_CONT_SENTENCES,      // {[5 +(2) -(1)] [+(2 3)] {- 6 3}}
     KN_CONT_LIST_SENTENCE,  //                         {- 6 3}
     KN_CONT_CELL_SENTENCE,  //  [5 +(2) -(1)],[+(2 3)]
@@ -361,14 +396,8 @@ typedef enum {
     KN_CONT_SEALED_CELL,    // $.[+ (1 2)]
 } KonContinuationType;
 
-typedef struct {
-  int code:8;
-  int a:8;
-  int b:8;
-  int c:8;
-} KnOp;
 
-typedef KnOp (*KonContFuncRef)(Kana* kana, KonContinuation* curCont);
+typedef void (*KonContFuncRef)(Kana* kana, KonContinuation* curCont);
 
 struct _KonContinuation {
     KonBase base;
@@ -487,7 +516,17 @@ struct _Kana {
     // gc root source end
     ////
 
-    KN* knRegs;
+    // KN* knRegs;
+    KN knRegs[16];
+    KnOp NEXT_OP;    // next instructinon register, used in bounce-trampoline mode
+    KnFrame* FRAME;  // current frame
+    
+    KnOp* CS;   // byte code segment register
+    int* PC;   // program counter register, offset of CS register
+    // usually, IR = CS + *PC
+    // but when in bounce-trampoline interprete mode, IR is pointed to NEXT_OP
+    KnOp** IR; // instructinon register
+    
 
     struct _GcState* gcState;
 

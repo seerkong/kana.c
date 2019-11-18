@@ -1,12 +1,12 @@
 #include "op_handlers.h"
 
-KnOp ContHandler_Return(Kana* kana, KonContinuation* curCont)
+void ContHandler_Return(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp = { .code = OPC_LAND };
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
-KnOp ContHandler_Sentences(Kana* kana, KonContinuation* curCont)
+void ContHandler_Sentences(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
     KxList* pendingList = curCont->pendingJobs;
@@ -25,10 +25,10 @@ KnOp ContHandler_Sentences(Kana* kana, KonContinuation* curCont)
         GS_NODE_TO_RUN = nextJob;
         nextOp.code = OPC_LOAD_CONT_RUN_NEXT_NODE;
     }
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
-KnOp ContHandler_ListSentence(Kana* kana, KonContinuation* curCont)
+void ContHandler_ListSentence(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
     const int WAIT_VERB = 0;
@@ -98,29 +98,29 @@ KnOp ContHandler_ListSentence(Kana* kana, KonContinuation* curCont)
     }
     printf("ContHandler_ListSentence, before return\n");
 
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
 // run clauses until rest jobs is nil
-KnOp ContHandler_CellSentence(Kana* kana, KonContinuation* curCont)
+void ContHandler_CellSentence(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp = { .code = OPC_NOP };
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
-KnOp ContHandler_CellClause(Kana* kana, KonContinuation* curCont)
+void ContHandler_CellClause(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp = { .code = OPC_NOP };
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
-KnOp ContHandler_ClauseCore(Kana* kana, KonContinuation* curCont)
+void ContHandler_ClauseCore(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp = { .code = OPC_NOP };
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
-KnOp ContHandler_ClauseArgs(Kana* kana, KonContinuation* curCont)
+void ContHandler_ClauseArgs(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
     KxList* pendingList = curCont->pendingJobs;
@@ -150,20 +150,19 @@ KnOp ContHandler_ClauseArgs(Kana* kana, KonContinuation* curCont)
         GS_NODE_TO_RUN = nextJob;
         nextOp.code = OPC_LOAD_CONT_RUN_NEXT_NODE;
     }
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
 
-KnOp OpHandler_HELLOWORLD(Kana* kana, KonContinuation* curCont)
+void OpHandler_HELLOWORLD(Kana* kana, KonContinuation* curCont)
 {
     GS_LAST_VAL = KN_BOX_INT(5);
     printf("in OpHandler_HELLOWORLD\n");
-    KnOp nextOp = { .code = OPC_NOP };
-    KonEnv* curEnv = curCont->env;
-    return nextOp;
+    KnOp nextOp = { .code = OPC_LAND };
+    GS_NEXT_OP = nextOp;
 }
 
-KnOp OpHandler_EVAL_SENTENCES(Kana* kana, KonContinuation* curCont)
+void OpHandler_EVAL_SENTENCES(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
     KonEnv* curEnv = curCont->env;
@@ -188,10 +187,10 @@ KnOp OpHandler_EVAL_SENTENCES(Kana* kana, KonContinuation* curCont)
         GS_NODE_TO_RUN = KN_CAR(GS_NODE_TO_RUN);
         nextOp.code = OPC_LOAD_CONT_RUN_NEXT_NODE;
     }
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
-KnOp OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont)
+void OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
     KonEnv* curEnv = curCont->env;
@@ -231,13 +230,13 @@ KnOp OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont)
     // GS_NEW_CONT = KON_2_KN(verbCont);
     // GS_NODE_TO_RUN = KN_CAR(GS_NODE_TO_RUN);
     // nextOp->code = OPC_LOAD_CONT_RUN_NEXT_NODE;
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
-KnOp OpHandler_EVAL_CELL_SENTENCE(Kana* kana, KonContinuation* curCont)
+void OpHandler_EVAL_CELL_SENTENCE(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp = { .code = OPC_NOP };
     KonEnv* curEnv = curCont->env;
-    return nextOp;
+    GS_NEXT_OP = nextOp;
 }
 
