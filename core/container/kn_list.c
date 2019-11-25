@@ -1,5 +1,5 @@
 /**
- * KxList
+ * KnList
  * Copyright (c) 2019 Kong WeiXian
  *
  */
@@ -14,34 +14,34 @@
 
 
 
-KxList* KxList_Init()
+KnList* KnList_Init()
 {
-    KxList* self = (KxList*)tb_nalloc0(1, sizeof(KxList));
+    KnList* self = (KnList*)tb_nalloc0(1, sizeof(KnList));
     if (self == NULL) {
-        printf("KxList_Init failed\n");
+        printf("KnList_Init failed\n");
         return NULL;
     }
     self->length = 0;
-    self->head = KX_LIST_NIL;
-    self->tail = KX_LIST_NIL;
+    self->head = KN_LIST_NIL;
+    self->tail = KN_LIST_NIL;
     return self;
 }
 
-int KxList_Destroy(KxList* self)
+int KnList_Destroy(KnList* self)
 {
     if (self == NULL) {
         return -1;
     }
-    KxList_Clear(self);
+    KnList_Clear(self);
     tb_free(self);
     return 1;
 }
 
-int KxList_Clear(KxList* self)
+int KnList_Clear(KnList* self)
 {
-    KxListNode* iter = self->head;
-    while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->next;
+    KnListNode* iter = self->head;
+    while ((klist_val_t)iter != KN_LIST_NIL) {
+        KnListNode* next = iter->next;
         tb_free(iter);
         iter = next;
     }
@@ -49,18 +49,18 @@ int KxList_Clear(KxList* self)
 }
 
 // number of elements
-uint32_t KxList_Length(KxList* self)
+uint32_t KnList_Length(KnList* self)
 {
     return self->length;
 }
 
 // get val by index number
-klist_val_t KxList_ValAt(KxList* self, int index)
+klist_val_t KnList_ValAt(KnList* self, int index)
 {
     int cursor = 0;
-    KxListNode* iter = self->head;
-    while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->next;
+    KnListNode* iter = self->head;
+    while ((klist_val_t)iter != KN_LIST_NIL) {
+        KnListNode* next = iter->next;
         
         if (index == cursor) {
             return iter->val;
@@ -71,49 +71,49 @@ klist_val_t KxList_ValAt(KxList* self, int index)
     }
 
     // not found
-    return KX_LIST_UNDEF;
+    return KN_LIST_UNDEF;
 }
 
-klist_val_t KxList_Head(KxList* self)
+klist_val_t KnList_Head(KnList* self)
 {
-    if ((klist_val_t)self->head != KX_LIST_NIL) {
+    if ((klist_val_t)self->head != KN_LIST_NIL) {
         return self->head->val;
     }
     else {
-        return KX_LIST_NIL;
+        return KN_LIST_NIL;
     }
 }
 
-klist_val_t KxList_Tail(KxList* self)
+klist_val_t KnList_Tail(KnList* self)
 {
-    if ((klist_val_t)self->tail != KX_LIST_NIL) {
+    if ((klist_val_t)self->tail != KN_LIST_NIL) {
         return self->tail->val;
     }
     else {
-        return KX_LIST_NIL;
+        return KN_LIST_NIL;
     }
 }
 
-KxListNode* KxList_NewNode(klist_val_t value)
+KnListNode* KnList_NewNode(klist_val_t value)
 {
-    KxListNode* node = (KxListNode*)tb_nalloc0(1, sizeof(KxListNode));
+    KnListNode* node = (KnListNode*)tb_nalloc0(1, sizeof(KnListNode));
     if (node == NULL) {
         return NULL;
     }
     node->val = value;
-    node->prev = KX_LIST_NIL;
-    node->next = KX_LIST_NIL;
+    node->prev = KN_LIST_NIL;
+    node->next = KN_LIST_NIL;
     return node;
 }
 
 // add value to tail
-int KxList_Push(KxList* self, klist_val_t value)
+int KnList_Push(KnList* self, klist_val_t value)
 {
-    KxListNode* node = KxList_NewNode(value);
+    KnListNode* node = KnList_NewNode(value);
     if (node == NULL) {
         return -1;
     }
-    if ((klist_val_t)self->tail != KX_LIST_NIL) {
+    if ((klist_val_t)self->tail != KN_LIST_NIL) {
         self->tail->next = node;
     }
     if (self->length == 0) {
@@ -126,21 +126,21 @@ int KxList_Push(KxList* self, klist_val_t value)
     return 1;
 }
 // get tail and remove
-klist_val_t KxList_Pop(KxList* self)
+klist_val_t KnList_Pop(KnList* self)
 {
-    if ((klist_val_t)self->tail == KX_LIST_NIL) {
-        return KX_LIST_UNDEF;
+    if ((klist_val_t)self->tail == KN_LIST_NIL) {
+        return KN_LIST_UNDEF;
     }
     klist_val_t tailVal = self->tail->val;
-    KxListNode* newTail = self->tail->prev;
+    KnListNode* newTail = self->tail->prev;
 
     if (self->length == 1) {
-        self->head = KX_LIST_NIL;
+        self->head = KN_LIST_NIL;
     }
 
     tb_free(self->tail);
-    if ((klist_val_t)newTail != KX_LIST_NIL) {
-        newTail->next = KX_LIST_NIL;
+    if ((klist_val_t)newTail != KN_LIST_NIL) {
+        newTail->next = KN_LIST_NIL;
     }
     
     self->tail = newTail;
@@ -149,15 +149,15 @@ klist_val_t KxList_Pop(KxList* self)
 }
 
 // add a list to tail
-int KxList_Append(KxList* self, KxList* other)
+int KnList_Append(KnList* self, KnList* other)
 {
     int cursor = 0;
-    KxListNode* iter = other->head;
-    while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->next;
+    KnListNode* iter = other->head;
+    while ((klist_val_t)iter != KN_LIST_NIL) {
+        KnListNode* next = iter->next;
         
         klist_val_t val = iter->val;
-        KxList_Push(self, val);
+        KnList_Push(self, val);
 
         cursor += 1;
         iter = next;
@@ -167,13 +167,13 @@ int KxList_Append(KxList* self, KxList* other)
 
 
 // add value to head
-int KxList_Unshift(KxList* self, klist_val_t value)
+int KnList_Unshift(KnList* self, klist_val_t value)
 {
-    KxListNode* node = KxList_NewNode(value);
+    KnListNode* node = KnList_NewNode(value);
     if (node == NULL) {
         return -1;
     }
-    if ((klist_val_t)self->head != KX_LIST_NIL) {
+    if ((klist_val_t)self->head != KN_LIST_NIL) {
         self->head->prev = node;
     }
     if (self->length == 0) {
@@ -187,21 +187,21 @@ int KxList_Unshift(KxList* self, klist_val_t value)
 }
 
 // get head and remove
-klist_val_t KxList_Shift(KxList* self)
+klist_val_t KnList_Shift(KnList* self)
 {
-    if ((klist_val_t)self->head == KX_LIST_NIL) {
-        return KX_LIST_UNDEF;
+    if ((klist_val_t)self->head == KN_LIST_NIL) {
+        return KN_LIST_UNDEF;
     }
     klist_val_t headVal = self->head->val;
-    KxListNode* newHead = self->head->next;
+    KnListNode* newHead = self->head->next;
 
     if (self->length == 1) {
         
-        self->tail = KX_LIST_NIL;
+        self->tail = KN_LIST_NIL;
     }
     tb_free(self->head);
-    if ((klist_val_t)newHead != KX_LIST_NIL) {
-        newHead->prev = KX_LIST_NIL;
+    if ((klist_val_t)newHead != KN_LIST_NIL) {
+        newHead->prev = KN_LIST_NIL;
     }
     
     self->head = newHead;
@@ -210,15 +210,15 @@ klist_val_t KxList_Shift(KxList* self)
 }
 
 // add a list at head
-int KxList_Prepend(KxList* self, KxList* other)
+int KnList_Prepend(KnList* self, KnList* other)
 {
     int cursor = 0;
-    KxListNode* iter = other->head;
-    while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->next;
+    KnListNode* iter = other->head;
+    while ((klist_val_t)iter != KN_LIST_NIL) {
+        KnListNode* next = iter->next;
         
         klist_val_t val = iter->val;
-        KxList_Unshift(self, val);
+        KnList_Unshift(self, val);
 
         cursor += 1;
         iter = next;
@@ -227,17 +227,17 @@ int KxList_Prepend(KxList* self, KxList* other)
 }
 
 // TODO check if is list head or tail
-int KxList_InsertBefore(KxList* self, KxListNode* node, klist_val_t value)
+int KnList_InsertBefore(KnList* self, KnListNode* node, klist_val_t value)
 {
-    if (value == KX_LIST_NIL) {
+    if (value == KN_LIST_NIL) {
         // TODO throw exception
         return -1;
     }
-    KxListNode* newNode = KxList_NewNode(value);
+    KnListNode* newNode = KnList_NewNode(value);
     if (newNode == NULL) {
         return -1;
     }
-    if ((klist_val_t)node->prev != KX_LIST_NIL) {
+    if ((klist_val_t)node->prev != KN_LIST_NIL) {
         node->prev->next = newNode;
     }
     newNode->next = node;
@@ -248,17 +248,17 @@ int KxList_InsertBefore(KxList* self, KxListNode* node, klist_val_t value)
 }
 
 // TODO check if is list head or tail
-int KxList_InsertAfter(KxList* self, KxListNode* node, klist_val_t value)
+int KnList_InsertAfter(KnList* self, KnListNode* node, klist_val_t value)
 {
-    if (value == KX_LIST_NIL) {
+    if (value == KN_LIST_NIL) {
         // TODO throw exception
         return -1;
     }
-    KxListNode* newNode = KxList_NewNode(value);
+    KnListNode* newNode = KnList_NewNode(value);
     if (newNode == NULL) {
         return -1;
     }
-    if ((klist_val_t)node->next != KX_LIST_NIL) {
+    if ((klist_val_t)node->next != KN_LIST_NIL) {
         node->next->prev = newNode;
     }
     
@@ -270,20 +270,20 @@ int KxList_InsertAfter(KxList* self, KxListNode* node, klist_val_t value)
     return 1;
 }
 
-int KxList_InsertAt(KxList* self, int index, klist_val_t value)
+int KnList_InsertAt(KnList* self, int index, klist_val_t value)
 {
-    KxListNode* newNode = KxList_NewNode(value);
+    KnListNode* newNode = KnList_NewNode(value);
     if (newNode == NULL) {
         return -1;
     }
 
     int cursor = 0;
-    KxListNode* iter = self->head;
-    while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->next;
+    KnListNode* iter = self->head;
+    while ((klist_val_t)iter != KN_LIST_NIL) {
+        KnListNode* next = iter->next;
         
         if (index == cursor) {
-            KxList_InsertBefore(self, iter, newNode);
+            KnList_InsertBefore(self, iter, newNode);
         }
 
         cursor += 1;
@@ -295,12 +295,12 @@ int KxList_InsertAt(KxList* self, int index, klist_val_t value)
 }
 
 // del by index, if out of range, do nothing
-int KxList_DelNode(KxList* self, KxListNode* node)
+int KnList_DelNode(KnList* self, KnListNode* node)
 {
     if (self->length == 1 && self->head == node) {
         
-        self->head = KX_LIST_NIL;
-        self->tail = KX_LIST_NIL;
+        self->head = KN_LIST_NIL;
+        self->tail = KN_LIST_NIL;
     }
     else if (self->head == node) {
         self->head = node->next;
@@ -308,10 +308,10 @@ int KxList_DelNode(KxList* self, KxListNode* node)
     else if (self->tail == node) {
         self->tail = node->prev;
     }
-    if ((klist_val_t)node->next != KX_LIST_NIL) {
+    if ((klist_val_t)node->next != KN_LIST_NIL) {
         node->next->prev = node->prev;
     }
-    if ((klist_val_t)node->prev != KX_LIST_NIL) {
+    if ((klist_val_t)node->prev != KN_LIST_NIL) {
         node->prev->next = node->next;
     }
     tb_free(node);
@@ -321,15 +321,15 @@ int KxList_DelNode(KxList* self, KxListNode* node)
 }
 
 // del at index
-int KxList_DelAt(KxList* self, int index)
+int KnList_DelAt(KnList* self, int index)
 {
     int cursor = 0;
-    KxListNode* iter = self->head;
-    while ((klist_val_t)iter != KX_LIST_NIL) {
-        KxListNode* next = iter->next;
+    KnListNode* iter = self->head;
+    while ((klist_val_t)iter != KN_LIST_NIL) {
+        KnListNode* next = iter->next;
         
         if (index == cursor) {
-            KxList_DelNode(self, iter);
+            KnList_DelNode(self, iter);
             return 1;
         }
 
@@ -343,48 +343,48 @@ int KxList_DelAt(KxList* self, int index)
 
 ////
 // iterator
-KxListNode* KxList_IterHead(KxList* self)
+KnListNode* KnList_IterHead(KnList* self)
 {
     return self->head;
 }
 
-KxListNode* KxList_IterTail(KxList* self)
+KnListNode* KnList_IterTail(KnList* self)
 {
     return self->tail;
 }
 
-bool KxList_IterHasNext(KxListNode* iter)
+bool KnList_IterHasNext(KnListNode* iter)
 {
-    if (iter == NULL || (klist_val_t)iter == KX_LIST_NIL) {
+    if (iter == NULL || (klist_val_t)iter == KN_LIST_NIL) {
         return false;
     }
-    return ((klist_val_t)iter->next == KX_LIST_NIL) ? false : true;
+    return ((klist_val_t)iter->next == KN_LIST_NIL) ? false : true;
 }
 
-KxListNode* KxList_IterNext(KxListNode* iter)
+KnListNode* KnList_IterNext(KnListNode* iter)
 {
     return iter->next;
 }
 
-bool KxList_IterHasPrev(KxListNode* iter)
+bool KnList_IterHasPrev(KnListNode* iter)
 {
-    if (iter == NULL || (klist_val_t)iter == KX_LIST_NIL) {
+    if (iter == NULL || (klist_val_t)iter == KN_LIST_NIL) {
         return false;
     }
-    return ((klist_val_t)iter->prev == KX_LIST_NIL) ? false : true;
+    return ((klist_val_t)iter->prev == KN_LIST_NIL) ? false : true;
 }
 
-KxListNode* KxList_IterPrev(KxListNode* iter)
+KnListNode* KnList_IterPrev(KnListNode* iter)
 {
     return iter->prev;
 }
 
-klist_val_t KxList_IterVal(KxListNode* iter)
+klist_val_t KnList_IterVal(KnListNode* iter)
 {
-    if ((klist_val_t)iter != KX_LIST_NIL) {
+    if ((klist_val_t)iter != KN_LIST_NIL) {
         return iter->val;
     }
     else {
-        return KX_LIST_UNDEF;
+        return KN_LIST_UNDEF;
     }
 }

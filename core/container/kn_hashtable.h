@@ -1,164 +1,161 @@
 /**
- * KxHashTable
+ * KnHashTable
  * Copyright (c) 2019 Kong WeiXian
  *
  */
 
 
-#ifndef KxHashTable__H
-#define KxHashTable__H 1
+#ifndef KnHashTable__H
+#define KnHashTable__H 1
 #include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 #include <stdbool.h>
-typedef struct _KxHashTable KxHashTable;
-typedef struct _KxHashTableKeyEntry KxHashTableKeyEntry;
-typedef struct _KxHashTableValEntry KxHashTableValEntry;
-typedef struct _KxHashTableValEntry* KxHashTableIter;
-// typedef void* XN;
-// typedef volatile union _Kon* XN;
-// a pointer or a fix number
-// typedef long int ktable_val_t;
+typedef struct _KnHashTable KnHashTable;
+typedef struct _KnHashTableKeyEntry KnHashTableKeyEntry;
+typedef struct _KnHashTableValEntry KnHashTableValEntry;
+typedef struct _KnHashTableValEntry* KnHashTableIter;
+
 typedef uint64_t ktable_val_t;
 
-#define KX_HASH_TABLE_REHASH_THRESHOLD 0.25
+#define KN_HASH_TABLE_REHASH_THRESHOLD 0.25
 
-#define KX_HASH_TABLE_UNDEF 0x0eL
-#define KX_HASH_TABLE_NIL 0x06L
-#define KX_HASH_TABLE_UKN 0x07L
-#define KX_TABLE_FIXNUM_BITS 1
-#define KX_TABLE_FIXNUM_TAG 1
-#define KX_TABLE_BOX_UINT(n)    ((ktable_val_t) ((((ktable_val_t)(n))*(ktable_val_t)((ktable_val_t)1<<KX_LIST_FIXNUM_BITS)) | KX_LIST_FIXNUM_TAG))
-#define KX_TABLE_UNBOX_UINT(n)   (((ktable_val_t)((ktable_val_t)(n) & ~KX_LIST_FIXNUM_TAG))/(ktable_val_t)((ktable_val_t)1<<KX_LIST_FIXNUM_BITS))
+#define KN_HASH_TABLE_UNDEF 0x0eL
+#define KN_HASH_TABLE_NIL 0x06L
+#define KN_HASH_TABLE_UKN 0x07L
+#define KN_TABLE_FIXNUM_BITS 1
+#define KN_TABLE_FIXNUM_TAG 1
+#define KN_TABLE_BOX_UINT(n)    ((ktable_val_t) ((((ktable_val_t)(n))*(ktable_val_t)((ktable_val_t)1<<KN_LIST_FIXNUM_BITS)) | KN_LIST_FIXNUM_TAG))
+#define KN_TABLE_UNBOX_UINT(n)   (((ktable_val_t)((ktable_val_t)(n) & ~KN_LIST_FIXNUM_TAG))/(ktable_val_t)((ktable_val_t)1<<KN_LIST_FIXNUM_BITS))
 
 
-struct _KxHashTable {
+struct _KnHashTable {
     uint32_t hashSize;  // hash vector size 2**n
     uint32_t hashMask;  // size - 1
     uint32_t powerOfTwo;  // 2**n = HashSize, the n
 
     uint32_t bucketUsed;   // BucketVector used
     uint32_t itemNum;  // how many items stored
-    KxHashTableKeyEntry** buckets;
-    KxHashTableValEntry* valListHead;
-    KxHashTableValEntry* valListTail;
+    KnHashTableKeyEntry** buckets;
+    KnHashTableValEntry* valListHead;
+    KnHashTableValEntry* valListTail;
 };
 
-struct _KxHashTableKeyEntry {
-    KxHashTableKeyEntry* prev;
-    KxHashTableKeyEntry* next;
-    KxHashTableValEntry* valEntry;
+struct _KnHashTableKeyEntry {
+    KnHashTableKeyEntry* prev;
+    KnHashTableKeyEntry* next;
+    KnHashTableValEntry* valEntry;
     uint32_t hashCode;      // hash(Key)
     uint32_t keyLen;
     uint32_t verifyCode;    // hash(Key+KeyLen+ HashCode)
 };
 
-struct _KxHashTableValEntry {
-    KxHashTableValEntry* prev;
-    KxHashTableValEntry* next;
+struct _KnHashTableValEntry {
+    KnHashTableValEntry* prev;
+    KnHashTableValEntry* next;
     char* key;
     ktable_val_t val;
 };
 
 // the n of 2**n
-KxHashTable* KxHashTable_Init(uint32_t powerOfTwo);
+KnHashTable* KnHashTable_Init(uint32_t powerOfTwo);
 
-int KxHashTable_Destroy(KxHashTable* self);
+int KnHashTable_Destroy(KnHashTable* self);
 
-int KxHashTable_Clear(KxHashTable* self);
+int KnHashTable_Clear(KnHashTable* self);
 
 // number of elements
-uint32_t KxHashTable_Length(KxHashTable* self);
+uint32_t KnHashTable_Length(KnHashTable* self);
 
-bool KxHashTable_HasKey(KxHashTable* self, const char* key);
+bool KnHashTable_HasKey(KnHashTable* self, const char* key);
 
 // get value by key string
-ktable_val_t KxHashTable_AtKey(KxHashTable* self, const char* key);
+ktable_val_t KnHashTable_AtKey(KnHashTable* self, const char* key);
 
 // get val by index number
-ktable_val_t KxHashTable_ValAtIndex(KxHashTable* self, int index);
+ktable_val_t KnHashTable_ValAtIndex(KnHashTable* self, int index);
 // get key by index number
-const char* KxHashTable_KeyAtIndex(KxHashTable* self, int index);
+const char* KnHashTable_KeyAtIndex(KnHashTable* self, int index);
 
-ktable_val_t KxHashTable_FirstVal(KxHashTable* self);
+ktable_val_t KnHashTable_FirstVal(KnHashTable* self);
 
-ktable_val_t KxHashTable_LastVal(KxHashTable* self);
+ktable_val_t KnHashTable_LastVal(KnHashTable* self);
 
 
 // add value to tail
-int KxHashTable_PushVal(KxHashTable* self, ktable_val_t value);
+int KnHashTable_PushVal(KnHashTable* self, ktable_val_t value);
 // add key value to tail, 0 fail 1 insert key 2 update key to new value
-int KxHashTable_PushKv(KxHashTable* self, char* key, ktable_val_t value);
+int KnHashTable_PushKv(KnHashTable* self, char* key, ktable_val_t value);
 // add value to head
-int KxHashTable_UnshiftVal(KxHashTable* self, ktable_val_t value);
+int KnHashTable_UnshiftVal(KnHashTable* self, ktable_val_t value);
 // add key value to head
-int KxHashTable_UnshiftKv(KxHashTable* self, const char* key, ktable_val_t value);
+int KnHashTable_UnshiftKv(KnHashTable* self, const char* key, ktable_val_t value);
 // set key, add or update  value, result 0: invalid or fail; 1 insert; 2 update
-int KxHashTable_PutKv(KxHashTable* self, const char* key, ktable_val_t value);
+int KnHashTable_PutKv(KnHashTable* self, const char* key, ktable_val_t value);
 
 // set or update index item's key, if out of range, do nothing
 // result 0: invalid or fail; 1 insert; 2 update
-int KxHashTable_SetKeyAtIndex(KxHashTable* self, int index, const char* key);
+int KnHashTable_SetKeyAtIndex(KnHashTable* self, int index, const char* key);
 // set value by index, if out of range, do nothing
-int KxHashTable_SetValAtIndex(KxHashTable* self, int index, ktable_val_t value);
+int KnHashTable_SetValAtIndex(KnHashTable* self, int index, ktable_val_t value);
 // set index item's key and value, if out of range, do nothing
-int KxHashTable_SetKvAtIndex(KxHashTable* self, int index, const char* key, ktable_val_t value);
+int KnHashTable_SetKvAtIndex(KnHashTable* self, int index, const char* key, ktable_val_t value);
 
 // del by key
-int KxHashTable_DelByKey(KxHashTable* self, const char* key);
+int KnHashTable_DelByKey(KnHashTable* self, const char* key);
 // del by index, if out of range, do nothing
-int KxHashTable_DelByIndex(KxHashTable* self, int index);
+int KnHashTable_DelByIndex(KnHashTable* self, int index);
 
 
 
 ////
 // iterator
-KxHashTableIter KxHashTable_IterHead(KxHashTable* self);
+KnHashTableIter KnHashTable_IterHead(KnHashTable* self);
 
-KxHashTableIter KxHashTable_IterTail(KxHashTable* self);
+KnHashTableIter KnHashTable_IterTail(KnHashTable* self);
 
-bool KxHashTable_IterHasNext(KxHashTable* self, KxHashTableIter iter);
+bool KnHashTable_IterHasNext(KnHashTable* self, KnHashTableIter iter);
 
-KxHashTableIter KxHashTable_IterNext(KxHashTable* self, KxHashTableIter iter);
+KnHashTableIter KnHashTable_IterNext(KnHashTable* self, KnHashTableIter iter);
 
-bool KxHashTable_IterHasPrev(KxHashTable* self, KxHashTableIter iter);
+bool KnHashTable_IterHasPrev(KnHashTable* self, KnHashTableIter iter);
 
-KxHashTableIter KxHashTable_IterPrev(KxHashTable* self, KxHashTableIter iter);
+KnHashTableIter KnHashTable_IterPrev(KnHashTable* self, KnHashTableIter iter);
 
 
-const char* KxHashTable_IterGetKey(KxHashTable* self, KxHashTableIter iter);
+const char* KnHashTable_IterGetKey(KnHashTable* self, KnHashTableIter iter);
 
-ktable_val_t KxHashTable_IterGetVal(KxHashTable* self, KxHashTableIter iter);
+ktable_val_t KnHashTable_IterGetVal(KnHashTable* self, KnHashTableIter iter);
 
 // set iter item key
 // result 0: invalid or fail; 1 insert; 2 update
-int KxHashTable_IterSetKey(KxHashTable* self, KxHashTableIter iter, char* key);
+int KnHashTable_IterSetKey(KnHashTable* self, KnHashTableIter iter, char* key);
 // set iter item value
-int KxHashTable_IterSetVal(KxHashTable* self, KxHashTableIter iter, ktable_val_t value);
+int KnHashTable_IterSetVal(KnHashTable* self, KnHashTableIter iter, ktable_val_t value);
 
 
 // del key and value
-int KxHashTable_DelByIter(KxHashTable* self, KxHashTableIter iter, char* key);
+int KnHashTable_DelByIter(KnHashTable* self, KnHashTableIter iter, char* key);
 
 // insert value before iter
-int KxHashTable_InsertValBeforeIter(KxHashTable* self, KxHashTableIter iter, ktable_val_t value);
+int KnHashTable_InsertValBeforeIter(KnHashTable* self, KnHashTableIter iter, ktable_val_t value);
 // insert k v before iter
-int KxHashTable_InsertKvBeforIter(KxHashTable* self, KxHashTableIter iter, char* key, ktable_val_t value);
+int KnHashTable_InsertKvBeforIter(KnHashTable* self, KnHashTableIter iter, char* key, ktable_val_t value);
 
 // insert value after iter
-int KxHashTable_InsertValAfterIter(KxHashTable* self, KxHashTableIter iter, ktable_val_t value);
+int KnHashTable_InsertValAfterIter(KnHashTable* self, KnHashTableIter iter, ktable_val_t value);
 // insert k v after iter
-int KxHashTable_InsertKvAfterIter(KxHashTable* self, KxHashTableIter iter, char* key, ktable_val_t value);
+int KnHashTable_InsertKvAfterIter(KnHashTable* self, KnHashTableIter iter, char* key, ktable_val_t value);
 
-KxHashTable* KxHashTable_ShadowClone(KxHashTable* source);
+KnHashTable* KnHashTable_ShadowClone(KnHashTable* source);
 
 ////
 // internal
-uint32_t KxHashTable_KeyHashIndex(KxHashTable* self, uint32_t hashCode);
-void KxHashTable_CheckRehash(KxHashTable* self);
-void KxHashTable_PrintKeys(KxHashTable* self);
+uint32_t KnHashTable_KeyHashIndex(KnHashTable* self, uint32_t hashCode);
+void KnHashTable_CheckRehash(KnHashTable* self);
+void KnHashTable_PrintKeys(KnHashTable* self);
 
 #ifdef __cplusplus
 }

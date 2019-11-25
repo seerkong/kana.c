@@ -17,7 +17,7 @@ Kana* KN_Init()
     }
     // kana->base.tag = KN_T_STATE;
     kana->nextMsgDispatcherId = 100;
-    kana->msgDispatchers = KxVector_InitWithSize(200);
+    kana->msgDispatchers = KnVector_InitWithSize(200);
 
 
     GcState* gcState = (GcState*)calloc(1, sizeof(GcState));
@@ -25,7 +25,7 @@ Kana* KN_Init()
 
     // init root env
     // KN env = KN_MakeRootEnv(kana);
-    // KN_DEBUG("root env addr %x", env);     
+    // KN_DEBUG("root env addr %x", env);
     // kana->value.Context.rootEnv = env;
 
     KN_InitGc(kana);

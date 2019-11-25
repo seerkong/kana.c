@@ -44,13 +44,13 @@ KonBuilder* CreateVectorBuilder()
         return NULL;
     }
     builder->type = KN_BUILDER_VECTOR;
-    builder->vector = KxVector_Init();
+    builder->vector = KnVector_Init();
     return builder;
 }
 
 void VectorBuilderAddItem(KonBuilder* builder, KN item)
 {
-    KxVector_Push(builder->vector, item.asU64);
+    KnVector_Push(builder->vector, item.asU64);
 }
 
 KN MakeVectorByBuilder(Kana* kana, KonBuilder* builder)
@@ -69,25 +69,25 @@ KonBuilder* CreateListBuilder()
         return NULL;
     }
     builder->type = KN_BUILDER_LIST;
-    builder->list = KxVector_Init();
+    builder->list = KnVector_Init();
     return builder;
 }
 
 void ListBuilderAddItem(KonBuilder* builder, KN item)
 {
-    KxVector_Push(builder->list, item.asU64);
+    KnVector_Push(builder->list, item.asU64);
 }
 
 KN MakeListByBuilder(Kana* kana, KonBuilder* builder)
 {
     KN pair = BOXED_KN_NIL;
     
-    KxVector* list = builder->list;
+    KnVector* list = builder->list;
 
     // reverse add
-    int len = KxVector_Length(list);
+    int len = KnVector_Length(list);
     for (int i = len - 1; i >= 0; i--) {
-        KN item = (KN)KxVector_AtIndex(list, i);
+        KN item = (KN)KnVector_AtIndex(list, i);
         pair = KN_CONS(kana, item, pair);
     }
 
@@ -102,13 +102,13 @@ KonBuilder* CreateBlockBuilder()
         return NULL;
     }
     builder->type = KN_BUILDER_BLOCK;
-    builder->block = KxVector_Init();
+    builder->block = KnVector_Init();
     return builder;
 }
 
 void BlockBuilderAddItem(KonBuilder* builder, KN item)
 {
-    KxVector_Push(builder->block, item.asU64);
+    KnVector_Push(builder->block, item.asU64);
 }
 
 KN MakeBlockByBuilder(Kana* kana, KonBuilder* builder)
@@ -118,9 +118,9 @@ KN MakeBlockByBuilder(Kana* kana, KonBuilder* builder)
     KonVector* list = builder->block;
 
     // reverse add
-    int len = KxVector_Length(list);
+    int len = KnVector_Length(list);
     for (int i = len - 1; i >= 0; i--) {
-        KN item = (KN)KxVector_AtIndex(list, i);
+        KN item = (KN)KnVector_AtIndex(list, i);
         pair = KN_CONS(kana, item, pair);
     }
     if (len > 0) {
@@ -138,7 +138,7 @@ KonBuilder* CreateParamBuilder()
         return NULL;
     }
     builder->type = KN_BUILDER_PARAM;
-    builder->param = KxHashTable_Init(10);;
+    builder->param = KnHashTable_Init(10);;
     return builder;
 }
 
@@ -146,14 +146,14 @@ void ParamBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
 {
     char* key = KxStringBuffer_Cstr(pair->kvPair.key);
     
-    KxHashTable_PushKv(builder->param, key, pair->kvPair.value.asU64);
+    KnHashTable_PushKv(builder->param, key, pair->kvPair.value.asU64);
     KN_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
 }
 
 void ParamBuilderAddValue(KonBuilder* builder, KN value)
 {
-    KxHashTable_PushVal(builder->param, value.asU64);
+    KnHashTable_PushVal(builder->param, value.asU64);
 }
 
 KN MakeParamByBuilder(Kana* kana, KonBuilder* builder)
@@ -172,7 +172,7 @@ KonBuilder* CreateTableBuilder()
         return NULL;
     }
     builder->type = KN_BUILDER_TABLE;
-    builder->table = KxHashTable_Init(10);;
+    builder->table = KnHashTable_Init(10);;
     return builder;
 }
 
@@ -180,14 +180,14 @@ void TableBuilderAddPair(KonBuilder* builder, KonBuilder* pair)
 {
     char* key = KxStringBuffer_Cstr(pair->kvPair.key);
     
-    KxHashTable_PushKv(builder->table, key, pair->kvPair.value.asU64);
+    KnHashTable_PushKv(builder->table, key, pair->kvPair.value.asU64);
     KN_DEBUG("TableBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
 }
 
 void TableBuilderAddValue(KonBuilder* builder, KN value)
 {
-    KxHashTable_PushVal(builder->table, value.asU64);
+    KnHashTable_PushVal(builder->table, value.asU64);
 }
 
 KN MakeTableByBuilder(Kana* kana, KonBuilder* builder)
@@ -240,15 +240,15 @@ KonBuilder* CreateMapBuilder()
         return NULL;
     }
     builder->type = KN_BUILDER_MAP;
-    builder->map = KxHashTable_Init(10);;
+    builder->map = KnHashTable_Init(10);;
     return builder;
 }
 
 void MapBuilderAddPair(Kana* kana, KonBuilder* builder, KonBuilder* pair)
 {
     char* key = KxStringBuffer_Cstr(pair->kvPair.key);
-    KxHashTable* unboxedMap = builder->map;
-    KxHashTable_PutKv(unboxedMap, key, pair->kvPair.value.asU64);
+    KnHashTable* unboxedMap = builder->map;
+    KnHashTable_PutKv(unboxedMap, key, pair->kvPair.value.asU64);
     KN_DEBUG("MapBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
 }
@@ -282,11 +282,11 @@ KonBuilder* CreateCellBuilder()
     }
 
     builder->type = KN_BUILDER_CELL;
-    builder->cell = KxVector_Init();
+    builder->cell = KnVector_Init();
 
     CellBuilderItem* cellItem = CreateCellBuilderItem();
 
-    KxVector_Push(builder->cell, cellItem);
+    KnVector_Push(builder->cell, cellItem);
 
     return builder;
 }
@@ -299,7 +299,7 @@ KonBuilder* CreateCellBuilder()
 void CellBuilderSetCore(KonBuilder* builder, KN name)
 {
     KN_DEBUG("CellBuilderSetCore");
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    CellBuilderItem* cellItem = (CellBuilderItem*)KnVector_Tail(builder->cell);
     if (cellItem->core.asU64 != KNBOX_UNDEF
         || cellItem->table.asU64 != KNBOX_UNDEF
         || cellItem->list.asU64 != KNBOX_UNDEF
@@ -307,7 +307,7 @@ void CellBuilderSetCore(KonBuilder* builder, KN name)
         || cellItem->suffix.asU64 != KNBOX_UNDEF
     ) {
         CellBuilderItem* newCellItem = CreateCellBuilderItem();
-        KxVector_Push(builder->cell, newCellItem);
+        KnVector_Push(builder->cell, newCellItem);
         cellItem = newCellItem;
     }
     cellItem->core = name;
@@ -315,10 +315,10 @@ void CellBuilderSetCore(KonBuilder* builder, KN name)
 
 void CellBuilderSetList(KonBuilder* builder, KN list)
 {
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    CellBuilderItem* cellItem = (CellBuilderItem*)KnVector_Tail(builder->cell);
     if (cellItem->list.asU64 != KNBOX_UNDEF) {
         CellBuilderItem* newCellItem = CreateCellBuilderItem();
-        KxVector_Push(builder->cell, newCellItem);
+        KnVector_Push(builder->cell, newCellItem);
         cellItem = newCellItem;
     }
     cellItem->list = list;
@@ -326,12 +326,12 @@ void CellBuilderSetList(KonBuilder* builder, KN list)
 
 void CellBuilderSetTable(KonBuilder* builder, KN table)
 {
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    CellBuilderItem* cellItem = (CellBuilderItem*)KnVector_Tail(builder->cell);
     if (cellItem->table.asU64 != KNBOX_UNDEF
         || cellItem->list.asU64 != KNBOX_UNDEF
     ) {
         CellBuilderItem* newCellItem = CreateCellBuilderItem();
-        KxVector_Push(builder->cell, newCellItem);
+        KnVector_Push(builder->cell, newCellItem);
         cellItem = newCellItem;
     }
     cellItem->table = table;
@@ -339,12 +339,12 @@ void CellBuilderSetTable(KonBuilder* builder, KN table)
 
 void CellBuilderSetVector(KonBuilder* builder, KN vector)
 {
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    CellBuilderItem* cellItem = (CellBuilderItem*)KnVector_Tail(builder->cell);
     if (cellItem->vector.asU64 != KNBOX_UNDEF
         || cellItem->vector.asU64 != KNBOX_UNDEF
     ) {
         CellBuilderItem* newCellItem = CreateCellBuilderItem();
-        KxVector_Push(builder->cell, newCellItem);
+        KnVector_Push(builder->cell, newCellItem);
         cellItem = newCellItem;
     }
     cellItem->vector = vector;
@@ -353,12 +353,12 @@ void CellBuilderSetVector(KonBuilder* builder, KN vector)
 
 void CellBuilderSetSuffix(KonBuilder* builder, KN suffix)
 {
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    CellBuilderItem* cellItem = (CellBuilderItem*)KnVector_Tail(builder->cell);
     if (cellItem->suffix.asU64 != KNBOX_UNDEF
         || cellItem->suffix.asU64 != KNBOX_UNDEF
     ) {
         CellBuilderItem* newCellItem = CreateCellBuilderItem();
-        KxVector_Push(builder->cell, newCellItem);
+        KnVector_Push(builder->cell, newCellItem);
         cellItem = newCellItem;
     }
     cellItem->suffix = suffix;
@@ -366,16 +366,16 @@ void CellBuilderSetSuffix(KonBuilder* builder, KN suffix)
 
 void CellBuilderAddPair(Kana* kana, KonBuilder* builder, KonBuilder* pair)
 {
-    CellBuilderItem* cellItem = (CellBuilderItem*)KxVector_Tail(builder->cell);
+    CellBuilderItem* cellItem = (CellBuilderItem*)KnVector_Tail(builder->cell);
     if (cellItem->map.asU64 == KNBOX_UNDEF) {
         KonMap* newMap = KN_NEW_CONST_OBJ(kana, KonMap, KN_T_MAP);
-        newMap->map = KxHashTable_Init(4);
+        newMap->map = KnHashTable_Init(4);
         cellItem->map = KON_2_KN(newMap);
     }
 
     char* key = KxStringBuffer_Cstr(pair->kvPair.key);
-    KxHashTable* unboxedMap = KN_FIELD(cellItem->map, Map, map);
-    KxHashTable_PutKv(unboxedMap, key, pair->kvPair.value.asU64);
+    KnHashTable* unboxedMap = KN_FIELD(cellItem->map, Map, map);
+    KnHashTable_PutKv(unboxedMap, key, pair->kvPair.value.asU64);
     KN_DEBUG("CellBuilderAddPair before free pair builder key %s", key);
     tb_free(pair);
 }
@@ -400,9 +400,9 @@ KN MakeCellByBuilder(Kana* kana, KonBuilder* builder)
 
     KonCell* currentHead = KN_2_KON(KN_NIL, Cell);
     // reverse add
-    int len = KxVector_Length(cell);
+    int len = KnVector_Length(cell);
     for (int i = len - 1; i >= 0; i--) {
-        CellBuilderItem* cellBuilderItem = (CellBuilderItem*)KxVector_AtIndex(cell, i);
+        CellBuilderItem* cellBuilderItem = (CellBuilderItem*)KnVector_AtIndex(cell, i);
         KonCell* newNode = CreateNewKonCellNode(kana, cellBuilderItem);
         newNode->next = currentHead;
         if (currentHead != KNBOX_NIL) {

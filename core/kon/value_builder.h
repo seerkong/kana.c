@@ -39,18 +39,18 @@ typedef struct {
 typedef struct {
     KonBuilderType type;
     union {
-        KxVector* vector; // vector of KN
-        KxVector* list; // vector of KN
-        KxVector* block;
-        KxHashTable* param;
-        KxHashTable* table;
-        KxHashTable* map;
+        KnVector* vector; // vector of KN
+        KnVector* list; // vector of KN
+        KnVector* block;
+        KnHashTable* param;
+        KnHashTable* table;
+        KnHashTable* map;
         struct {
             KxStringBuffer* key;
             KN value;
         } kvPair;
 
-        KxVector* cell; // vector of CellBuilderItem*
+        KnVector* cell; // vector of CellBuilderItem*
 
         struct {
             KN name;

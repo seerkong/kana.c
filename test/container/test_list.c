@@ -11,78 +11,78 @@
 SUITE(test_list);
 
 TEST List_NewDelete(void) {
-    KxList* list = KxList_Init();
+    KnList* list = KnList_Init();
 
-    ASSERT_EQ_FMT(1, (int)KxList_Destroy(list), "%d");
-    ASSERT_EQ_FMT(-1, (int)KxList_Destroy(NULL), "%d");
+    ASSERT_EQ_FMT(1, (int)KnList_Destroy(list), "%d");
+    ASSERT_EQ_FMT(-1, (int)KnList_Destroy(NULL), "%d");
     PASS();
 }
 
 
 TEST List_Push(void) {
-    KxList* list = KxList_Init();
+    KnList* list = KnList_Init();
 
     char* value1 = "stdlib.h";
     char* value2 = "stdio.h";
     char* value3 = "stdbool.h";
     char* value4 = "stdint.h";
 
-    KxList_Push(list, value1);
-    KxList_Push(list, value2);
+    KnList_Push(list, value1);
+    KnList_Push(list, value2);
 
-    ASSERT_STR_EQ(value2, KxList_Tail(list));
-    KxList_Destroy(list);
+    ASSERT_STR_EQ(value2, KnList_Tail(list));
+    KnList_Destroy(list);
     PASS();
 }
 
 TEST List_Pop(void) {
-    KxList* list = KxList_Init();
+    KnList* list = KnList_Init();
 
     char* value1 = "stdlib.h";
     char* value2 = "stdio.h";
     char* value3 = "stdbool.h";
     char* value4 = "stdint.h";
 
-    KxList_Push(list, value1);
-    KxList_Push(list, value2);
-    char* poped = (char*)KxList_Pop(list);
+    KnList_Push(list, value1);
+    KnList_Push(list, value2);
+    char* poped = (char*)KnList_Pop(list);
     ASSERT_STR_EQ(value2, poped);
-    ASSERT_STR_EQ(value1, KxList_Tail(list));
-    KxList_Destroy(list);
+    ASSERT_STR_EQ(value1, KnList_Tail(list));
+    KnList_Destroy(list);
     PASS();
 }
 
 
 TEST List_Unshift(void) {
-    KxList* list = KxList_Init();
+    KnList* list = KnList_Init();
 
     char* value1 = "stdlib.h";
     char* value2 = "stdio.h";
     char* value3 = "stdbool.h";
     char* value4 = "stdint.h";
 
-    KxList_Unshift(list, value1);
-    KxList_Unshift(list, value2);
+    KnList_Unshift(list, value1);
+    KnList_Unshift(list, value2);
 
-    ASSERT_STR_EQ(value2, KxList_Head(list));
-    KxList_Destroy(list);
+    ASSERT_STR_EQ(value2, KnList_Head(list));
+    KnList_Destroy(list);
     PASS();
 }
 
 TEST List_Shift(void) {
-    KxList* list = KxList_Init();
+    KnList* list = KnList_Init();
 
     char* value1 = "stdlib.h";
     char* value2 = "stdio.h";
     char* value3 = "stdbool.h";
     char* value4 = "stdint.h";
 
-    KxList_Unshift(list, value1);
-    KxList_Unshift(list, value2);
-    char* poped = (char*)KxList_Shift(list);
+    KnList_Unshift(list, value1);
+    KnList_Unshift(list, value2);
+    char* poped = (char*)KnList_Shift(list);
     ASSERT_STR_EQ(value2, poped);
-    ASSERT_STR_EQ(value1, KxList_Head(list));
-    KxList_Destroy(list);
+    ASSERT_STR_EQ(value1, KnList_Head(list));
+    KnList_Destroy(list);
     PASS();
 }
 

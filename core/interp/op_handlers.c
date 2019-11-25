@@ -9,18 +9,18 @@ void ContHandler_Return(Kana* kana, KonContinuation* curCont)
 void ContHandler_Sentences(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
-    KxList* pendingList = curCont->pendingJobs;
-    KxList* finishedList = curCont->finishedJobs;
+    KnList* pendingList = curCont->pendingJobs;
+    KnList* finishedList = curCont->finishedJobs;
 
     // no need to store result of each sentence
-    // KxList_Push(finishedList, GS_LAST_VAL.asU64);
+    // KnList_Push(finishedList, GS_LAST_VAL.asU64);
 
-    if (KxList_Length(pendingList) == 0) {
+    if (KnList_Length(pendingList) == 0) {
         nextOp.code = OPC_RUN_NEXT_CONT;
     }
     else {
-        KN nextJob = (KN)KxList_Shift(pendingList);
-        printf("next job");
+        KN nextJob = (KN)KnList_Shift(pendingList);
+        KN_DEBUG("next job");
         KN_PrintNodeToStdio(kana, nextJob);
         GS_NODE_TO_RUN = nextJob;
         nextOp.code = OPC_LOAD_CONT_RUN_NEXT_NODE;
@@ -28,78 +28,6 @@ void ContHandler_Sentences(Kana* kana, KonContinuation* curCont)
     GS_NEXT_OP = nextOp;
 }
 
-void ContHandler_ListSentence(Kana* kana, KonContinuation* curCont)
-{
-    KnOp nextOp;
-    const int WAIT_VERB = 0;
-    const int WAIT_ARGS = 1;
-
-    const int CONT_STATE = 0;
-    const int REG_FUNC = 1;
-    const int REG_ARGS = 2;
-
-    // get current state
-    int state = KN_UNBOX_INT(curCont->memo[CONT_STATE]);
-    printf("ContHandler_ListSentence, state %d\n", state);
-    switch (state) {
-        case WAIT_VERB: {
-            printf("ContHandler_ListSentence, before box new state\n");
-            // verb eval finished
-            curCont->memo[CONT_STATE] = KN_BOX_INT(WAIT_ARGS);
-            curCont->memo[REG_FUNC] = GS_LAST_VAL;
-            printf("ContHandler_ListSentence, before shift args\n");
-            KN args = (KN)KxList_Shift(curCont->pendingJobs);
-
-            if (args.asU64 == KNBOX_NIL) {
-                printf("ContHandler_ListSentence, no args\n");
-                // no args, apply
-                GS_PROCEDURE_FUNC = curCont->memo[REG_FUNC];
-                GS_PROCEDURE_ARGS = KN_NIL;
-                GS_PROCEDURE_BLOCK = KN_NIL;
-
-                nextOp.code = OPC_APPLY_PROCEDURE;
-
-            }
-            else {
-                printf("ContHandler_ListSentence, spawn new continuation\n");
-                KonContinuation* newCont = AllocContinuationWithType(kana, KN_CONT_SENTENCES, curCont->env, curCont);
-                newCont->contHandler = ContHandler_ClauseArgs;
-
-                KxList* pendingList = newCont->pendingJobs;
-
-                // add args to pending queue
-                KN iter = KN_CDR(args);;
-                
-                while (iter.asU64 != KNBOX_NIL && KN_IS_PAIR(iter)) {
-                    KN item = KN_CAR(iter);
-                    KN next = KN_CDR(iter);
-                    KxList_Push(pendingList, item.asU64);
-                    iter = next;
-                }
-
-                printf("ContHandler_ListSentence, after make pending list\n");
-
-                GS_NEW_CONT = KON_2_KN(newCont);
-                GS_NODE_TO_RUN = KN_CAR(args);
-
-                KN_PrintNodeToStdio(kana, GS_NODE_TO_RUN);
-                nextOp.code = OPC_LOAD_CONT_RUN_NEXT_NODE;
-                break;
-            }
-        }
-        case WAIT_ARGS: {
-            // args eval finished
-            GS_PROCEDURE_FUNC = curCont->memo[REG_FUNC];
-            GS_PROCEDURE_ARGS = GS_LAST_VAL;
-            GS_PROCEDURE_BLOCK = KN_NIL;
-
-            nextOp.code = OPC_APPLY_PROCEDURE;
-        }
-    }
-    printf("ContHandler_ListSentence, before return\n");
-
-    GS_NEXT_OP = nextOp;
-}
 
 // run clauses until rest jobs is nil
 void ContHandler_CellSentence(Kana* kana, KonContinuation* curCont)
@@ -123,19 +51,19 @@ void ContHandler_ClauseCore(Kana* kana, KonContinuation* curCont)
 void ContHandler_ClauseArgs(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
-    KxList* pendingList = curCont->pendingJobs;
-    KxList* finishedList = curCont->finishedJobs;
+    KnList* pendingList = curCont->pendingJobs;
+    KnList* finishedList = curCont->finishedJobs;
 
-    KxList_Push(finishedList, GS_LAST_VAL.asU64);
+    KnList_Push(finishedList, GS_LAST_VAL.asU64);
 
-    if (KxList_Length(pendingList) == 0) {
+    if (KnList_Length(pendingList) == 0) {
         // finished list to KN arg list
         KN result = KN_NIL;
-        KxListNode* iter = KxList_IterTail(finishedList);
+        KnListNode* iter = KnList_IterTail(finishedList);
         while ((int64_t)iter != KNBOX_NIL) {
-            KxListNode* next = KxList_IterPrev(iter);
+            KnListNode* next = KnList_IterPrev(iter);
 
-            KN arg = (KN)KxList_IterVal(iter);
+            KN arg = (KN)KnList_IterVal(iter);
             // KN_PrintNodeToStdio(kana, arg);
             result = KN_CONS(kana, arg, result);
             iter = next;
@@ -144,8 +72,8 @@ void ContHandler_ClauseArgs(Kana* kana, KonContinuation* curCont)
         nextOp.code = OPC_RUN_NEXT_CONT;
     }
     else {
-        KN nextJob = (KN)KxList_Shift(pendingList);
-        printf("next job");
+        KN nextJob = (KN)KnList_Shift(pendingList);
+        KN_DEBUG("next job");
         KN_PrintNodeToStdio(kana, nextJob);
         GS_NODE_TO_RUN = nextJob;
         nextOp.code = OPC_LOAD_CONT_RUN_NEXT_NODE;
@@ -172,7 +100,7 @@ void OpHandler_EVAL_SENTENCES(Kana* kana, KonContinuation* curCont)
     else {
         KonContinuation* newCont = AllocContinuationWithType(kana, KN_CONT_SENTENCES, curEnv, curCont);
         newCont->contHandler = ContHandler_Sentences;
-        KxList* pendingList = newCont->pendingJobs;
+        KnList* pendingList = newCont->pendingJobs;
 
         // add centences to pending queue
         KN iter = KN_CDR(GS_NODE_TO_RUN);
@@ -180,7 +108,7 @@ void OpHandler_EVAL_SENTENCES(Kana* kana, KonContinuation* curCont)
         while (iter.asU64 != KNBOX_NIL && KN_IS_PAIR(iter)) {
             KN item = KN_CAR(iter);
             KN next = KN_CDR(iter);
-            KxList_Push(pendingList, item.asU64);
+            KnList_Push(pendingList, item.asU64);
             iter = next;
         }
         GS_NEW_CONT = KON_2_KN(newCont);
@@ -190,6 +118,81 @@ void OpHandler_EVAL_SENTENCES(Kana* kana, KonContinuation* curCont)
     GS_NEXT_OP = nextOp;
 }
 
+
+void ContHandler_ListSentence(Kana* kana, KonContinuation* curCont)
+{
+    KnOp nextOp;
+    const int WAIT_VERB = 0;
+    const int WAIT_ARGS = 1;
+
+    const int CONT_STATE = 0;
+    const int REG_FUNC = 1;
+    const int REG_ARGS = 2;
+
+    // get current state
+    int state = KN_UNBOX_INT(curCont->memo[CONT_STATE]);
+    KN_DEBUG("ContHandler_ListSentence, state %d\n", state);
+    switch (state) {
+        case WAIT_VERB: {
+            KN_DEBUG("ContHandler_ListSentence, before box new state\n");
+            // verb eval finished
+            curCont->memo[CONT_STATE] = KN_BOX_INT(WAIT_ARGS);
+            curCont->memo[REG_FUNC] = GS_LAST_VAL;
+            KN_DEBUG("ContHandler_ListSentence, before shift args\n");
+            KN args = (KN)KnList_Shift(curCont->pendingJobs);
+
+            if (args.asU64 == KNBOX_NIL) {
+                KN_DEBUG("ContHandler_ListSentence, no args\n");
+                // no args, apply
+                GS_PROCEDURE_FUNC = curCont->memo[REG_FUNC];
+                GS_PROCEDURE_ARGS = KN_NIL;
+                GS_PROCEDURE_BLOCK = KN_NIL;
+
+                nextOp.code = OPC_APPLY_PROCEDURE;
+
+            }
+            else {
+                KN_DEBUG("ContHandler_ListSentence, spawn new continuation\n");
+                KonContinuation* newCont = AllocContinuationWithType(kana, KN_CONT_SENTENCES, curCont->env, curCont);
+                newCont->contHandler = ContHandler_ClauseArgs;
+
+                KnList* pendingList = newCont->pendingJobs;
+
+                // add args to pending queue
+                KN iter = KN_CDR(args);;
+                
+                while (iter.asU64 != KNBOX_NIL && KN_IS_PAIR(iter)) {
+                    KN item = KN_CAR(iter);
+                    KN next = KN_CDR(iter);
+                    KnList_Push(pendingList, item.asU64);
+                    iter = next;
+                }
+
+                KN_DEBUG("ContHandler_ListSentence, after make pending list\n");
+
+                GS_NEW_CONT = KON_2_KN(newCont);
+                GS_NODE_TO_RUN = KN_CAR(args);
+
+                KN_PrintNodeToStdio(kana, GS_NODE_TO_RUN);
+                nextOp.code = OPC_LOAD_CONT_RUN_NEXT_NODE;
+                break;
+            }
+        }
+        case WAIT_ARGS: {
+            // args eval finished
+            GS_PROCEDURE_FUNC = curCont->memo[REG_FUNC];
+            GS_PROCEDURE_ARGS = GS_LAST_VAL;
+            GS_PROCEDURE_BLOCK = KN_NIL;
+
+            nextOp.code = OPC_APPLY_PROCEDURE;
+        }
+    }
+    KN_DEBUG("ContHandler_ListSentence, before return\n");
+
+    GS_NEXT_OP = nextOp;
+}
+
+
 void OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
@@ -197,11 +200,11 @@ void OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont)
     KonContinuation* newCont = AllocContinuationWithType(kana, KN_CONT_SENTENCES, curEnv, curCont);
     newCont->contHandler = ContHandler_ListSentence;
 
-    KxList* pendingList = newCont->pendingJobs;
-    KxList* finishedList = newCont->pendingJobs;
+    KnList* pendingList = newCont->pendingJobs;
+    KnList* finishedList = newCont->pendingJobs;
 
     newCont->memo[0] = KN_BOX_INT(0);
-    KxList_Push(pendingList, KN_CDR(GS_NODE_TO_RUN).asU64);
+    KnList_Push(pendingList, KN_CDR(GS_NODE_TO_RUN).asU64);
 
     GS_NEW_CONT = KON_2_KN(newCont);
     GS_NODE_TO_RUN = KN_CAR(GS_NODE_TO_RUN);
@@ -215,7 +218,7 @@ void OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont)
     // KonContinuation* verbCont = AllocContinuationWithType(kana, KN_CONT_SENTENCES, curEnv, argsCont);
     // verbCont->contHandler = ContHandler_ClauseCore;
 
-    // KxList* pendingList = argsCont->pendingJobs;
+    // KnList* pendingList = argsCont->pendingJobs;
 
     // // add centences to pending queue
     // KN iter = KN_CDR(GS_NODE_TO_RUN);
@@ -223,7 +226,7 @@ void OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont)
     // while (iter.asU64 != KNBOX_NIL && KN_IS_PAIR(iter)) {
     //     KN item = KN_CAR(iter);
     //     KN next = KN_CDR(iter);
-    //     KxList_Push(pendingList, item.asU64);
+    //     KnList_Push(pendingList, item.asU64);
     //     iter = next;
     // }
 

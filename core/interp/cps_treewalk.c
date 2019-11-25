@@ -26,6 +26,15 @@ KN KN_EvalFile(Kana* kana, char* filePath)
         if (KN_IsPairList(root)) {
             KonEnv* rootEnv = KN_MakeRootEnv(kana);
 
+            // kon module
+            // KN_EnvDefine(kana, env, "kn",
+            //     KN_Module_Export(kana, env)
+            // );
+
+            // KN_PrimaryOpExport(kana, env);
+            NativeExportConf conf = KN_PrimaryOpExport(kana, rootEnv);
+            KN_EnvImportNative(kana, rootEnv, conf);
+
             // DefineReservedDispatcher(kana, env);
 
             KonEnv* processEnv = KN_MakeChildEnv(kana, rootEnv);

@@ -2,7 +2,7 @@
 #define KN_CPS_TREEWALK_H 1
 
 #include "prefix.h"
-
+#include "primary.h"
 
 KN KN_EvalFile(Kana* kana, char* filePath);
 KN KN_ExecAst(Kana* kana, KN sentences, KonEnv* env);

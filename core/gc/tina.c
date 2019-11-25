@@ -9,19 +9,19 @@
 // #define MAX_SEGMENT_CNT 2
 
 void KN_MarkPhase(Kana* kana);
-void KN_Mark(Kana* kana, KxList* taskQueue, char color);
+void KN_Mark(Kana* kana, KnList* taskQueue, char color);
 void KN_SweepPhase();
 void KN_ResetAndCopyPtrSegList(Kana* kana);
-void KN_MarkNode(struct _KonBase* item, KxList* markTaskQueue, char color);
+void KN_MarkNode(struct _KonBase* item, KnList* markTaskQueue, char color);
 void KN_DestroyNode(Kana* kana, struct _KonBase* item);
 
 
 
-KxList* KN_CreateHeapPtrSegList(Kana* kana)
+KnList* KN_CreateHeapPtrSegList(Kana* kana)
 {
-    KxVector* firstSeg = KxVector_InitWithCapacity(FIRST_HEAP_PTR_SEG_SIZE);
-    KxList* segList = KxList_Init();
-    KxList_Push(segList, firstSeg);
+    KnVector* firstSeg = KnVector_InitWithCapacity(FIRST_HEAP_PTR_SEG_SIZE);
+    KnList* segList = KnList_Init();
+    KnList_Push(segList, firstSeg);
     return segList;
 }
 
@@ -36,10 +36,10 @@ void KN_InitGc(Kana* kana)
         return;
     }
 
-    kana->writeBarrierGen = KxList_Init();
+    kana->writeBarrierGen = KnList_Init();
     kana->heapPtrSegs = KN_CreateHeapPtrSegList(kana);
-    kana->markTaskQueue = KxList_Init();
-    kana->segmentMaxSizeVec = KxVector_InitWithSize(MAX_SEGMENT_CNT);
+    kana->markTaskQueue = KnList_Init();
+    kana->segmentMaxSizeVec = KnVector_InitWithSize(MAX_SEGMENT_CNT);
 
     unsigned long nextSize = FIRST_HEAP_PTR_SEG_SIZE;
     unsigned long maxObjCnt = 0;
@@ -47,7 +47,7 @@ void KN_InitGc(Kana* kana)
     for (int i = 0; i < MAX_SEGMENT_CNT; i++) {
         maxObjCnt += nextSize;
         // KN_DEBUG("seg vec index %d, size %d\n", i, nextSize);
-        KxVector_SetIndex(kana->segmentMaxSizeVec, i, KX_VEC_BOX_UINT(nextSize));
+        KnVector_SetIndex(kana->segmentMaxSizeVec, i, KN_VEC_BOX_UINT(nextSize));
         
         // align to n *4
         int notAligned = nextSize * 1.618;
@@ -104,25 +104,25 @@ KN KN_NewDynamicMemObj(Kana* kana, size_t size, kon_uint_t tag)
 
 void KN_ShowGcStatics(Kana* kana)
 {
-    int barrierObjLength = KxList_Length(kana->writeBarrierGen);
+    int barrierObjLength = KnList_Length(kana->writeBarrierGen);
 
     long long totalObjCnt = KN_CurrentObjCount(kana);
-    KN_DEBUG("HeapPtrSegs count : %d, totalObjCnt %lld, barrierObjLength %d\n", KxList_Length(kana->heapPtrSegs), totalObjCnt, barrierObjLength);
+    KN_DEBUG("HeapPtrSegs count : %d, totalObjCnt %lld, barrierObjLength %d\n", KnList_Length(kana->heapPtrSegs), totalObjCnt, barrierObjLength);
 }
 
 
-int KN_PushToHeapPtrSeg(Kana* kana, KxList* heapPtrSegs, KN ptr)
+int KN_PushToHeapPtrSeg(Kana* kana, KnList* heapPtrSegs, KN ptr)
 {
-    KxListNode* iter = KxList_IterHead(heapPtrSegs);
-    // KN_DEBUG("KxList_IterHead(heapPtrSegs) addr %x\n", iter);
+    KnListNode* iter = KnList_IterHead(heapPtrSegs);
+    // KN_DEBUG("KnList_IterHead(heapPtrSegs) addr %x\n", iter);
     int segIndex = -1;
     while (iter != KNBOX_NIL) {
         segIndex += 1;
-        KxListNode* next = KxList_IterNext(iter);
+        KnListNode* next = KnList_IterNext(iter);
 
-        KxVector* segment = (KxVector*)KxList_IterVal(iter);
-        if (KxVector_SpaceLeft(segment) > 0) {
-            KxVector_Push(segment, ptr.asU64);
+        KnVector* segment = (KnVector*)KnList_IterVal(iter);
+        if (KnVector_SpaceLeft(segment) > 0) {
+            KnVector_Push(segment, ptr.asU64);
             return 1;
         }
         
@@ -130,19 +130,19 @@ int KN_PushToHeapPtrSeg(Kana* kana, KxList* heapPtrSegs, KN ptr)
     }
 
     // all segments are full
-    if (KxList_Length(heapPtrSegs) >= MAX_SEGMENT_CNT) {
-        KN_DEBUG("error!!! reach gc ptr cnt limit, current seg cnt %d\n", KxList_Length(heapPtrSegs));
+    if (KnList_Length(heapPtrSegs) >= MAX_SEGMENT_CNT) {
+        KN_DEBUG("error!!! reach gc ptr cnt limit, current seg cnt %d\n", KnList_Length(heapPtrSegs));
         exit(1);
         // return -1;
     }
     // create a new segment
     segIndex += 1;
-    int nextSize = KX_VEC_UNBOX_UINT(KxVector_AtIndex(kana->segmentMaxSizeVec, segIndex));
-    KxVector* nextSeg = KxVector_InitWithCapacity(nextSize);
-    KxVector_Push(nextSeg, ptr.asU64);
+    int nextSize = KN_VEC_UNBOX_UINT(KnVector_AtIndex(kana->segmentMaxSizeVec, segIndex));
+    KnVector* nextSeg = KnVector_InitWithCapacity(nextSize);
+    KnVector_Push(nextSeg, ptr.asU64);
     KN_DEBUG("\n**create a new segment, seg index %d , new seg size %d\n", segIndex, nextSize);
 
-    KxList_Push(heapPtrSegs, nextSeg);
+    KnList_Push(heapPtrSegs, nextSeg);
 
     
     return 1;
@@ -150,13 +150,13 @@ int KN_PushToHeapPtrSeg(Kana* kana, KxList* heapPtrSegs, KN ptr)
 
 long long KN_CurrentObjCount(Kana* kana)
 {
-    KxListNode* iter = KxList_IterHead(kana->heapPtrSegs);
+    KnListNode* iter = KnList_IterHead(kana->heapPtrSegs);
     long long count = 0;
     while (iter != KNBOX_NIL) {
-        KxListNode* next = KxList_IterNext(iter);
+        KnListNode* next = KnList_IterNext(iter);
 
-        KxVector* segment = (KxVector*)KxList_IterVal(iter);
-        count += KxVector_Length(segment);
+        KnVector* segment = (KnVector*)KnList_IterVal(iter);
+        count += KnVector_Length(segment);
 
         iter = next;
     }
@@ -183,14 +183,14 @@ bool KN_HasEnoughSegSpace(Kana* kana, int requireSize)
 
 void KN_PushWriteBarrierObjsToHeapPtrSeg(Kana* kana)
 {
-    klist_val_t konPtr = KxList_Shift(kana->writeBarrierGen);
+    klist_val_t konPtr = KnList_Shift(kana->writeBarrierGen);
 
-    while (konPtr != KX_LIST_UNDEF) {
+    while (konPtr != KN_LIST_UNDEF) {
         ((KonBase*)konPtr)->gcMarkColor = KN_GC_MARK_WHITE;
         // add to segment
         KN_PushToHeapPtrSeg(kana, kana->heapPtrSegs, (KN)konPtr);
 
-        konPtr = KxList_Shift(kana->writeBarrierGen);
+        konPtr = KnList_Shift(kana->writeBarrierGen);
     }
 }
 
@@ -202,7 +202,7 @@ void KN_SwitchContinuation(Kana* kana, KonContinuation* cont)
     kana->currCont = cont;
     
     // write barrier list size
-    int barrierObjLength = KxList_Length(kana->writeBarrierGen);
+    int barrierObjLength = KnList_Length(kana->writeBarrierGen);
     bool firstTry = KN_HasEnoughSegSpace(kana, barrierObjLength);
     if (!firstTry) {
         long long totalObjCnt = KN_CurrentObjCount(kana);
@@ -232,7 +232,7 @@ void KN_RecordNewKonNode(Kana* kana, KN newVal)
     // add the pointers created between two continuation switch
     // to a temp list
     KN_FIELD(newVal, Base, gcMarkColor) = KN_GC_MARK_GRAY;
-    KxList_Push(kana->writeBarrierGen, newVal.asU64);
+    KnList_Push(kana->writeBarrierGen, newVal.asU64);
 }
 
 // safepoint:
@@ -259,31 +259,31 @@ void KN_MarkPhase(Kana* kana)
 {
     // code pointers should be reserved
     if (kana->currCode.asU64 != NULL) {
-        KxList_Push(kana->markTaskQueue, kana->currCode.asU64);
+        KnList_Push(kana->markTaskQueue, kana->currCode.asU64);
     }
 
     // pointers which are not set to pointer addr segments should be reserved
-    KxListNode* iter = KxList_IterHead(kana->writeBarrierGen);
+    KnListNode* iter = KnList_IterHead(kana->writeBarrierGen);
     while (iter != KNBOX_NIL) {
-        KxListNode* next = KxList_IterNext(iter);
+        KnListNode* next = KnList_IterNext(iter);
 
-        KN ptr = (KN)KxList_IterVal(iter);
+        KN ptr = (KN)KnList_IterVal(iter);
 
         // add to MarkTaskQueue
-        KxList_Push(kana->markTaskQueue, ptr.asU64);
+        KnList_Push(kana->markTaskQueue, ptr.asU64);
 
         iter = next;
     }
 
     // msg dispatchers should be reserved
-    int vecLen = KxVector_Length(kana->msgDispatchers);
+    int vecLen = KnVector_Length(kana->msgDispatchers);
     for (int i = 0; i < vecLen; i++) {
-        KN dispatcherPtr = (KN)KxVector_AtIndex(kana->msgDispatchers, i);
-        KxList_Push(kana->markTaskQueue, dispatcherPtr.asU64);
+        KN dispatcherPtr = (KN)KnVector_AtIndex(kana->msgDispatchers, i);
+        KnList_Push(kana->markTaskQueue, dispatcherPtr.asU64);
     }
 
     if (kana->currCont != NULL) {
-        KxList_Push(kana->markTaskQueue, kana->currCont);
+        KnList_Push(kana->markTaskQueue, kana->currCont);
     }
 
     KN_Mark(kana, kana->markTaskQueue, KN_GC_MARK_BLACK);
@@ -291,19 +291,19 @@ void KN_MarkPhase(Kana* kana)
     // FIXME: this is a workaround
     // to avoid free AST nodes
     // reserve code pointers
-    // KxList* astTaskQueue = KxList_Init();
-    // KxList_Push(astTaskQueue, kana->currCode);
+    // KnList* astTaskQueue = KnList_Init();
+    // KnList_Push(astTaskQueue, kana->currCode);
     // KN_Mark(kana, astTaskQueue, KN_GC_MARK_BLACK);
-    // KxList_Destroy(astTaskQueue);
+    // KnList_Destroy(astTaskQueue);
 }
 
 // 1. shift a KonValue
 // 2. mark this value to black
 // 3. add all children to this queue
-void KN_Mark(Kana* kana, KxList* taskQueue, char color)
+void KN_Mark(Kana* kana, KnList* taskQueue, char color)
 {
-    while (KxList_Length(kana->markTaskQueue) > 0) {
-        KonBase* konPtr = KxList_Shift(taskQueue);
+    while (KnList_Length(kana->markTaskQueue) > 0) {
+        KonBase* konPtr = KnList_Shift(taskQueue);
         KN_MarkNode(konPtr, taskQueue, color);
         
     }
@@ -313,11 +313,11 @@ void KN_SweepPhase(Kana* kana)
 {
 
     // mark kana->writeBarrierGen objs to gray
-    KxListNode* iter = KxList_IterHead(kana->writeBarrierGen);
+    KnListNode* iter = KnList_IterHead(kana->writeBarrierGen);
     while (iter != KNBOX_NIL) {
-        KxListNode* next = KxList_IterNext(iter);
+        KnListNode* next = KnList_IterNext(iter);
 
-        KonBase* ptr = (KonBase*)KxList_IterVal(iter);
+        KonBase* ptr = (KonBase*)KnList_IterVal(iter);
 
         ptr->gcMarkColor = KN_GC_MARK_GRAY;
 
@@ -335,9 +335,9 @@ void KN_ResetAndCopyPtrSegList(Kana* kana)
 {
     KN_DEBUG("KN_ResetAndCopyPtrSegList\n");
     // shink the segment list
-    KxList* newPtrSegList = KN_CreateHeapPtrSegList(kana);
+    KnList* newPtrSegList = KN_CreateHeapPtrSegList(kana);
     
-    KxListNode* iter = KxList_IterHead(kana->heapPtrSegs);
+    KnListNode* iter = KnList_IterHead(kana->heapPtrSegs);
     
     unsigned long whiteCnt = 0;
     unsigned long grayCnt = 0;
@@ -345,13 +345,13 @@ void KN_ResetAndCopyPtrSegList(Kana* kana)
     unsigned long blackCnt = 0;
     
     while (iter != KNBOX_NIL) {
-        KxListNode* next = KxList_IterNext(iter);
+        KnListNode* next = KnList_IterNext(iter);
 
-        KxVector* segment = (KxVector*)KxList_IterVal(iter);
+        KnVector* segment = (KnVector*)KnList_IterVal(iter);
 
-        int vecLen = KxVector_Length(segment);
+        int vecLen = KnVector_Length(segment);
         for (int i = 0; i < vecLen; i++) {
-            KonBase* konPtr = (KonBase*)KxVector_AtIndex(segment, i);
+            KonBase* konPtr = (KonBase*)KnVector_AtIndex(segment, i);
             if (konPtr->gcMarkColor == KN_GC_MARK_WHITE) {
                 whiteCnt += 1;
                 KN_DestroyNode(kana, konPtr);
@@ -371,8 +371,8 @@ void KN_ResetAndCopyPtrSegList(Kana* kana)
             KN_PushToHeapPtrSeg(kana, newPtrSegList, KON_2_KN(konPtr));
         }
 
-        KxVector_Destroy(segment);
-        KxList_DelNode(kana->heapPtrSegs, iter);
+        KnVector_Destroy(segment);
+        KnList_DelNode(kana->heapPtrSegs, iter);
 
         iter = next;
     }
@@ -380,13 +380,13 @@ void KN_ResetAndCopyPtrSegList(Kana* kana)
     KN_DEBUG("ptr color cnt : white %ld, gray %ld, red %ld, black %ld\n", whiteCnt, grayCnt, redCnt, blackCnt);
     
     // free old kana->heapPtrSegs
-    KxList_Destroy(kana->heapPtrSegs);
+    KnList_Destroy(kana->heapPtrSegs);
 
     kana->heapPtrSegs = newPtrSegList;
 }
 
 
-void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
+void KN_MarkNode(KonBase* node, KnList* markTaskQueue, char color)
 {
     if (node == NULL || !KN_IS_POINTER(KON_2_KN(node))) {
         return;
@@ -412,9 +412,9 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
         }
         case KN_T_PAIR: {
             KonPair* pair = (KonPair*)node;
-            KxList_Push(markTaskQueue, pair->prev.asU64);
-            KxList_Push(markTaskQueue, pair->next.asU64);
-            KxList_Push(markTaskQueue, pair->body.asU64);
+            KnList_Push(markTaskQueue, pair->prev.asU64);
+            KnList_Push(markTaskQueue, pair->next.asU64);
+            KnList_Push(markTaskQueue, pair->body.asU64);
             break;
         }
         case KN_T_SYMBOL: {
@@ -430,161 +430,161 @@ void KN_MarkNode(KonBase* node, KxList* markTaskQueue, char color)
             break;
         }
         case KN_T_VECTOR: {
-            KxVector* vec = ((KonVector*)node)->vector;
-            for (int i = 0; i < KxVector_Length(vec); i++) {
-                KxList_Push(markTaskQueue, KxVector_AtIndex(vec, i));
+            KnVector* vec = ((KonVector*)node)->vector;
+            for (int i = 0; i < KnVector_Length(vec); i++) {
+                KnList_Push(markTaskQueue, KnVector_AtIndex(vec, i));
             }
             break;
         }
         case KN_T_TABLE: {
-            KxHashTable* table = ((KonTable*)node)->table;
-            KxHashTableIter iter = KxHashTable_IterHead(table);
+            KnHashTable* table = ((KonTable*)node)->table;
+            KnHashTableIter iter = KnHashTable_IterHead(table);
             while (iter != KNBOX_NIL) {
-                KxHashTableIter next = KxHashTable_IterNext(table, iter);
-                KxList_Push(markTaskQueue, KxHashTable_IterGetVal(table, iter));
+                KnHashTableIter next = KnHashTable_IterNext(table, iter);
+                KnList_Push(markTaskQueue, KnHashTable_IterGetVal(table, iter));
                 iter = next;
             }
             break;
         }
         case KN_T_MAP: {
-            KxHashTable* map = ((KonMap*)node)->map;
-            KxHashTableIter iter = KxHashTable_IterHead(map);
+            KnHashTable* map = ((KonMap*)node)->map;
+            KnHashTableIter iter = KnHashTable_IterHead(map);
             while (iter != KNBOX_NIL) {
-                KxHashTableIter next = KxHashTable_IterNext(map, iter);
-                KxList_Push(markTaskQueue, KxHashTable_IterGetVal(map, iter));
+                KnHashTableIter next = KnHashTable_IterNext(map, iter);
+                KnList_Push(markTaskQueue, KnHashTable_IterGetVal(map, iter));
                 iter = next;
             }
             break;
         }
         case KN_T_CELL: {
             KonCell* cell = (KonCell*)node;
-            KxList_Push(markTaskQueue, cell->core.asU64);
-            KxList_Push(markTaskQueue, cell->map);
-            KxList_Push(markTaskQueue, cell->table);
-            KxList_Push(markTaskQueue, cell->list);
+            KnList_Push(markTaskQueue, cell->core.asU64);
+            KnList_Push(markTaskQueue, cell->map);
+            KnList_Push(markTaskQueue, cell->table);
+            KnList_Push(markTaskQueue, cell->list);
             if (cell->next != KNBOX_NIL) {
-                KxList_Push(markTaskQueue, cell->next);
+                KnList_Push(markTaskQueue, cell->next);
             }
             break;
         }
         case KN_T_PARAM: {
-            KxHashTable* table = ((KonParam*)node)->table;;
-            KxHashTableIter iter = KxHashTable_IterHead(table);
+            KnHashTable* table = ((KonParam*)node)->table;;
+            KnHashTableIter iter = KnHashTable_IterHead(table);
             while (iter != KNBOX_NIL) {
-                KxHashTableIter next = KxHashTable_IterNext(table, iter);
-                KxList_Push(markTaskQueue, KxHashTable_IterGetVal(table, iter));
+                KnHashTableIter next = KnHashTable_IterNext(table, iter);
+                KnList_Push(markTaskQueue, KnHashTable_IterGetVal(table, iter));
                 iter = next;
             }
             break;
         }
         case KN_T_BLOCK: {
             KonBlock* pair = (KonBlock*)node;
-            KxList_Push(markTaskQueue, pair->prev.asU64);
-            KxList_Push(markTaskQueue, pair->next.asU64);
-            KxList_Push(markTaskQueue, pair->body.asU64);
+            KnList_Push(markTaskQueue, pair->prev.asU64);
+            KnList_Push(markTaskQueue, pair->next.asU64);
+            KnList_Push(markTaskQueue, pair->body.asU64);
             break;
         }
         case KN_T_QUOTE: {
             KonQuote* quote = (KonQuote*)node;
-            KxList_Push(markTaskQueue, quote->inner.asU64);
+            KnList_Push(markTaskQueue, quote->inner.asU64);
             break;
         }
         case KN_T_QUASIQUOTE: {
             KonQuasiquote* quasi = (KonQuasiquote*)node;
-            KxList_Push(markTaskQueue, quasi->inner.asU64);
+            KnList_Push(markTaskQueue, quasi->inner.asU64);
             break;
         }
         case KN_T_UNQUOTE: {
             KonUnquote* unquote = (KonUnquote*)node;
-            KxList_Push(markTaskQueue, unquote->inner.asU64);
+            KnList_Push(markTaskQueue, unquote->inner.asU64);
             break;
         }
         case KN_T_ENV: {
             // BIND TABLE
             KonEnv* env = (KonEnv*)node;
-            KxHashTable* tableBindings = env->bindings;
-            KxHashTableIter iterBindings = KxHashTable_IterHead(tableBindings);
+            KnHashTable* tableBindings = env->bindings;
+            KnHashTableIter iterBindings = KnHashTable_IterHead(tableBindings);
             while (iterBindings != KNBOX_NIL) {
-                KxHashTableIter next = KxHashTable_IterNext(tableBindings, iterBindings);
-                KxList_Push(markTaskQueue, KxHashTable_IterGetVal(tableBindings, iterBindings));
+                KnHashTableIter next = KnHashTable_IterNext(tableBindings, iterBindings);
+                KnList_Push(markTaskQueue, KnHashTable_IterGetVal(tableBindings, iterBindings));
                 iterBindings = next;
             }
             
-            KxHashTable* tableDispatchers = env->bindings;
-            KxHashTableIter iterDispatchers = KxHashTable_IterHead(tableDispatchers);
+            KnHashTable* tableDispatchers = env->bindings;
+            KnHashTableIter iterDispatchers = KnHashTable_IterHead(tableDispatchers);
             while (iterDispatchers != KNBOX_NIL) {
-                KxHashTableIter next = KxHashTable_IterNext(tableDispatchers, iterDispatchers);
-                KxList_Push(markTaskQueue, KxHashTable_IterGetVal(tableDispatchers, iterDispatchers));
+                KnHashTableIter next = KnHashTable_IterNext(tableDispatchers, iterDispatchers);
+                KnList_Push(markTaskQueue, KnHashTable_IterGetVal(tableDispatchers, iterDispatchers));
                 iterDispatchers = next;
             }
 
-            KxList_Push(markTaskQueue, env->parent);
+            KnList_Push(markTaskQueue, env->parent);
             break;
         }
         case KN_T_ACCESSOR: {
             KonAccessor* slot = (KonAccessor*)node;
             if (slot->isDir) {
-                KxHashTable* dirItems = slot->dir;
-                KxHashTableIter iterDirItems = KxHashTable_IterHead(dirItems);
+                KnHashTable* dirItems = slot->dir;
+                KnHashTableIter iterDirItems = KnHashTable_IterHead(dirItems);
                 while (iterDirItems != KNBOX_NIL) {
-                    KxHashTableIter next = KxHashTable_IterNext(dirItems, iterDirItems);
-                    KxList_Push(markTaskQueue, KxHashTable_IterGetVal(dirItems, iterDirItems));
+                    KnHashTableIter next = KnHashTable_IterNext(dirItems, iterDirItems);
+                    KnList_Push(markTaskQueue, KnHashTable_IterGetVal(dirItems, iterDirItems));
                     iterDirItems = next;
                 }
             }
             else {
-                KxList_Push(markTaskQueue, slot->value.asU64);
+                KnList_Push(markTaskQueue, slot->value.asU64);
             }
             break;
         }
         case KN_T_MSG_DISPATCHER: {
             KonMsgDispatcher* dispatcher = (KonMsgDispatcher*)node;
-            KxList_Push(markTaskQueue, dispatcher->onSymbol);
-            KxList_Push(markTaskQueue, dispatcher->onSyntaxMarker);
-            KxList_Push(markTaskQueue, dispatcher->onMethodCall);
-            KxList_Push(markTaskQueue, dispatcher->onVisitList);
-            KxList_Push(markTaskQueue, dispatcher->onVisitVector);
-            KxList_Push(markTaskQueue, dispatcher->onVisitTable);
-            KxList_Push(markTaskQueue, dispatcher->onVisitCell);
-            KxList_Push(markTaskQueue, dispatcher->onOtherType);
+            KnList_Push(markTaskQueue, dispatcher->onSymbol);
+            KnList_Push(markTaskQueue, dispatcher->onSyntaxMarker);
+            KnList_Push(markTaskQueue, dispatcher->onMethodCall);
+            KnList_Push(markTaskQueue, dispatcher->onVisitList);
+            KnList_Push(markTaskQueue, dispatcher->onVisitVector);
+            KnList_Push(markTaskQueue, dispatcher->onVisitTable);
+            KnList_Push(markTaskQueue, dispatcher->onVisitCell);
+            KnList_Push(markTaskQueue, dispatcher->onOtherType);
             break;
         }
         case KN_T_CONTINUATION: {
             KonContinuation* cont = (KonContinuation*)node;
 
             if (cont->type == KN_CONT_NATIVE_CALLBACK) {
-                KxHashTable* table = cont->native.memoTable;
-                KxHashTableIter iter = KxHashTable_IterHead(table);
+                KnHashTable* table = cont->native.memoTable;
+                KnHashTableIter iter = KnHashTable_IterHead(table);
                 while (iter != KNBOX_NIL) {
-                    KxHashTableIter next = KxHashTable_IterNext(table, iter);
-                    KxList_Push(markTaskQueue, KxHashTable_IterGetVal(table, iter));
+                    KnHashTableIter next = KnHashTable_IterNext(table, iter);
+                    KnList_Push(markTaskQueue, KnHashTable_IterGetVal(table, iter));
                     iter = next;
                 }
             }
             else if (cont->type == KN_CONT_EVAL_CLAUSE_LIST) {
-                KxList_Push(markTaskQueue, cont->evalClauseList.subj.asU64);
-                KxList_Push(markTaskQueue, cont->evalClauseList.restClauses.asU64);
+                KnList_Push(markTaskQueue, cont->evalClauseList.subj.asU64);
+                KnList_Push(markTaskQueue, cont->evalClauseList.restClauses.asU64);
             }
             else if (cont->type == KN_CONT_EVAL_CLAUSE_ARGS) {
-                KxList_Push(markTaskQueue, cont->evalClauseArgs.subj.asU64);
-                KxList_Push(markTaskQueue, cont->evalClauseArgs.restArgList.asU64);
-                KxList_Push(markTaskQueue, cont->evalClauseArgs.evaledArgList.asU64);
+                KnList_Push(markTaskQueue, cont->evalClauseArgs.subj.asU64);
+                KnList_Push(markTaskQueue, cont->evalClauseArgs.restArgList.asU64);
+                KnList_Push(markTaskQueue, cont->evalClauseArgs.evaledArgList.asU64);
             }
             else {
-                KxList_Push(markTaskQueue, cont->restJobs.asU64);
+                KnList_Push(markTaskQueue, cont->restJobs.asU64);
             }
 
-            KxList_Push(markTaskQueue, cont->env);
-            KxList_Push(markTaskQueue, cont->cont);
+            KnList_Push(markTaskQueue, cont->env);
+            KnList_Push(markTaskQueue, cont->cont);
             break;
         }
         case KN_T_PROCEDURE: {
             KonProcedure* proc = (KonProcedure*)node;
             if (proc->type != KN_NATIVE_FUNC && proc->type != KN_NATIVE_OBJ_METHOD) {
-                KxList_Push(markTaskQueue, proc->composite.argList.asU64);
-                KxList_Push(markTaskQueue, proc->composite.body.asU64);
-                KxList_Push(markTaskQueue, proc->composite.lexicalEnv);
-                KxList_Push(markTaskQueue, proc->composite.captureList.asU64);
+                KnList_Push(markTaskQueue, proc->composite.argList.asU64);
+                KnList_Push(markTaskQueue, proc->composite.body.asU64);
+                KnList_Push(markTaskQueue, proc->composite.lexicalEnv);
+                KnList_Push(markTaskQueue, proc->composite.captureList.asU64);
             }
             break;
         }
@@ -647,7 +647,7 @@ void KN_DestroyNode(Kana* kana, KonBase* node)
         case KN_T_VECTOR: {
             KonVector* vector = (KonVector*)node;
             if (vector->vector != NULL) {
-                KxVector_Destroy(vector->vector);
+                KnVector_Destroy(vector->vector);
                 vector->vector = NULL;
             }
             break;
@@ -655,15 +655,15 @@ void KN_DestroyNode(Kana* kana, KonBase* node)
         case KN_T_TABLE: {
             KonTable* table = (KonTable*)node;
             if (table->table != NULL) {
-                KxHashTable_Destroy(table->table);
+                KnHashTable_Destroy(table->table);
                 table->table = NULL;
             }
             break;
         }
         case KN_T_MAP: {
-            KxHashTable* map = (KonMap*)node;
+            KnHashTable* map = (KonMap*)node;
             if (map != NULL) {
-                KxHashTable_Destroy(map);
+                KnHashTable_Destroy(map);
                 map = NULL;
             }
             break;
@@ -675,7 +675,7 @@ void KN_DestroyNode(Kana* kana, KonBase* node)
         case KN_T_PARAM: {
             KonParam* table = (KonParam*)node;
             if (table->table != NULL) {
-                KxHashTable_Destroy(table->table);
+                KnHashTable_Destroy(table->table);
                 table->table = NULL;
             }
             break;
@@ -700,7 +700,7 @@ void KN_DestroyNode(Kana* kana, KonBase* node)
                 
             }
             if (env->bindings != NULL) {
-                KxHashTable_Destroy(env->bindings);
+                KnHashTable_Destroy(env->bindings);
                 env->bindings = NULL;
             }
             break;
@@ -708,7 +708,7 @@ void KN_DestroyNode(Kana* kana, KonBase* node)
         case KN_T_ACCESSOR: {
             KonAccessor* slot = (KonAccessor*)node;
             if (slot->isDir && slot->dir != NULL) {
-                KxHashTable_Destroy(slot->dir);
+                KnHashTable_Destroy(slot->dir);
                 slot->dir = NULL;
             }
             break;
@@ -720,10 +720,10 @@ void KN_DestroyNode(Kana* kana, KonBase* node)
         case KN_T_CONTINUATION: {
             KonContinuation* cont = (KonContinuation*)node;
             if (cont->type == KN_CONT_NATIVE_CALLBACK && cont->native.memoTable) {
-                KxHashTable* table = cont->native.memoTable;
+                KnHashTable* table = cont->native.memoTable;
                 KN_DEBUG("destroy memo table, table addr %x", table);
-                KxHashTable_PrintKeys(table);
-                KxHashTable_Destroy(table);
+                KnHashTable_PrintKeys(table);
+                KnHashTable_Destroy(table);
                 cont->native.memoTable = NULL;
             }
 

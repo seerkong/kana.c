@@ -14,7 +14,7 @@ SUITE(test_hashtable_iter);
 
 
 TEST Table_IterNext(void) {
-    KxHashTable* table = KxHashTable_Init(4);
+    KnHashTable* table = KnHashTable_Init(4);
 
     char* value1 = "stdlib.h";
     char* value2 = "stdio.h";
@@ -24,30 +24,30 @@ TEST Table_IterNext(void) {
     char* value6 = "stdint.h";
     char* value7 = "kon_hashmap.h";
 
-    KxHashTable_PutKv(table, "abc", value1);
-    KxHashTable_PutKv(table, "bcd", value2);
-    KxHashTable_PutKv(table, "cde", value3);
-    KxHashTable_PutKv(table, "efg", value4);
-    KxHashTable_PutKv(table, "hi", value5);
-    KxHashTable_PutKv(table, "jklmn", value6);
-    KxHashTable_PutKv(table, "opqrstuvwxyz", value7);
+    KnHashTable_PutKv(table, "abc", value1);
+    KnHashTable_PutKv(table, "bcd", value2);
+    KnHashTable_PutKv(table, "cde", value3);
+    KnHashTable_PutKv(table, "efg", value4);
+    KnHashTable_PutKv(table, "hi", value5);
+    KnHashTable_PutKv(table, "jklmn", value6);
+    KnHashTable_PutKv(table, "opqrstuvwxyz", value7);
 
-    KxHashTableIter iter = KxHashTable_IterHead(table);
-    while (iter != KX_HASH_TABLE_NIL) {
-        KxHashTableIter next = KxHashTable_IterNext(table, iter);
-        const char* key = KxHashTable_IterGetKey(table, iter);
-        char* val = (char*)KxHashTable_IterGetVal(table, iter);
+    KnHashTableIter iter = KnHashTable_IterHead(table);
+    while (iter != KN_HASH_TABLE_NIL) {
+        KnHashTableIter next = KnHashTable_IterNext(table, iter);
+        const char* key = KnHashTable_IterGetKey(table, iter);
+        char* val = (char*)KnHashTable_IterGetVal(table, iter);
         printf("iter next , key %s, val %s\n", key, val);
         iter = next;
     }
-    ASSERT_EQm("destroy ptr", KxHashTable_Destroy(table), 1);
+    ASSERT_EQm("destroy ptr", KnHashTable_Destroy(table), 1);
     PASS();
 }
 
 
 
 TEST Table_IterPrev(void) {
-    KxHashTable* table = KxHashTable_Init(4);
+    KnHashTable* table = KnHashTable_Init(4);
 
     char* value1 = "stdlib.h";
     char* value2 = "stdio.h";
@@ -57,24 +57,24 @@ TEST Table_IterPrev(void) {
     char* value6 = "stdint.h";
     char* value7 = "kon_hashmap.h";
 
-    KxHashTable_PutKv(table, "abc", value1);
-    KxHashTable_PutKv(table, "bcd", value2);
-    KxHashTable_PutKv(table, "cde", value3);
-    KxHashTable_PutKv(table, "efg", value4);
-    KxHashTable_PutKv(table, "hi", value5);
-    KxHashTable_PutKv(table, "jklmn", value6);
-    KxHashTable_PutKv(table, "opqrstuvwxyz", value7);
+    KnHashTable_PutKv(table, "abc", value1);
+    KnHashTable_PutKv(table, "bcd", value2);
+    KnHashTable_PutKv(table, "cde", value3);
+    KnHashTable_PutKv(table, "efg", value4);
+    KnHashTable_PutKv(table, "hi", value5);
+    KnHashTable_PutKv(table, "jklmn", value6);
+    KnHashTable_PutKv(table, "opqrstuvwxyz", value7);
 
-    KxHashTableIter iter = KxHashTable_IterTail(table);
-    while (iter != KX_HASH_TABLE_NIL) {
-        KxHashTableIter next = KxHashTable_IterPrev(table, iter);
-        const char* key = KxHashTable_IterGetKey(table, iter);
-        char* val = (char*)KxHashTable_IterGetVal(table, iter);
+    KnHashTableIter iter = KnHashTable_IterTail(table);
+    while (iter != KN_HASH_TABLE_NIL) {
+        KnHashTableIter next = KnHashTable_IterPrev(table, iter);
+        const char* key = KnHashTable_IterGetKey(table, iter);
+        char* val = (char*)KnHashTable_IterGetVal(table, iter);
         printf("iter next , key %s, val %s\n", key, val);
         iter = next;
     }
 
-    ASSERT_EQm("destroy ptr", KxHashTable_Destroy(table), 1);
+    ASSERT_EQm("destroy ptr", KnHashTable_Destroy(table), 1);
     PASS();
 }
 

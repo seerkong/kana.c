@@ -8,15 +8,33 @@
 
 
 typedef struct _NativeProcedureConf NativeProcedureConf;
+typedef struct _NativeExportItem NativeExportItem;
+typedef struct _NativeExportConf NativeExportConf;
 
 struct _NativeProcedureConf {
     KonProcedureType type;
-    char* name;
     KonNativeFuncRef funcRef;
     int paramNum;   // arg num before ...
     int hasVAList;   // if have ... in arg list
     int hasVAMap;   // variable argument map
     int hasBlock;
+};
+
+enum NativeExportItemType {
+    KN_NATIVE_EXPORT_PROC,
+};
+
+struct _NativeExportItem {
+    enum NativeExportItemType type;
+    char* name;
+    union {
+        NativeProcedureConf proc;
+    };
+};
+
+struct _NativeExportConf {
+    int len;
+    NativeExportItem* items;
 };
 
 

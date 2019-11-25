@@ -594,16 +594,16 @@ KN KN_VectorStringify(Kana* kana, KN source, bool newLine, int depth, char* padd
     KonString* result = KN_NEW_CONST_OBJ(kana, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
-    KxVector* items = KN_FIELD(source, Vector, vector);
+    KnVector* items = KN_FIELD(source, Vector, vector);
 
-    int vecLen = KxVector_Length(items);
+    int vecLen = KnVector_Length(items);
     
     if (newLine) {
         KxStringBuffer_AppendCstr(result->string, "<\n");
 
         
         for (int i = 0; i < vecLen; i++) {
-            KN item = (KN)KxVector_AtIndex(items, i);
+            KN item = (KN)KnVector_AtIndex(items, i);
             KN itemToKonStr = KN_ToFormatString(kana, item, true, depth + 1, padding);
 
             AddLeftPadding(result->string, depth, padding);
@@ -619,7 +619,7 @@ KN KN_VectorStringify(Kana* kana, KN source, bool newLine, int depth, char* padd
         KxStringBuffer_AppendCstr(result->string, "<");
         
         for (int i = 0; i < vecLen; i++) {
-            KN item = (KN)KxVector_AtIndex(items, i);
+            KN item = (KN)KnVector_AtIndex(items, i);
             
             KN itemToKonStr = KN_ToFormatString(kana, item, false, depth + 1, padding);
             KxStringBuffer_AppendStringBuffer(result->string, KN_UNBOX_STRING(itemToKonStr));
@@ -792,17 +792,17 @@ KN KN_TableStringify(Kana* kana, KN source, bool newLine, int depth, char* paddi
     KonString* result = KN_NEW_CONST_OBJ(kana, KonString, KN_T_STRING);
     result->string = KxStringBuffer_New();
 
-    KxHashTable* hashTable = KN_FIELD(source, Table, table);
-    KxHashTableIter iter = KxHashTable_IterHead(hashTable);
+    KnHashTable* hashTable = KN_FIELD(source, Table, table);
+    KnHashTableIter iter = KnHashTable_IterHead(hashTable);
 
     if (newLine) {
         KxStringBuffer_AppendCstr(result->string, "(\n");
 
 
         while (iter != KNBOX_NIL) {
-            KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
-            const char* itemKey = KxHashTable_IterGetKey(hashTable, iter);
-            KN itemValue = (KN)KxHashTable_IterGetVal(hashTable, iter);
+            KnHashTableIter next = KnHashTable_IterNext(hashTable, iter);
+            const char* itemKey = KnHashTable_IterGetKey(hashTable, iter);
+            KN itemValue = (KN)KnHashTable_IterGetVal(hashTable, iter);
 
             KN itemToKonStr = KN_ToFormatString(kana, itemValue, true, depth + 1, padding);
             if (itemKey != NULL) {
@@ -827,9 +827,9 @@ KN KN_TableStringify(Kana* kana, KN source, bool newLine, int depth, char* paddi
         KxStringBuffer_AppendCstr(result->string, "(");
 
         while (iter != KNBOX_NIL) {
-            KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
-            const char* itemKey = KxHashTable_IterGetKey(hashTable, iter);
-            KN itemValue = (KN)KxHashTable_IterGetVal(hashTable, iter);
+            KnHashTableIter next = KnHashTable_IterNext(hashTable, iter);
+            const char* itemKey = KnHashTable_IterGetKey(hashTable, iter);
+            KN itemValue = (KN)KnHashTable_IterGetVal(hashTable, iter);
 
             KN itemToKonStr = KN_ToFormatString(kana, itemValue, false, depth + 1, padding);
 
@@ -855,13 +855,13 @@ KN KN_TableStringify(Kana* kana, KN source, bool newLine, int depth, char* paddi
 
 KN KN_ParamTableToList(Kana* kana, KN source)
 {
-    KxHashTable* hashTable = KN_FIELD(source, Param, table);
-    KxHashTableIter iter = KxHashTable_IterHead(hashTable);
+    KnHashTable* hashTable = KN_FIELD(source, Param, table);
+    KnHashTableIter iter = KnHashTable_IterHead(hashTable);
     KN result = KN_NIL;
     while (iter != KNBOX_NIL) {
-        KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
-        const char* itemKey = KxHashTable_IterGetKey(hashTable, iter);
-        KN itemValue = (KN)KxHashTable_IterGetVal(hashTable, iter);
+        KnHashTableIter next = KnHashTable_IterNext(hashTable, iter);
+        const char* itemKey = KnHashTable_IterGetKey(hashTable, iter);
+        KN itemValue = (KN)KnHashTable_IterGetVal(hashTable, iter);
         result = KN_CONS(kana, itemValue, result);
         iter = next;
     }
@@ -899,12 +899,12 @@ KN KN_CellStringify(Kana* kana, KN source, bool newLine, int depth, char* paddin
             }
 
             if (innerMap != KNBOX_UNDEF) {
-                KxHashTable* unboxedMap = innerMap->map;
-                KxHashTableIter mapIter = KxHashTable_IterHead(unboxedMap);
+                KnHashTable* unboxedMap = innerMap->map;
+                KnHashTableIter mapIter = KnHashTable_IterHead(unboxedMap);
                 while (mapIter != KNBOX_NIL) {
-                    KxHashTableIter mapIterNext = KxHashTable_IterNext(unboxedMap, mapIter);
-                    const char* mapKey = KxHashTable_IterGetKey(unboxedMap, mapIter);
-                    KN mapValue = (KN)KxHashTable_IterGetVal(unboxedMap, mapIter);
+                    KnHashTableIter mapIterNext = KnHashTable_IterNext(unboxedMap, mapIter);
+                    const char* mapKey = KnHashTable_IterGetKey(unboxedMap, mapIter);
+                    KN mapValue = (KN)KnHashTable_IterGetVal(unboxedMap, mapIter);
                     KxStringBuffer_AppendCstr(result->string, "\n");
                     AddLeftPadding(result->string, depth, padding);
                     KxStringBuffer_AppendCstr(result->string, padding);
@@ -991,13 +991,13 @@ KN KN_CellStringify(Kana* kana, KN source, bool newLine, int depth, char* paddin
             }
 
             if (innerMap != KNBOX_UNDEF) {
-                KxHashTable* unboxedMap = innerMap->map;
+                KnHashTable* unboxedMap = innerMap->map;
 
-                KxHashTableIter mapIter = KxHashTable_IterHead(unboxedMap);
+                KnHashTableIter mapIter = KnHashTable_IterHead(unboxedMap);
                 while (mapIter != KNBOX_NIL) {
-                    KxHashTableIter mapIterNext = KxHashTable_IterNext(unboxedMap, mapIter);
-                    const char* mapKey = KxHashTable_IterGetKey(unboxedMap, mapIter);
-                    KN mapValue = (KN)KxHashTable_IterGetVal(unboxedMap, mapIter);
+                    KnHashTableIter mapIterNext = KnHashTable_IterNext(unboxedMap, mapIter);
+                    const char* mapKey = KnHashTable_IterGetKey(unboxedMap, mapIter);
+                    KN mapValue = (KN)KnHashTable_IterGetVal(unboxedMap, mapIter);
                     KxStringBuffer_AppendCstr(result->string, " ");
 
                     KxStringBuffer_AppendCstr(result->string, ":'");
@@ -1081,16 +1081,16 @@ KN KN_AccessorStringify(Kana* kana, KN source, bool newLine, int depth, char* pa
         }
         return KN_ToFormatString(kana, value, true, depth, padding);
     }
-    KxHashTable* hashTable = accessor->dir;
-    KxHashTableIter iter = KxHashTable_IterHead(hashTable);
+    KnHashTable* hashTable = accessor->dir;
+    KnHashTableIter iter = KnHashTable_IterHead(hashTable);
 
     if (newLine) {
         KxStringBuffer_AppendCstr(result->string, "#accesor.(\n");
 
         while (iter != KNBOX_NIL) {
-            KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
-            const char* itemKey = KxHashTable_IterGetKey(hashTable, iter);
-            KN itemValue = (KN)KxHashTable_IterGetVal(hashTable, iter);
+            KnHashTableIter next = KnHashTable_IterNext(hashTable, iter);
+            const char* itemKey = KnHashTable_IterGetKey(hashTable, iter);
+            KN itemValue = (KN)KnHashTable_IterGetVal(hashTable, iter);
 
             KN itemToKonStr = KN_ToFormatString(kana, itemValue, true, depth + 1, padding);
 
@@ -1114,9 +1114,9 @@ KN KN_AccessorStringify(Kana* kana, KN source, bool newLine, int depth, char* pa
         KxStringBuffer_AppendCstr(result->string, "#accesor.(");
 
         while (iter != KNBOX_NIL) {
-            KxHashTableIter next = KxHashTable_IterNext(hashTable, iter);
-            const char* itemKey = KxHashTable_IterGetKey(hashTable, iter);
-            KN itemValue = (KN)KxHashTable_IterGetVal(hashTable, iter);
+            KnHashTableIter next = KnHashTable_IterNext(hashTable, iter);
+            const char* itemKey = KnHashTable_IterGetKey(hashTable, iter);
+            KN itemValue = (KN)KnHashTable_IterGetVal(hashTable, iter);
 
             KN itemToKonStr = KN_ToFormatString(kana, itemValue, false, depth + 1, padding);
 
@@ -1197,7 +1197,7 @@ KonMsgDispatcher* MakeMsgDispatcher(Kana* kana)
 
 int KN_SetMsgDispatcher(Kana* kana, unsigned int dispatcherId, KonMsgDispatcher* dispatcher)
 {
-    KxVector_SetIndex(kana->msgDispatchers, dispatcherId, dispatcher);
+    KnVector_SetIndex(kana->msgDispatchers, dispatcherId, dispatcher);
     return 1;
 }
 
@@ -1211,7 +1211,7 @@ unsigned int KN_SetNextMsgDispatcher(Kana* kana, KonMsgDispatcher* dispatcher)
 
 KonMsgDispatcher* KN_GetMsgDispatcher(Kana* kana, unsigned int dispatcherId)
 {
-    KN dispatcher = (KN)KxVector_AtIndex(kana->msgDispatchers, dispatcherId);
+    KN dispatcher = (KN)KnVector_AtIndex(kana->msgDispatchers, dispatcherId);
     if (dispatcher.asU64 == KNBOX_UKN || dispatcher.asU64 == NULL) {
         return NULL;
     }
@@ -1254,7 +1254,7 @@ KonAccessor* KN_InitAccessorWithMod(Kana* kana, char* mod)
     return result;
 }
 
-KN KN_MakePropertyAccessor(Kana* kana, KN value, char* mod, KonProcedure* setter)
+KonAccessor* KN_MakePropertyAccessor(Kana* kana, KN value, char* mod, KonProcedure* setter)
 {
     KonAccessor* result = KN_InitAccessorWithMod(kana, mod);
     result->isDir = false;
@@ -1262,19 +1262,19 @@ KN KN_MakePropertyAccessor(Kana* kana, KN value, char* mod, KonProcedure* setter
     if (setter != NULL) {
         result->setter = setter;
     }
-    return KON_2_KN(result);
+    return result;
 }
 
-KN KN_MakeDirAccessor(Kana* kana, char* mod, KonProcedure* setter)
+KonAccessor* KN_MakeDirAccessor(Kana* kana, char* mod, KonProcedure* setter)
 {
     KonAccessor* result = KN_InitAccessorWithMod(kana, mod);
     result->isDir = true;
     result->value = KN_NIL;
-    result->dir = KxHashTable_Init(4);
+    result->dir = KnHashTable_Init(4);
     if (setter != NULL) {
         result->setter = setter;
     }
-    return KON_2_KN(result);
+    return result;
 }
 
 bool KN_DirAccessorPutKeyProperty(Kana* kana, KN dir, char* key, KN property)
@@ -1284,7 +1284,7 @@ bool KN_DirAccessorPutKeyProperty(Kana* kana, KN dir, char* key, KN property)
         return false;
     }
 
-    KxHashTable_PutKv(
+    KnHashTable_PutKv(
         KN_FIELD(dir, Accessor, dir),
         key,
         property.asU64
@@ -1294,25 +1294,26 @@ bool KN_DirAccessorPutKeyProperty(Kana* kana, KN dir, char* key, KN property)
 
 bool KN_DirAccessorPutKeyValue(Kana* kana, KN dir, char* key, KN value, char* mod, KonProcedure* setter)
 {
+    KonAccessor* node = KN_MakePropertyAccessor(kana,
+        value,
+        mod,
+        setter
+    );
     return KN_DirAccessorPutKeyProperty(kana, dir,
         key,
-        KN_MakePropertyAccessor(kana,
-            value,
-            mod,
-            setter
-        )
+        KON_2_KN(node)
     );
 }
 
 
 
-KN KN_VectorToKonPairList(Kana* kana, KxVector* vector)
+KN KN_VectorToKonPairList(Kana* kana, KnVector* vector)
 {
     KN list = KN_NIL;
 
-    int len = KxVector_Length(vector);
+    int len = KnVector_Length(vector);
     for (int i = len - 1; i >= 0; i--) {
-        KN item = (KN)KxVector_AtIndex(vector, i);
+        KN item = (KN)KnVector_AtIndex(vector, i);
         list = KN_CONS(kana, item, list);
     }
 
@@ -1327,8 +1328,8 @@ KonContinuation* AllocContinuationWithType(Kana* kana, KonContinuationType type,
     cont->type = type;
     cont->env = env;
     cont->next = nextCont;
-    cont->pendingJobs = KxList_Init();
-    cont->finishedJobs = KxList_Init();
+    cont->pendingJobs = KnList_Init();
+    cont->finishedJobs = KnList_Init();
 
     return cont;
 }

@@ -243,7 +243,7 @@ struct _KonBlock {
 
 struct _KonMap {
     KonBase base;
-    KxHashTable* map;
+    KnHashTable* map;
 };
 
 struct _KonCell {
@@ -261,7 +261,7 @@ struct _KonCell {
 struct _KonEnv {
     KonBase base;
     KonEnv* parent;
-    KxHashTable* bindings;
+    KnHashTable* bindings;
 };
 
 
@@ -278,7 +278,7 @@ struct _KonAccessor {
     bool canWrite;  // w
     // bool canExec;    // x func, blk, lambda
     // bool isMethod;  // m func(self, p2, p3)
-    KxHashTable* dir;   // key: cstr, value: KonAccessor*
+    KnHashTable* dir;   // key: cstr, value: KonAccessor*
 
     KN value;
     KonProcedure* setter;
@@ -409,8 +409,8 @@ struct _KonContinuation {
     KonContFuncRef contHandler;
 
     KonEnv* env;
-    KxList* pendingJobs;
-    KxList* finishedJobs;
+    KnList* pendingJobs;
+    KnList* finishedJobs;
     KN memo[4];
 };
 
@@ -428,17 +428,17 @@ struct _KonString {
 
 struct _KonVector {
     KonBase base;
-    KxVector* vector;
+    KnVector* vector;
 };
 
 struct _KonTable {
     KonBase base;
-    KxHashTable* table;
+    KnHashTable* table;
 };
 
 struct _KonParam {
     KonBase base;
-    KxHashTable* table;
+    KnHashTable* table;
 };
 
 
@@ -504,13 +504,13 @@ struct _Kana {
     // gc root source start
 
     // how dispatch a message
-    KxVector* msgDispatchers;
+    KnVector* msgDispatchers;
     unsigned int nextMsgDispatcherId;
 
     struct _KonContinuation* currCont;
     // temp pointer type KN list allocated between two
     // continuation switch
-    KxList* writeBarrierGen;
+    KnList* writeBarrierGen;
     KN currCode;
 
     // gc root source end
@@ -530,15 +530,15 @@ struct _Kana {
 
     struct _GcState* gcState;
 
-    // a list of KxVector. store heap pointers
-    KxList* heapPtrSegs;
-    KxVector* segmentMaxSizeVec;    // buffsize of each ptr segment
+    // a list of KnVector. store heap pointers
+    KnList* heapPtrSegs;
+    KnVector* segmentMaxSizeVec;    // buffsize of each ptr segment
     unsigned long maxObjCntLimit;    // how many objs can be stored in ptr seg
     unsigned long gcThreshold;  // trigger gc when obj count bigger than this number
     bool needGc;
 
     // mark task queue. mark the value grey before add to this queue
-    KxList* markTaskQueue;
+    KnList* markTaskQueue;
     
     tb_allocator_ref_t largeConstAllocator;
     tb_allocator_ref_t constAllocator;
@@ -609,7 +609,7 @@ KN_API unsigned int KN_NodeDispacherId(Kana* kana, KN obj);
 #define KN_TEN     KN_BOX_INT(10)
 
 // alt to KN_MAKE_FIXNUM, KN_UNBOX_FIXNUM
-#define KN_BOX_INT(n) (KN)(KnBox_FromInt(n).asF64)
+#define KN_BOX_INT(n) ((KN)(KnBox_FromInt(n).asF64))
 #define KN_UNBOX_INT(n) KnBox_ToInt((KnBox)n.asF64)
 #define KN_IS_INT(x)  KnBox_IsInt(KN_2_KNBOX(x))
 #define KN_IS_FIXNUM  KN_IS_INT
@@ -617,21 +617,21 @@ KN_API unsigned int KN_NodeDispacherId(Kana* kana, KN obj);
 #define KN_UNBOX_FIXNUM KN_UNBOX_INT
 
 #define KN_IS_DOUBLE(x)      KnBox_IsDouble(KN_2_KNBOX(x))
-#define KN_BOX_DOUBLE(n) (KN)(KnBox_FromDouble(n).asF64)
+#define KN_BOX_DOUBLE(n) ((KN)(KnBox_FromDouble(n).asF64))
 #define KN_UNBOX_DOUBLE(n) KnBox_ToDouble((KnBox)n.asF64)
 #define KN_IS_FLONUM KN_IS_DOUBLE
 #define KN_MAKE_FLONUM KN_BOX_DOUBLE
 #define KN_UNBOX_FLONUM KN_UNBOX_DOUBLE
 
 #define KN_IS_CHAR(x)    KnBox_IsChar(KN_2_KNBOX(x))
-#define KN_BOX_CHAR(n)  (KN)(KnBox_FromChar(n).asF64)
+#define KN_BOX_CHAR(n)  ((KN)(KnBox_FromChar(n).asF64))
 #define KN_UNBOX_CHAR(n) KnBox_ToChar((KnBox)n.asF64)
 
 
 #define KN_IS_EXT_POINTER(x) KnBox_IsExtPtr(KN_2_KNBOX(x))
 // alt to KN_MAKE_EXT_POINTER, KN_UNBOX_EXT_POINTER
-#define KN_BOX_EXT_PTR(v) (KN)(KnBox_FromExtPtr(v).asF64)
-#define KN_UNBOX_EXT_PTR(v) KnBox_ToExtPtr((KnBox)(v.asF64));
+#define KN_BOX_EXT_PTR(v) ((KN)(KnBox_FromExtPtr(v).asF64))
+#define KN_UNBOX_EXT_PTR(v) KnBox_ToExtPtr((KnBox)(v.asF64))
 
 
 
@@ -871,8 +871,8 @@ unsigned int KN_SetNextMsgDispatcher(Kana* kana, KonMsgDispatcher* dispatcher);
 KonMsgDispatcher* KN_GetMsgDispatcher(Kana* kana, unsigned int dispatcherId);
 
 KonAccessor* KN_InitAccessorWithMod(Kana* kana, char* mod);
-KN KN_MakePropertyAccessor(Kana* kana, KN value, char* mod, KonProcedure* setter);
-KN KN_MakeDirAccessor(Kana* kana, char* mod, KonProcedure* setter);
+KonAccessor* KN_MakePropertyAccessor(Kana* kana, KN value, char* mod, KonProcedure* setter);
+KonAccessor* KN_MakeDirAccessor(Kana* kana, char* mod, KonProcedure* setter);
 bool KN_DirAccessorPutKeyProperty(Kana* kana, KN dir, char* key, KN property);
 bool KN_DirAccessorPutKeyValue(Kana* kana, KN dir, char* key, KN value, char* mod, KonProcedure* setter);
 
@@ -882,7 +882,7 @@ bool KN_DirAccessorPutKeyValue(Kana* kana, KN dir, char* key, KN value, char* mo
 KN_API KxStringBuffer* KN_ReadFileContent(const char* filePathOrigin);
 KN_API const char* KN_HumanFormatTime();
 
-KN KN_VectorToKonPairList(Kana* kana, KxVector* vector);
+KN KN_VectorToKonPairList(Kana* kana, KnVector* vector);
 
 // common utils end
 
