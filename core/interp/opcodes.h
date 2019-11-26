@@ -19,12 +19,13 @@
 #define OPC_EVAL_CLAUSE_ARGS      11
 
 #define OPC_LOAD_CONT_RUN_NEXT_NODE   12
-#define OPC_RUN_NEXT_CONT             13
-#define OPC_RUN_CURRENT_CONT          14
-#define OPC_ENV_LOOKUP                15
+#define OPC_LOAD_CONT                 13
+#define OPC_RUN_NEXT_CONT             14
+#define OPC_RUN_CURRENT_CONT          15
+#define OPC_ENV_LOOKUP                16
 
 // native func, composite func
-#define OPC_APPLY_PROCEDURE           16
+#define OPC_APPLY_PROCEDURE           17
 
 
 // byte code instructions

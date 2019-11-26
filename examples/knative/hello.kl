@@ -1,4 +1,9 @@
 ``{newline}
-{writeln "abc" "efg"}
+``{writeln "abc" "efg"}
+``{writeln "abc" {writeln "abc" "efg"} }
+[writeln ("abc" "efghi")]
+``[writeln % "abc" "efg"]
+``[+ (1 2) | (+ 5 6)]
+``[+ % 1 2; | + 5 6; println]
 ``[displayln ("abc" "efg") ]
 ``[displayln% "abc" "efg"]

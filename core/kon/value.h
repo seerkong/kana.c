@@ -376,24 +376,7 @@ typedef enum {
     KN_CONT_RETURN,
     KN_CONT_QUIT_BOUNCE_MODE,
 
-    KN_CONT_SENTENCES,      // {[5 +(2) -(1)] [+(2 3)] {- 6 3}}
-    KN_CONT_LIST_SENTENCE,  //                         {- 6 3}
-    KN_CONT_CELL_SENTENCE,  //  [5 +(2) -(1)],[+(2 3)]
-    KN_CONT_CELL_CLAUSE,    //   5,+(2),-(1) , +(2 3)
-    KN_CONT_CLAUSE_CORE,    //   5,+,  ,-    , +      , -
-    KN_CONT_CLAUSE_ARGS,    //      (2)  (1)    (2 3)    (6 3)
-
-    KN_CONT_NATIVE_MARCRO,
-    
-    // all values will be evaluated
-    KN_CONT_EXPOSED_LIST,   // #{}  #xxx.{}
-    KN_CONT_EXPOSED_CELL,   // #[]  #xxx.[]
-    // only eval unquoted items
-    KN_CONT_QUASI_LIST,     // @.{1 $%ab}
-    KN_CONT_QUASI_CELL,     // @.[$%ab 1]
-    // leave inner as it is, no eval
-    KN_CONT_SEALED_LIST,    // $.{+ 1 2}
-    KN_CONT_SEALED_CELL,    // $.[+ (1 2)]
+    KN_CONT_NATIVE_HANDLER,
 } KonContinuationType;
 
 

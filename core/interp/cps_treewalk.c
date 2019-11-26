@@ -316,7 +316,14 @@ KN KN_ExecAst(Kana* kana, KN sourceCodeAst, KonEnv* rootEnv)
     {
         DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
-    
+    DEF_OPC(OPC_LOAD_CONT)
+    {
+        KN_DEBUG("OPC_LOAD_CONT");
+        // append cont chain
+        curCont = KN_2_KON(GS_NEW_CONT, Continuation);
+        // OPC_RUN_CURRENT_CONT
+        DISPATCH(OPC_RUN_CURRENT_CONT);
+    }
     DEF_OPC(OPC_LOAD_CONT_RUN_NEXT_NODE)
     {
         KN_DEBUG("OPC_LOAD_CONT_RUN_NEXT_NODE");
@@ -368,7 +375,7 @@ KN KN_ExecAst(Kana* kana, KN sourceCodeAst, KonEnv* rootEnv)
         DISPATCH_NEXT_OP(GS_FRAME, GS_PC, GS_IR);
     }
 
-    opc17: opc18: opc19: opc20:
+    opc18: opc19: opc20:
     opc21: opc22: opc23: opc24: opc25: opc26: opc27: opc28: opc29: opc30:
     opc31: opc32: opc33: opc34: opc35: opc36: opc37: opc38: opc39: opc40:
     opc41: opc42: opc43: opc44: opc45: opc46: opc47: opc48: opc49: opc50:
