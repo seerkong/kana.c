@@ -1328,6 +1328,7 @@ KonContinuation* AllocContinuationWithType(Kana* kana, KonContinuationType type,
     cont->type = type;
     cont->env = env;
     cont->next = nextCont;
+    cont->status = 0;
     cont->pendingJobs = KnList_Init();
     cont->finishedJobs = KnList_Init();
 

@@ -100,24 +100,25 @@ void OpHandler_EVAL_SENTENCES(Kana* kana, KonContinuation* curCont)
 }
 
 
+enum ContStatusListSentence {
+    CONT_STATUS_LIST_SENTENCE_WAIT_VERB = 0,
+    CONT_STATUS_LIST_SENTENCE_WAIT_ARGS
+};
+
 void ContHandler_ListSentence(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
-    const int WAIT_VERB = 0;
-    const int WAIT_ARGS = 1;
-
-    const int CONT_STATE = 0;
     const int REG_FUNC = 1;
     const int REG_ARGS = 2;
 
     // get current state
-    int state = KN_UNBOX_INT(curCont->memo[CONT_STATE]);
+    int state = curCont->status;
     KN_DEBUG("ContHandler_ListSentence, state %d\n", state);
     switch (state) {
-        case WAIT_VERB: {
+        case CONT_STATUS_LIST_SENTENCE_WAIT_VERB: {
             KN_DEBUG("ContHandler_ListSentence, before box new state\n");
             // verb eval finished
-            curCont->memo[CONT_STATE] = KN_BOX_INT(WAIT_ARGS);
+            curCont->status = CONT_STATUS_LIST_SENTENCE_WAIT_ARGS;
             curCont->memo[REG_FUNC] = GS_LAST_VAL;
             KN_DEBUG("ContHandler_ListSentence, before shift args\n");
             KN args = (KN)KnList_Shift(curCont->pendingJobs);
@@ -159,7 +160,7 @@ void ContHandler_ListSentence(Kana* kana, KonContinuation* curCont)
                 break;
             }
         }
-        case WAIT_ARGS: {
+        case CONT_STATUS_LIST_SENTENCE_WAIT_ARGS: {
             // args eval finished
             GS_PROCEDURE_FUNC = curCont->memo[REG_FUNC];
             GS_PROCEDURE_ARGS = GS_LAST_VAL;
@@ -184,36 +185,12 @@ void OpHandler_EVAL_LIST_SENTENCE(Kana* kana, KonContinuation* curCont)
     KnList* pendingList = newCont->pendingJobs;
     KnList* finishedList = newCont->finishedJobs;
 
-    newCont->memo[0] = KN_BOX_INT(0);
     KnList_Push(pendingList, KN_CDR(GS_NODE_TO_RUN).asU64);
 
     GS_NEW_CONT = KON_2_KN(newCont);
     GS_NODE_TO_RUN = KN_CAR(GS_NODE_TO_RUN);
     nextOp.code = OPC_LOAD_CONT_RUN_NEXT_NODE;
 
-
-
-    // // create two continuation
-    // KonContinuation* argsCont = AllocContinuationWithType(kana, KN_CONT_NATIVE_HANDLER, curEnv, curCont);
-    // argsCont->contHandler = ContHandler_ClauseArgs;
-    // KonContinuation* verbCont = AllocContinuationWithType(kana, KN_CONT_NATIVE_HANDLER, curEnv, argsCont);
-    // verbCont->contHandler = ContHandler_ClauseCore;
-
-    // KnList* pendingList = argsCont->pendingJobs;
-
-    // // add centences to pending queue
-    // KN iter = KN_CDR(GS_NODE_TO_RUN);
-
-    // while (iter.asU64 != KNBOX_NIL && KN_IS_PAIR(iter)) {
-    //     KN item = KN_CAR(iter);
-    //     KN next = KN_CDR(iter);
-    //     KnList_Push(pendingList, item.asU64);
-    //     iter = next;
-    // }
-
-    // GS_NEW_CONT = KON_2_KN(verbCont);
-    // GS_NODE_TO_RUN = KN_CAR(GS_NODE_TO_RUN);
-    // nextOp->code = OPC_LOAD_CONT_RUN_NEXT_NODE;
     GS_NEXT_OP = nextOp;
 }
 
@@ -267,33 +244,34 @@ void ContHandler_ClauseCore(Kana* kana, KonContinuation* curCont)
     GS_NEXT_OP = nextOp;
 }
 
+enum ContStatusCellClause {
+    CONT_STATUS_CELL_CLAUSE_PREPARE_SUBJ = 0,
+    CONT_STATUS_CELL_CLAUSE_SUBJ_EVALED_NEXT_TABLE,
+    CONT_STATUS_CELL_CLAUSE_TABLE_EVALED_NEXT_MAP,
+    CONT_STATUS_CELL_CLAUSE_ALL_EVALED
+};
+
 void ContHandler_CellClause(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
-    const int SUBJ_EVALED_NEXT_TABLE = 1; // subject evaled
-    const int TABLE_EVALED_NEXT_MAP = 2; // table evaled
-    const int ALL_EVALED = 3; // all evaled
-    
+
     // memo
-    const int CONT_STATE = 0;
     const int REG_SUBJ = 1;
     const int REG_TABLE = 2;
     
-
     // get current state
-    int state = KN_UNBOX_INT(curCont->memo[CONT_STATE]);
+    int state = curCont->status;
     KN_DEBUG("ContHandler_CellClause, state %d\n", state);
     switch (state) {
-        case SUBJ_EVALED_NEXT_TABLE: {
+        case CONT_STATUS_CELL_CLAUSE_SUBJ_EVALED_NEXT_TABLE: {
             KN firstCell = (KN)KnList_Head(curCont->pendingJobs);
             KonTable* table = KN_FIELD(firstCell, Cell, table);
-            curCont->memo[CONT_STATE] = KN_BOX_INT(TABLE_EVALED_NEXT_MAP);
+            curCont->status = CONT_STATUS_CELL_CLAUSE_TABLE_EVALED_NEXT_MAP;
             if (table != KNBOX_UNDEF && KnHashTable_Length(table->table) > 0) {
                 KnHashTable* clauseCellTable = table->table;
                 KN_DEBUG("ContHandler_CellClause, spawn new continuation to eval arg table\n");
                 KonContinuation* evalTableCont = AllocContinuationWithType(kana, KN_CONT_NATIVE_HANDLER, curCont->env, curCont);
                 evalTableCont->contHandler = ContHandler_ClauseArgs;
-                evalTableCont->memo[0] = KN_BOX_INT(0);
 
                 KnList* pendingList = evalTableCont->pendingJobs;
 
@@ -320,14 +298,14 @@ void ContHandler_CellClause(Kana* kana, KonContinuation* curCont)
             }
         }
             
-        case TABLE_EVALED_NEXT_MAP: {
+        case CONT_STATUS_CELL_CLAUSE_TABLE_EVALED_NEXT_MAP: {
             curCont->memo[REG_TABLE] = GS_LAST_VAL;
             
             // TODO eval map attributes
             
-            curCont->memo[CONT_STATE] = KN_BOX_INT(ALL_EVALED);
+            curCont->status = CONT_STATUS_CELL_CLAUSE_ALL_EVALED;
         }
-        case ALL_EVALED: {
+        case CONT_STATUS_CELL_CLAUSE_ALL_EVALED: {
             if (curCont->memo[REG_TABLE].asU64 != KNBOX_UNDEF) {
                 // TODO find subject handler
                 
@@ -346,31 +324,29 @@ void ContHandler_CellClause(Kana* kana, KonContinuation* curCont)
         }
     }
     
-
-    
-    
     GS_NEXT_OP = nextOp;
 }
 
+enum ContStatusCellSentence {
+    CONT_STATUS_CELL_SENTENCE_WAIT_SUBJ = 0,
+    CONT_STATUS_CELL_SENTENCE_DO_CLAUSE,
+};
 
 // run clauses until rest jobs is nil
 void ContHandler_CellSentence(Kana* kana, KonContinuation* curCont)
 {
     KnOp nextOp;
-    const int WAIT_SUBJ = 0;
-    const int DO_CLAUSE = 1;
 
-    const int CONT_STATE = 0;
     const int REG_SUBJ = 1;
 
     // get current state
-    int state = KN_UNBOX_INT(curCont->memo[CONT_STATE]);
+    int state = curCont->status;
     KN_DEBUG("ContHandler_CellSentence, state %d\n", state);
     switch (state) {
-        case WAIT_SUBJ: {
+        case CONT_STATUS_CELL_SENTENCE_WAIT_SUBJ: {
             KN_DEBUG("ContHandler_CellSentence, before box new state\n");
             // verb eval finished
-            curCont->memo[CONT_STATE] = KN_BOX_INT(DO_CLAUSE);
+            curCont->status = CONT_STATUS_CELL_SENTENCE_DO_CLAUSE;
             curCont->memo[REG_SUBJ] = GS_LAST_VAL;
             KN_DEBUG("ContHandler_CellSentence, before shift args\n");
             int clauseRestLen = KnList_Length(curCont->pendingJobs);
@@ -380,7 +356,7 @@ void ContHandler_CellSentence(Kana* kana, KonContinuation* curCont)
                 break;
             }
         }
-        case DO_CLAUSE: {
+        case CONT_STATUS_CELL_SENTENCE_DO_CLAUSE: {
             int clauseRestLen = KnList_Length(curCont->pendingJobs);
             if (clauseRestLen == 0) {
                 KN_DEBUG("ContHandler_CellSentence, PREPARE_CLAUSE all clauses finished\n");
@@ -401,7 +377,7 @@ void ContHandler_CellSentence(Kana* kana, KonContinuation* curCont)
             
             KonContinuation* newCont = AllocContinuationWithType(kana, KN_CONT_NATIVE_HANDLER, curCont->env, curCont);
             newCont->contHandler = ContHandler_CellClause;
-            newCont->memo[0] = KN_BOX_INT(1);   // eval table
+            newCont->status = CONT_STATUS_CELL_CLAUSE_SUBJ_EVALED_NEXT_TABLE;   // eval table
             newCont->memo[1] = curCont->memo[REG_SUBJ];
 
             KnList* pendingList = newCont->pendingJobs;
@@ -429,7 +405,6 @@ void OpHandler_EVAL_CELL_SENTENCE(Kana* kana, KonContinuation* curCont)
         // TODO dispatch keyword/marcro handler
         return;
     }
-    
 
     KnOp nextOp;
     KonEnv* curEnv = curCont->env;
@@ -439,7 +414,6 @@ void OpHandler_EVAL_CELL_SENTENCE(Kana* kana, KonContinuation* curCont)
     KnList* pendingList = newCont->pendingJobs;
     KnList* finishedList = newCont->finishedJobs;
 
-    newCont->memo[0] = KN_BOX_INT(0);; // wait subject
     // 1 save last val to memo
     newCont->memo[1] = GS_NODE_TO_RUN;
 

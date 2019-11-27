@@ -394,6 +394,7 @@ struct _KonContinuation {
     KonEnv* env;
     KnList* pendingJobs;
     KnList* finishedJobs;
+    int status;
     KN memo[4];
 };
 
